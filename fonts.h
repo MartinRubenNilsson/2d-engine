@@ -1,11 +1,9 @@
 #pragma once
 
-namespace fonts
-{
+namespace fonts {
 	struct Font;
 
-	struct Glyph
-	{
+	struct Glyph {
 		// The horizontal distance (in unscaled coordinates) to move the pen after drawing this glyph.
 		int advance_width = 0;
 		// The distance (in unscaled coordinates) from the glyph origin to the left edge of the glyph.
@@ -25,10 +23,10 @@ namespace fonts
 	extern const int ATLAS_TEXTURE_SIZE;
 
 	Handle<Font> load_font(const std::string& path);
-	Handle<graphics::Texture> get_atlas_texture(Handle<Font> handle); // updates the atlas if it is dirty
-	int get_line_spacing(Handle<Font> handle); // in unscaled coordinates
-	float get_scale_for_pixel_height(Handle<Font> handle, float pixel_height);
-	Glyph get_glyph(Handle<Font> handle, char32_t codepoint);
-	int get_kerning_advance(Handle<Font> handle, char32_t codepoint1, char32_t codepoint2); // in unscaled coordinates
+	Font* get_font(Handle<Font> handle);
+	Handle<graphics::Texture> get_atlas_texture(Font& font); // updates the atlas if it is dirty
+	int get_line_spacing(const Font& font); // in unscaled coordinates
+	float get_scale_for_pixel_height(const Font& font, float pixel_height);
+	Glyph get_glyph(Font& font, char32_t codepoint);
+	int get_kerning_advance(const Font& font, char32_t codepoint1, char32_t codepoint2); // in unscaled coordinates
 }
-

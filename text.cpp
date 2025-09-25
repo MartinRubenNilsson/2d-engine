@@ -8,11 +8,13 @@
 namespace text {
     void render(const Text& text) {
         if (text.unicode_string.empty()) return;
+        fonts::Font* font = fonts::get_font(text.font);
+        if (!font) return;
 
-        float whitespace_width = (float)fonts::get_glyph(text.font, U' ').advance_width;
+        float whitespace_width = (float)fonts::get_glyph(*font, U' ').advance_width;
         const float letter_spacing = whitespace_width * (text.letter_spacing_factor - 1.f);
         whitespace_width += letter_spacing;
-        const float line_spacing = fonts::get_line_spacing(text.font) * text.line_spacing_factor;
+        const float line_spacing = fonts::get_line_spacing(*font) * text.line_spacing_factor;
         Vector2f current_point; // In unscaled coordinates
 
         std::vector<graphics::Vertex> vertices;
@@ -21,7 +23,7 @@ namespace text {
         for (char32_t codepoint : text.unicode_string) {
             if (codepoint == U'\r') continue; // Skip carriage returns to avoid graphical issues
 
-            current_point.x += fonts::get_kerning_advance(text.font, previous_codepoint, codepoint);
+            current_point.x += fonts::get_kerning_advance(*font, previous_codepoint, codepoint);
 
             switch (codepoint) {
             case U' ': {
@@ -36,7 +38,7 @@ namespace text {
             } continue; // Don't need to create a quad for whitespaces
             }
 
-            const fonts::Glyph glyph = fonts::get_glyph(text.font, codepoint);
+            const fonts::Glyph glyph = fonts::get_glyph(*font, codepoint);
 
             const Vector2f pos0 = current_point + Vector2f((float)glyph.x0, (float)glyph.y0);
             const Vector2f pos1 = current_point + Vector2f((float)glyph.x1, (float)glyph.y1);
@@ -54,7 +56,7 @@ namespace text {
             previous_codepoint = codepoint;
         }
 
-        const float scale_for_pixel_height = fonts::get_scale_for_pixel_height(text.font, text.pixel_height);
+        const float scale_for_pixel_height = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
         for (graphics::Vertex& vertex : vertices) {
             vertex.position.y = -vertex.position.y; // Flip y-axis
             vertex.position *= scale_for_pixel_height;
@@ -64,7 +66,7 @@ namespace text {
 
         graphics::bind_vertex_shader(graphics::sprite_vert);
         graphics::bind_fragment_shader(graphics::text_frag);
-        graphics::bind_texture(0, fonts::get_atlas_texture(text.font));
+        graphics::bind_texture(0, fonts::get_atlas_texture(*font));
         graphics::update_buffer(graphics::dynamic_vertex_buffer,
             vertices.data(), (unsigned int)vertices.size() * sizeof(graphics::Vertex));
         graphics::set_primitives(graphics::Primitives::TriangleList);

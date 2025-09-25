@@ -70,41 +70,37 @@ namespace fonts {
 		return handle;
 	}
 
-	Handle<graphics::Texture> get_atlas_texture(Handle<Font> handle) {
-		Font* font = _font_pool.get(handle);
-		if (!font) return Handle<graphics::Texture>();
-		if (font->atlas_texture_needs_updating) {
-			graphics::update_texture(font->atlas_texture, font->atlas_pixels.data());
-			font->atlas_texture_needs_updating = false;
+	Font* get_font(Handle<Font> handle) {
+		return _font_pool.get(handle);
+	}
+
+	Handle<graphics::Texture> get_atlas_texture(Font& font) {
+		if (font.atlas_texture_needs_updating) {
+			graphics::update_texture(font.atlas_texture, font.atlas_pixels.data());
+			font.atlas_texture_needs_updating = false;
 		}
-		return font->atlas_texture;
+		return font.atlas_texture;
 	}
 
-	int get_line_spacing(Handle<Font> handle) {
-		const Font* font = _font_pool.get(handle);
-		if (!font) return 0;
-		return font->ascent - font->descent + font->line_gap;
+	int get_line_spacing(const Font& font) {
+		return font.ascent - font.descent + font.line_gap;
 	}
 
-	float get_scale_for_pixel_height(Handle<Font> handle, float pixel_height) {
-		const Font* font = _font_pool.get(handle);
-		if (!font) return 0.0f;
-		return stbtt_ScaleForPixelHeight(&font->info, pixel_height);
+	float get_scale_for_pixel_height(const Font& font, float pixel_height) {
+		return stbtt_ScaleForPixelHeight(&font.info, pixel_height);
 	}
 
-	Glyph get_glyph(Handle<Font> handle, char32_t codepoint) {
-		Font* font = _font_pool.get(handle);
-		if (!font) return Glyph();
+	Glyph get_glyph(Font& font, char32_t codepoint) {
 		Glyph glyph{};
-		stbtt_GetCodepointHMetrics(&font->info, codepoint, &glyph.advance_width, &glyph.left_side_bearing);
-		stbtt_GetCodepointBox(&font->info, codepoint, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
-		auto packed_char_it = font->packed_chars.find(codepoint);
-		if (packed_char_it == font->packed_chars.end()) {
+		stbtt_GetCodepointHMetrics(&font.info, codepoint, &glyph.advance_width, &glyph.left_side_bearing);
+		stbtt_GetCodepointBox(&font.info, codepoint, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
+		auto packed_char_it = font.packed_chars.find(codepoint);
+		if (packed_char_it == font.packed_chars.end()) {
 			const float font_size = 30.f; //Hardcoded for now
 			stbtt_packedchar packed_char{};
-			stbtt_PackFontRange(&font->pack_context, font->data.data(), 0, font_size, codepoint, 1, &packed_char);
-			packed_char_it = font->packed_chars.emplace(codepoint, packed_char).first;
-			font->atlas_texture_needs_updating = true;
+			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, font_size, codepoint, 1, &packed_char);
+			packed_char_it = font.packed_chars.emplace(codepoint, packed_char).first;
+			font.atlas_texture_needs_updating = true;
 		}
 		glyph.s0 = packed_char_it->second.x0;
 		glyph.t0 = packed_char_it->second.y0;
@@ -113,9 +109,7 @@ namespace fonts {
 		return glyph;
 	}
 
-	int get_kerning_advance(Handle<Font> handle, char32_t codepoint1, char32_t codepoint2) {
-		const Font* font = _font_pool.get(handle);
-		if (!font) return 0;
-		return stbtt_GetCodepointKernAdvance(&font->info, codepoint1, codepoint2);
+	int get_kerning_advance(const Font& font, char32_t codepoint1, char32_t codepoint2) {
+		return stbtt_GetCodepointKernAdvance(&font.info, codepoint1, codepoint2);
 	}
 }
