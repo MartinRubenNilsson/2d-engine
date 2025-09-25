@@ -22,7 +22,6 @@
 #include "sprites.h"
 #include "renderdoc.h"
 #include "imgui_impl.h"
-#include "kdtree_test.h"
 
 int main(int argc, char* argv[]) {
     if (steam::restart_app_if_necessary()) {
@@ -292,19 +291,6 @@ int main(int argc, char* argv[]) {
 
 #ifdef _DEBUG
         ecs::add_debug_shapes_to_render_queue();
-
-#if 0
-        // KD-TREE TEST
-
-        kdtree_test::show_imgui_window(window_framebuffer_width, window_framebuffer_height);
-        {
-            double cursor_x = 0.0;
-			double cursor_y = 0.0;
-			window::get_cursor_pos(cursor_x, cursor_y);
-		    kdtree_test::set_cursor_pos(cursor_x, cursor_y);
-        }
-        kdtree_test::add_debug_shapes_to_render_queue();
-#endif
 
 		// RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
