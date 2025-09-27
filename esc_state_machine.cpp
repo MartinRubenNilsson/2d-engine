@@ -126,10 +126,11 @@ namespace ecs {
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
 			std::string string;
 			if (State* current_state = _get_state(sm, sm.current_state)) {
-				string += std::format("{} ({:.1f})", current_state->id, current_state->time_active);
+				string += current_state->id;
 			}
 			if (State* next_state = _get_state(sm, sm.next_state)) {
-				string += std::format(" -> {} (-{:.1f})", next_state->id, sm.next_state_transition_time);
+				string += " -> ";
+				string += next_state->id;
 			}
 			if (string.empty()) continue;
 			text.string = text::to_u32(string);

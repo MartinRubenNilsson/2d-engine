@@ -38,7 +38,7 @@ namespace text {
             } continue; // Don't need to create a quad for whitespaces
             case U'\n': {
                 current_point.x = 0.f;
-                current_point.y += line_spacing;
+                current_point.y -= line_spacing; // TODO: is this correct?
             } continue; // Don't need to create a quad for whitespaces
             }
 

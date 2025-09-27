@@ -129,10 +129,6 @@ namespace ecs {
 			.exit = _stop_retracting_blade_trap, 
 			.update = _update_retracting_blade_trap });
 		add_state(sm, {
-			.id = "retracting",
-			.exit = _stop_retracting_blade_trap,
-			.update = _update_retracting_blade_trap });
-		add_state(sm, {
 			.id = "wait" });
 		transition(sm, "idle", entity);
 	}
