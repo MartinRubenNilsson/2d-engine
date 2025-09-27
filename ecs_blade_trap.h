@@ -1,22 +1,12 @@
 #pragma once
-#include "timer.h"
 
 namespace ecs {
-	struct PhysicsEvent;
-
-	enum class BladeTrapState {
-		Idle,
-		Extend,
-		Impact,
-		Retract,
-	};
-
 	struct BladeTrap {
 		unsigned int update_count = 0;
-		BladeTrapState state = BladeTrapState::Idle;
-		Timer state_timer; // for pausing between state changes
+		Vector2f direction;
 		Vector2f start_position;
-		Handle<audio::Event> audio_event; // changes depending on state
+		Handle<audio::Event> audio_event;
+		Handle<audio::Event> retraction_audio_event;
 	};
 
 	void update_blade_traps(float dt);
@@ -24,6 +14,6 @@ namespace ecs {
 	BladeTrap& emplace_blade_trap(entt::entity entity);
 	BladeTrap* get_blade_trap(entt::entity entity);
 
-	void on_blade_trap_begin_touch(entt::entity blade_trap_entity, entt::entity other_entity);
+	struct PhysicsEvent;
 	void on_blade_trap_physics_event(const PhysicsEvent& ev);
 }

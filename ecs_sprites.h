@@ -51,5 +51,5 @@ namespace ecs {
 
 	SpriteBlink& emplace_sprite_blink(entt::entity entity);
 
-	SpriteShake& emplace_sprite_shake(entt::entity entity);
+	void emplace_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
 }

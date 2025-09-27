@@ -218,6 +218,9 @@
     <ClCompile Include="delaunay.cpp">
       <Filter>math\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="esc_state_machine.cpp">
+      <Filter>game\ecs\state_machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -466,6 +469,9 @@
     <ClInclude Include="delaunay.h">
       <Filter>math\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_state_machine.h">
+      <Filter>game\ecs\state_machine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -557,6 +563,9 @@
     </Filter>
     <Filter Include="math\geometry">
       <UniqueIdentifier>{ab000c27-cdf7-472a-bf6e-87da02d252a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\state_machine">
+      <UniqueIdentifier>{7f6f1dba-1e00-4cc0-b3b5-9aafc805ff9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -91,7 +91,7 @@ namespace ecs {
             // DRAW ACTION TYPE
             {
                 const std::string action_type_string = to_string(action.type);
-                text.unicode_string.assign(action_type_string.begin(), action_type_string.end());
+                text.string.assign(action_type_string.begin(), action_type_string.end());
                 text.position = knowledge.me.position + Vector2f(-8.f, -10.f);
                 text::render(text);
             }

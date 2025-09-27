@@ -14,10 +14,10 @@
 #include "ecs_bomb.h"
 #include "ecs_portal.h"
 #include "ecs_blade_trap.h"
+#include "ecs_state_machine.h"
 
 #include "console.h"
 #include "sprites.h"
-#include "shapes.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 
@@ -45,6 +45,7 @@ namespace ecs {
 		update_pickups(dt);
 		update_bombs(dt);
 		update_blade_traps(dt);
+		update_state_machines(dt);
 		update_ai_logic(dt);
 		update_ai_graphics(dt);
 		update_lifetimes(dt);
@@ -115,6 +116,7 @@ namespace ecs {
 			debug_draw_physics();
 		}
 		if (debug_flags & DEBUG_AI) {
+			debug_draw_state_machines();
 			debug_draw_ai();
 		}
 		if (debug_flags & DEBUG_PLAYER) {

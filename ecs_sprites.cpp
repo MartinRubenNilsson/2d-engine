@@ -88,9 +88,8 @@ namespace ecs {
 		return _registry.emplace_or_replace<SpriteBlink>(entity);
 	}
 
-	SpriteShake& emplace_sprite_shake(entt::entity entity) {
-		SpriteShake& shake = _registry.emplace_or_replace<SpriteShake>(entity);
+	void emplace_sprite_shake(entt::entity entity, SpriteShake&& shake) {
 		shake._random_seed = random::range_ui(0, 128);
-		return shake;
+		_registry.emplace_or_replace<SpriteShake>(entity, std::move(shake));
 	}
 }

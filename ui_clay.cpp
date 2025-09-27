@@ -195,51 +195,51 @@ namespace ui {
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
 			switch (command.commandType) {
-			case CLAY_RENDER_COMMAND_TYPE_NONE: {
-				// This command type should be skipped.
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
-				// The renderer should draw a solid color rectangle.
-				const Clay_RectangleRenderData& rectangle = command.renderData.rectangle;
-				sprites::Sprite sprite{};
-				sprite.vertex_shader = graphics::ui_rectangle_vert;
-				sprite.fragment_shader = graphics::ui_rectangle_frag;
-				sprite.position.x = command.boundingBox.x;
-				sprite.position.y = command.boundingBox.y;
-				sprite.size.x = command.boundingBox.width;
-				sprite.size.y = command.boundingBox.height;
-				sprite.color = {
-					(unsigned char)rectangle.backgroundColor.r,
-					(unsigned char)rectangle.backgroundColor.g,
-					(unsigned char)rectangle.backgroundColor.b,
-					(unsigned char)rectangle.backgroundColor.a
-				};
-				sprites::add(sprite);
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_BORDER: {
-				// The renderer should draw a colored border inset into the bounding box.
-				__debugbreak();
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_TEXT: {
-				// The renderer should draw text.
-				__debugbreak();
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
-				// The renderer should draw an image.
-				//__debugbreak(); //TODO
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
-				// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
-				__debugbreak();
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END: {
-				// The renderer should finish any previously active clipping, and begin rendering elements in full again.
-				__debugbreak();
-			} break;
-			case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
-				// The renderer should provide a custom implementation for handling this render command based on its .customData
-				__debugbreak();
-			} break;
+				case CLAY_RENDER_COMMAND_TYPE_NONE: {
+					// This command type should be skipped.
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
+					// The renderer should draw a solid color rectangle.
+					const Clay_RectangleRenderData& rectangle = command.renderData.rectangle;
+					sprites::Sprite sprite{};
+					sprite.vertex_shader = graphics::ui_rectangle_vert;
+					sprite.fragment_shader = graphics::ui_rectangle_frag;
+					sprite.position.x = command.boundingBox.x;
+					sprite.position.y = command.boundingBox.y;
+					sprite.size.x = command.boundingBox.width;
+					sprite.size.y = command.boundingBox.height;
+					sprite.color = {
+						(unsigned char)rectangle.backgroundColor.r,
+						(unsigned char)rectangle.backgroundColor.g,
+						(unsigned char)rectangle.backgroundColor.b,
+						(unsigned char)rectangle.backgroundColor.a
+					};
+					sprites::add(sprite);
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
+					// The renderer should draw a colored border inset into the bounding box.
+					__debugbreak();
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
+					// The renderer should draw text.
+					__debugbreak();
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
+					// The renderer should draw an image.
+					//__debugbreak(); //TODO
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
+					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
+					__debugbreak();
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END: {
+					// The renderer should finish any previously active clipping, and begin rendering elements in full again.
+					__debugbreak();
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
+					// The renderer should provide a custom implementation for handling this render command based on its .customData
+					__debugbreak();
+				} break;
 			}
 		}
 		// No need to sort, since the Clay render commands are already sorted.

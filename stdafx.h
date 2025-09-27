@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 
+#include <format>
 #include <ranges>
 #include <span>
 #include <sstream>

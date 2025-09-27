@@ -145,6 +145,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="esc_state_machine.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="background.cpp" />
     <ClCompile Include="console.cpp" />
@@ -226,6 +227,7 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ecs_state_machine.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="background.h" />
     <ClInclude Include="color.h" />

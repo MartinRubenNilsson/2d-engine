@@ -6,8 +6,12 @@
 #include "graphics_vertices.h"
 
 namespace text {
+    std::u32string to_u32(std::string_view string) {
+        return { string.begin(), string.end() };
+    }
+
     void render(const Text& text) {
-        if (text.unicode_string.empty()) return;
+        if (text.string.empty()) return;
         fonts::Font* font = fonts::get_font(text.font);
         if (!font) return;
 
@@ -20,7 +24,7 @@ namespace text {
         std::vector<graphics::Vertex> vertices;
 
         char32_t previous_codepoint = 0;
-        for (char32_t codepoint : text.unicode_string) {
+        for (char32_t codepoint : text.string) {
             if (codepoint == U'\r') continue; // Skip carriage returns to avoid graphical issues
 
             current_point.x += fonts::get_kerning_advance(*font, previous_codepoint, codepoint);
