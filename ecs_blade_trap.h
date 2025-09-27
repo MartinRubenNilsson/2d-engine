@@ -6,7 +6,6 @@ namespace ecs {
 		Vector2f direction;
 		Vector2f start_position;
 		Handle<audio::Event> audio_event;
-		Handle<audio::Event> retraction_audio_event;
 	};
 
 	void update_blade_traps(float dt);

@@ -74,7 +74,7 @@ namespace ecs {
 	void _start_retracting_blade_trap(entt::entity entity) {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		// Start playing retraction sound.
-		trap.retraction_audio_event = audio::create_event({ .path = "event:/blade_trap/retract" });
+		trap.audio_event = audio::create_event({ .path = "event:/blade_trap/retract" });
 	}
 
 	void _update_retracting_blade_trap(entt::entity entity, float dt) {
@@ -105,7 +105,7 @@ namespace ecs {
 			.magnitude = 6.f,
 			.exponent = 2.f });
 		// Stop playing retraction sound.
-		audio::stop_event(trap.retraction_audio_event);
+		audio::stop_event(trap.audio_event);
 		// Play reset sound.
 		audio::create_event({
 			.path = "event:/blade_trap/reset",
