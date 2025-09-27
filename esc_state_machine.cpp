@@ -62,11 +62,11 @@ namespace ecs {
 		s->update(entity, dt);
 	}
 
-	void process(StateMachine& sm, entt::entity entity, unsigned int event_type, const void* event_data) {
+	void handle(StateMachine& sm, entt::entity entity, unsigned int event_type, const void* event_data) {
 		State* s = _get_state(sm, sm.current_state);
 		if (!s) return;
-		if (!s->process) return;
-		s->process(entity, event_type, event_data);
+		if (!s->handle) return;
+		s->handle(entity, event_type, event_data);
 	}
 
 	StateHandle _find_state(const StateMachine& sm, std::string_view state_id) {
