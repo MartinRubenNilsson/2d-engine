@@ -10,7 +10,7 @@ namespace map {
 		std::vector<entt::entity> opened_chests;
 	};
 
+	void destroy_entities();
 	void create_entities(const tiled::Map& map);
 	void patch_entities(const MapPatch& patch);
-	void destroy_entities();
 }

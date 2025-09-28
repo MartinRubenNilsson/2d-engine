@@ -38,6 +38,10 @@ namespace ecs {
 		process_window_event_for_players(event);
 	}
 
+	void initialize_new_entities() {
+		initialize_blade_traps();
+	}
+
 	void update(float dt) {
 		update_physics(dt);
 		update_players(dt);

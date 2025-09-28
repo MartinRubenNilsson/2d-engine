@@ -10,6 +10,10 @@ namespace ecs {
 	extern entt::registry _registry;
 	std::unordered_set<entt::entity> _entities_to_destroy_at_end_of_frame;
 
+	struct Lifetime {
+		float time = 0.f;
+	};
+
 	void update_lifetimes(float dt) {
 		for (auto [entity, lifetime] : _registry.view<Lifetime>().each()) {
 			lifetime.time -= dt;
@@ -81,20 +85,10 @@ namespace ecs {
 		_registry.emplace_or_replace<Name>(entity, std::string(name));
 	}
 
-	void set_tag(entt::entity entity, Tag tag) {
-		_registry.emplace_or_replace<Tag>(entity, tag);
-	}
-
 	std::string_view get_name(entt::entity entity) {
 		const Name* name = _registry.try_get<const Name>(entity);
 		if (!name) return "";
 		return name->value;
-	}
-
-	Tag get_tag(entt::entity entity) {
-		const Tag* tag = _registry.try_get<const Tag>(entity);
-		if (!tag) return Tag::None;
-		return *tag;
 	}
 
 	entt::entity find_entity_by_name(std::string_view name) {

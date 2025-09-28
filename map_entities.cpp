@@ -10,6 +10,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 
+#include "ecs.h"
 #include "ecs_common.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
@@ -24,7 +25,6 @@
 #include "ecs_portal.h"
 #include "ecs_chest.h"
 #include "ecs_grass.h"
-#include "ecs_blade_trap.h"
 
 #include "player_outfit.h"
 
@@ -37,6 +37,10 @@ namespace map {
 	unsigned int get_object_layer_index();
 
 	extern tiled::Context _tiled_context;
+
+	void destroy_entities() {
+		ecs::clear();
+	}
 
 	void create_entities(const tiled::Map& map) {
 		//
@@ -410,32 +414,6 @@ namespace map {
 					ecs::set_interaction_callback(entity, ecs::interact_with_chest);
 
 				} break;
-				case ecs::Tag::BladeTrap: {
-
-					const Vector2f center = { 8.f, 8.f };
-
-					ecs::BladeTrap& blade_trap = ecs::emplace_blade_trap(entity);
-					blade_trap.start_position = position_top_left + center;
-
-					if (sprites::Sprite* sprite = ecs::get_sprite(entity)) {
-						sprite->sorting_point = center;
-					}
-					{
-						b2BodyDef body_def = b2DefaultBodyDef();
-						body_def.type = b2_staticBody;
-						body_def.position = position_top_left + center;
-						body_def.fixedRotation = true;
-						b2BodyId body = ecs::emplace_body(entity, body_def);
-						b2ShapeDef shape_def = b2DefaultShapeDef();
-						b2Circle circle{};
-						circle.radius = 6.f;
-						b2CreateCircleShape(body, &shape_def, &circle);
-					}
-					ecs::set_physics_event_callback(entity, ecs::on_blade_trap_physics_event);
-
-					ecs::emplace_sprite_follow_body(entity, -center);
-
-				} break;
 				}
 			}
 		}
@@ -643,6 +621,8 @@ namespace map {
 				}
 			}
 		}
+
+		ecs::initialize_new_entities();
 	}
 
 	void patch_entities(const MapPatch& patch) {
@@ -654,9 +634,5 @@ namespace map {
 		for (entt::entity entity : patch.opened_chests) {
 			ecs::open_chest(entity, true);
 		}
-	}
-
-	void destroy_entities() {
-		ecs::clear();
 	}
 }

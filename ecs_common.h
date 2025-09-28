@@ -6,10 +6,6 @@ namespace tiled {
 }
 
 namespace ecs {
-	struct Lifetime {
-		float time = 0.f;
-	};
-
 	void update_lifetimes(float dt);
 	void destroy_entities_to_be_destroyed_at_end_of_frame();
 
@@ -24,12 +20,10 @@ namespace ecs {
 	void destroy_at_end_of_frame(entt::entity entity);
 	bool valid(entt::entity entity);
 
-	// NAME AND TAG
+	// NAME
 
 	void set_name(entt::entity entity, std::string_view name);
-	void set_tag(entt::entity entity, Tag tag);
 	std::string_view get_name(entt::entity entity);
-	Tag get_tag(entt::entity entity);
 	entt::entity find_entity_by_name(std::string_view name);
 	entt::entity find_entity_by_tag(Tag tag);
 

@@ -8,9 +8,15 @@
 #include "audio.h"
 
 namespace ecs {
-
 	constexpr float _BLADE_TRAP_EXTEND_SPEED = 16.f * 6.f; // 6 tiles per second
 	constexpr float _BLADE_TRAP_RETRACT_SPEED = 16.f * 2.f; // 2 tiles per second
+
+	struct BladeTrap {
+		unsigned int update_count = 0;
+		Vector2f direction;
+		Vector2f start_position;
+		Handle<audio::Event> audio_event;
+	};
 
 	extern entt::registry _registry;
 
@@ -112,25 +118,56 @@ namespace ecs {
 			.position = b2Body_GetPosition(body) });
 	}
 
-	void _emplace_blade_trap_state_machine(entt::entity entity) {
-		StateMachine& sm = emplace_state_machine(entity);
-		add_state(sm, {
-			.id = "idle",
-			.update = _update_idle_blade_trap });
-		add_state(sm, {
-			.id = "extending",
-			.enter = _start_extending_blade_trap,
-			.exit = _stop_extending_blade_trap });
-		add_state(sm, {
-			.id = "impacting",
-			.enter = _start_impacting_blade_trap });
-		add_state(sm, {
-			.id = "retracting",
-			.exit = _stop_retracting_blade_trap, 
-			.update = _update_retracting_blade_trap });
-		add_state(sm, {
-			.id = "wait" });
-		transition(sm, "idle", entity);
+	void initialize_blade_traps() {
+		for (auto [entity, sprite] : _registry.view<Type<Tag::BladeTrap>, sprites::Sprite>().each()) {
+
+			const Vector2f center = { 8.f, 8.f };
+
+			// Emplace blade trap.
+			{
+				ecs::BladeTrap& blade_trap = _registry.emplace<BladeTrap>(entity);
+				blade_trap.start_position = sprite.position + center;
+			}
+
+			sprite.sorting_point = center;
+
+			// Emplace body.
+			{
+				b2BodyDef body_def = b2DefaultBodyDef();
+				body_def.type = b2_staticBody;
+				body_def.position = sprite.position + center;
+				body_def.fixedRotation = true;
+				b2BodyId body = ecs::emplace_body(entity, body_def);
+				b2ShapeDef shape_def = b2DefaultShapeDef();
+				b2Circle circle{};
+				circle.radius = 6.f;
+				b2CreateCircleShape(body, &shape_def, &circle);
+			}
+			ecs::set_physics_event_callback(entity, ecs::on_blade_trap_physics_event);
+			ecs::emplace_sprite_follow_body(entity, -center);
+
+			// Emplace state machine.
+			{
+				StateMachine& sm = emplace_state_machine(entity);
+				add_state(sm, {
+					.id = "idle",
+					.update = _update_idle_blade_trap });
+				add_state(sm, {
+					.id = "extending",
+					.enter = _start_extending_blade_trap,
+					.exit = _stop_extending_blade_trap });
+				add_state(sm, {
+					.id = "impacting",
+					.enter = _start_impacting_blade_trap });
+				add_state(sm, {
+					.id = "retracting",
+					.exit = _stop_retracting_blade_trap,
+					.update = _update_retracting_blade_trap });
+				add_state(sm, {
+					.id = "wait" });
+				transition(sm, "idle", entity);
+			}
+		}
 	}
 
 	void update_blade_traps(float dt) {
@@ -141,15 +178,6 @@ namespace ecs {
 				audio::set_event_position(blade_trap.audio_event, b2Body_GetPosition(body));
 			}
 		}
-	}
-
-	BladeTrap& emplace_blade_trap(entt::entity entity) {
-		_emplace_blade_trap_state_machine(entity); // HACK
-		return _registry.emplace_or_replace<BladeTrap>(entity);
-	}
-
-	BladeTrap* get_blade_trap(entt::entity entity) {
-		return _registry.try_get<BladeTrap>(entity);
 	}
 
 	void on_blade_trap_physics_event(const PhysicsEvent& ev) {

@@ -145,6 +145,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="esc_state_machine.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="background.cpp" />
@@ -227,6 +228,7 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_state_machine.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="background.h" />
