@@ -34,8 +34,29 @@ namespace ecs {
 		return _get_property<tiled::PropertyType::String>(*_obj, name);
 	}
 
+	int TiledObject::get_int(std::string_view name) const {
+		return _get_property<tiled::PropertyType::Int>(*_obj, name);
+	}
+
+	float TiledObject::get_float(std::string_view name) const {
+		return _get_property<tiled::PropertyType::Float>(*_obj, name);
+	}
+
 	bool TiledObject::get_bool(std::string_view name) const {
 		return _get_property<tiled::PropertyType::Bool>(*_obj, name);
+	}
+
+	Color TiledObject::get_color(std::string_view name) const {
+		tiled::Color color = _get_property<tiled::PropertyType::Color>(*_obj, name);
+		return { color.r, color.g, color.b, color.a };
+	}
+
+	std::string_view TiledObject::get_file(std::string_view name) const {
+		return _get_property<tiled::PropertyType::File>(*_obj, name);
+	}
+
+	entt::entity TiledObject::get_object(std::string_view name) const {
+		return (entt::entity)_get_property<tiled::PropertyType::Object>(*_obj, name);
 	}
 
 	extern entt::registry _registry;

@@ -73,7 +73,7 @@ namespace ecs {
 
             Chest& chest = _registry.emplace<Chest>(entity);
             if (chest_type == "bomb") {
-                chest.type == ChestType::Bomb;
+                chest.type = ChestType::Bomb;
             }
 
             const Vector2f pivot = { 16.f, 22.f };

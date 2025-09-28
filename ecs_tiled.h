@@ -6,7 +6,7 @@ namespace tiled {
 
 namespace ecs {
 
-	// Wrapper class for safe and convenient querying of a Tiled object.
+	// Wrapper class for safe and convenient access to a Tiled object.
 	class TiledObject {
 		const tiled::Object* _obj;
 
@@ -19,7 +19,12 @@ namespace ecs {
 		Vector2f get_top_left() const;
 
 		std::string_view get_string(std::string_view name) const;
+		int get_int(std::string_view name) const;
+		float get_float(std::string_view name) const;
 		bool get_bool(std::string_view name) const;
+		Color get_color(std::string_view name) const;
+		std::string_view get_file(std::string_view name) const;
+		entt::entity get_object(std::string_view name) const;
 	};
 
 	void emplace_tiled_object(entt::entity entity, const tiled::Object& obj);
