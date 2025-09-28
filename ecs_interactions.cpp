@@ -8,30 +8,30 @@
 #include "shapes.h"
 
 namespace ecs {
-	struct _InteractionCallbackComponent {
-		InteractionCallback callback = nullptr;
+	struct InteractionHandlerComponent {
+		InteractionHandler handler = nullptr;
 	};
 
 	extern entt::registry _registry;
 
-	void set_interaction_callback(entt::entity entity, InteractionCallback callback) {
-		if (callback) {
-			_registry.emplace_or_replace<_InteractionCallbackComponent>(entity).callback = callback;
+	void set_interaction_handler(entt::entity entity, InteractionHandler handler) {
+		if (handler) {
+			_registry.emplace_or_replace<InteractionHandlerComponent>(entity, handler);
 		} else {
-			_registry.remove<_InteractionCallbackComponent>(entity);
+			_registry.remove<InteractionHandlerComponent>(entity);
 		}
 	}
 
-	InteractionCallback get_interaction_callback(entt::entity entity) {
-		_InteractionCallbackComponent* callback_component = _registry.try_get<_InteractionCallbackComponent>(entity);
-		if (!callback_component) return nullptr;
-		return callback_component->callback;
+	InteractionHandler get_interaction_handler(entt::entity entity) {
+		InteractionHandlerComponent* component_ptr = _registry.try_get<InteractionHandlerComponent>(entity);
+		if (!component_ptr) return nullptr;
+		return component_ptr->handler;
 	}
 
 	void interact_with(entt::entity entity) {
-		InteractionCallback callback = get_interaction_callback(entity);
-		if (!callback) return;
-		callback(entity);
+		InteractionHandler handler = get_interaction_handler(entity);
+		if (!handler) return;
+		handler(entity);
 	}
 
 	void interact_with_all_entities_in_box(const Vector2f& box_min, const Vector2f& box_max) {

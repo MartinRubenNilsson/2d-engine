@@ -11,6 +11,7 @@
 #include "graphics_globals.h"
 
 #include "ecs.h"
+#include "ecs_tiled.h"
 #include "ecs_common.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
@@ -23,8 +24,8 @@
 #include "ecs_camera.h"
 #include "ecs_ai.h"
 #include "ecs_portal.h"
-#include "ecs_chest.h"
 #include "ecs_grass.h"
+#include "ecs_chest.h"
 
 #include "player_outfit.h"
 
@@ -114,6 +115,8 @@ namespace map {
 				if (!object.class_.empty() && ecs::string_to_tag(object.class_, tag)) {
 					ecs::set_tag(entity, tag);
 				}
+
+				ecs::emplace_tiled_object(entity, object);
 
 				if (!object.properties.empty()) {
 					ecs::set_properties(entity, object.properties);
@@ -389,31 +392,6 @@ namespace map {
 					get<tiled::PropertyType::Object>(object.properties, "follow", (unsigned int&)camera.entity_to_follow);
 
 				} break;
-				case ecs::Tag::Chest: {
-
-					ecs::Chest chest{};
-					if (std::string type; get<tiled::PropertyType::String>(object.properties, "type", type)) {
-						if (type == "bomb") {
-							chest.type = ecs::ChestType::Bomb;
-						}
-					}
-					ecs::emplace_chest(entity, chest);
-
-					const Vector2f pivot = { 16.f, 22.f };
-					{
-						b2BodyDef body_def = b2DefaultBodyDef();
-						body_def.type = b2_staticBody;
-						body_def.position = position_top_left + pivot;
-						body_def.fixedRotation = true;
-						b2BodyId body = ecs::emplace_body(entity, body_def);
-						b2ShapeDef shape_def = b2DefaultShapeDef();
-						b2Polygon box = b2MakeBox(10.f, 6.f);
-						b2CreatePolygonShape(body, &shape_def, &box);
-					}
-
-					ecs::set_interaction_callback(entity, ecs::interact_with_chest);
-
-				} break;
 				}
 			}
 		}
@@ -623,6 +601,10 @@ namespace map {
 		}
 
 		ecs::setup();
+
+		// PITFALL: ecs::setup() may want to query data from Tiled objects,
+		// so we must call it before ecs::clear_all_tiled_objects()! 
+		ecs::clear_all_tiled_objects();
 	}
 
 	void patch_entities(const MapPatch& patch) {

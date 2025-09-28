@@ -224,6 +224,9 @@
     <ClCompile Include="ecs_camera.cpp">
       <Filter>game\ecs\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_tiled.cpp">
+      <Filter>game\ecs\tiled</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -478,6 +481,9 @@
     <ClInclude Include="ecs_camera.h">
       <Filter>game\ecs\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_tiled.h">
+      <Filter>game\ecs\tiled</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -575,6 +581,9 @@
     </Filter>
     <Filter Include="game\ecs\tags">
       <UniqueIdentifier>{629c10a7-6918-4b36-9b46-38c4ca86a6c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\tiled">
+      <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

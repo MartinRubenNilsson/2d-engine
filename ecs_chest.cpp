@@ -1,25 +1,29 @@
 #include "stdafx.h"
 #include "ecs_chest.h"
+#include "ecs_tiled.h"
 #include "ecs_animations.h"
 #include "ecs_bomb.h"
 #include "ecs_physics.h"
 #include "ui_textbox.h"
+#include "ecs_interactions.h"
 #include "map.h"
 #include "audio.h"
 
 namespace ecs {
+    enum class ChestType {
+        Normal,
+        Bomb, // trap chest; explodes when opened
+    };
+
+    struct Chest {
+        ChestType type = ChestType::Normal;
+        bool opened = false;
+    };
+
     extern entt::registry _registry;
 
-    Chest& emplace_chest(entt::entity entity, const Chest& chest) {
-        return _registry.emplace_or_replace<Chest>(entity, chest);
-    }
-
-    Chest* get_chest(entt::entity entity) {
-        return _registry.try_get<Chest>(entity);
-    }
-
     void open_chest(entt::entity entity, bool ignore_contents) {
-        Chest* chest = get_chest(entity);
+        Chest* chest = _registry.try_get<Chest>(entity);
         if (!chest) return;
         if (chest->opened) return;
         chest->opened = true;
@@ -57,7 +61,34 @@ namespace ecs {
         audio::create_event({ .path = "event:/props/chest/open" });
     }
 
-    void interact_with_chest(entt::entity entity) {
+    void _handle_interaction_with_chest(entt::entity entity) {
         open_chest(entity);
+    }
+
+    void setup_chests() {
+        for (auto [entity, object] : _registry.view<Type<Tag::Chest>, TiledObject>().each()) {
+
+            const Vector2f top_left = object.get_top_left();
+            const std::string_view chest_type = object.get_string("type");
+
+            Chest& chest = _registry.emplace<Chest>(entity);
+            if (chest_type == "bomb") {
+                chest.type == ChestType::Bomb;
+            }
+
+            const Vector2f pivot = { 16.f, 22.f };
+            {
+                b2BodyDef body_def = b2DefaultBodyDef();
+                body_def.type = b2_staticBody;
+                body_def.position = top_left + pivot;
+                body_def.fixedRotation = true;
+                b2BodyId body = ecs::emplace_body(entity, body_def);
+                b2ShapeDef shape_def = b2DefaultShapeDef();
+                b2Polygon box = b2MakeBox(10.f, 6.f);
+                b2CreatePolygonShape(body, &shape_def, &box);
+            }
+
+            ecs::set_interaction_handler(entity, ecs::_handle_interaction_with_chest);
+        }
     }
 }

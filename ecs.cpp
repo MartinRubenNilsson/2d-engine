@@ -12,6 +12,7 @@
 #include "ecs_portal.h"
 #include "ecs_blade_trap.h"
 #include "ecs_state_machine.h"
+#include "ecs_chest.h"
 
 namespace ecs {
 	void initialize() {
@@ -24,6 +25,7 @@ namespace ecs {
 	}
 
 	void setup() {
+		setup_chests();
 		setup_blade_traps();
 	}
 

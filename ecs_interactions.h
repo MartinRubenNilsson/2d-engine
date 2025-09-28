@@ -1,14 +1,14 @@
 #pragma once
 
 namespace ecs {
-	using InteractionCallback = void(*)(entt::entity entity);
+	using InteractionHandler = void(*)(entt::entity entity);
 
-	void set_interaction_callback(entt::entity entity, InteractionCallback callback);
-	InteractionCallback get_interaction_callback(entt::entity entity);
+	void set_interaction_handler(entt::entity entity, InteractionHandler handler);
+	InteractionHandler get_interaction_handler(entt::entity entity);
 
-	// Calls the entity's interaction callback, if it exists.
+	// Calls the entity's interaction handler, if one is set.
 	void interact_with(entt::entity entity);
 
-	// Calls the interaction callback for all entities that intersect the given box.
+	// Calls the interaction handler for all entities that intersect the given box.
 	void interact_with_all_entities_in_box(const Vector2f& box_min, const Vector2f& box_max);
 }
