@@ -8,6 +8,16 @@
 #include "audio.h"
 
 namespace ecs {
+	Vector2f _get_direction_for_update_count(unsigned int update_count) {
+		switch (update_count % 4) {
+			case 0: return { 1.f, 0.f };
+			case 1: return { 0.f, 1.f };
+			case 2: return { -1.f, 0.f };
+			case 3: return { 0.f, -1.f };
+		}
+		return { 0.f, 0.f }; // should never happen
+	}
+
 	constexpr float _BLADE_TRAP_EXTEND_SPEED = 16.f * 6.f; // 6 tiles per second
 	constexpr float _BLADE_TRAP_RETRACT_SPEED = 16.f * 2.f; // 2 tiles per second
 
@@ -19,16 +29,6 @@ namespace ecs {
 	};
 
 	extern entt::registry _registry;
-
-	Vector2f _get_direction_for_update_count(unsigned int update_count) {
-		switch (update_count % 4) {
-			case 0: return { 1.f, 0.f };
-			case 1: return { 0.f, 1.f };
-			case 2: return { -1.f, 0.f };
-			case 3: return { 0.f, -1.f };
-		}
-		return { 0.f, 0.f }; // should never happen
-	}
 
 	void _update_idle_blade_trap(entt::entity entity, float dt)  {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
@@ -65,7 +65,7 @@ namespace ecs {
 	void _start_impacting_blade_trap(entt::entity entity) {
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
 		// Shake a lot.
-		emplace_sprite_shake(entity, {
+		make_sprite_shake(entity, {
 			.duration = 0.4f,
 			.magnitude = 7.f,
 			.exponent = 3.f });
@@ -106,7 +106,7 @@ namespace ecs {
 		b2Body_SetType(body, b2_staticBody);
 		b2Body_SetTransform(body, trap.start_position, b2Rot_identity);
 		// Shake a little.
-		emplace_sprite_shake(entity, {
+		make_sprite_shake(entity, {
 			.duration = 0.2f,
 			.magnitude = 6.f,
 			.exponent = 2.f });
@@ -118,35 +118,42 @@ namespace ecs {
 			.position = b2Body_GetPosition(body) });
 	}
 
-	void initialize_blade_traps() {
+	void _handle_physics_event_for_blade_trap(const PhysicsEvent& ev) {
+		if (ev.type == PhysicsEventType::ContactBeginTouch) {
+			transition_state_machine(ev.entity_a, "impacting");
+			apply_damage(ev.entity_b, { .type = DamageType::Melee, .amount = 1 });
+		}
+	}
+
+	void setup_blade_traps() {
 		for (auto [entity, sprite] : _registry.view<Type<Tag::BladeTrap>, sprites::Sprite>().each()) {
 
 			const Vector2f center = { 8.f, 8.f };
 
-			// Emplace blade trap.
+			// Setup blade trap.
 			{
-				ecs::BladeTrap& blade_trap = _registry.emplace<BladeTrap>(entity);
+				BladeTrap& blade_trap = _registry.emplace<BladeTrap>(entity);
 				blade_trap.start_position = sprite.position + center;
 			}
 
 			sprite.sorting_point = center;
 
-			// Emplace body.
+			// Setup body.
 			{
 				b2BodyDef body_def = b2DefaultBodyDef();
 				body_def.type = b2_staticBody;
 				body_def.position = sprite.position + center;
 				body_def.fixedRotation = true;
-				b2BodyId body = ecs::emplace_body(entity, body_def);
+				b2BodyId body = emplace_body(entity, body_def);
 				b2ShapeDef shape_def = b2DefaultShapeDef();
 				b2Circle circle{};
 				circle.radius = 6.f;
 				b2CreateCircleShape(body, &shape_def, &circle);
 			}
-			ecs::set_physics_event_callback(entity, ecs::on_blade_trap_physics_event);
-			ecs::emplace_sprite_follow_body(entity, -center);
+			set_physics_event_handler(entity, _handle_physics_event_for_blade_trap);
+			make_sprite_follow_body(entity, -center);
 
-			// Emplace state machine.
+			// Setup state machine.
 			{
 				StateMachine& sm = emplace_state_machine(entity);
 				add_state(sm, {
@@ -177,13 +184,6 @@ namespace ecs {
 			if (blade_trap.audio_event != Handle<audio::Event>()) {
 				audio::set_event_position(blade_trap.audio_event, b2Body_GetPosition(body));
 			}
-		}
-	}
-
-	void on_blade_trap_physics_event(const PhysicsEvent& ev) {
-		if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			transition_state_machine(ev.entity_a, "impacting");
-			apply_damage(ev.entity_b, { .type = DamageType::Melee, .amount = 1 });
 		}
 	}
 }

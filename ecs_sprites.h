@@ -2,11 +2,10 @@
 #include "sprites.h"
 
 namespace ecs {
+	sprites::Sprite& emplace_sprite(entt::entity entity);
+	sprites::Sprite* get_sprite(entt::entity entity);
 
-	// Makes the Sprite follow along a b2BodyId as the latter moves.
-	struct SpriteFollowBody {
-		Vector2f offset; // the sprite's position relative to the body's position
-	};
+	void make_sprite_follow_body(entt::entity entity, const Vector2f& offset = { 0.f, 0.f });
 
 	// Makes the Sprite's color blink.
 	struct SpriteBlink {
@@ -15,6 +14,8 @@ namespace ecs {
 		Color color = colors::WHITE;
 		Color _original_color; // for internal use only!
 	};
+
+	void make_sprite_blink(entt::entity entity, SpriteBlink&& blink = SpriteBlink());
 
 	// Makes the Sprite shake.
 	struct SpriteShake {
@@ -34,22 +35,8 @@ namespace ecs {
 		Vector2f _original_position; // for internal use only!
 	};
 
-	void update_sprites_following_bodies();
-	void update_sprite_blinks(float dt);
-	void update_sprite_shakes(float dt);
+	void make_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
 
-	void blink_sprites_before_drawing();
-	void unblink_sprites_after_drawing();
-	void shake_sprites_before_drawing();
-	void unshake_sprites_after_drawing();
-
-	sprites::Sprite& emplace_sprite(entt::entity entity);
-	sprites::Sprite* get_sprite(entt::entity entity);
-
-	SpriteFollowBody& emplace_sprite_follow_body(entt::entity entity, const Vector2f& offset = { 0.f, 0.f });
-	SpriteFollowBody* get_sprite_follow_body(entt::entity entity);
-
-	SpriteBlink& emplace_sprite_blink(entt::entity entity);
-
-	void emplace_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
+	void update_sprites(float dt);
+	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max);
 }

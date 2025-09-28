@@ -201,7 +201,7 @@ namespace map {
 
 						// EMPLACE SPRITE-BODY ATTACHMENT
 
-						ecs::emplace_sprite_follow_body(entity);
+						ecs::make_sprite_follow_body(entity);
 
 						// EMPLACE BODY
 
@@ -326,7 +326,7 @@ namespace map {
 						b2CreateCircleShape(body, &shape_def, &circle);
 					}
 
-					ecs::emplace_sprite_follow_body(entity, -pivot);
+					ecs::make_sprite_follow_body(entity, -pivot);
 
 					if (last_active_portal) {
 
@@ -353,7 +353,7 @@ namespace map {
 					ecs::emplace_tile_animation(player.held_item);
 					ecs::emplace_player(entity, player);
 
-					ecs::set_physics_event_callback(entity, ecs::on_player_physics_event);
+					ecs::set_physics_event_handler(entity, ecs::on_player_physics_event);
 
 					ecs::set_apply_damage_callback(entity, ecs::apply_damage_to_player);
 
@@ -622,7 +622,7 @@ namespace map {
 			}
 		}
 
-		ecs::initialize_new_entities();
+		ecs::setup_new_entities();
 	}
 
 	void patch_entities(const MapPatch& patch) {

@@ -31,10 +31,10 @@ namespace ecs
 			const float progress_after = bomb.explosion_timer.get_progress();
 
 			if (progress_before < 0.5f && progress_after >= 0.5f) {
-                SpriteBlink& blink = emplace_sprite_blink(entity);
-				blink.duration = bomb.explosion_timer.get_time_left();
-				blink.interval = 0.2f;
-				blink.color = { 255, 0, 0, 255 };
+                make_sprite_blink(entity, {
+				    .duration = bomb.explosion_timer.get_time_left(),
+				    .interval = 0.2f,
+				    .color = { 255, 0, 0, 255 } });
 			}
 
             const Vector2f center = b2Body_GetPosition(body);

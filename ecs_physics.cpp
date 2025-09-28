@@ -65,14 +65,14 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) {
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
 						callback(ev);
 					}
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
 						callback(ev);
 					}
 				}
@@ -88,14 +88,14 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) {
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
 						callback(ev);
 					}
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
 						callback(ev);
 					}
 				}
@@ -116,7 +116,7 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) {
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
 						callback(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
@@ -124,7 +124,7 @@ namespace ecs {
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
 						callback(ev);
 					}
 				}
@@ -140,7 +140,7 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) {
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
 						callback(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
@@ -148,7 +148,7 @@ namespace ecs {
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventCallback callback = get_physics_event_callback(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
 						callback(ev);
 					}
 				}
@@ -408,12 +408,12 @@ namespace ecs {
 		return _registry.remove<b2BodyId>(entity);
 	}
 
-	void set_physics_event_callback(entt::entity entity, PhysicsEventCallback callback) {
-		_registry.emplace_or_replace<PhysicsEventCallback>(entity, callback);
+	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler) {
+		_registry.emplace_or_replace<PhysicsEventHandler>(entity, handler);
 	}
 
-	PhysicsEventCallback get_physics_event_callback(entt::entity entity) {
-		PhysicsEventCallback* callback_ptr = _registry.try_get<PhysicsEventCallback>(entity);
-		return callback_ptr ? *callback_ptr : nullptr;
+	PhysicsEventHandler get_physics_event_handler(entt::entity entity) {
+		PhysicsEventHandler* handler_ptr = _registry.try_get<PhysicsEventHandler>(entity);
+		return handler_ptr ? *handler_ptr : nullptr;
 	}
 }

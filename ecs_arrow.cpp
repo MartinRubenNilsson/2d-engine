@@ -61,8 +61,8 @@ namespace ecs {
 			circle.radius = 6.f;
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
-		set_physics_event_callback(entity, _on_arrow_physics_event);
-		emplace_sprite_follow_body(entity, -pivot);
+		set_physics_event_handler(entity, _on_arrow_physics_event);
+		make_sprite_follow_body(entity, -pivot);
 		audio::create_event({ .path = "event:/snd_fire_arrow" });
 		return entity;
 	}

@@ -61,8 +61,8 @@ namespace ecs {
 		Tag tag_b = Tag::None;
 	};
 
-	using PhysicsEventCallback = void(*)(const PhysicsEvent& ev);
+	using PhysicsEventHandler = void(*)(const PhysicsEvent& ev);
 
-	void set_physics_event_callback(entt::entity entity, PhysicsEventCallback callback);
-	PhysicsEventCallback get_physics_event_callback(entt::entity entity); // Returns nullptr if entity has no callback.
+	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler);
+	PhysicsEventHandler get_physics_event_handler(entt::entity entity); // Returns nullptr if entity has no handler.
 }
