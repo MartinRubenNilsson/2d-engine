@@ -1,9 +1,7 @@
 #include "stdafx.h"
-
 #include "ecs.h"
 #include "ecs_common.h"
 #include "ecs_physics.h"
-#include "ecs_uniform_block.h"
 #include "ecs_sprites.h"
 #include "ecs_player.h"
 #include "ecs_ai.h"
@@ -15,14 +13,7 @@
 #include "ecs_blade_trap.h"
 #include "ecs_state_machine.h"
 
-#include "sprites.h"
-#include "graphics.h"
-#include "graphics_globals.h"
-
 namespace ecs {
-	int debug_flags = 0;
-	entt::registry _registry;
-
 	void initialize() {
 		initialize_physics();
 	}
@@ -36,7 +27,7 @@ namespace ecs {
 		process_window_event_for_players(event);
 	}
 
-	void setup_new_entities() {
+	void setup() {
 		setup_blade_traps();
 	}
 
@@ -66,6 +57,8 @@ namespace ecs {
 		max = center + size / 2.f;
 	}
 
+	int debug_flags = 0;
+
 	void add_debug_shapes_to_render_queue() {
 		if (debug_flags & DEBUG_PHYSICS) {
 			debug_draw_physics();
@@ -78,4 +71,6 @@ namespace ecs {
 			show_player_debug_window();
 		}
 	}
+
+	entt::registry _registry;
 }

@@ -12,7 +12,7 @@ namespace ecs {
 	void initialize();
 	void shutdown();
 	void process_window_event(const window::Event& ev);
-	void setup_new_entities(); // Called on map load.
+	void setup(); // Called on map load.
 	void update(float dt);
 	void get_camera_bounds(Vector2f& min, Vector2f& max);
 	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max);

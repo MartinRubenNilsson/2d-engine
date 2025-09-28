@@ -622,7 +622,7 @@ namespace map {
 			}
 		}
 
-		ecs::setup_new_entities();
+		ecs::setup();
 	}
 
 	void patch_entities(const MapPatch& patch) {
