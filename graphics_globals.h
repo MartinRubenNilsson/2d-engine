@@ -1,4 +1,5 @@
 #pragma once
+#include "graphics.h"
 #include "graphics_vertices.h"
 
 namespace graphics {

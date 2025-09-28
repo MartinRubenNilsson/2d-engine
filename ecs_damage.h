@@ -20,12 +20,12 @@ namespace ecs {
 	};
 
 	// Called when the entity is meant to take damage. Should return true if any damage was applied.
-	using ApplyDamageCallback = bool(*)(entt::entity entity, const Damage& damage);
+	using DamageHandler = bool(*)(entt::entity entity, const Damage& damage);
 
-	void set_apply_damage_callback(entt::entity entity, ApplyDamageCallback callback);
-	ApplyDamageCallback get_apply_damage_callback(entt::entity entity); // Returns nullptr if callback isn't set
+	void set_damage_handler(entt::entity entity, DamageHandler handler);
+	DamageHandler get_damage_handler(entt::entity entity); // Returns nullptr if handler isn't set
 
-	// Appplies damage to a single entity by calling the entity's ApplyDamageCallback.
+	// Appplies damage to a single entity by calling the entity's DamageHandler.
 	bool apply_damage(entt::entity entity, const Damage& damage);
 
 	// Applies damage to all entities that intersect the given box. Returns true if any entity was damaged.

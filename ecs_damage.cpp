@@ -1,28 +1,24 @@
 #include "stdafx.h"
 #include "ecs_damage.h"
-#include "ecs_common.h"
 #include "ecs_physics.h"
-#include "ecs_pickups.h"
-#include "random.h"
-#include "audio.h"
 
 namespace ecs {
 
 	extern entt::registry _registry;
 
-	void set_apply_damage_callback(entt::entity entity, ApplyDamageCallback callback) {
-		_registry.emplace_or_replace<ApplyDamageCallback>(entity, callback);
+	void set_damage_handler(entt::entity entity, DamageHandler handler) {
+		_registry.emplace_or_replace<DamageHandler>(entity, handler);
 	}
 
-	ApplyDamageCallback get_apply_damage_callback(entt::entity entity) {
-		ApplyDamageCallback* callback_ptr = _registry.try_get<ApplyDamageCallback>(entity);
-		return callback_ptr ? *callback_ptr : nullptr;
+	DamageHandler get_damage_handler(entt::entity entity) {
+		DamageHandler* handler_ptr = _registry.try_get<DamageHandler>(entity);
+		return handler_ptr ? *handler_ptr : nullptr;
 	}
 
 	bool apply_damage(entt::entity entity, const Damage& damage) {
 		if (entity == entt::null) return false;
 		if (entity == damage.source) return false; // For now, entities can't damage themselves
-		ApplyDamageCallback callback = get_apply_damage_callback(entity);
+		DamageHandler callback = get_damage_handler(entity);
 		if (!callback) return false;
 		return callback(entity, damage);
 	}

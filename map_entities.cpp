@@ -16,15 +16,12 @@
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_damage.h"
-#include "ecs_interactions.h"
 #include "ecs_sprites.h"
-#include "ecs_uniform_block.h"
 #include "ecs_animations.h"
 #include "ecs_player.h"
 #include "ecs_camera.h"
 #include "ecs_ai.h"
 #include "ecs_portal.h"
-#include "ecs_grass.h"
 #include "ecs_chest.h"
 
 #include "player_outfit.h"
@@ -358,7 +355,7 @@ namespace map {
 
 					ecs::set_physics_event_handler(entity, ecs::on_player_physics_event);
 
-					ecs::set_apply_damage_callback(entity, ecs::apply_damage_to_player);
+					ecs::set_damage_handler(entity, ecs::apply_damage_to_player);
 
 					ecs::Camera camera{};
 					camera.center = position_top_left;
@@ -372,7 +369,7 @@ namespace map {
 				case ecs::Tag::Slime: {
 
 					ecs::emplace_ai(entity, ecs::AiType::Slime);
-					ecs::set_apply_damage_callback(entity, ecs::apply_damage_to_slime);
+					ecs::set_damage_handler(entity, ecs::apply_damage_to_slime);
 
 				} break;
 				case ecs::Tag::Portal: {
@@ -574,27 +571,6 @@ namespace map {
 							} break;
 							}
 						}
-					}
-
-					// TAG-SPECIFIC ENTITY SETUP
-
-					switch (tag) {
-					case ecs::Tag::Grass: {
-
-						sprite.vertex_shader = graphics::grass_vert;
-						sprite.sorting_point = { 8.f, 28.f };
-
-						ecs::emplace_grass(entity);
-						{
-							ecs::GrassUniformBlock& block = ecs::emplace_grass_uniform_block(entity);
-							block.position = position;
-							block.tex_min = sprite.tex_position;
-							block.tex_max = sprite.tex_position + sprite.tex_size;
-							ecs::emplace_uniform_block(entity, &block, sizeof(ecs::GrassUniformBlock));
-						}
-						ecs::set_apply_damage_callback(entity, ecs::apply_damage_to_grass);
-
-					} break;
 					}
 				}
 			}

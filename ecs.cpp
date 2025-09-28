@@ -13,6 +13,7 @@
 #include "ecs_blade_trap.h"
 #include "ecs_state_machine.h"
 #include "ecs_chest.h"
+#include "ecs_grass.h"
 
 namespace ecs {
 	void initialize() {
@@ -25,6 +26,7 @@ namespace ecs {
 	}
 
 	void setup() {
+		setup_grass();
 		setup_chests();
 		setup_blade_traps();
 	}
