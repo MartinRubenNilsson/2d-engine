@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
                 console::process_window_event(ev);
                 ui::process_window_event(ev);
                 if (!ui::is_menu_or_textbox_visible()) {
-                    ecs::process_window_event(ev);
+                    ecs::handle_window_event(ev);
                 }
             }
         }

@@ -36,7 +36,7 @@ namespace ecs {
 	unsigned int _input_flags_to_enable = 0;
 	unsigned int _input_flags_to_disable = 0;
 
-	void process_window_event_for_players(const window::Event& ev) {
+	void handle_window_event_for_players(const window::Event& ev) {
 		if (ev.type == window::EventType::KeyPress) {
 			switch (ev.key.code) {
 			case window::Key::Left:

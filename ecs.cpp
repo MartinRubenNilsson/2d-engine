@@ -23,10 +23,6 @@ namespace ecs {
 		shutdown_physics();
 	}
 
-	void process_window_event(const window::Event& event) {
-		process_window_event_for_players(event);
-	}
-
 	void setup() {
 		setup_blade_traps();
 	}
@@ -39,8 +35,8 @@ namespace ecs {
 		update_bombs(dt);
 		update_blade_traps(dt);
 		update_state_machines(dt);
-		update_ai_logic(dt);
-		update_ai_graphics(dt);
+		update_ai_logic(dt); // TODO remove
+		update_ai_graphics(dt); // TODO remove
 		update_lifetimes(dt);
 		destroy_entities_to_be_destroyed_at_end_of_frame();
 		update_tile_animations(dt);
@@ -48,6 +44,10 @@ namespace ecs {
 		update_animated_sprites(dt);
 		update_sprites(dt);
 		update_cameras(dt);
+	}
+
+	void handle_window_event(const window::Event& event) {
+		handle_window_event_for_players(event);
 	}
 
 	void get_camera_bounds(Vector2f& min, Vector2f& max) {

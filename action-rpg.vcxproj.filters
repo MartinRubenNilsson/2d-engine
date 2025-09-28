@@ -28,9 +28,6 @@
     <ClCompile Include="ui_textbox.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_camera.cpp">
-      <Filter>game\ecs</Filter>
-    </ClCompile>
     <ClCompile Include="ui_hud.cpp">
       <Filter>ui</Filter>
     </ClCompile>
@@ -224,6 +221,9 @@
     <ClCompile Include="ecs_tags.cpp">
       <Filter>game\ecs\tags</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_camera.cpp">
+      <Filter>game\ecs\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -255,9 +255,6 @@
     </ClInclude>
     <ClInclude Include="ui_textbox.h">
       <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_camera.h">
-      <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ui_hud.h">
       <Filter>ui</Filter>
@@ -477,6 +474,9 @@
     </ClInclude>
     <ClInclude Include="ecs_tags.h">
       <Filter>game\ecs\tags</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_camera.h">
+      <Filter>game\ecs\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

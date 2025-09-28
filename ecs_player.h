@@ -48,7 +48,7 @@ namespace ecs {
 		Handle<audio::Event> stone_sliding_sound;
 	};
 
-	void process_window_event_for_players(const window::Event& ev);
+	void handle_window_event_for_players(const window::Event& ev);
 	void update_players(float dt);
 	void show_player_debug_window();
 
