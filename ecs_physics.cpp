@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
-#include "ecs_common.h"
+#include "ecs_tiled.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "box2d-d.lib")
@@ -14,13 +14,13 @@
 #endif
 
 namespace ecs {
-
 	constexpr float _PHYSICS_TIME_STEP = 1.f / 60.f;
 	constexpr int _PHYSICS_SUB_STEP_COUNT = 4;
 
-	extern entt::registry _registry;
 	b2WorldId _physics_world = b2_nullWorldId;
 	float _physics_time_accumulator = 0.f;
+
+	extern entt::registry _registry;
 
 	void _on_destroy_b2BodyId(entt::registry& registry, entt::entity entity) {
 		b2DestroyBody(registry.get<b2BodyId>(entity));
@@ -28,11 +28,9 @@ namespace ecs {
 
 	void initialize_physics() {
 		b2SetLengthUnitsPerMeter(16.f); // 16 pixels per meter
-		{
-			b2WorldDef world_def = b2DefaultWorldDef();
-			world_def.gravity = { 0.f, 0.f };
-			_physics_world = b2CreateWorld(&world_def);
-		}
+		b2WorldDef world_def = b2DefaultWorldDef();
+		world_def.gravity = { 0.f, 0.f }; // no gravity
+		_physics_world = b2CreateWorld(&world_def);
 		_registry.on_destroy<b2BodyId>().connect<_on_destroy_b2BodyId>();
 	}
 
@@ -40,6 +38,12 @@ namespace ecs {
 		_registry.on_destroy<b2BodyId>().disconnect<_on_destroy_b2BodyId>();
 		b2DestroyWorld(_physics_world);
 		_physics_world = b2_nullWorldId;
+	}
+
+	void setup_physics() {
+		for (auto [entity, object] : _registry.view<TiledObject>().each()) {
+
+		}
 	}
 
 	void update_physics(float dt) {
@@ -65,15 +69,15 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+						handler(ev);
 					}
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+						handler(ev);
 					}
 				}
 				for (int32_t i = 0; i < sensor_events.endCount; ++i) {
@@ -88,15 +92,15 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+						handler(ev);
 					}
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+						handler(ev);
 					}
 				}
 			}
@@ -116,16 +120,16 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+						handler(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+						handler(ev);
 					}
 				}
 				for (int32_t i = 0; i < contact_events.endCount; ++i) {
@@ -140,16 +144,16 @@ namespace ecs {
 					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
 					ev.tag_a = get_tag(ev.entity_a);
 					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) {
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+						handler(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
 					std::swap(ev.shape_a, ev.shape_b);
 					std::swap(ev.body_a, ev.body_b);
 					std::swap(ev.entity_a, ev.entity_b);
 					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler callback = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
-						callback(ev);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+						handler(ev);
 					}
 				}
 			}

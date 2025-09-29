@@ -5,6 +5,8 @@ namespace ecs {
 
 	void initialize_physics();
 	void shutdown_physics();
+
+	void setup_physics(); // Called on map load.
 	void update_physics(float dt);
 	void debug_draw_physics();
 

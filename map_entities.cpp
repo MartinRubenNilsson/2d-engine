@@ -29,26 +29,6 @@ namespace map {
 	}
 
 	void create_entities(const tiled::Map& map) {
-		//
-		// IMPORTANT:
-		// 
-		// In one of my school projects, my group had a similar function to this one,
-		// with the difference being that we used functions like entt::registry::emplace()
-		// directly. It turns out that this caused a lot of template bloat, which slowed down
-		// compilation times, and eventually made the .cpp file too large to compile.
-		// 
-		// The solution was to wrap calls to entt::registry::emplace() in our own helper functions
-		// and put them in separate .cpp files, so each template is instantiated in its own unit.
-		// This is why we have functions like ecs::emplace_tile() and ecs::emplace_body().
-		//
-		// TLDR: You may NOT access entt::registry directly in this file! Make a helper function
-		// in ecs_[your component here].cpp and call that instead!
-		//
-
-		const Vector2f map_bounds_min = { 0.f, 0.f };
-		const Vector2f map_bounds_max = {
-			(float)map.width * map.tile_width,
-			(float)map.height * map.tile_height };
 
 		//TODO: clean this up
 

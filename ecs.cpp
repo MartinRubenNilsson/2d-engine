@@ -29,6 +29,7 @@ namespace ecs {
 
 	void setup() {
 		setup_cameras();
+		setup_physics();
 		setup_audio_sources();
 		setup_portals();
 		setup_grass();

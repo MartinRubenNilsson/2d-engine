@@ -12,12 +12,24 @@ namespace ecs {
 			     (float)_map->height * _map->tile_height };
 	}
 
+	TiledTile::TiledTile(const tiled::Tile* tile)
+		: _tile(tile)
+	{}
+
 	TiledObject::TiledObject(const tiled::Object* obj, const tiled::Map* map)
 		: _obj(obj), _map(map)
 	{}
 
 	TiledMap TiledObject::get_map() const {
 		return { _map };
+	}
+
+	entt::entity TiledObject::get_id() const {
+		return (entt::entity)_obj->id;
+	}
+
+	ObjectType TiledObject::get_type() const {
+		return (ObjectType)_obj->type;
 	}
 
 	Vector2f TiledObject::get_position() const {
@@ -30,6 +42,10 @@ namespace ecs {
 			p.y -= _obj->height;
 		}
 		return p;
+	}
+
+	std::span<const Vector2f> TiledObject::get_points() const {
+		return { (const Vector2f*)_obj->points.data(), _obj->points.size() };
 	}
 
 	template<tiled::PropertyType type>
