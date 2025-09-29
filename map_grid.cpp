@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "map_tilegrid.h"
+#include "map_grid.h"
 #include "tiled.h"
 #include "console.h"
 
@@ -107,7 +107,7 @@ namespace map {
 		return std::string(magic_enum::enum_name(type));
 	}
 
-	void create_tilegrid(const tiled::Map& map) {
+	void create_grid(const tiled::Map& map) {
 		_grid.size = Vector2i(map.width, map.height);
 		_grid.tile_size = Vector2i(map.tile_width, map.tile_height);
 		_grid.tiles.resize(_grid.size.x * _grid.size.y);
@@ -153,7 +153,7 @@ namespace map {
 		}
 	}
 
-	void destroy_tilegrid() {
+	void destroy_grid() {
 		_grid = TileGrid();
 	}
 

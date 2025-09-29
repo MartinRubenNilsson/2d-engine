@@ -11,7 +11,7 @@
 #include "ecs_bomb.h"
 #include "ecs_portal.h"
 #include "ecs_blade_trap.h"
-#include "ecs_state_machine.h"
+#include "ecs_states.h"
 #include "ecs_chest.h"
 #include "ecs_grass.h"
 #include "ecs_audio.h"

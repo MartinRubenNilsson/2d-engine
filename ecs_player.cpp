@@ -20,7 +20,7 @@
 #include "ui_textbox.h"
 #include "ui_bindings.h"
 #include "random.h"
-#include "map_tilegrid.h"
+#include "map_grid.h"
 #include "postprocessing.h"
 #include "shapes.h"
 #include "tile_ids.h"

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "map.h"
-#include "map_tilegrid.h"
+#include "map_grid.h"
 #include "map_entities.h"
 #include "tiled.h"
 #include "tiled_types.h"
@@ -154,7 +154,7 @@ namespace map {
 
 		if (!next_map) {
 			destroy_entities();
-			destroy_tilegrid();
+			destroy_grid();
 			audio::stop_all_in_bus();
 			return;
 		}
@@ -174,7 +174,7 @@ namespace map {
 		}
 		_next_free_layer_index = (unsigned int)next_map->layers.size();
 
-		create_tilegrid(*next_map);
+		create_grid(*next_map);
 		create_entities(*next_map);
 		patch_entities(_map_path_to_patch[_current_map_path]);
 

@@ -1,14 +1,11 @@
 #pragma once
 
-namespace tiled
-{
+namespace tiled {
 	struct Map;
 }
 
-namespace map
-{
-	enum class TerrainType
-	{
+namespace map {
+	enum class TerrainType {
 		None,
 		Dirt,
 		LightGrass,
@@ -20,8 +17,8 @@ namespace map
 
 	std::string to_string(TerrainType type);
 
-	void create_tilegrid(const tiled::Map& map);
-	void destroy_tilegrid();
+	void create_grid(const tiled::Map& map);
+	void destroy_grid();
 
 	Vector2i get_grid_size(); // in tiles
 	Vector2i get_tile_size(); // in pixels
@@ -30,4 +27,3 @@ namespace map
 	TerrainType get_terrain_type_at(const Vector2f& world_pos);
 	bool pathfind(const Vector2i& start, const Vector2i& end, std::vector<Vector2i>& path);
 }
-

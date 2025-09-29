@@ -4,7 +4,7 @@
 #include "ecs_ai_action.h"
 #include "ecs_animations.h"
 #include "ecs_common.h"
-#include "map_tilegrid.h"
+#include "map_grid.h"
 #include "random.h"
 #include "audio.h"
 #include "shapes.h"

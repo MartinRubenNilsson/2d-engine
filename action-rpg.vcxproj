@@ -148,7 +148,7 @@
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_tiled.cpp" />
-    <ClCompile Include="esc_state_machine.cpp" />
+    <ClCompile Include="ecs_states.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="background.cpp" />
     <ClCompile Include="console.cpp" />
@@ -189,7 +189,7 @@
     <ClCompile Include="ecs_portal.cpp" />
     <ClCompile Include="ecs_vfx.cpp" />
     <ClCompile Include="map_entities.cpp" />
-    <ClCompile Include="map_tilegrid.cpp" />
+    <ClCompile Include="map_grid.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="postprocessing.cpp" />
     <ClCompile Include="random.cpp" />
@@ -232,7 +232,7 @@
   <ItemGroup>
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_slime.h" />
-    <ClInclude Include="ecs_state_machine.h" />
+    <ClInclude Include="ecs_states.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="background.h" />
     <ClInclude Include="color.h" />
@@ -290,7 +290,7 @@
     <ClInclude Include="ecs_portal.h" />
     <ClInclude Include="ecs_vfx.h" />
     <ClInclude Include="map_entities.h" />
-    <ClInclude Include="map_tilegrid.h" />
+    <ClInclude Include="map_grid.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="postprocessing.h" />
     <ClInclude Include="random.h" />
