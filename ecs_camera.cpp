@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "ecs_camera.h"
 #include "ecs_physics.h"
+#include "ecs_tiled.h"
 #include "random.h"
 #include "easings.h"
+#include "map.h"
 
 namespace ecs {
 	const Vector2f DEFAULT_CAMERA_SIZE = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT };
@@ -37,6 +39,16 @@ namespace ecs {
 			confined_center.y = (confines_min.y + confines_max.y) / 2.f;
 		}
 		return confined_center;
+	}
+
+	void setup_cameras() {
+		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, TiledObject>().each()) {
+			ecs::Camera& camera = _registry.emplace<Camera>(entity);
+			camera.center = object.get_position();
+			//camera.confines_min = map_bounds_max; // TODO
+			//camera.confines_max = map_bounds_max; // TODO
+			camera.entity_to_follow = object.get_object("follow");
+		}
 	}
 
 	void update_cameras(float dt) {

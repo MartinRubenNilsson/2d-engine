@@ -380,15 +380,6 @@ namespace map {
 					get<tiled::PropertyType::String>(object.properties, "exit_direction", portal.exit_direction);
 
 				} break;
-				case ecs::Tag::Camera: {
-
-					ecs::Camera& camera = ecs::emplace_camera(entity);
-					camera.center = position_top_left;
-					camera.confines_min = map_bounds_min;
-					camera.confines_max = map_bounds_max;
-					get<tiled::PropertyType::Object>(object.properties, "follow", (unsigned int&)camera.entity_to_follow);
-
-				} break;
 				}
 			}
 		}

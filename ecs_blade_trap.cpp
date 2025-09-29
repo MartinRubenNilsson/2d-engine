@@ -43,7 +43,7 @@ namespace ecs {
 		if (is_zero(b2Body_GetLinearVelocity(hit.body)))
 			return; // We see something, but it's not moving.
 		// Start extending.
-		transition_state_machine(entity, "extending");
+		transition_to_state(entity, "extending");
 	}
 
 	void _start_extending_blade_trap(entt::entity entity) {
@@ -74,7 +74,7 @@ namespace ecs {
 			.path = "event:/blade_trap/impact",
 			.position = b2Body_GetPosition(body) });
 		// Start retracting in 0.4 seconds.
-		transition_state_machine_later(entity, "retracting", 0.4f);
+		transition_to_state_later(entity, "retracting", 0.4f);
 	}
 
 	void _start_retracting_blade_trap(entt::entity entity) {
@@ -95,8 +95,8 @@ namespace ecs {
 			return;
 		}
 		// Go back to being idle, but wait 0.2 seconds first.
-		transition_state_machine(entity, "wait");
-		transition_state_machine_later(entity, "idle", 0.2f);
+		transition_to_state(entity, "wait");
+		transition_to_state_later(entity, "idle", 0.2f);
 	}
 
 	void _stop_retracting_blade_trap(entt::entity entity) {
@@ -120,7 +120,7 @@ namespace ecs {
 
 	void _handle_physics_event_for_blade_trap(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			transition_state_machine(ev.entity_a, "impacting");
+			transition_to_state(ev.entity_a, "impacting");
 			apply_damage(ev.entity_b, { .type = DamageType::Melee, .amount = 1 });
 		}
 	}
@@ -156,7 +156,7 @@ namespace ecs {
 			// Setup state machine.
 			{
 				StateMachine& sm = emplace_state_machine(entity);
-				add_state(sm, {
+				StateHandle idle_state = add_state(sm, {
 					.id = "idle",
 					.update = _update_idle_blade_trap });
 				add_state(sm, {
@@ -172,7 +172,7 @@ namespace ecs {
 					.update = _update_retracting_blade_trap });
 				add_state(sm, {
 					.id = "wait" });
-				transition(sm, "idle", entity);
+				transition(sm, idle_state, entity);
 			}
 		}
 	}

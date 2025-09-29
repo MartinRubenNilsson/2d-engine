@@ -227,6 +227,9 @@
     <ClCompile Include="ecs_tiled.cpp">
       <Filter>game\ecs\tiled</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_audio.cpp">
+      <Filter>game\ecs\audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -484,6 +487,9 @@
     <ClInclude Include="ecs_tiled.h">
       <Filter>game\ecs\tiled</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_audio.h">
+      <Filter>game\ecs\audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -584,6 +590,9 @@
     </Filter>
     <Filter Include="game\ecs\tiled">
       <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\audio">
+      <UniqueIdentifier>{7dee26dd-6bc2-4c4b-aaee-ab7d44f7dede}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

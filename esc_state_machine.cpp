@@ -17,6 +17,15 @@ namespace ecs {
 		return handle;
 	}
 
+	StateHandle find_state(const StateMachine& sm, std::string_view id) {
+		for (unsigned int index = 0; index < sm.states.size(); index++) {
+			if (sm.states[index].id == id) {
+				return StateHandle{ index };
+			}
+		}
+		return StateHandle();
+	}
+
 	State* _get_state(StateMachine& sm, StateHandle handle) {
 		if (handle.index >= sm.states.size())
 			return nullptr;
@@ -62,26 +71,22 @@ namespace ecs {
 		s->update(entity, dt);
 	}
 
-	void handle(StateMachine& sm, entt::entity entity, unsigned int event_type, const void* event_data) {
+	void handle(StateMachine& sm, entt::entity entity, const StateEvent& event) {
 		State* s = _get_state(sm, sm.current_state);
 		if (!s) return;
 		if (!s->handle) return;
-		s->handle(entity, event_type, event_data);
+		s->handle(entity, event);
 	}
 
-	StateHandle _find_state(const StateMachine& sm, std::string_view state_id) {
-		for (unsigned int index = 0; index < sm.states.size(); index++) {
-			if (sm.states[index].id == state_id)
-				return StateHandle{ index };
-		}
-		return StateHandle();
-	}
-
-	bool transition(StateMachine& sm, std::string_view state_id, entt::entity entity) {
-		StateHandle next_state = _find_state(sm, state_id);
-		if (next_state == StateHandle())
-			return false;
-		return transition(sm, next_state, entity);
+	void transition_later(StateMachine& sm, StateHandle state, float time) {
+		if (state.index >= sm.states.size())
+			return; // invalid state handle
+		if (time <= 0.f)
+			return; // invalid time
+		if (0.f < sm.next_state_transition_time && sm.next_state_transition_time < time)
+			return; // another transition is scheduled to happen earlier
+		sm.next_state = state;
+		sm.next_state_transition_time = time;
 	}
 
 	extern entt::registry _registry;
@@ -90,26 +95,24 @@ namespace ecs {
 		return _registry.emplace_or_replace<StateMachine>(entity);
 	}
 
-	bool transition_state_machine(entt::entity entity, std::string_view state_id) {
+	bool transition_to_state(entt::entity entity, std::string_view state_id) {
 		if (!_registry.all_of<StateMachine>(entity))
 			return false;
 		StateMachine& sm = _registry.get<StateMachine>(entity);
-		return transition(sm, state_id, entity);
+		StateHandle state = find_state(sm, state_id);
+		if (state == StateHandle())
+			return false;
+		return transition(sm, state, entity);
 	}
 
-	void transition_state_machine_later(entt::entity entity, std::string_view state_id, float time) {
-		if (time <= 0.f)
-			return;
+	void transition_to_state_later(entt::entity entity, std::string_view state_id, float time) {
 		if (!_registry.all_of<StateMachine>(entity))
 			return;
 		StateMachine& sm = _registry.get<StateMachine>(entity);
-		if (0.f < sm.next_state_transition_time && sm.next_state_transition_time < time)
-			return; // no point in transitioning since another will happen before
-		StateHandle next_state = _find_state(sm, state_id);
-		if (next_state == StateHandle())
-			return; // invalid state handle
-		sm.next_state = next_state;
-		sm.next_state_transition_time = time;
+		StateHandle state = find_state(sm, state_id);
+		if (state == StateHandle())
+			return;
+		transition_later(sm, state, time);
 	}
 
 	void update_state_machines(float dt) {

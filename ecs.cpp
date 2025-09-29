@@ -29,6 +29,7 @@ namespace ecs {
 		setup_grass();
 		setup_chests();
 		setup_blade_traps();
+		setup_cameras();
 	}
 
 	void update(float dt) {

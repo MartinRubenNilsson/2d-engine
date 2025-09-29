@@ -3,8 +3,7 @@
 // Math for Game Programmers: Juicing Your Cameras With Math
 // https://www.youtube.com/watch?v=tu-Qe66AvtY
 
-namespace ecs
-{
+namespace ecs {
 	// view:               The camera view, which determines which part of the world is visible.
 	// confines_min/max:   The camera view will be confined to this box. If the width or height is zero,
 	//                     the view will not be confined along that axis, and if the width or height is
@@ -19,8 +18,7 @@ namespace ecs
 
 	extern const Vector2f DEFAULT_CAMERA_SIZE;
 
-	struct Camera
-	{
+	struct Camera {
 		Vector2f center;
 		Vector2f size = DEFAULT_CAMERA_SIZE;
 		Vector2f confines_min;
@@ -33,6 +31,7 @@ namespace ecs
 		entt::entity entity_to_follow = entt::null;
 	};
 
+	void setup_cameras();
 	void update_cameras(float dt);
 
 	void get_active_camera_view(Vector2f& center, Vector2f& size); // Hard-cuts when activating new camera.
