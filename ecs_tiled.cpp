@@ -19,15 +19,35 @@ namespace ecs {
 		return p;
 	}
 
-	template <tiled::PropertyType type>
-	const auto& _get_property(const tiled::Object& obj, std::string_view name) {
+	template<tiled::PropertyType type>
+	struct GetPropertyRetVal {
+		using Type = std::variant_alternative_t<(size_t)type, tiled::PropertyValue>;
+	};
+
+	template<>
+	struct GetPropertyRetVal<tiled::PropertyType::String> {
+		using Type = std::string_view;
+	};
+
+	template<>
+	struct GetPropertyRetVal<tiled::PropertyType::File> {
+		using Type = std::string_view;
+	};
+
+	template<>
+	struct GetPropertyRetVal<tiled::PropertyType::Class> {
+		using Type = std::string_view;
+	};
+
+	template<tiled::PropertyType type>
+	GetPropertyRetVal<type>::Type _get_property(const tiled::Object& obj, std::string_view name) {
 		constexpr size_t index = (size_t)type;
 		for (const tiled::Property& prop : obj.properties) {
 			if (prop.value.index() != index) continue;
 			if (prop.name != name) continue;
 			return std::get<index>(prop.value);
 		}
-		return std::variant_alternative_t<index, tiled::PropertyValue>();
+		return {};
 	}
 
 	std::string_view TiledObject::get_string(std::string_view name) const {
