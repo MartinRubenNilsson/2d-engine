@@ -20,7 +20,7 @@ namespace ecs {
 	}
 
 	template <tiled::PropertyType type>
-	auto _get_property(const tiled::Object& obj, std::string_view name) {
+	const auto& _get_property(const tiled::Object& obj, std::string_view name) {
 		constexpr size_t index = (size_t)type;
 		for (const tiled::Property& prop : obj.properties) {
 			if (prop.value.index() != index) continue;

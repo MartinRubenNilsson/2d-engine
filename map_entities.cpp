@@ -6,7 +6,6 @@
 #include "tiled_types.h"
 
 #include "console.h"
-#include "audio.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 
@@ -25,11 +24,6 @@
 #include "ecs_chest.h"
 
 #include "player_outfit.h"
-
-// Precautionary measure so we don't access entt::registry directly in this file.
-#define DONT_ACCESS_REGISTRY_DIRECTLY_IN_MAP_ENTITIES_USE_HELPER_FUNCTIONS_INSTEAD
-#define registry DONT_ACCESS_REGISTRY_DIRECTLY_IN_MAP_ENTITIES_USE_HELPER_FUNCTIONS_INSTEAD
-#define _registry DONT_ACCESS_REGISTRY_DIRECTLY_IN_MAP_ENTITIES_USE_HELPER_FUNCTIONS_INSTEAD
 
 namespace map {
 	unsigned int get_object_layer_index();
@@ -286,13 +280,6 @@ namespace map {
 				// TAG-SPECIFIC ENTITY SETUP
 
 				switch (tag) {
-				case ecs::Tag::AudioSource: {
-
-					if (std::string ev; get<tiled::PropertyType::String>(object.properties, "event", ev)) {
-						audio::create_event({ .path = ev.c_str(), .position = position_top_left });
-					}
-
-				} break;
 				case ecs::Tag::Player: {
 
 					ecs::Player player{};
