@@ -1,19 +1,27 @@
 #include "stdafx.h"
 #include "ecs_portal.h"
+#include "ecs_tags.h"
+#include "ecs_tiled.h"
 #include "map.h"
 #include "audio.h"
 
-namespace ecs
-{
+namespace ecs {
 	extern entt::registry _registry;
 
-	void update_portals(float dt)
-	{
+	void setup_portals() {
+		for (auto [entity, object] : _registry.view<Type<Tag::Portal>, TiledObject>().each()) {
+			Portal& portal = _registry.emplace<Portal>(entity);
+			portal.target_map = object.get_string("target_map");
+			portal.target_point = object.get_string("target_point");
+			portal.exit_direction = object.get_string("exit_direction");
+		}
+	}
+
+	void update_portals(float dt) {
 		//Empty
 	}
 
-	entt::entity find_active_portal_entity()
-	{
+	entt::entity find_active_portal_entity() {
 		for (auto [entity, portal] : _registry.view<const Portal>().each()) {
 			if (portal.activated) return entity;
 		}
@@ -36,8 +44,7 @@ namespace ecs
 		return _registry.all_of<Portal>(entity);
 	}
 
-	void activate_portal(entt::entity entity)
-	{
+	void activate_portal(entt::entity entity) {
 		Portal* portal = get_portal(entity);
 		if (!portal) return;
 		if (portal->activated) return;

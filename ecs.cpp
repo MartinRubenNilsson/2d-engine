@@ -28,6 +28,7 @@ namespace ecs {
 
 	void setup() {
 		setup_audio_sources();
+		setup_portals();
 		setup_grass();
 		setup_chests();
 		setup_blade_traps();
