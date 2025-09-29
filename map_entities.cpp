@@ -19,7 +19,6 @@
 #include "ecs_animations.h"
 #include "ecs_player.h"
 #include "ecs_camera.h"
-#include "ecs_ai.h"
 #include "ecs_portal.h"
 #include "ecs_chest.h"
 
@@ -351,12 +350,6 @@ namespace map {
 						camera.entity_to_follow = entity;
 						ecs::emplace_camera(entity, camera);
 						ecs::activate_camera(entity, true);
-
-					} break;
-					case ecs::Tag::Slime: {
-
-						ecs::emplace_ai(entity, ecs::AiType::Slime);
-						ecs::set_damage_handler(entity, ecs::apply_damage_to_slime);
 
 					} break;
 				}

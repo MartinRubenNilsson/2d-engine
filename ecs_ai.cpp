@@ -120,16 +120,4 @@ namespace ecs {
         _registry.emplace_or_replace<AiType>(entity, type);
         _registry.emplace_or_replace<AiAction>(entity);
     }
-
-    bool apply_damage_to_slime(entt::entity entity, const Damage& damage) {
-        //TODO: more stuff here
-
-        audio::create_event({ .path = "event:/snd_slime_dying" });
-
-        // TODO use snd_slime_hurt when slime is damaged and snd_slime_dying when slime is dead
-        // audio::play("event:/snd_slime_hurt");
-
-        destroy_at_end_of_frame(entity);
-        return true;
-    }
 }

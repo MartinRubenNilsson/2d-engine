@@ -16,9 +16,4 @@ namespace ecs {
 	void debug_draw_ai();
 
 	void emplace_ai(entt::entity entity, AiType type);
-
-	struct Damage;
-
-	//Shouldn't really be here but i dont know where to put it as of now
-	bool apply_damage_to_slime(entt::entity entity, const Damage& damage);
 }

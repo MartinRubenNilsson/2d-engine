@@ -15,6 +15,7 @@
 #include "ecs_chest.h"
 #include "ecs_grass.h"
 #include "ecs_audio.h"
+#include "ecs_slime.h"
 
 namespace ecs {
 	void initialize() {
@@ -31,6 +32,7 @@ namespace ecs {
 		setup_portals();
 		setup_grass();
 		setup_chests();
+		setup_slimes();
 		setup_blade_traps();
 		setup_cameras();
 	}
