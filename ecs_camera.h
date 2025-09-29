@@ -21,8 +21,8 @@ namespace ecs {
 	struct Camera {
 		Vector2f center;
 		Vector2f size = DEFAULT_CAMERA_SIZE;
-		Vector2f confines_min;
-		Vector2f confines_max;
+		Vector2f confines_min = { -FLT_MAX, -FLT_MAX };
+		Vector2f confines_max = { FLT_MAX, FLT_MAX };
 		Vector2f shake_offset;
 		float shake_amplitude = 6.f;
 		float shake_frequency = 10.f;

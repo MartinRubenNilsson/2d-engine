@@ -3,9 +3,22 @@
 #include "tiled_types.h"
 
 namespace ecs {
-	TiledObject::TiledObject(const tiled::Object& obj)
-		: _obj(&obj)
+	TiledMap::TiledMap(const tiled::Map* map)
+		: _map(map)
 	{}
+
+	Vector2f TiledMap::get_bottom_right() const {
+		return { (float)_map->width  * _map->tile_width,
+			     (float)_map->height * _map->tile_height };
+	}
+
+	TiledObject::TiledObject(const tiled::Object* obj, const tiled::Map* map)
+		: _obj(obj), _map(map)
+	{}
+
+	TiledMap TiledObject::get_map() const {
+		return { _map };
+	}
 
 	Vector2f TiledObject::get_position() const {
 		return { _obj->x, _obj->y };
@@ -81,7 +94,7 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void emplace_tiled_object(entt::entity entity, const tiled::Object& obj) {
+	void emplace_tiled_object(entt::entity entity, const TiledObject& obj) {
 		_registry.emplace_or_replace<TiledObject>(entity, obj);
 	}
 

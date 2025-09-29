@@ -25,6 +25,8 @@
 #include "shapes.h"
 #include "tile_ids.h"
 #include "ecs_pickups.h"
+#include "ecs_tiled.h"
+#include "graphics_globals.h"
 
 namespace ecs {
 	const float _PLAYER_WALK_SPEED = 60.f;
@@ -98,6 +100,81 @@ namespace ecs {
 		Vector2f box_min = position - Vector2f(6.f, 6.f);
 		Vector2f box_max = position + Vector2f(6.f, 6.f);
 		apply_damage_in_box({ DamageType::Melee, 1, entity }, box_min, box_max, ~CC_Player);
+	}
+
+	void setup_players() {
+		for (auto [entity, object] : _registry.view<Type<Tag::Player>, TiledObject>().each()) {
+			const Vector2f top_left = object.get_top_left();
+
+			Player player{};
+			/*if (last_player) { // TODO
+				player = *last_player;
+				player.input_flags = 0;
+			}*/
+
+			const Vector2f pivot = { 32.f, 42.f };
+
+			{
+				player::Outfit outfit{};
+				player::randomize_outfit(outfit);
+				player::create_outfit_texture(outfit);
+			}
+
+			if (sprites::Sprite* sprite = get_sprite(entity)) {
+				sprite->texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
+				sprite->sorting_point = pivot;
+			}
+			{
+				b2BodyDef body_def = b2DefaultBodyDef();
+				body_def.type = b2_dynamicBody;
+				body_def.position = top_left + pivot;
+				body_def.fixedRotation = true;
+				b2BodyId body = emplace_body(entity, body_def);
+				b2ShapeDef shape_def = b2DefaultShapeDef();
+				shape_def.filter = get_physics_filter_for_tag(Tag::Player);
+				b2Circle circle{};
+				circle.radius = 7.f;
+				b2CreateCircleShape(body, &shape_def, &circle);
+			}
+
+			make_sprite_follow_body(entity, -pivot);
+
+			/*if (last_active_portal) { // TODO
+
+				if (const tiled::Object* target_point = tiled::find_object_with_name(map, last_active_portal->target_point)) {
+#if 0
+					if (body) {
+						body->SetTransform(target_point->position_top_left, 0.f);
+					}
+#endif
+				}
+
+				if (last_active_portal->exit_direction == "up") {
+					player.look_dir = { 0.f, -1.f };
+				} else if (last_active_portal->exit_direction == "down") {
+					player.look_dir = { 0.f, 1.f };
+				} else if (last_active_portal->exit_direction == "left") {
+					player.look_dir = { -1.f, 0.f };
+				} else if (last_active_portal->exit_direction == "right") {
+					player.look_dir = { 1.f, 0.f };
+				}
+			}*/
+
+			player.held_item = create();
+			emplace_tile_animation(player.held_item);
+			emplace_player(entity, player);
+
+			set_physics_event_handler(entity, on_player_physics_event);
+			set_damage_handler(entity, apply_damage_to_player);
+
+			Camera camera{};
+			camera.center = top_left;
+			camera.confines_min = { 0.f, 0.f };
+			camera.confines_max = object.get_map().get_bottom_right();
+			camera.entity_to_follow = entity;
+			emplace_camera(entity, camera);
+			activate_camera(entity, true);
+		}
 	}
 
 	void update_players(float dt) {

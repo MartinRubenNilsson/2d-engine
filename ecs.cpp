@@ -28,13 +28,14 @@ namespace ecs {
 	}
 
 	void setup() {
+		setup_cameras();
 		setup_audio_sources();
 		setup_portals();
 		setup_grass();
 		setup_chests();
+		setup_players();
 		setup_slimes();
 		setup_blade_traps();
-		setup_cameras();
 	}
 
 	void update(float dt) {

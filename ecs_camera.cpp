@@ -43,10 +43,10 @@ namespace ecs {
 
 	void setup_cameras() {
 		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, TiledObject>().each()) {
-			ecs::Camera& camera = _registry.emplace<Camera>(entity);
+			Camera& camera = _registry.emplace<Camera>(entity);
 			camera.center = object.get_position();
-			//camera.confines_min = map_bounds_max; // TODO
-			//camera.confines_max = map_bounds_max; // TODO
+			camera.confines_min = { 0.f, 0.f };
+			camera.confines_max = object.get_map().get_bottom_right();
 			camera.entity_to_follow = object.get_object("follow");
 		}
 	}

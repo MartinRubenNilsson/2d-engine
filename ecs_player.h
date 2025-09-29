@@ -48,8 +48,9 @@ namespace ecs {
 		Handle<audio::Event> stone_sliding_sound;
 	};
 
-	void handle_window_event_for_players(const window::Event& ev);
+	void setup_players();
 	void update_players(float dt);
+	void handle_window_event_for_players(const window::Event& ev);
 	void show_player_debug_window();
 
 	// Returns the first entity with a Player component, or entt::null if none exists.

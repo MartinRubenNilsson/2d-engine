@@ -40,9 +40,6 @@
     <ClCompile Include="ecs_ai_knowledge.cpp">
       <Filter>game\ecs\ai</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_pickups.cpp">
-      <Filter>game\ecs</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_ai.cpp">
       <Filter>game\ecs\ai</Filter>
     </ClCompile>
@@ -59,7 +56,7 @@
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player.cpp">
-      <Filter>game\ecs\player</Filter>
+      <Filter>game\ecs\players</Filter>
     </ClCompile>
     <ClCompile Include="background.cpp">
       <Filter>graphics</Filter>
@@ -91,9 +88,6 @@
     <ClCompile Include="easings.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_portal.cpp">
-      <Filter>game\ecs</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>application</Filter>
     </ClCompile>
@@ -121,9 +115,6 @@
     </ClCompile>
     <ClCompile Include="text.cpp">
       <Filter>graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs_chest.cpp">
-      <Filter>game\ecs</Filter>
     </ClCompile>
     <ClCompile Include="ecs_interactions.cpp">
       <Filter>game\ecs\mechanics</Filter>
@@ -230,6 +221,15 @@
     <ClCompile Include="ecs_audio.cpp">
       <Filter>game\ecs\audio</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_chest.cpp">
+      <Filter>game\ecs\chests</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_pickups.cpp">
+      <Filter>game\ecs\pickups</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_portal.cpp">
+      <Filter>game\ecs\portals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -271,9 +271,6 @@
     <ClInclude Include="ecs_ai_action.h">
       <Filter>game\ecs\ai</Filter>
     </ClInclude>
-    <ClInclude Include="ecs_pickups.h">
-      <Filter>game\ecs</Filter>
-    </ClInclude>
     <ClInclude Include="ecs_ai.h">
       <Filter>game\ecs\ai</Filter>
     </ClInclude>
@@ -290,7 +287,7 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player.h">
-      <Filter>game\ecs\player</Filter>
+      <Filter>game\ecs\players</Filter>
     </ClInclude>
     <ClInclude Include="background.h">
       <Filter>graphics</Filter>
@@ -321,9 +318,6 @@
     </ClInclude>
     <ClInclude Include="easings.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_portal.h">
-      <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="settings.h">
       <Filter>application</Filter>
@@ -357,9 +351,6 @@
     </ClInclude>
     <ClInclude Include="handle.h">
       <Filter>utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_chest.h">
-      <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs_interactions.h">
       <Filter>game\ecs\mechanics</Filter>
@@ -490,6 +481,15 @@
     <ClInclude Include="ecs_audio.h">
       <Filter>game\ecs\audio</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_chest.h">
+      <Filter>game\ecs\chests</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_pickups.h">
+      <Filter>game\ecs\pickups</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_portal.h">
+      <Filter>game\ecs\portals</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -533,9 +533,6 @@
     </Filter>
     <Filter Include="game\ecs\physics\box2d">
       <UniqueIdentifier>{ffe6cfc6-66be-46cd-a885-5762aed4b6bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\player">
-      <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\ecs\mechanics">
       <UniqueIdentifier>{bda05a2e-3455-426f-87f2-f5bcb303a363}</UniqueIdentifier>
@@ -593,6 +590,18 @@
     </Filter>
     <Filter Include="game\ecs\states">
       <UniqueIdentifier>{7f6f1dba-1e00-4cc0-b3b5-9aafc805ff9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\chests">
+      <UniqueIdentifier>{56ba1ffe-bcd3-4ab3-ab39-375a42ef707b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\pickups">
+      <UniqueIdentifier>{00dbe252-53ab-48da-a99d-73fd007bf388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\portals">
+      <UniqueIdentifier>{529cdad0-dd89-4b72-b232-eefaadbc77a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\players">
+      <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

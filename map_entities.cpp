@@ -7,22 +7,17 @@
 
 #include "console.h"
 #include "graphics.h"
-#include "graphics_globals.h"
 
 #include "ecs.h"
 #include "ecs_tiled.h"
 #include "ecs_common.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
-#include "ecs_damage.h"
 #include "ecs_sprites.h"
 #include "ecs_animations.h"
 #include "ecs_player.h"
-#include "ecs_camera.h"
 #include "ecs_portal.h"
 #include "ecs_chest.h"
-
-#include "player_outfit.h"
 
 namespace map {
 	unsigned int get_object_layer_index();
@@ -106,7 +101,7 @@ namespace map {
 					ecs::set_tag(entity, tag);
 				}
 
-				ecs::emplace_tiled_object(entity, object);
+				ecs::emplace_tiled_object(entity, { &object, &map });
 
 				if (!object.properties.empty()) {
 					ecs::set_properties(entity, object.properties);
@@ -172,10 +167,11 @@ namespace map {
 					}
 
 					// EMPLACE ANIMATION
-
-					ecs::TileAnimation& animation = ecs::emplace_tile_animation(entity);
-					animation.tileset_id = object.tileset.tileset_id;
-					animation.tile_id = tile_id;
+					{
+						ecs::TileAnimation& animation = ecs::emplace_tile_animation(entity);
+						animation.tileset_id = object.tileset.tileset_id;
+						animation.tile_id = tile_id;
+					}
 
 					if (!tile.objects.empty()) {
 
@@ -274,84 +270,6 @@ namespace map {
 					}
 
 				} break;
-				}
-
-				// TAG-SPECIFIC ENTITY SETUP
-
-				switch (tag) {
-					case ecs::Tag::Player: {
-
-						ecs::Player player{};
-						if (last_player) {
-							player = *last_player;
-							player.input_flags = 0;
-						}
-
-						const Vector2f pivot = { 32.f, 42.f };
-
-						{
-							player::Outfit outfit{};
-							player::randomize_outfit(outfit);
-							player::create_outfit_texture(outfit);
-						}
-
-						if (sprites::Sprite* sprite = ecs::get_sprite(entity)) {
-							sprite->texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
-							sprite->sorting_point = pivot;
-						}
-						{
-							b2BodyDef body_def = b2DefaultBodyDef();
-							body_def.type = b2_dynamicBody;
-							body_def.position = position_top_left + pivot;
-							body_def.fixedRotation = true;
-							b2BodyId body = ecs::emplace_body(entity, body_def);
-							b2ShapeDef shape_def = b2DefaultShapeDef();
-							shape_def.filter = ecs::get_physics_filter_for_tag(tag);
-							b2Circle circle{};
-							circle.radius = 7.f;
-							b2CreateCircleShape(body, &shape_def, &circle);
-						}
-
-						ecs::make_sprite_follow_body(entity, -pivot);
-
-						if (last_active_portal) {
-
-							if (const tiled::Object* target_point = tiled::find_object_with_name(map, last_active_portal->target_point)) {
-#if 0
-								if (body) {
-									body->SetTransform(target_point->position_top_left, 0.f);
-								}
-#endif
-							}
-
-							if (last_active_portal->exit_direction == "up") {
-								player.look_dir = { 0.f, -1.f };
-							} else if (last_active_portal->exit_direction == "down") {
-								player.look_dir = { 0.f, 1.f };
-							} else if (last_active_portal->exit_direction == "left") {
-								player.look_dir = { -1.f, 0.f };
-							} else if (last_active_portal->exit_direction == "right") {
-								player.look_dir = { 1.f, 0.f };
-							}
-						}
-
-						player.held_item = ecs::create();
-						ecs::emplace_tile_animation(player.held_item);
-						ecs::emplace_player(entity, player);
-
-						ecs::set_physics_event_handler(entity, ecs::on_player_physics_event);
-
-						ecs::set_damage_handler(entity, ecs::apply_damage_to_player);
-
-						ecs::Camera camera{};
-						camera.center = position_top_left;
-						camera.confines_min = map_bounds_min;
-						camera.confines_max = map_bounds_max;
-						camera.entity_to_follow = entity;
-						ecs::emplace_camera(entity, camera);
-						ecs::activate_camera(entity, true);
-
-					} break;
 				}
 			}
 		}
