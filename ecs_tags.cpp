@@ -53,9 +53,10 @@ namespace ecs {
 	}
 
 	entt::entity find_entity_by_tag(Tag tag) {
-		for (auto [entity, other_tag] : _registry.view<Tag>().each()) {
-			if (other_tag == tag) return entity;
-		}
-		return entt::null;
+		entt::entity entity = entt::null;
+		magic_enum::enum_switch([&entity](auto tag) {
+			entity = _registry.view<Type<tag>>().front();
+		}, tag);
+		return entity;
 	}
 }
