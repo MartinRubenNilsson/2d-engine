@@ -13,25 +13,22 @@ namespace ecs
 		if (!_registry.valid(entity)) return AiEntity();
 		AiEntity info{};
 		info.entity = entity;
-		info.name = get_name(entity);
 		info.tag = get_tag(entity);
 		if (b2BodyId body = get_body(entity); B2_IS_NON_NULL(body)) {
 			//info.position = b2Body_GetPosition(body);
 			info.position = b2Body_GetWorldCenterOfMass(body);
 			info.velocity = b2Body_GetLinearVelocity(body);
 		}
-		get_float_property(entity, "speed", info.p_speed);
+		//get_float_property(entity, "speed", info.p_speed); // TODO
 		return info;
 	} 
 
 	void update_ai_knowledge_and_world(float dt)
 	{
 		_ai_world.player = _make_ai_entity(find_entity_by_tag(Tag::Player));
-		_ai_world.ais.clear();
 
 		for (auto [entity, knowledge] : _registry.view<AiKnowledge>().each()) {
 			knowledge.me = _make_ai_entity(entity);
-			_ai_world.ais.push_back(knowledge.me);
 		}
 	}
 

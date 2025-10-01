@@ -26,7 +26,7 @@ namespace ecs {
 		b2DestroyBody(registry.get<b2BodyId>(entity));
 	}
 
-	void initialize_physics() {
+	void startup_physics() {
 		b2SetLengthUnitsPerMeter(16.f); // 16 pixels per meter
 		b2WorldDef world_def = b2DefaultWorldDef();
 		world_def.gravity = { 0.f, 0.f }; // no gravity

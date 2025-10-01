@@ -1,11 +1,9 @@
 #pragma once
 
-namespace ecs
-{
+namespace ecs {
 	//TODO: rename "Action" to "Task" maybe?
 
-	enum class AiActionType
-	{
+	enum class AiActionType {
 		None, // Do nothing. Runs forever.
 		Wait, // Wait for a certain amount of time. Succeeds after the time has elapsed.
 		MoveTo, // Move to a certain position. Succeeds when the entity is sufficiently close.
@@ -15,17 +13,15 @@ namespace ecs
 		//PlayAnimation, // Play a certain animation. Succeeds when it's finished, fails if it doesn't exist.
 	};
 
-	std::string to_string(AiActionType type);
+	std::string_view to_string(AiActionType type);
 
-	enum class AiActionStatus
-	{
+	enum class AiActionStatus {
 		Running,
 		Succeeded,
 		Failed,
 	};
 
-	struct AiAction
-	{
+	struct AiAction {
 		AiActionType type = AiActionType::None;
 		AiActionStatus status = AiActionStatus::Running;
 		float running_time = 0.f;

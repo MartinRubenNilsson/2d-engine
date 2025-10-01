@@ -9,10 +9,17 @@ namespace ecs {
 
 	extern int debug_flags;
 
-	void initialize(); // Called on app startup.
+	void startup(); // Called on app startup.
 	void shutdown(); // Called on app shutdown.
 
-	void setup(); // Called on map load.
+	void clear();
+	entt::entity create();
+	entt::entity create(entt::entity hint);
+	entt::entity deep_copy(entt::entity entity);
+	bool valid(entt::entity entity);
+
+	void setup(); // Called on map load after entities has been created.
+	void patch(const std::string& patch_id);
 	void update(float dt);
 	void handle_window_event(const window::Event& ev);
 

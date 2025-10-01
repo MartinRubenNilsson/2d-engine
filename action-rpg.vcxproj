@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ecs_audio.cpp" />
+    <ClCompile Include="ecs_patch.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_tiled.cpp" />
     <ClCompile Include="ecs_states.cpp" />
@@ -194,7 +195,7 @@
     <ClCompile Include="postprocessing.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="ecs.cpp" />
-    <ClCompile Include="ecs_common.cpp" />
+    <ClCompile Include="ecs_lifetime.cpp" />
     <ClCompile Include="ecs_physics.cpp" />
     <ClCompile Include="ecs_player.cpp" />
     <ClCompile Include="math.cpp" />
@@ -231,6 +232,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ecs_audio.h" />
+    <ClInclude Include="ecs_patch.h" />
     <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_states.h" />
     <ClInclude Include="audio.h" />
@@ -295,7 +297,7 @@
     <ClInclude Include="postprocessing.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="ecs.h" />
-    <ClInclude Include="ecs_common.h" />
+    <ClInclude Include="ecs_lifetime.h" />
     <ClInclude Include="ecs_physics.h" />
     <ClInclude Include="ecs_player.h" />
     <ClInclude Include="math.h" />

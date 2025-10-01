@@ -20,7 +20,6 @@ namespace map {
 	unsigned int _next_free_layer_index = 0;
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
-	std::unordered_map<std::string, MapPatch> _map_path_to_patch;
 
 	void _show_debug_window(float dt) {
 #ifdef _DEBUG_IMGUI
@@ -176,7 +175,6 @@ namespace map {
 
 		create_grid(*next_map);
 		create_entities(*next_map);
-		patch_entities(_map_path_to_patch[_current_map_path]);
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {
@@ -273,30 +271,5 @@ namespace map {
 
 	bool is_dark() {
 		return get_name().starts_with("muddy_cave"); // HACK
-	}
-
-	MapPatch* _get_patch() {
-		if (_current_map_path.empty()) return nullptr;
-		return &_map_path_to_patch[_current_map_path];
-	}
-
-	template <typename T>
-	bool _insert_into_sorted_vector(std::vector<T>& vec, const T& value) {
-		auto it = std::lower_bound(vec.begin(), vec.end(), value);
-		if (it != vec.end() && *it == value) return false;
-		vec.insert(it, value);
-		return true;
-	}
-
-	void mark_entity_as_destroyed(entt::entity entity) {
-		MapPatch* patch = _get_patch();
-		if (!patch) return;
-		_insert_into_sorted_vector(patch->destroyed_entities, entity);
-	}
-
-	void mark_chest_as_opened(entt::entity entity) {
-		MapPatch* patch = _get_patch();
-		if (!patch) return;
-		_insert_into_sorted_vector(patch->opened_chests, entity);
 	}
 }

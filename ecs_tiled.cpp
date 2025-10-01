@@ -110,11 +110,16 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
+	void emplace_tiled_tile(entt::entity entity, const TiledTile& tile) {
+		_registry.emplace_or_replace<TiledTile>(entity, tile);
+	}
+
 	void emplace_tiled_object(entt::entity entity, const TiledObject& obj) {
 		_registry.emplace_or_replace<TiledObject>(entity, obj);
 	}
 
-	void clear_all_tiled_objects() {
+	void clear_all_tiled_tiles_and_objects() {
+		_registry.clear<TiledTile>();
 		_registry.clear<TiledObject>();
 	}
 }

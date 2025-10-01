@@ -69,6 +69,7 @@ namespace ecs {
 		entt::entity get_object(std::string_view name) const;
 	};
 
+	void emplace_tiled_tile(entt::entity entity, const TiledTile& tile);
 	void emplace_tiled_object(entt::entity entity, const TiledObject& obj);
-	void clear_all_tiled_objects();
+	void clear_all_tiled_tiles_and_objects();
 }

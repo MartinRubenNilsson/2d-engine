@@ -27,4 +27,6 @@ namespace ecs {
 	// Type<new_tag> component (and possibly removing a Type<old_tag> component).
 	void set_tag(entt::entity entity, Tag new_tag);
 	Tag get_tag(entt::entity entity);
+
+	entt::entity find_entity_by_tag(Tag tag);
 }

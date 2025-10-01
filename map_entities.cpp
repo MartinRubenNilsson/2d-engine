@@ -10,14 +10,10 @@
 
 #include "ecs.h"
 #include "ecs_tiled.h"
-#include "ecs_common.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_sprites.h"
 #include "ecs_animations.h"
-#include "ecs_player.h"
-#include "ecs_portal.h"
-#include "ecs_chest.h"
 
 namespace map {
 	unsigned int get_object_layer_index();
@@ -29,23 +25,6 @@ namespace map {
 	}
 
 	void create_entities(const tiled::Map& map) {
-
-		//TODO: clean this up
-
-		// Save some components to be carried over between maps,
-		// or that is needed in general when populating the new map.
-		std::optional<ecs::Player> last_player;
-		std::optional<ecs::Portal> last_active_portal;
-		{
-			entt::entity player_entity = ecs::find_player_entity();
-			if (ecs::Player* player = ecs::get_player(player_entity)) {
-				last_player = *player;
-			}
-			entt::entity portal_entity = ecs::find_active_portal_entity();
-			if (ecs::Portal* portal = ecs::get_portal(portal_entity)) {
-				last_active_portal = *portal;
-			}
-		}
 
 		// Destroy all entities before creating new ones.
 
@@ -72,9 +51,9 @@ namespace map {
 				entt::entity entity = (entt::entity)object.id;
 				assert(ecs::valid(entity));
 
-				if (!object.name.empty()) {
+				/*if (!object.name.empty()) {
 					ecs::set_name(entity, object.name);
-				}
+				}*/
 
 				ecs::Tag tag = ecs::Tag::None;
 				if (!object.class_.empty() && ecs::string_to_tag(object.class_, tag)) {
@@ -82,10 +61,6 @@ namespace map {
 				}
 
 				ecs::emplace_tiled_object(entity, { &object, &map });
-
-				if (!object.properties.empty()) {
-					ecs::set_properties(entity, object.properties);
-				}
 
 				// In Tiled, objects are positioned by their top-left corner...
 				Vector2f position_top_left = Vector2f(object.x, object.y);
@@ -110,6 +85,7 @@ namespace map {
 					}
 
 					const tiled::Tile& tile = tileset->tiles[tile_id];
+					//ecs::emplace_tiled_tile(entity, { &tile });
 
 					// EMPLACE SPRITE
 
@@ -288,6 +264,7 @@ namespace map {
 					}
 
 					const tiled::Tile& tile = tileset->tiles[tile_id];
+					
 
 					const Vector2f position = {
 						(float)x * map.tile_width,
@@ -301,9 +278,8 @@ namespace map {
 					if (!tile.class_.empty() && ecs::string_to_tag(tile.class_, tag)) {
 						ecs::set_tag(entity, tag);
 					}
-					if (!tile.properties.empty()) {
-						ecs::set_properties(entity, tile.properties);
-					}
+
+					ecs::emplace_tiled_tile(entity, { &tile });
 
 					// EMPLACE SPRITE
 
@@ -438,20 +414,10 @@ namespace map {
 		}
 
 		ecs::setup();
+		ecs::patch(map.path);
 
-		// PITFALL: ecs::setup() may want to query data from Tiled objects,
+		// PITFALL: ecs::setup() may want to query data from Tiled components,
 		// so we must call it before ecs::clear_all_tiled_objects()! 
-		ecs::clear_all_tiled_objects();
-	}
-
-	void patch_entities(const MapPatch& patch) {
-		// Patching is a way to modify the state of the map after it has been created.
-
-		for (entt::entity entity : patch.destroyed_entities) {
-			ecs::destroy_immediately(entity);
-		}
-		for (entt::entity entity : patch.opened_chests) {
-			ecs::open_chest(entity, true);
-		}
+		ecs::clear_all_tiled_tiles_and_objects();
 	}
 }

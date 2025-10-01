@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ecs_sprites.h"
+#include "ecs_tiled.h"
 #include "ecs_uniform_block.h"
 #include "random.h"
 #include "graphics.h"
@@ -33,6 +34,12 @@ namespace ecs {
 	void make_sprite_shake(entt::entity entity, SpriteShake&& shake) {
 		shake._random_seed = random::range_ui(0, 128);
 		_registry.emplace_or_replace<SpriteShake>(entity, std::move(shake));
+	}
+
+	void setup_sprites() {
+		for (auto [entity, tile] : _registry.view<TiledTile>().each()) {
+
+		}
 	}
 
 	void _update_sprites_following_bodies() {

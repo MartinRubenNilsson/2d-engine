@@ -37,6 +37,7 @@ namespace ecs {
 
 	void make_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
 
+	void setup_sprites();
 	void update_sprites(float dt);
 	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max);
 }

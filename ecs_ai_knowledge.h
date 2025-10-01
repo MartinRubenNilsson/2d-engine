@@ -1,12 +1,9 @@
 #pragma once
 #include "ecs_tags.h"
 
-namespace ecs
-{
-	struct AiEntity
-	{
+namespace ecs {
+	struct AiEntity {
 		entt::entity entity = entt::null;
-		std::string name;
 		Tag tag = Tag::None;
 		Vector2f position;
 		Vector2f velocity;
@@ -15,14 +12,11 @@ namespace ecs
 		float p_speed = 0.f;
 	};
 
-	struct AiWorld
-	{
+	struct AiWorld {
 		AiEntity player;
-		std::vector<AiEntity> ais;
 	};
 
-	struct AiKnowledge
-	{
+	struct AiKnowledge {
 		AiEntity me;
 		Vector2f initial_position;
 		Vector2f initial_velocity;

@@ -3,10 +3,8 @@
 #include "ecs_ai_knowledge.h"
 #include "ecs_ai_action.h"
 #include "ecs_animations.h"
-#include "ecs_common.h"
 #include "map_grid.h"
 #include "random.h"
-#include "audio.h"
 #include "shapes.h"
 #include "text.h"
 #include "fonts.h"
@@ -90,7 +88,7 @@ namespace ecs {
 
             // DRAW ACTION TYPE
             {
-                const std::string action_type_string = to_string(action.type);
+                std::string_view action_type_string = to_string(action.type);
                 text.string.assign(action_type_string.begin(), action_type_string.end());
                 text.position = knowledge.me.position + Vector2f(-8.f, -10.f);
                 text::render(text);

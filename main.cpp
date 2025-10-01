@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
     renderdoc::initialize();
 #endif
     window::initialize();
+#if 0
 #ifdef _DEBUG_GRAPHICS
     // HACK: We should be using a post-build event to copy the shaders,
     // but then it doesn't run when only debugging and not recompiling,
@@ -47,6 +48,7 @@ int main(int argc, char* argv[]) {
 	platform::system("copy /Y ..\\shaders\\dxbc\\* assets\\shaders");
 #endif
 #endif
+#endif
     graphics::initialize();
     graphics::initialize_globals();
 #ifdef _DEBUG_IMGUI
@@ -56,7 +58,7 @@ int main(int argc, char* argv[]) {
     audio::initialize();
     ui::initialize();
     map::initialize();
-    ecs::initialize();
+    ecs::startup();
 
     for (const filesystem::File& file : filesystem::get_all_files_in_directory("assets/audio/banks")) {
         if (file.format != filesystem::FileFormat::FmodStudioBank) continue;

@@ -22,9 +22,6 @@
     <ClCompile Include="ecs.cpp">
       <Filter>game\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_common.cpp">
-      <Filter>game\ecs</Filter>
-    </ClCompile>
     <ClCompile Include="ui_textbox.cpp">
       <Filter>ui</Filter>
     </ClCompile>
@@ -230,6 +227,12 @@
     <ClCompile Include="ecs_portal.cpp">
       <Filter>game\ecs\portals</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_patch.cpp">
+      <Filter>game\ecs\patching</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_lifetime.cpp">
+      <Filter>game\ecs\lifetime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -254,9 +257,6 @@
       <Filter>application\console</Filter>
     </ClInclude>
     <ClInclude Include="ecs.h">
-      <Filter>game\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_common.h">
       <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ui_textbox.h">
@@ -490,6 +490,12 @@
     <ClInclude Include="ecs_portal.h">
       <Filter>game\ecs\portals</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_patch.h">
+      <Filter>game\ecs\patching</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_lifetime.h">
+      <Filter>game\ecs\lifetime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -602,6 +608,12 @@
     </Filter>
     <Filter Include="game\ecs\players">
       <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\patching">
+      <UniqueIdentifier>{f6824319-f523-4bf5-b752-928b21ec152f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\lifetime">
+      <UniqueIdentifier>{0cc4bc17-e65d-41dd-9af6-8de480f78e9b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ecs.h"
-#include "ecs_common.h"
+#include "ecs_lifetime.h"
+#include "ecs_patch.h"
 #include "ecs_physics.h"
 #include "ecs_sprites.h"
 #include "ecs_player.h"
@@ -18,8 +19,8 @@
 #include "ecs_slime.h"
 
 namespace ecs {
-	void initialize() {
-		initialize_physics();
+	void startup() {
+		startup_physics();
 	}
 
 	void shutdown() {
@@ -27,7 +28,43 @@ namespace ecs {
 		shutdown_physics();
 	}
 
+	entt::registry _registry;
+
+	void clear() {
+		clear_entities_to_destroy_at_end_of_frame();
+		_registry.clear();
+	}
+
+	entt::entity create() {
+		return _registry.create();
+	}
+
+	entt::entity create(entt::entity hint) {
+		return _registry.create(hint);
+	}
+
+	entt::entity deep_copy(entt::entity entity) {
+		entt::entity copied_entity = _registry.create();
+		for (auto [name, storage] : _registry.storage()) {
+			if (!storage.contains(entity)) continue;
+			if (storage.type() == entt::type_id<b2BodyId>()) {
+				deep_copy_and_emplace_body(copied_entity, *(b2BodyId*)storage.value(entity));
+			} else if (storage.type() == entt::type_id<Player>()) {
+				// TODO: deep copy player, since it holds a held item entity
+				storage.push(copied_entity, storage.value(entity));
+			} else {
+				storage.push(copied_entity, storage.value(entity));
+			}
+		}
+		return copied_entity;
+	}
+
+	bool valid(entt::entity entity) {
+		return _registry.valid(entity);
+	}
+
 	void setup() {
+		setup_sprites();
 		setup_cameras();
 		setup_physics();
 		setup_audio_sources();
@@ -39,6 +76,13 @@ namespace ecs {
 		setup_blade_traps();
 	}
 
+	void patch(const std::string& patch_id) {
+		if (!set_patch(patch_id)) return;
+		Patch& patch = get_patch();
+		patch_entities_to_destroy(patch);
+		patch_chests(patch);
+	}
+
 	void update(float dt) {
 		update_physics(dt);
 		update_players(dt);
@@ -46,6 +90,7 @@ namespace ecs {
 		update_pickups(dt);
 		update_bombs(dt);
 		update_blade_traps(dt);
+		update_slimes(dt);
 		update_state_machines(dt);
 		update_ai_logic(dt); // TODO remove
 		update_ai_graphics(dt); // TODO remove
@@ -83,6 +128,4 @@ namespace ecs {
 			show_player_debug_window();
 		}
 	}
-
-	entt::registry _registry;
 }

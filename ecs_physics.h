@@ -3,8 +3,8 @@
 
 namespace ecs {
 
-	void initialize_physics();
-	void shutdown_physics();
+	void startup_physics(); // Called on app startup.
+	void shutdown_physics(); // Called on app shutdown.
 
 	void setup_physics(); // Called on map load.
 	void update_physics(float dt);

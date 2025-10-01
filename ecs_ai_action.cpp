@@ -15,8 +15,8 @@ namespace ecs {
 	extern entt::registry _registry;
 	float _ai_action_time = 0.f;
 
-	std::string to_string(AiActionType type) {
-		return std::string(magic_enum::enum_name(type));
+	std::string_view to_string(AiActionType type) {
+		return magic_enum::enum_name(type);
 	}
 
 	// Imagine a magnetic dipole at the origin, with the north pole pointing in the

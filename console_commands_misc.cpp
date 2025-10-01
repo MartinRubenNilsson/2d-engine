@@ -1,15 +1,17 @@
 #include "stdafx.h"
 #include "console_commands.h"
 #include "console.h"
-#include "window.h"
+//#include "window.h"
 #include "audio.h"
 #include "map.h"
 #include "ui.h"
 //#include "shaders.h"
+#include "ecs.h"
 #include "ecs_player.h"
-#include "ecs_common.h"
+#include "ecs_lifetime.h"
 #include "ecs_camera.h"
 #include "ecs_vfx.h"
+#include "ecs_tags.h"
 
 namespace console {
 	void _add_misc_commands() {
