@@ -2,35 +2,37 @@
 
 namespace tiled {
 	struct Map;
+	struct Tileset;
 	struct Tile;
 	struct Object;
 }
 
 namespace ecs {
-	class TiledMap;
-	class TiledTile;
-	class TiledObject;
+	class TMap;
+	class TTile;
+	class TObject;
 
 	// Wrapper class for safe and convenient access to a Tiled map.
-	class TiledMap {
+	class TMap {
 		const tiled::Map* _map;
 
 	public:
-		TiledMap(const tiled::Map* map);
+		TMap(const tiled::Map* map);
 
 		// NOTE: The top left is always (0, 0).
 		Vector2f get_bottom_right() const;
 	};
 
 	// Wrapper class for safe and convenient access to a Tiled tile.
-	class TiledTile {
+	class TTile {
 		const tiled::Tile* _tile;
+		const tiled::Tileset* _tileset;
 
 	public:
-		TiledTile(const tiled::Tile* tile);
+		TTile(const tiled::Tile* tile, const tiled::Tileset* tileset);
 	};
 
-	enum class ObjectType { // must match tiled::ObjectType!
+	enum class TObjectType { // must match tiled::ObjectType!
 		Rectangle,
 		Ellipse,
 		Point,
@@ -41,17 +43,17 @@ namespace ecs {
 	};
 
 	// Wrapper class for safe and convenient access to a Tiled object.
-	class TiledObject {
+	class TObject {
 		const tiled::Object* _obj;
 		const tiled::Map* _map;
 
 	public:
-		TiledObject(const tiled::Object* obj, const tiled::Map* map);
+		TObject(const tiled::Object* obj, const tiled::Map* map);
 
-		TiledMap get_map() const;
+		TMap get_map() const;
 
 		entt::entity get_id() const;
-		ObjectType get_type() const;
+		TObjectType get_type() const;
 
 		// Returns the position of the top-left corner, unless the object is a tile object,
 		// in which case it returns the position of the bottom-left corner.
@@ -69,7 +71,7 @@ namespace ecs {
 		entt::entity get_object(std::string_view name) const;
 	};
 
-	void emplace_tiled_tile(entt::entity entity, const TiledTile& tile);
-	void emplace_tiled_object(entt::entity entity, const TiledObject& obj);
+	void emplace_tiled_tile(entt::entity entity, const TTile& tile);
+	void emplace_tiled_object(entt::entity entity, const TObject& obj);
 	void clear_all_tiled_tiles_and_objects();
 }

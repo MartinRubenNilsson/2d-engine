@@ -9,7 +9,7 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void setup_portals() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Portal>, TiledObject>().each()) {
+		for (auto [entity, object] : _registry.view<Type<Tag::Portal>, TObject>().each()) {
 			Portal& portal = _registry.emplace<Portal>(entity);
 			portal.target_map = object.get_string("target_map");
 			portal.target_point = object.get_string("target_point");

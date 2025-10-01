@@ -41,7 +41,7 @@ namespace ecs {
 	}
 
 	void setup_physics() {
-		for (auto [entity, object] : _registry.view<TiledObject>().each()) {
+		for (auto [entity, object] : _registry.view<TObject>().each()) {
 
 		}
 	}
@@ -413,7 +413,11 @@ namespace ecs {
 	}
 
 	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler) {
-		_registry.emplace_or_replace<PhysicsEventHandler>(entity, handler);
+		if (handler) {
+			_registry.emplace_or_replace<PhysicsEventHandler>(entity, handler);
+		} else {
+			_registry.remove<PhysicsEventHandler>(entity);
+		}
 	}
 
 	PhysicsEventHandler get_physics_event_handler(entt::entity entity) {

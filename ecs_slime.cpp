@@ -3,7 +3,7 @@
 #include "ecs_tags.h"
 #include "ecs_ai.h"
 #include "ecs_damage.h"
-#include "ecs_common.h"
+#include "ecs_lifetime.h"
 #include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "ecs_physics.h"
@@ -59,7 +59,7 @@ namespace ecs {
     }
 
     void setup_slimes() {
-        for (auto [entity, object] : _registry.view<Type<Tag::Slime>, TiledObject>().each()) {
+        for (auto [entity, object] : _registry.view<Type<Tag::Slime>, TObject>().each()) {
             Slime& slime = _registry.emplace<Slime>(entity);
             slime.speed = object.get_float("speed");
 

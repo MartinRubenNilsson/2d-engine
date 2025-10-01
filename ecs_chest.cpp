@@ -63,7 +63,7 @@ namespace ecs {
     }
 
     void setup_chests() {
-        for (auto [entity, object] : _registry.view<Type<Tag::Chest>, TiledObject>().each()) {
+        for (auto [entity, object] : _registry.view<Type<Tag::Chest>, TObject>().each()) {
 
             const Vector2f top_left = object.get_top_left();
             const std::string_view type = object.get_string("type");

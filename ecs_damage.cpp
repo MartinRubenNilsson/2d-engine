@@ -7,7 +7,11 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void set_damage_handler(entt::entity entity, DamageHandler handler) {
-		_registry.emplace_or_replace<DamageHandler>(entity, handler);
+		if (handler) {
+			_registry.emplace_or_replace<DamageHandler>(entity, handler);
+		} else {
+			_registry.remove<DamageHandler>(entity);
+		}
 	}
 
 	DamageHandler get_damage_handler(entt::entity entity) {

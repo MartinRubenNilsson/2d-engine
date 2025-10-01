@@ -37,7 +37,7 @@ namespace ecs {
 	}
 
 	void setup_sprites() {
-		for (auto [entity, tile] : _registry.view<TiledTile>().each()) {
+		for (auto [entity, tile] : _registry.view<TTile>().each()) {
 
 		}
 	}

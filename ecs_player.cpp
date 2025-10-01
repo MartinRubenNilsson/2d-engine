@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ecs_player.h"
-#include "ecs_common.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_arrow.h"
@@ -26,6 +25,8 @@
 #include "tile_ids.h"
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
+#include "ecs_tags.h"
+#include "ecs_lifetime.h"
 #include "graphics_globals.h"
 
 namespace ecs {
@@ -103,7 +104,7 @@ namespace ecs {
 	}
 
 	void setup_players() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Player>, TiledObject>().each()) {
+		for (auto [entity, object] : _registry.view<Type<Tag::Player>, TObject>().each()) {
 			const Vector2f top_left = object.get_top_left();
 
 			Player player{};
@@ -160,7 +161,7 @@ namespace ecs {
 				}
 			}*/
 
-			player.held_item = create();
+			player.held_item = _registry.create();
 			emplace_tile_animation(player.held_item);
 			emplace_player(entity, player);
 

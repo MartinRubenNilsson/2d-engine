@@ -42,7 +42,7 @@ namespace ecs {
 	}
 
 	void setup_cameras() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, TiledObject>().each()) {
+		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, TObject>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);
 			camera.center = object.get_position();
 			camera.confines_min = { 0.f, 0.f };

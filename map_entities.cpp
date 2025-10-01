@@ -279,7 +279,7 @@ namespace map {
 						ecs::set_tag(entity, tag);
 					}
 
-					ecs::emplace_tiled_tile(entity, { &tile });
+					ecs::emplace_tiled_tile(entity, { &tile, tileset });
 
 					// EMPLACE SPRITE
 

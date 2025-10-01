@@ -8,7 +8,7 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void setup_audio_sources() {
-		for (auto [entity, object] : _registry.view<Type<Tag::AudioSource>, TiledObject>().each()) {
+		for (auto [entity, object] : _registry.view<Type<Tag::AudioSource>, TObject>().each()) {
 			std::string_view event = object.get_string("event");
 			if (!event.empty()) {
 				audio::create_event({
