@@ -4,6 +4,7 @@
 #include "ecs_physics.h"
 #include "ecs_pickups.h"
 #include "ecs_uniform_block.h"
+#include "ecs_tags.h"
 #include "random.h"
 #include "audio.h"
 #include "sprites.h"
@@ -41,9 +42,9 @@ namespace ecs {
 				block.position = sprite.position;
 				block.tex_min = sprite.tex_position;
 				block.tex_max = sprite.tex_position + sprite.tex_size;
-				ecs::emplace_uniform_block(entity, &block, sizeof(ecs::GrassUniformBlock));
+				emplace_uniform_block(entity, &block, sizeof(GrassUniformBlock));
 			}
-			ecs::set_damage_handler(entity, ecs::_handle_damage_to_grass);
+			set_damage_handler(entity, _handle_damage_to_grass);
 		}
 	}
 }

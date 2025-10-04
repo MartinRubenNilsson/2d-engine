@@ -2,6 +2,7 @@
 #include "ecs_camera.h"
 #include "ecs_physics.h"
 #include "ecs_tiled.h"
+#include "ecs_tags.h"
 #include "random.h"
 #include "easings.h"
 

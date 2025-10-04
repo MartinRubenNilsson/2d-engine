@@ -7,6 +7,7 @@
 #include "ecs_interactions.h"
 #include "ecs_patch.h"
 #include "ui_textbox.h"
+#include "ecs_tags.h"
 #include "audio.h"
 
 namespace ecs {

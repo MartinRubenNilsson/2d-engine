@@ -1,5 +1,4 @@
 #pragma once
-#include "ecs_tags.h"
 
 namespace ecs {
 	void startup_physics();
