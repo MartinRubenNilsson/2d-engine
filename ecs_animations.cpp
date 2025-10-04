@@ -49,7 +49,7 @@ namespace ecs {
 
 			const TileId old_frame = animation._frame;
 			animation._frame = tile; // in case the tile isn't animated
-			animation._frame_changed = false;
+			animation._frame_changed = (animation._frame != old_frame);
 			animation._looped = false;
 
 			if (!animated(tile)) continue;

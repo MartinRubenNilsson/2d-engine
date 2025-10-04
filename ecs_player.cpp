@@ -342,9 +342,9 @@ namespace ecs {
 							case 'd': tile = change(tile, TILE_ID_PLAYER_IDLE_DOWN); break;
 						}
 
-						anim.set_loop(true);
+						anim.set_progress(0.f);
+						anim.set_loop(false);
 						sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
-
 					}
 
 					if (player.input_flags & INPUT_INTERACT) {
@@ -422,97 +422,6 @@ namespace ecs {
 			}
 
 			b2Body_SetLinearVelocity(body, new_velocity);
-
-			// UPDATE HELD ITEM GRAPHICS
-
-#if 0
-			if (TileAnimation* held_item_tile = get_tile_animation(player.held_item)) {
-				held_item_tile->set_flag(TILE_VISIBLE, held_item_type != HeldItemType::None);
-				Vector2f player_tile_sorting_pos = animation.offset - animation.pivot + animation.sorting_pivot;
-				switch (held_item_type) {
-					case HeldItemType::Sword: {
-						held_item_tile->set_tileset("sword");
-						held_item_tile->set_tile(3);
-						held_item_tile->offset = offset;
-						held_item_tile->offset.y -= 10.f;
-						held_item_tile->pivot = { 16.f, 16.f };
-						held_item_tile->sorting_pivot =
-							player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
-						switch (dir) {
-							case 'u':
-								held_item_tile->set_rotation((int)animation._frame_id - 1);
-								switch (animation._frame_id) {
-									case 0: held_item_tile->offset += { -18.f, -3.f }; break;
-									case 1: held_item_tile->offset += { 0.f, -21.f }; break;
-									case 2: held_item_tile->offset += { 20.f, -1.f }; break;
-								}
-								break;
-							case 'r':
-								held_item_tile->set_rotation(2 - (int)animation._frame_id);
-								switch (animation._frame_id) {
-									case 0: held_item_tile->offset += { -0.f, 18.f }; break;
-									case 1: held_item_tile->offset += { 28.f, 0.f }; break;
-									case 2: held_item_tile->offset += { 1.f, -18.f }; break;
-								}
-								break;
-							case 'd':
-								held_item_tile->set_rotation((int)animation._frame_id + 1);
-								switch (animation._frame_id) {
-									case 0: held_item_tile->offset += { 18.f, 2.f }; break;
-									case 1: held_item_tile->offset += { 0.f, 20.f }; break;
-									case 2: held_item_tile->offset += { -18.f, -2.f }; break;
-								}
-								break;
-							case 'l':
-								held_item_tile->set_rotation((int)animation._frame_id + 2);
-								switch (animation._frame_id) {
-									case 0: held_item_tile->offset += { 2.f, 18.f }; break;
-									case 1: held_item_tile->offset += { -28.f, 0.f }; break;
-									case 2: held_item_tile->offset += { -2.f, -18.f }; break;
-								}
-								break;
-						}
-					} break;
-					case HeldItemType::Bow: {
-						held_item_tile->set_tileset("bow_01");
-						held_item_tile->set_tile(animation._frame_id);
-						held_item_tile->offset = offset;
-						held_item_tile->offset.y -= 13.f;
-						held_item_tile->pivot = { 16.f, 16.f };
-						held_item_tile->sorting_pivot =
-							player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
-						switch (dir) {
-							case 'r':
-								held_item_tile->set_rotation(0);
-								held_item_tile->offset.x += 16.f;
-								held_item_tile->offset.y += 2.f;
-								held_item_tile->sorting_pivot.y -= 2.f;
-								held_item_tile->sorting_pivot.y += 1.f;
-								break;
-							case 'd':
-								held_item_tile->set_rotation(1);
-								held_item_tile->offset.y += 11.f;
-								held_item_tile->sorting_pivot.y -= 11.f;
-								held_item_tile->sorting_pivot.y += 1.f;
-								break;
-							case 'l':
-								held_item_tile->set_rotation(2);
-								held_item_tile->offset.x -= 16.f;
-								held_item_tile->offset.y += 3.f;
-								held_item_tile->sorting_pivot.y -= 3.f;
-								held_item_tile->sorting_pivot.y += 1.f;
-								break;
-							case 'u':
-								held_item_tile->set_rotation(3);
-								held_item_tile->offset.y -= 11.f;
-								held_item_tile->sorting_pivot.y += 11.f;
-								held_item_tile->sorting_pivot.y -= 1.f;
-								break;
-						}
-					} break;
-				}
-			}
-#endif
 
 			// UPDATE SPRITE COLOR
 
