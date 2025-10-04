@@ -59,7 +59,7 @@ namespace ecs {
 		setup_tiled(map);
 		setup_tags();
 		setup_sprites(map);
-		setup_tile_animations();
+		setup_animations();
 		setup_physics(map);
 		setup_cameras(map);
 		setup_audio_sources();
@@ -99,8 +99,7 @@ namespace ecs {
 		update_ai_logic(dt); // TODO remove
 		update_lifetimes(dt);
 		destroy_entities_to_be_destroyed_at_end_of_frame();
-		update_tile_animations(dt);
-		update_flipbook_animations(dt);
+		update_animations(dt);
 		update_animated_sprites(dt);
 		update_sprites(dt);
 		update_cameras(dt);

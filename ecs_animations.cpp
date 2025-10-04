@@ -7,67 +7,81 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	void setup_tile_animations() {
-		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
-			// Only add a tile animation if the object is a tile object.
-			if (get_type(object) != ObjectType::Tile)
-				continue;
-			const TileId tile = get_tile(object);
-			if (!tile)
-				continue;
-			TileAnimation& animation = emplace_tile_animation(entity);
-			animation.tile = tile;
-			animation._frame = tile; // DEFENSIVE
-		}
+	void TileAnimation::set_progress(float progress) {
+		_progress = std::clamp(progress, 0.f, 1.f);
+	}
 
+	void TileAnimation::set_speed(float speed) {
+		_speed = std::max(speed, 0.f);
+	}
+
+	void TileAnimation::set_loop(bool loop) {
+		_loop = loop;
+	}
+
+	bool TileAnimation::done() const {
+		if (_loop) return false;
+		return _progress == 1.f;
+	}
+
+	bool TileAnimation::looped() const {
+		return _looped;
+	}
+
+	TileAnimation& emplace_tile_animation(entt::entity entity) {
+		return _registry.emplace_or_replace<TileAnimation>(entity);
+	}
+
+	void _setup_tile_animations() {
 		for (auto [entity, tile] : _registry.view<TileId>().each()) {
 			// The majority of tiles are not animated and don't change during gameplay,
 			// so let's only add an animation component if the tile is actually animated.
 			if (!animated(tile))
 				continue;
-			TileAnimation& animation = emplace_tile_animation(entity);
-			animation.tile = tile;
-			animation._frame = tile; // DEFENSIVE
+			emplace_tile_animation(entity);
 		}
 	}
 
-	void update_tile_animations(float dt) {
-		for (auto [entity, animation] : _registry.view<TileAnimation>().each()) {
+	void _update_tile_animations(float dt) {
+		for (auto [entity, tile, animation] : _registry.view<const TileId, TileAnimation>().each()) {
+
+			if (!tile) continue;
+
+			const TileId old_frame = animation._frame;
+			animation._frame = tile; // in case the tile isn't animated
 			animation._frame_changed = false;
 			animation._looped = false;
 
-			if (!animation.tile)
-				continue;
-			if (!animated(animation.tile))
-				continue;
+			if (!animated(tile)) continue;
 
-			const unsigned int duration_ms = get_animation_duration(animation.tile);
+			const unsigned int duration_ms = get_animation_duration(tile);
 			if (duration_ms == 0)
-				continue; // DEFENSIVE
+				continue; // defensive
 
 			// TODO: support for negative speed
-			const float delta_progress = animation.speed * dt * 1000.f / duration_ms;
+			const float delta_progress = animation._speed * dt * 1000.f / duration_ms;
 
-			animation.progress += delta_progress;
-			if (animation.progress >= 1.f) {
-				if (animation.loop) {
+			animation._progress += delta_progress;
+			if (animation._progress >= 1.f) {
+				if (animation._loop) {
 					animation._looped = true;
-					animation.progress = fmodf(animation.progress, 1.f);
+					animation._progress = fmodf(animation._progress, 1.f);
 				} else {
-					animation.progress = 1.f;
+					animation._progress = 1.f;
 				}
 			}
 
-			unsigned int time_ms = (unsigned int)(animation.progress * duration_ms);
-			const TileId new_frame = get_animation_frame(animation.tile, time_ms);
-			if (animation._frame != new_frame) {
-				animation._frame = new_frame;
-				animation._frame_changed = true;
-			}
+			unsigned int time_ms = (unsigned int)(animation._progress * duration_ms);
+			animation._frame = get_animation_frame(tile, time_ms);
+			animation._frame_changed = (animation._frame != old_frame);
 		}
 	}
 
-	void update_flipbook_animations(float dt) {
+	FlipbookAnimation& emplace_flipbook_animation(entt::entity entity) {
+		return _registry.emplace_or_replace<FlipbookAnimation>(entity);
+	}
+
+	void _update_flipbook_animations(float dt) {
 		for (auto [entity, animation] : _registry.view<FlipbookAnimation>().each()) {
 			if (animation.rows <= 0) continue;
 			if (animation.columns <= 0) continue;
@@ -78,6 +92,15 @@ namespace ecs {
 				animation.time = fmodf(animation.time, duration);
 			}
 		}
+	}
+
+	void setup_animations() {
+		_setup_tile_animations();
+	}
+
+	void update_animations(float dt) {
+		_update_tile_animations(dt);
+		_update_flipbook_animations(dt);
 	}
 
 	void update_animated_sprites(float dt) {
@@ -110,17 +133,5 @@ namespace ecs {
 			sprite.tex_position = { col * frame_width, row * frame_height };
 			sprite.tex_size = { frame_width, frame_height };
 		}
-	}
-
-	TileAnimation& emplace_tile_animation(entt::entity entity) {
-		return _registry.emplace_or_replace<TileAnimation>(entity);
-	}
-
-	TileAnimation* get_tile_animation(entt::entity entity) {
-		return _registry.try_get<TileAnimation>(entity);
-	}
-
-	FlipbookAnimation& emplace_flipbook_animation(entt::entity entity) {
-		return _registry.emplace_or_replace<FlipbookAnimation>(entity);
 	}
 }

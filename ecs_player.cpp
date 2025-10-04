@@ -44,57 +44,57 @@ namespace ecs {
 	void handle_window_event_for_players(const window::Event& ev) {
 		if (ev.type == window::EventType::KeyPress) {
 			switch (ev.key.code) {
-			case window::Key::Left:
-				_input_flags_to_enable |= INPUT_LEFT;
-				break;
-			case window::Key::Right:
-				_input_flags_to_enable |= INPUT_RIGHT;
-				break;
-			case window::Key::Up:
-				_input_flags_to_enable |= INPUT_UP;
-				break;
-			case window::Key::Down:
-				_input_flags_to_enable |= INPUT_DOWN;
-				break;
-			case window::Key::LShift:
-				_input_flags_to_enable |= INPUT_RUN;
-				break;
-			case window::Key::LControl:
-				_input_flags_to_enable |= INPUT_STEALTH;
-				break;
-			case window::Key::C:
-				_input_flags_to_enable |= INPUT_INTERACT;
-				break;
-			case window::Key::X:
-				_input_flags_to_enable |= INPUT_SHOOT_BOW;
-				break;
-			case window::Key::Z:
-				_input_flags_to_enable |= INPUT_DROP_BOMB;
-				break;
-			case window::Key::Space:
-				_input_flags_to_enable |= INPUT_SWING_SWORD;
-				break;
+				case window::Key::Left:
+					_input_flags_to_enable |= INPUT_LEFT;
+					break;
+				case window::Key::Right:
+					_input_flags_to_enable |= INPUT_RIGHT;
+					break;
+				case window::Key::Up:
+					_input_flags_to_enable |= INPUT_UP;
+					break;
+				case window::Key::Down:
+					_input_flags_to_enable |= INPUT_DOWN;
+					break;
+				case window::Key::LShift:
+					_input_flags_to_enable |= INPUT_RUN;
+					break;
+				case window::Key::LControl:
+					_input_flags_to_enable |= INPUT_STEALTH;
+					break;
+				case window::Key::C:
+					_input_flags_to_enable |= INPUT_INTERACT;
+					break;
+				case window::Key::X:
+					_input_flags_to_enable |= INPUT_SHOOT_BOW;
+					break;
+				case window::Key::Z:
+					_input_flags_to_enable |= INPUT_DROP_BOMB;
+					break;
+				case window::Key::Space:
+					_input_flags_to_enable |= INPUT_SWING_SWORD;
+					break;
 			}
 		} else if (ev.type == window::EventType::KeyRelease) {
 			switch (ev.key.code) {
-			case window::Key::Left:
-				_input_flags_to_disable |= INPUT_LEFT;
-				break;
-			case window::Key::Right:
-				_input_flags_to_disable |= INPUT_RIGHT;
-				break;
-			case window::Key::Up:
-				_input_flags_to_disable |= INPUT_UP;
-				break;
-			case window::Key::Down:
-				_input_flags_to_disable |= INPUT_DOWN;
-				break;
-			case window::Key::LShift:
-				_input_flags_to_disable |= INPUT_RUN;
-				break;
-			case window::Key::LControl:
-				_input_flags_to_disable |= INPUT_STEALTH;
-				break;
+				case window::Key::Left:
+					_input_flags_to_disable |= INPUT_LEFT;
+					break;
+				case window::Key::Right:
+					_input_flags_to_disable |= INPUT_RIGHT;
+					break;
+				case window::Key::Up:
+					_input_flags_to_disable |= INPUT_UP;
+					break;
+				case window::Key::Down:
+					_input_flags_to_disable |= INPUT_DOWN;
+					break;
+				case window::Key::LShift:
+					_input_flags_to_disable |= INPUT_RUN;
+					break;
+				case window::Key::LControl:
+					_input_flags_to_disable |= INPUT_STEALTH;
+					break;
 			}
 		}
 	}
@@ -106,17 +106,10 @@ namespace ecs {
 	}
 
 	void setup_players(MapId map) {
-		const Vector2f map_bottom_right = get_size_in_pixels(map);
+		const Vector2f map_size_in_pixels = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
 			const Vector2f top_left = get_top_left(object);
-
-			Player player{};
-			/*if (last_player) { // TODO
-				player = *last_player;
-				player.input_flags = 0;
-			}*/
-
 			const Vector2f pivot = { 32.f, 42.f };
 
 			{
@@ -144,41 +137,27 @@ namespace ecs {
 
 			make_sprite_follow_body(entity, -pivot);
 
-			/*if (last_active_portal) { // TODO
+			emplace_tile_animation(entity);
 
-				if (const tiled::Object* target_point = tiled::find_object_with_name(map, last_active_portal->target_point)) {
-#if 0
-					if (body) {
-						body->SetTransform(target_point->position_top_left, 0.f);
-					}
-#endif
-				}
+			{
+				Player player{};
+				player.held_item = _registry.create();
+				emplace_tile_animation(player.held_item);
+				emplace_player(entity, player);
+			}
 
-				if (last_active_portal->exit_direction == "up") {
-					player.look_dir = { 0.f, -1.f };
-				} else if (last_active_portal->exit_direction == "down") {
-					player.look_dir = { 0.f, 1.f };
-				} else if (last_active_portal->exit_direction == "left") {
-					player.look_dir = { -1.f, 0.f };
-				} else if (last_active_portal->exit_direction == "right") {
-					player.look_dir = { 1.f, 0.f };
-				}
-			}*/
-
-			player.held_item = _registry.create();
-			emplace_tile_animation(player.held_item);
-			emplace_player(entity, player);
-
-			set_physics_event_handler(entity, on_player_physics_event);
+			set_physics_event_handler(entity, _handle_physics_event_for_player);
 			set_damage_handler(entity, apply_damage_to_player);
 
-			Camera camera{};
-			camera.center = top_left;
-			camera.confines_min = { 0.f, 0.f };
-			camera.confines_max = map_bottom_right;
-			camera.entity_to_follow = entity;
-			emplace_camera(entity, camera);
-			activate_camera(entity, true);
+			{
+				Camera camera{};
+				camera.center = top_left;
+				camera.confines_min = { 0.f, 0.f };
+				camera.confines_max = map_size_in_pixels;
+				camera.entity_to_follow = entity;
+				emplace_camera(entity, camera);
+				activate_camera(entity, true);
+			}
 		}
 	}
 
@@ -199,8 +178,8 @@ namespace ecs {
 	void update_players(float dt) {
 		const bool player_accepts_input = (dt > 0.f && window::has_focus() && !console::has_focus());
 
-		for (auto [player_entity, player, body, sprite, animation] :
-			_registry.view<Player, b2BodyId, sprites::Sprite, TileAnimation>().each()) {
+		for (auto [player_entity, player, body, sprite, tile, anim] :
+			_registry.view<Player, b2BodyId, sprites::Sprite, TileId, TileAnimation>().each()) {
 
 			if (player_accepts_input) {
 				player.input_flags |= _input_flags_to_enable;
@@ -242,204 +221,204 @@ namespace ecs {
 			const char dir = get_direction(player.look_dir);
 
 			switch (dir) {
-			case 'l': sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY; break;
-			case 'r': sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY; break;
+				case 'l': sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY; break;
+				case 'r': sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY; break;
 			}
 
 			switch (player.state) {
-			case PlayerState::Normal: {
+				case PlayerState::Normal: {
 
-				Vector2f new_move_dir;
-				float new_move_speed = 0.f;
+					Vector2f new_move_dir;
+					float new_move_speed = 0.f;
 
-				if (player.input_flags & INPUT_LEFT)  new_move_dir.x--;
-				if (player.input_flags & INPUT_RIGHT) new_move_dir.x++;
-				if (player.input_flags & INPUT_UP)    new_move_dir.y--;
-				if (player.input_flags & INPUT_DOWN)  new_move_dir.y++;
+					if (player.input_flags & INPUT_LEFT)  new_move_dir.x--;
+					if (player.input_flags & INPUT_RIGHT) new_move_dir.x++;
+					if (player.input_flags & INPUT_UP)    new_move_dir.y--;
+					if (player.input_flags & INPUT_DOWN)  new_move_dir.y++;
 
-				if (!is_zero(new_move_dir)) {
-					player.look_dir = new_move_dir;
-					new_move_dir = normalize(new_move_dir);
-					if (player.input_flags & INPUT_STEALTH) {
-						new_move_speed = _PLAYER_STEALTH_SPEED;
-					} else if (player.touching_pushable_block) {
-						new_move_speed = _PLAYER_WALK_SPEED;
-					} else if (player.input_flags & INPUT_RUN) {
-						new_move_speed = _PLAYER_RUN_SPEED;
+					if (!is_zero(new_move_dir)) {
+						player.look_dir = new_move_dir;
+						new_move_dir = normalize(new_move_dir);
+						if (player.input_flags & INPUT_STEALTH) {
+							new_move_speed = _PLAYER_STEALTH_SPEED;
+						} else if (player.touching_pushable_block) {
+							new_move_speed = _PLAYER_WALK_SPEED;
+						} else if (player.input_flags & INPUT_RUN) {
+							new_move_speed = _PLAYER_RUN_SPEED;
+						} else {
+							new_move_speed = _PLAYER_WALK_SPEED;
+						}
+					}
+
+					new_velocity = new_move_dir * new_move_speed;
+
+					if (player.input_flags & INPUT_SWING_SWORD) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
+						}
+
+						audio::create_event({ .path = "event:/snd_sword_attack" });
+						anim.set_progress(0.f);
+						anim.set_loop(false);
+
+						player.state = PlayerState::SwingingSword;
+
+					} else if (player.input_flags & INPUT_SHOOT_BOW && player.arrows > 0) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
+						}
+
+						anim.set_progress(0.f);
+						anim.set_loop(false);
+
+						player.state = PlayerState::ShootingBow;
+
+					} else if (player.input_flags & INPUT_DROP_BOMB && player.bombs > 0) {
+
+						const Vector2f bomb_position = position + player.look_dir * 16.f;
+						if (create_bomb(bomb_position) != entt::null) {
+							player.bombs--;
+							audio::create_event({ .path = "event:/player/place_bomb" });
+						} else {
+							audio::create_event({ .path = "event:/player/error" });
+						}
+
+					} else if (player.touching_pushable_block && !is_zero(new_velocity)) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_PUSH_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_PUSH_DOWN); break;
+						}
+
+						anim.set_loop(true);
+						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+						}
+
+					} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_RUN_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_RUN_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_RUN_DOWN); break;
+						}
+
+						anim.set_loop(true);
+						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+						}
+
+					} else if (new_move_speed >= _PLAYER_WALK_SPEED) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_WALK_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_WALK_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_WALK_DOWN); break;
+						}
+
+						anim.set_loop(true);
+						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+						}
+
 					} else {
-						new_move_speed = _PLAYER_WALK_SPEED;
-					}
-				}
 
-				new_velocity = new_move_dir * new_move_speed;
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_IDLE_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_IDLE_DOWN); break;
+						}
 
-				if (player.input_flags & INPUT_SWING_SWORD) {
+						anim.set_loop(true);
+						sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
 
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
 					}
 
-					audio::create_event({ .path = "event:/snd_sword_attack" });
-					animation.progress = 0.f;
-					animation.loop = false;
-
-					player.state = PlayerState::SwingingSword;
-
-				} else if (player.input_flags & INPUT_SHOOT_BOW && player.arrows > 0) {
-
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
+					if (player.input_flags & INPUT_INTERACT) {
+						const Vector2f box_center = position + player.look_dir * 16.f;
+						const Vector2f box_min = box_center - Vector2f(6.f, 6.f);
+						const Vector2f box_max = box_center + Vector2f(6.f, 6.f);
+						interact_with_all_entities_in_box(box_min, box_max);
 					}
 
-					animation.progress = 0.f;
-					animation.loop = false;
-
-					player.state = PlayerState::ShootingBow;
-
-				} else if (player.input_flags & INPUT_DROP_BOMB && player.bombs > 0) {
-
-					const Vector2f bomb_position = position + player.look_dir * 16.f;
-					if (create_bomb(bomb_position) != entt::null) {
-						player.bombs--;
-						audio::create_event({ .path = "event:/player/place_bomb" });
-					} else {
-						audio::create_event({ .path = "event:/player/error" });
-					}
-
-				} else if (player.touching_pushable_block && !is_zero(new_velocity)) {
-
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_DOWN); break;
-					}
-
-					animation.loop = true;
-					if (animation._looped && (dir == 'u' || dir == 'd')) {
-						sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
-					}
-
-				} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
-
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_DOWN); break;
-					}
-
-					animation.loop = true;
-					if (animation._looped && (dir == 'u' || dir == 'd')) {
-						sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
-					}
-
-				} else if (new_move_speed >= _PLAYER_WALK_SPEED) {
-
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_DOWN); break;
-					}
-
-					animation.loop = true;
-					if (animation._looped && (dir == 'u' || dir == 'd')) {
-						sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
-					}
-
-				} else {
-
-					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_DOWN); break;
-					}
-
-					animation.loop = true;
-					sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
-
-				}
-
-				if (player.input_flags & INPUT_INTERACT) {
-					const Vector2f box_center = position + player.look_dir * 16.f;
-					const Vector2f box_min = box_center - Vector2f(6.f, 6.f);
-					const Vector2f box_max = box_center + Vector2f(6.f, 6.f);
-					interact_with_all_entities_in_box(box_min, box_max);
-				}
-
-			} break;
-			case PlayerState::SwingingSword: {
-				held_item_type = HeldItemType::Sword;
+				} break;
+				case PlayerState::SwingingSword: {
+					held_item_type = HeldItemType::Sword;
 #if 0
-				if (tile_dir != 'r') {
-					sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
-				}
+					if (tile_dir != 'r') {
+						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
+					}
 #endif
-				// TODO
-				//if (animation._frame_changed && animation._frame_id == 1) {
-				//	_player_attack(player_entity, position + player.look_dir * 16.f);
-				//}
-				if (animation.progress == 1.f) {
-					player.state = PlayerState::Normal;
-				}
-			} break;
-			case PlayerState::ShootingBow: {
-				held_item_type = HeldItemType::Bow;
+					// TODO
+					//if (animation._frame_changed && animation._frame_id == 1) {
+					//	_player_attack(player_entity, position + player.look_dir * 16.f);
+					//}
+					if (anim.done()) {
+						player.state = PlayerState::Normal;
+					}
+				} break;
+				case PlayerState::ShootingBow: {
+					held_item_type = HeldItemType::Bow;
 #if 0
-				if (tile_dir != 'r') {
-					sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
-				}
+					if (tile_dir != 'r') {
+						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
+					}
 #endif
-				// TODO
-				//if (player.arrows > 0 && animation._frame_changed && animation._frame_id == 2) {
-				//	player.arrows--;
-				//	create_arrow(position + player.look_dir * 16.f, player.look_dir * _PLAYER_ARROW_SPEED);
-				//}
-				if (animation.progress == 1.f) {
-					player.state = PlayerState::Normal;
-				}
-			} break;
-			case PlayerState::Dying: {
+					// TODO
+					//if (player.arrows > 0 && animation._frame_changed && animation._frame_id == 2) {
+					//	player.arrows--;
+					//	create_arrow(position + player.look_dir * 16.f, player.look_dir * _PLAYER_ARROW_SPEED);
+					//}
+					if (anim.done()) {
+						player.state = PlayerState::Normal;
+					}
+				} break;
+				case PlayerState::Dying: {
 
-				const TileId original_tile = animation.tile;
-
-				switch (dir) {
-				case 'l':
-				case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
-				case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
-				case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
-				}
-
-				if (animation.tile != original_tile) { // HACK
-					animation.progress = 0.f;
-				}
-				animation.loop = false;
-
-				if (animation.progress == 1.f) {
+					const TileId original_tile = tile;
 
 					switch (dir) {
-					case 'l':
-					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
-					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
-					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+						case 'l':
+						case 'r': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
+						case 'u': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
+						case 'd': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
 					}
 
-					kill_player(player_entity);
-					player.state = PlayerState::Dead;
-				}
+					if (tile != original_tile) { // HACK
+						anim.set_progress(0.f);
+					}
+					anim.set_loop(false);
 
-			} break;
-			case PlayerState::Dead: {
-				// Do nothing, u r ded
-			} break;
+					if (anim.done()) {
+
+						switch (dir) {
+							case 'l':
+							case 'r': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+							case 'u': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
+							case 'd': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+						}
+
+						kill_player(player_entity);
+						player.state = PlayerState::Dead;
+					}
+
+				} break;
+				case PlayerState::Dead: {
+					// Do nothing, u r ded
+				} break;
 			}
 
 			b2Body_SetLinearVelocity(body, new_velocity);
@@ -451,86 +430,86 @@ namespace ecs {
 				held_item_tile->set_flag(TILE_VISIBLE, held_item_type != HeldItemType::None);
 				Vector2f player_tile_sorting_pos = animation.offset - animation.pivot + animation.sorting_pivot;
 				switch (held_item_type) {
-				case HeldItemType::Sword: {
-					held_item_tile->set_tileset("sword");
-					held_item_tile->set_tile(3);
-					held_item_tile->offset = offset;
-					held_item_tile->offset.y -= 10.f;
-					held_item_tile->pivot = { 16.f, 16.f };
-					held_item_tile->sorting_pivot =
-						player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
-					switch (dir) {
-					case 'u':
-						held_item_tile->set_rotation((int)animation._frame_id - 1);
-						switch (animation._frame_id) {
-						case 0: held_item_tile->offset += { -18.f, -3.f }; break;
-						case 1: held_item_tile->offset += { 0.f, -21.f }; break;
-						case 2: held_item_tile->offset += { 20.f, -1.f }; break;
+					case HeldItemType::Sword: {
+						held_item_tile->set_tileset("sword");
+						held_item_tile->set_tile(3);
+						held_item_tile->offset = offset;
+						held_item_tile->offset.y -= 10.f;
+						held_item_tile->pivot = { 16.f, 16.f };
+						held_item_tile->sorting_pivot =
+							player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
+						switch (dir) {
+							case 'u':
+								held_item_tile->set_rotation((int)animation._frame_id - 1);
+								switch (animation._frame_id) {
+									case 0: held_item_tile->offset += { -18.f, -3.f }; break;
+									case 1: held_item_tile->offset += { 0.f, -21.f }; break;
+									case 2: held_item_tile->offset += { 20.f, -1.f }; break;
+								}
+								break;
+							case 'r':
+								held_item_tile->set_rotation(2 - (int)animation._frame_id);
+								switch (animation._frame_id) {
+									case 0: held_item_tile->offset += { -0.f, 18.f }; break;
+									case 1: held_item_tile->offset += { 28.f, 0.f }; break;
+									case 2: held_item_tile->offset += { 1.f, -18.f }; break;
+								}
+								break;
+							case 'd':
+								held_item_tile->set_rotation((int)animation._frame_id + 1);
+								switch (animation._frame_id) {
+									case 0: held_item_tile->offset += { 18.f, 2.f }; break;
+									case 1: held_item_tile->offset += { 0.f, 20.f }; break;
+									case 2: held_item_tile->offset += { -18.f, -2.f }; break;
+								}
+								break;
+							case 'l':
+								held_item_tile->set_rotation((int)animation._frame_id + 2);
+								switch (animation._frame_id) {
+									case 0: held_item_tile->offset += { 2.f, 18.f }; break;
+									case 1: held_item_tile->offset += { -28.f, 0.f }; break;
+									case 2: held_item_tile->offset += { -2.f, -18.f }; break;
+								}
+								break;
 						}
-						break;
-					case 'r':
-						held_item_tile->set_rotation(2 - (int)animation._frame_id);
-						switch (animation._frame_id) {
-						case 0: held_item_tile->offset += { -0.f, 18.f }; break;
-						case 1: held_item_tile->offset += { 28.f, 0.f }; break;
-						case 2: held_item_tile->offset += { 1.f, -18.f }; break;
+					} break;
+					case HeldItemType::Bow: {
+						held_item_tile->set_tileset("bow_01");
+						held_item_tile->set_tile(animation._frame_id);
+						held_item_tile->offset = offset;
+						held_item_tile->offset.y -= 13.f;
+						held_item_tile->pivot = { 16.f, 16.f };
+						held_item_tile->sorting_pivot =
+							player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
+						switch (dir) {
+							case 'r':
+								held_item_tile->set_rotation(0);
+								held_item_tile->offset.x += 16.f;
+								held_item_tile->offset.y += 2.f;
+								held_item_tile->sorting_pivot.y -= 2.f;
+								held_item_tile->sorting_pivot.y += 1.f;
+								break;
+							case 'd':
+								held_item_tile->set_rotation(1);
+								held_item_tile->offset.y += 11.f;
+								held_item_tile->sorting_pivot.y -= 11.f;
+								held_item_tile->sorting_pivot.y += 1.f;
+								break;
+							case 'l':
+								held_item_tile->set_rotation(2);
+								held_item_tile->offset.x -= 16.f;
+								held_item_tile->offset.y += 3.f;
+								held_item_tile->sorting_pivot.y -= 3.f;
+								held_item_tile->sorting_pivot.y += 1.f;
+								break;
+							case 'u':
+								held_item_tile->set_rotation(3);
+								held_item_tile->offset.y -= 11.f;
+								held_item_tile->sorting_pivot.y += 11.f;
+								held_item_tile->sorting_pivot.y -= 1.f;
+								break;
 						}
-						break;
-					case 'd':
-						held_item_tile->set_rotation((int)animation._frame_id + 1);
-						switch (animation._frame_id) {
-						case 0: held_item_tile->offset += { 18.f, 2.f }; break;
-						case 1: held_item_tile->offset += { 0.f, 20.f }; break;
-						case 2: held_item_tile->offset += { -18.f, -2.f }; break;
-						}
-						break;
-					case 'l':
-						held_item_tile->set_rotation((int)animation._frame_id + 2);
-						switch (animation._frame_id) {
-						case 0: held_item_tile->offset += { 2.f, 18.f }; break;
-						case 1: held_item_tile->offset += { -28.f, 0.f }; break;
-						case 2: held_item_tile->offset += { -2.f, -18.f }; break;
-						}
-						break;
-					}
-				} break;
-				case HeldItemType::Bow: {
-					held_item_tile->set_tileset("bow_01");
-					held_item_tile->set_tile(animation._frame_id);
-					held_item_tile->offset = offset;
-					held_item_tile->offset.y -= 13.f;
-					held_item_tile->pivot = { 16.f, 16.f };
-					held_item_tile->sorting_pivot =
-						player_tile_sorting_pos - held_item_tile->offset + held_item_tile->pivot;
-					switch (dir) {
-					case 'r':
-						held_item_tile->set_rotation(0);
-						held_item_tile->offset.x += 16.f;
-						held_item_tile->offset.y += 2.f;
-						held_item_tile->sorting_pivot.y -= 2.f;
-						held_item_tile->sorting_pivot.y += 1.f;
-						break;
-					case 'd':
-						held_item_tile->set_rotation(1);
-						held_item_tile->offset.y += 11.f;
-						held_item_tile->sorting_pivot.y -= 11.f;
-						held_item_tile->sorting_pivot.y += 1.f;
-						break;
-					case 'l':
-						held_item_tile->set_rotation(2);
-						held_item_tile->offset.x -= 16.f;
-						held_item_tile->offset.y += 3.f;
-						held_item_tile->sorting_pivot.y -= 3.f;
-						held_item_tile->sorting_pivot.y += 1.f;
-						break;
-					case 'u':
-						held_item_tile->set_rotation(3);
-						held_item_tile->offset.y -= 11.f;
-						held_item_tile->sorting_pivot.y += 11.f;
-						held_item_tile->sorting_pivot.y -= 1.f;
-						break;
-					}
-				} break;
+					} break;
 				}
 			}
 #endif
@@ -655,23 +634,23 @@ namespace ecs {
 		if (!pickup) return;
 
 		switch (pickup->type) {
-		case PickupType::Arrow: {
-			player->arrows++;
-			audio::create_event({ .path = "event:/snd_pickup" });
-		} break;
-		case PickupType::Rupee: {
-			player->rupees++;
-			audio::create_event({ .path = "event:/snd_pickup_rupee" });
-		} break;
-		case PickupType::Bomb: {
-			player->bombs++;
-			audio::create_event({ .path = "event:/snd_pickup" });
-		} break;
-		case PickupType::Heart: {
-			player->health = std::min(player->health + 1, player->max_health);
-			//TODO
-			//audio::play("event:/snd_pickup_heart");
-		} break;
+			case PickupType::Arrow: {
+				player->arrows++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Rupee: {
+				player->rupees++;
+				audio::create_event({ .path = "event:/snd_pickup_rupee" });
+			} break;
+			case PickupType::Bomb: {
+				player->bombs++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Heart: {
+				player->health = std::min(player->health + 1, player->max_health);
+				//TODO
+				//audio::play("event:/snd_pickup_heart");
+			} break;
 		}
 
 		destroy_at_end_of_frame(pickup_entity);
@@ -698,7 +677,7 @@ namespace ecs {
 		}
 	}
 
-	void on_player_physics_event(const PhysicsEvent& ev) {
+	void _handle_physics_event_for_player(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::SensorBeginTouch) {
 			if (ev.other_tag == Tag::Pickup) {
 				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
@@ -708,7 +687,7 @@ namespace ecs {
 				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
 			} else if (ev.other_tag == Tag::Slime) {
 				apply_damage_to_player(ev.entity, { DamageType::Melee, 1 });
-			} 
+			}
 		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
 			if (ev.other_tag == Tag::PushableBlock) {
 				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);

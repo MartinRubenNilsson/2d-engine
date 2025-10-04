@@ -89,7 +89,7 @@ namespace ecs {
     };
 
     void update_slimes(float dt) {
-        for (auto [entity, slime, body, animation] : _registry.view<Slime, b2BodyId, TileAnimation>().each()) {
+        for (auto [entity, slime, body, tile, anim] : _registry.view<Slime, b2BodyId, TileId, TileAnimation>().each()) {
             Vector2f velocity = b2Body_GetLinearVelocity(body);
             unsigned int tile_id = UINT_MAX;
             if (!is_zero(velocity)) {
@@ -100,8 +100,8 @@ namespace ecs {
                     case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
                 }
             }
-            animation.tile = change(animation.tile, tile_id);
-            animation.speed = length(velocity) / 32.f;
+            tile = change(tile, tile_id);
+            anim.set_speed(length(velocity) / 32.f);
         }
     }
 }

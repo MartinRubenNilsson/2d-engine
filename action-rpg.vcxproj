@@ -151,6 +151,7 @@
     <ClCompile Include="ecs_physics_setup.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_task.cpp" />
+    <ClCompile Include="ecs_task_pursue.cpp" />
     <ClCompile Include="ecs_task_wait.cpp" />
     <ClCompile Include="ecs_task_wander.cpp" />
     <ClCompile Include="ecs_tiled.cpp" />

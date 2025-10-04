@@ -65,7 +65,7 @@ namespace ecs {
 
 	bool kill_player(entt::entity entity);
 
-	void on_player_physics_event(const PhysicsEvent& ev);
+	void _handle_physics_event_for_player(const PhysicsEvent& ev);
 
 	struct Damage;
 
