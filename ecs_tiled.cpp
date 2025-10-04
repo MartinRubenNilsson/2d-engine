@@ -204,8 +204,9 @@ namespace ecs {
 	}
 
 	TileId change(TileId tile, unsigned int id) {
-		tile.id = id;
-		return tile ? tile : TileId();
+		TileId new_tile = tile;
+		new_tile.id = id;
+		return new_tile ? new_tile : tile;
 	}
 
 	TileId offset(TileId tile, int delta_x, int delta_y) {

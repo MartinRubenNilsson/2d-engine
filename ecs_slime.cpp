@@ -6,7 +6,7 @@
 #include "ecs_lifetime.h"
 #include "ecs_states.h"
 #include "ecs_tiled.h"
-#include "ecs_physics.h"
+#include "ecs_animations.h"
 #include "ecs_task.h"
 #include "audio.h"
 #include "random.h"
@@ -14,8 +14,6 @@
 namespace ecs {
     struct Slime {
         float speed = 0.f;
-        entt::entity player_entity = entt::null;
-        float distance_to_player = -1.f;
     };
 
     extern entt::registry _registry;
@@ -82,19 +80,28 @@ namespace ecs {
         }
     }
 
-    void update_slimes(float dt) {
-        const entt::entity player_entity = find_entity_by_tag(Tag::Player);
-        const b2BodyId player_body = get_body(player_entity);
-        const Vector2f player_pos = B2_IS_NON_NULL(player_body) ?
-            (Vector2f)b2Body_GetWorldCenterOfMass(player_body) : Vector2f();
+    // slime.tsx
+    enum TILE_ID_SLIME {
+        TILE_ID_SLIME_WALK_DOWN = 0,
+        TILE_ID_SLIME_WALK_RIGHT = 4,
+        TILE_ID_SLIME_WALK_UP = 8,
+        TILE_ID_SLIME_WALK_LEFT = 12,
+    };
 
-        for (auto [entity, slime, body] : _registry.view<Slime, b2BodyId>().each()) {
-            Vector2f pos = b2Body_GetWorldCenterOfMass(body);
-            slime.player_entity = player_entity;
-            slime.distance_to_player = -1.f;
-            if (player_entity != entt::null) {
-                slime.distance_to_player = length(player_pos - pos);
+    void update_slimes(float dt) {
+        for (auto [entity, slime, body, animation] : _registry.view<Slime, b2BodyId, TileAnimation>().each()) {
+            Vector2f velocity = b2Body_GetLinearVelocity(body);
+            unsigned int tile_id = UINT_MAX;
+            if (!is_zero(velocity)) {
+                switch (get_direction(velocity)) {
+                    case 'd': tile_id = TILE_ID_SLIME_WALK_DOWN; break;
+                    case 'r': tile_id = TILE_ID_SLIME_WALK_RIGHT; break;
+                    case 'u': tile_id = TILE_ID_SLIME_WALK_UP; break;
+                    case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
+                }
             }
+            animation.tile = change(animation.tile, tile_id);
+            animation.speed = length(velocity) / 32.f;
         }
     }
 }

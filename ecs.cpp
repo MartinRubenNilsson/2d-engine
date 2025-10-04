@@ -97,7 +97,6 @@ namespace ecs {
 		update_tasks(dt);
 		update_slimes(dt);
 		update_ai_logic(dt); // TODO remove
-		update_ai_graphics(dt); // TODO remove
 		update_lifetimes(dt);
 		destroy_entities_to_be_destroyed_at_end_of_frame();
 		update_tile_animations(dt);

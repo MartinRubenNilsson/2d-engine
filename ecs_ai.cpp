@@ -55,28 +55,6 @@ namespace ecs {
         update_ai_actions(dt);
     }
 
-    void update_ai_graphics(float dt) {
-        for (auto [entity, animation, ai_type, body] :
-            _registry.view<TileAnimation, const AiType, b2BodyId>().each()) {
-            switch (ai_type) {
-                case AiType::Slime: {
-                    Vector2f velocity = b2Body_GetLinearVelocity(body);
-                    unsigned int tile_id = UINT_MAX;
-                    if (!is_zero(velocity)) {
-                        switch (get_direction(velocity)) {
-                            case 'd': tile_id = TILE_ID_SLIME_WALK_DOWN; break;
-                            case 'r': tile_id = TILE_ID_SLIME_WALK_RIGHT; break;
-                            case 'u': tile_id = TILE_ID_SLIME_WALK_UP; break;
-                            case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
-                        }
-                    }
-                    animation.tile = change(animation.tile, tile_id);
-                    animation.speed = length(velocity) / 32.f;
-                } break;
-            }
-        }
-    }
-
     void debug_draw_ai() {
 #ifdef _DEBUG
         text::Text text{};
