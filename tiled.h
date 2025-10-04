@@ -75,7 +75,9 @@ namespace tiled {
 	};
 
 	struct Object {
-		unsigned int id = 0; // valid IDs are >= 1
+		// This is a unique id for the object with respect to the map it's in
+		// (and NOT an index into Context::objects[]). Valid IDs are >= 1.
+		unsigned int id_in_map = 0; 
 		ObjectType type = ObjectType::Rectangle;
 		std::string path; // empty if not a template object
 		std::string name;
@@ -97,7 +99,7 @@ namespace tiled {
 	struct Tile {
 		std::string class_;
 		std::vector<Property> properties;
-		std::vector<Object>	objects;
+		std::vector<unsigned int> objects; // indices into Context::objects[]
 		std::vector<Frame> animation;
 	};
 
@@ -171,7 +173,7 @@ namespace tiled {
 		std::string class_;
 		std::vector<Property> properties;
 		std::vector<TileGid> tiles; // nonempty if type = Tile; in that case size = width * height
-		std::vector<Object> objects; // (possibly) nonempty if type = Object 
+		std::vector<unsigned int> objects; // indices into Context::objects[], empty if type != Object 
 		unsigned int width = 0; // in tiles
 		unsigned int height = 0; // in tiles
 		bool visible = true;

@@ -82,7 +82,7 @@ namespace tiled {
 		// there will be duplicated properties!!!
 		_load_properties(node, object.properties);
 		if (pugi::xml_attribute id = node.attribute("id")) {
-			object.id = id.as_uint();
+			object.id_in_map = id.as_uint();
 		}
 		if (pugi::xml_attribute name = node.attribute("name")) {
 			object.name = name.as_string();
@@ -194,7 +194,8 @@ namespace tiled {
 			tile.class_ = tile_node.attribute("type").as_string(); // SIC: "type", not "class"
 			_load_properties(tile_node, tile.properties);
 			for (pugi::xml_node object_node : tile_node.child("objectgroup").children("object")) {
-				_load_object(object_node, tile.objects.emplace_back());
+				tile.objects.push_back((unsigned int)context.objects.size());
+				_load_object(object_node, context.objects.emplace_back());
 			}
 			for (pugi::xml_node frame_node : tile_node.child("animation").children("frame")) {
 				Frame& frame = tile.animation.emplace_back();
@@ -288,7 +289,7 @@ namespace tiled {
 	unsigned int load_object_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
-		// Check if the template is already loaded
+		// Check if the object is already loaded
 		for (unsigned int id = 0; id < context.objects.size(); ++id) {
 			if (context.objects[id].path == normalized_path) {
 				return id;
@@ -395,7 +396,7 @@ namespace tiled {
 	void _load_layer_recursive(
 		Context& context,
 		Map& map,
-		const std::vector<TilesetWithGids>& tileset_references,
+		const std::vector<TilesetWithGids>& tilesets_with_gids,
 		const pugi::xml_node& node
 	) {
 		// PITFALL: node may be of type <tileset>, and we are only interested in layers,
@@ -509,12 +510,13 @@ namespace tiled {
 			// Resolve GIDs. This converts Tiled GIDs (which are local to this map) into a pair
 			// of IDs which can be used to reference the tile independently of this map.
 			for (TileGid& tile : layer.tiles) {
-				_resolve_gid(tile, tileset_references);
+				_resolve_gid(tile, tilesets_with_gids);
 			}
 		} break;
 		case LayerType::Object: {
 			for (pugi::xml_node object_node : node.children("object")) {
-				Object& object = layer.objects.emplace_back();
+				layer.objects.push_back((unsigned int)context.objects.size());
+				Object& object = context.objects.emplace_back();
 				// If the object is connected to a template, we need to load and apply it first.
 				if (pugi::xml_attribute template_attribute = object_node.attribute("template")) {
 					std::string template_path = _get_parent_path(map.path);
@@ -531,7 +533,7 @@ namespace tiled {
 				if (object.tile.value != UINT32_MAX) {
 					// This happens when the object is not a template and has a tile, in which case
 					// we need to resolve its GID. (For templates this is done at load time.)
-					_resolve_gid(object.tile, tileset_references);
+					_resolve_gid(object.tile, tilesets_with_gids);
 				}
 			}
 		} break;
@@ -540,7 +542,7 @@ namespace tiled {
 		} break;
 		case LayerType::Group: {
 			for (pugi::xml_node child_node : node.children()) {
-				_load_layer_recursive(context, map, tileset_references, child_node);
+				_load_layer_recursive(context, map, tilesets_with_gids, child_node);
 			}
 		} break;
 		}

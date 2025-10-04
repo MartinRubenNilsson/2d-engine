@@ -182,7 +182,7 @@ namespace ecs {
 	}
 
 	entt::entity get_entity(ObjectId obj) {
-		return (entt::entity)_get_object(obj).id;
+		return (entt::entity)_get_object(obj).id_in_map;
 	}
 
 	ObjectType get_type(ObjectId obj) {
@@ -245,13 +245,13 @@ namespace ecs {
 
 		for (const tiled::Layer& layer : map->layers) {
 			if (layer.type != tiled::LayerType::Object) continue;
-			for (const tiled::Object& object : layer.objects) {
+			for (unsigned int object_id : layer.objects) {
+				const tiled::Object& object = _tiled_context.objects[object_id];
 
-				entt::entity entity = _registry.create((entt::entity)object.id);
-				assert(entity == (entt::entity)object.id);
+				entt::entity entity = _registry.create((entt::entity)object.id_in_map);
+				assert(entity == (entt::entity)object.id_in_map);
 
-				//const ObjectId obj_id{ .id = (uint16_t)std::distance(layer.objects.data(), &object) };
-				//_registry.emplace<ObjectId>(entity, obj_id);
+				_registry.emplace<ObjectId>(entity, (uint16_t)object_id);
 
 				// TODO: Move to setup_tags()
 				Tag tag = Tag::None;
@@ -332,11 +332,12 @@ namespace ecs {
 
 							Vector2f pivot;
 
-							for (const tiled::Object& object : tile.objects) {
-								if (object.type != tiled::ObjectType::Point) continue;
-								if (object.name != "pivot") continue;
-								pivot.x = object.x;
-								pivot.y = object.y;
+							for (unsigned int tile_object_id : tile.objects) {
+								const tiled::Object& tile_object = _tiled_context.objects[tile_object_id];
+								if (tile_object.type != tiled::ObjectType::Point) continue;
+								if (tile_object.name != "pivot") continue;
+								pivot.x = tile_object.x;
+								pivot.y = tile_object.y;
 							}
 
 							sprite.sorting_point = pivot;
@@ -353,7 +354,8 @@ namespace ecs {
 							body_def.position = position_top_left;
 							b2BodyId body = emplace_body(entity, body_def);
 
-							for (const tiled::Object& collider : tile.objects) {
+							for (unsigned int tile_object_id : tile.objects) {
+								const tiled::Object& collider = _tiled_context.objects[tile_object_id];
 
 								const float coll_x = collider.x;
 								const float coll_y = collider.y;
@@ -522,7 +524,8 @@ namespace ecs {
 						body_def.fixedRotation = true;
 						body = emplace_body(entity, body_def);
 
-						for (const tiled::Object& collider : tile.objects) {
+						for (unsigned int tile_object_id : tile.objects) {
+							const tiled::Object& collider = _tiled_context.objects[tile_object_id];
 
 							const Vector2f collider_center(collider.x, collider.y);
 							const Vector2f collider_half_size(collider.width / 2.f, collider.height / 2.f);
