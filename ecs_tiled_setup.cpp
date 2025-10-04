@@ -72,8 +72,6 @@ namespace ecs {
 			const tiled::Layer& layer = map.layers[layer_id];
 			if (layer.type != tiled::LayerType::Tile)
 				continue;
-			if (!layer.visible) // TODO: this causes colliders to not load
-				continue;
 
 			// OPTIMIZATION: When iterating through the view of all Tile components, EnTT
 			// returns them in reverse order of creation. Let's therefore CREATE them in reverse

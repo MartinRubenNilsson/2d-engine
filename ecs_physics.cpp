@@ -43,7 +43,7 @@ namespace ecs {
 		_physics_world = b2_nullWorldId;
 	}
 
-	void setup_physics() {
+	void setup_physics(MapId map) {
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
 			const Tag tag = get_tag(entity);
 
@@ -152,7 +152,9 @@ namespace ecs {
 			}
 		}
 
-		for (auto [entity, tile, tile_pos] : _registry.view<TileId, Vector2u>().each()) {
+		const Vector2u map_tile_size = get_tile_size(map);
+
+		for (auto [entity, tile, tile_pos] : _registry.view<TileId, TileCoord>().each()) {
 			if (!tile)
 				continue;
 
@@ -160,9 +162,10 @@ namespace ecs {
 			if (colliders.empty())
 				continue;
 
+			// Top left corner in the tile grid.
 			const Vector2f position = {
-				tile_pos.x * _PHYSICS_LENGTH_UNITS_PER_METER,
-				tile_pos.y * _PHYSICS_LENGTH_UNITS_PER_METER
+				tile_pos.x * map_tile_size.x,
+				tile_pos.y * map_tile_size.y
 			};
 
 			b2BodyDef body_def = b2DefaultBodyDef();

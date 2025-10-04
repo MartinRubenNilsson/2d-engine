@@ -2,10 +2,10 @@
 #include "ecs_tags.h"
 
 namespace ecs {
-	void startup_physics(); // Called on app startup.
-	void shutdown_physics(); // Called on app shutdown.
+	void startup_physics();
+	void shutdown_physics();
 
-	void setup_physics(); // Called on map load.
+	void setup_physics(MapId map);
 	void update_physics(float dt);
 	void debug_draw_physics();
 
