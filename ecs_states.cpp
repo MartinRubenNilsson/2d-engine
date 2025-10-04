@@ -95,6 +95,16 @@ namespace ecs {
 		return _registry.emplace_or_replace<StateMachine>(entity);
 	}
 
+	std::string_view get_current_state(entt::entity entity) {
+		if (!_registry.all_of<StateMachine>(entity))
+			return {};
+		StateMachine& sm = _registry.get<StateMachine>(entity);
+		State* state = _get_state(sm, sm.current_state);
+		if (!state)
+			return {};
+		return state->id;
+	}
+
 	bool transition_to_state(entt::entity entity, std::string_view state_id) {
 		if (!_registry.all_of<StateMachine>(entity))
 			return false;

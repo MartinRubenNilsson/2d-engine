@@ -30,6 +30,7 @@ namespace ecs {
 	void handle(StateMachine& sm, entt::entity entity, const StateEvent& event);
 
 	StateMachine& emplace_state_machine(entt::entity entity);
+	std::string_view get_current_state(entt::entity entity);
 	bool transition_to_state(entt::entity entity, std::string_view state_id); // immediately
 	void transition_to_state_later(entt::entity entity, std::string_view state_id, float time);
 

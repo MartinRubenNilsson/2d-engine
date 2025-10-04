@@ -104,7 +104,7 @@ namespace ecs {
 
 			sprites::Sprite& sprite = emplace_sprite(entity);
 			update_sprite(sprite, tile);
-			sprite.sorting_layer = coord.layer;
+			sprite.sorting_layer = (uint8_t)coord.layer;
 			// Sensible default: Put the sorting point in the center, or when the tile is
 			// longer than the map grid cell height, put it in the center horizontally and
 			// half a grid cell away from the bottom edge. This makes e.g. trees sort correctly.
