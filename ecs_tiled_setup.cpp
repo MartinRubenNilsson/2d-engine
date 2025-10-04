@@ -55,14 +55,28 @@ namespace ecs {
 					console::log_error("Error 19175: Failed to find object in map");
 					continue;
 				}
-				const tiled::Object& object = _tiled_context.objects[object_id];
-				entt::entity entity = _registry.create((entt::entity)object.uid);
-				if (entity != (entt::entity)object.uid) {
+
+				const ObjectId object{ .id = object_id };
+
+				const entt::entity desired_entity = get_entity(object);
+				const entt::entity entity = _registry.create(desired_entity);
+				if (entity != desired_entity) {
 					console::log_error("Error 10757: Failed to preserve object UID when creating entity");
 					_registry.destroy(entity);
 					continue;
 				}
-				_registry.emplace<ObjectId>(entity, object_id);
+
+				_registry.emplace<ObjectId>(entity, object);
+
+				if (get_type(object) != ObjectType::Tile)
+					continue;
+				const TileId tile = get_tile(object);
+				if (!tile) {
+					console::log_error("Error 10391 : Invalid tile for tile object");
+					continue;
+				}
+
+				_registry.emplace<TileId>(entity, tile);
 			}
 		}
 

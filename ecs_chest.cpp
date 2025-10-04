@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "ecs_chest.h"
 #include "ecs_tiled.h"
-#include "ecs_animations.h"
 #include "ecs_bomb.h"
 #include "ecs_physics.h"
-#include "ui_textbox.h"
+#include "ecs_sprites.h"
 #include "ecs_interactions.h"
 #include "ecs_patch.h"
+#include "ui_textbox.h"
 #include "audio.h"
 
 namespace ecs {
@@ -28,13 +28,10 @@ namespace ecs {
         if (chest->opened) return;
         chest->opened = true;
 
-        if (TileAnimation* animation = get_tile_animation(entity)) {
-            // At the time I'm writing this, chest's corresponding closed tile
-            // is right below the open tile in the tileset.
-            if (TileId open_tile = offset(animation->tile, 0, 1)) {
-                animation->tile = open_tile;
-                animation->_frame = open_tile;
-                animation->_frame_changed = true;
+        if (TileId* tile = _registry.try_get<TileId>(entity)) {
+            *tile = offset(*tile, 0, 1);
+            if (sprites::Sprite* sprite = _registry.try_get<sprites::Sprite>(entity)) {
+                update_sprite(*sprite, *tile);
             }
         }
 

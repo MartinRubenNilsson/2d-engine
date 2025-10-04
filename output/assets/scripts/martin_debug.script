@@ -1,5 +1,5 @@
 bind o "map_open summer_forest_00"
 bind p map_close
 bind r reload_shaders
-map_open eternal_dungeon_test
 ui_show hud
+map_open summer_forest_00

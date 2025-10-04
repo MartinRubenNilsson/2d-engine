@@ -204,12 +204,12 @@ namespace ecs {
 
 	TileId offset(TileId tile, int delta_x, int delta_y) {
 		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
-		const unsigned int old_x = tile.id / ts.width;
-		const unsigned int new_x = old_x + delta_x;
+		const unsigned int old_x = tile.id % ts.width;
+		const unsigned int new_x = (int)old_x + delta_x;
 		if (new_x >= ts.width)
 			return tile;
-		const unsigned int old_y = tile.id % ts.width;
-		const unsigned int new_y = old_y + delta_y;
+		const unsigned int old_y = tile.id / ts.width;
+		const unsigned int new_y = (int)old_y + delta_y;
 		if (new_y >= ts.height)
 			return tile;
 		tile.id = (uint16_t)(new_x + new_y * ts.width);

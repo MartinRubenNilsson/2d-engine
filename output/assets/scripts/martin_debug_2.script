@@ -1,5 +1,0 @@
-bind o "map_open eternal_dungeon_test"
-bind p map_close
-bind r reload_shaders
-map_open eternal_dungeon_test
-ui_show hud
