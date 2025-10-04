@@ -22,7 +22,7 @@ namespace renderdoc {
 		}
 		//_rdoc_api->SetCaptureOptionU32(eRENDERDOC_Option_APIValidation, 1);
 		//_rdoc_api->SetCaptureOptionU32(eRENDERDOC_Option_DebugOutputMute, 0);
-		RENDERDOC_InputButton capture_key = eRENDERDOC_Key_PrtScrn;
+		RENDERDOC_InputButton capture_key = eRENDERDOC_Key_F11;
 		_rdoc_api->SetCaptureKeys(&capture_key, 1);
 		_rdoc_api->MaskOverlayBits(eRENDERDOC_Overlay_None, eRENDERDOC_Overlay_None);
 		return true;

@@ -3,6 +3,7 @@
 #include "ecs_ai_knowledge.h"
 #include "ecs_ai_action.h"
 #include "ecs_animations.h"
+#include "ecs_tiled.h"
 #include "map_grid.h"
 #include "random.h"
 #include "shapes.h"

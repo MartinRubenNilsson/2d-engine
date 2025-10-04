@@ -5,6 +5,8 @@ namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity);
 	sprites::Sprite* get_sprite(entt::entity entity);
 
+	void update_sprite(sprites::Sprite& sprite, TileId tile);
+
 	void make_sprite_follow_body(entt::entity entity, const Vector2f& offset = { 0.f, 0.f });
 
 	// Makes the Sprite's color blink.

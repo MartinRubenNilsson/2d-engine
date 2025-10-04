@@ -4,10 +4,7 @@
 #include "ecs_animations.h"
 #include "ecs_lifetime.h"
 #include "graphics.h"
-
-namespace map {
-    unsigned int get_next_free_layer_index();
-}
+#include "ecs_tiled.h"
 
 namespace ecs {
     extern entt::registry _registry;
@@ -17,7 +14,7 @@ namespace ecs {
 
         sprites::Sprite& sprite = emplace_sprite(entity);
         sprite.position = position;
-        sprite.sorting_layer = map::get_next_free_layer_index();
+        sprite.sorting_layer = get_object_layer();
 
         FlipbookAnimation& animation = emplace_flipbook_animation(entity);
 

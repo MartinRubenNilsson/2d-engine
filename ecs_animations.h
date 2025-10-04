@@ -1,5 +1,5 @@
 #pragma once
-#include "ecs_tiled.h"
+#include "ecs_tiled_ids.h"
 
 namespace ecs {
 	struct TileAnimation {

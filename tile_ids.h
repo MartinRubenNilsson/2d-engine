@@ -26,7 +26,7 @@ enum TILE_ID_PLAYER {
 	TILE_ID_PLAYER_DEAD_RIGHT_UP = 183,
 };
 
-// items2.tsx
+// items1.tsx
 enum TILE_ID_ITEM {
 	TILE_ID_ITEM_RUPEE = 40,
 	TILE_ID_ITEM_POTION = 77,

@@ -1,20 +1,15 @@
 #include "stdafx.h"
 #include "ecs_bomb.h"
 #include "ecs_sprites.h"
-#include "ecs_animations.h"
 #include "ecs_lifetime.h"
 #include "ecs_camera.h"
 #include "ecs_physics.h"
 #include "ecs_vfx.h"
 #include "ecs_damage.h"
+#include "ecs_tiled.h"
 #include "tile_ids.h"
 #include "audio.h"
 #include "postprocessing.h"
-#include "graphics.h"
-
-namespace map {
-    unsigned int get_object_layer_index();
-}
 
 namespace ecs {
     extern entt::registry _registry;
@@ -70,15 +65,11 @@ namespace ecs {
         ignite_bomb(entity);
         if (const TilesetId tileset = get_tileset("items1")) {
             if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_POTION)) { // placeholder
-                TileAnimation& animation = emplace_tile_animation(entity);
-                animation.tile = tile;
-
                 sprites::Sprite& sprite = emplace_sprite(entity);
-                sprite.texture = graphics::load_texture(get_image_path(tileset));
-                sprite.sorting_layer = map::get_object_layer_index();
+                update_sprite(sprite, tile);
+                sprite.sorting_layer = get_object_layer();
                 sprite.sorting_point = { 8.f, 16.f };
                 sprite.position = position - sprite.sorting_point;
-                sprite.size = { 16.f, 16.f };
             }
         }
         {

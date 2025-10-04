@@ -5,19 +5,44 @@
 #include "console.h"
 #include "ecs_sprites.h"
 
-namespace map {
-	unsigned int get_object_layer_index();
-}
-
 namespace ecs {
 	extern tiled::Context _tiled_context;
 	extern entt::registry _registry;
+	uint8_t _object_layer = 0;
+
+	uint8_t get_object_layer() {
+		return _object_layer;
+	}
+
+	size_t _find_object_layer(std::span<const tiled::Layer> layers) {
+		// 1. Look for a tile layer whose name starts with "object".
+		for (size_t i = 0; i < layers.size(); ++i) {
+			if (layers[i].type != tiled::LayerType::Tile)
+				continue;
+			if (layers[i].name.starts_with("object") ||
+				layers[i].name.starts_with("Object")) {
+				return i;
+			}
+		}
+		// 2. Look for the topmost object layer.
+		for (size_t i = 0; i < layers.size(); ++i) {
+			if (layers[i].type == tiled::LayerType::Object)
+				return i;
+		}
+		// 3. Return the topmost layer.
+		return 0;
+	}
 
 	void setup_tiled(MapId map_id) {
 		if (!map_id)
 			return;
 
 		const tiled::Map& map = _tiled_context.maps[map_id.id];
+
+		// Determine the object layer. This is not necessarily an actual object layer,
+		// rather the point is to make it 
+
+		_object_layer = (uint8_t)_find_object_layer(map.layers);
 
 		// Create object entities first. This is because we want to be sure that the
 		// object UIDs we get from Tiled are free to use as entity identifiers.
@@ -78,7 +103,7 @@ namespace ecs {
 						// are rendered in the correct order. This sorting layer may also be the
 						// index of a tile layer so that certain static tiles are rendered as if
 						// they were objects, e.g. trees and other props.
-						sprite.sorting_layer = (uint8_t)map::get_object_layer_index();
+						sprite.sorting_layer = get_object_layer();
 						sprite.sorting_point = Vector2f(object.width / 2.f, object.height / 2.f);
 						if (!layer.visible) {
 							sprite.flags &= ~sprites::SPRITE_VISIBLE;

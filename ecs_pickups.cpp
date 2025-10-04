@@ -3,13 +3,8 @@
 #include "ecs_lifetime.h"
 #include "ecs_sprites.h"
 #include "ecs_physics.h"
-#include "ecs_animations.h"
+#include "ecs_tiled.h"
 #include "tile_ids.h"
-#include "graphics.h"
-
-namespace map {
-	unsigned int get_object_layer_index();
-}
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -71,14 +66,11 @@ namespace ecs {
 			}
 
 			if (const TileId tile = get_tile(tileset, tile_id)) {
-				TileAnimation& animation = emplace_tile_animation(entity);
-
 				sprites::Sprite& sprite = emplace_sprite(entity);
-				sprite.texture = graphics::load_texture(get_image_path(tileset));
-				sprite.sorting_layer = (uint8_t)map::get_object_layer_index();
+				update_sprite(sprite, tile);
+				sprite.sorting_layer = get_object_layer();
 				sprite.sorting_point = { 8.f, 8.f };
 				sprite.position = position - sprite.sorting_point;
-				sprite.size = { 16.f, 16.f };
 			}
 		}
 		return entity;

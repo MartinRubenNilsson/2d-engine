@@ -77,9 +77,8 @@ namespace ecs {
 		patch_chests(patch);
 	}
 
-	void setup(const std::string& map_path) {
+	void setup(MapId map) {
 		clear();
-		const MapId map = get_map(map_path);
 		if (!map) return;
 		_setup(map);
 		_patch(map);

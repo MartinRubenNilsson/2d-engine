@@ -2,17 +2,12 @@
 #include "ecs_arrow.h"
 #include "ecs_lifetime.h"
 #include "ecs_sprites.h"
-#include "ecs_animations.h"
+#include "ecs_tiled.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_damage.h"
 #include "tile_ids.h"
 #include "audio.h"
-#include "graphics.h"
-
-namespace map {
-	unsigned int get_object_layer_index();
-}
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -40,15 +35,11 @@ namespace ecs {
 		const Vector2f pivot = { 8.f, 8.f };
 		if (const TilesetId tileset = get_tileset("items1")) {
 			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
-				TileAnimation& animation = emplace_tile_animation(entity);
-				animation.tile = tile;
-
 				sprites::Sprite& sprite = emplace_sprite(entity);
-				sprite.texture = graphics::load_texture(get_image_path(tileset));
-				sprite.sorting_layer = map::get_object_layer_index();
+				update_sprite(sprite, tile);
+				sprite.sorting_layer = get_object_layer();
 				sprite.sorting_point = pivot;
 				sprite.position = position - pivot;
-				sprite.size = { 16.f, 16.f };
 			}
 		}
 		{

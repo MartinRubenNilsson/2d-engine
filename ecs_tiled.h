@@ -6,6 +6,8 @@ namespace ecs {
 	void shutdown_tiled();
 	void setup_tiled(MapId map);
 
+	uint8_t get_object_layer();
+
 	/// MAPS
 
 	MapId get_map(std::string_view path);
@@ -17,6 +19,8 @@ namespace ecs {
 
 	TilesetId get_tileset(std::string_view name);
 	std::string_view get_image_path(TilesetId tileset);
+	Vector2u get_size_in_tiles(TilesetId tileset);
+	Vector2u get_size_in_pixels(TilesetId tileset);
 	TileId get_tile(TilesetId tileset, unsigned int tile_id);
 
 	/// TILES
@@ -28,6 +32,7 @@ namespace ecs {
 		unsigned int h = 0; // in pixels
 	};
 
+	TilesetId get_tileset(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
 	TextureRect get_texture_rect(TileId tile);

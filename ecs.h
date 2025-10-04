@@ -17,7 +17,7 @@ namespace ecs {
 	entt::entity deep_copy(entt::entity entity);
 
 	void clear();
-	void setup(const std::string& map_path);
+	void setup(MapId map);
 	void update(float dt);
 	void handle_window_event(const window::Event& ev);
 

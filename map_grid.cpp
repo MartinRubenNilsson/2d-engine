@@ -3,10 +3,11 @@
 #include "tiled.h"
 #include "console.h"
 
+namespace ecs {
+	extern tiled::Context _tiled_context; // TODO: remove
+}
+
 namespace map {
-
-	extern tiled::Context _tiled_context;
-
 	struct Tile {
 		enum State : unsigned char {
 			UNVISITED,
@@ -107,7 +108,10 @@ namespace map {
 		return std::string(magic_enum::enum_name(type));
 	}
 
-	void create_grid(const tiled::Map& map) {
+	void create_grid(ecs::MapId map_id) {
+		if (!map_id) return;
+
+		const tiled::Map& map = ecs::_tiled_context.maps[map_id.id];
 		_grid.size = Vector2i(map.width, map.height);
 		_grid.tile_size = Vector2i(map.tile_width, map.tile_height);
 		_grid.tiles.resize(_grid.size.x * _grid.size.y);

@@ -14,6 +14,19 @@ namespace ecs {
 		return _registry.emplace_or_replace<sprites::Sprite>(entity);
 	}
 
+	void update_sprite(sprites::Sprite& sprite, TileId tile) {
+		if (!tile) return;
+		const TextureRect rect = get_texture_rect(tile);
+		sprite.tex_position = { (float)rect.x, (float)rect.y };
+		sprite.tex_size = { (float)rect.w, (float)rect.h };
+		sprite.size = sprite.tex_size;
+		const TilesetId tileset = get_tileset(tile); // tileset is valid if tile is
+		const Vector2u tileset_size = get_size_in_pixels(tileset);
+		sprite.tex_position /= Vector2f(tileset_size);
+		sprite.tex_size /= Vector2f(tileset_size);
+		sprite.texture = graphics::load_texture(get_image_path(tileset));
+	}
+
 	sprites::Sprite* get_sprite(entt::entity entity) {
 		return _registry.try_get<sprites::Sprite>(entity);
 	}

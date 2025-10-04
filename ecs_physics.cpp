@@ -3,6 +3,7 @@
 #include "ecs_physics_filters.h"
 #include "ecs_tiled.h"
 #include "console.h"
+#include "ecs_sprites.h" // TODO: don't include here!
 
 #ifdef _DEBUG
 #pragma comment(lib, "box2d-d.lib")
@@ -72,8 +73,7 @@ namespace ecs {
 
 						// EMPLACE SPRITE-BODY ATTACHMENT
 
-						// TODO!
-						//make_sprite_follow_body(entity);
+						make_sprite_follow_body(entity);
 
 						// EMPLACE BODY
 

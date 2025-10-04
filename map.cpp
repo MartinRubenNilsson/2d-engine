@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "map.h"
 #include "map_grid.h"
-#include "tiled.h"
 #include "filesystem.h"
 #include "console.h"
 #include "audio.h"
@@ -9,18 +8,12 @@
 #include "ecs.h"
 #include "ecs_tiled.h"
 
-namespace ecs {
-	extern tiled::Context _tiled_context;
-}
-
 namespace map {
 	const float DEFAULT_TRANSITION_DURATION = 0.6f; // seconds
 
 	bool debug = false;
 	std::string _current_map_path;
 	std::string _next_map_path;
-	unsigned int _object_layer_index = 0;
-	unsigned int _next_free_layer_index = 0;
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
 
@@ -102,8 +95,6 @@ namespace map {
 		// CLOSE CURRENT MAP
 
 		if (current_map) {
-			_object_layer_index = 0;
-			_next_free_layer_index = 0;
 			audio::stop_all_in_bus(audio::BUS_SOUND);
 			ui::close_textbox_and_clear_queue();
 		}
@@ -117,25 +108,8 @@ namespace map {
 			return;
 		}
 
-		// Resolve the layer index on which to place objects/entities.
-		const auto& next_map_tiled = ecs::_tiled_context.maps[next_map.id];
-		const auto& layers = next_map_tiled.layers;
-		for (unsigned int i = 0; i < layers.size(); ++i) {
-			const tiled::Layer& layer = layers[i];
-			if (layer.type == tiled::LayerType::Tile) {
-				if (layer.name.starts_with("object") || layer.name.starts_with("Object")) {
-					_object_layer_index = i;
-					break;
-				}
-			} else if (layer.type == tiled::LayerType::Object) {
-				_object_layer_index = i;
-				break;
-			}
-		}
-		_next_free_layer_index = (unsigned int)layers.size();
-
-		create_grid(next_map_tiled);
-		ecs::setup(next_map_tiled.path);
+		create_grid(next_map);
+		ecs::setup(next_map);
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {
@@ -201,14 +175,6 @@ namespace map {
 
 	std::string get_name() {
 		return filesystem::get_stem(_current_map_path);
-	}
-
-	unsigned int get_object_layer_index() {
-		return _object_layer_index;
-	}
-
-	unsigned int get_next_free_layer_index() {
-		return _next_free_layer_index;
 	}
 
 	float get_transition_progress() {

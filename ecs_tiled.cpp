@@ -76,24 +76,19 @@ namespace ecs {
 		return maps;
 	}
 
-	const tiled::Map* _get_map(MapId id) {
-		if (id.id >= _tiled_context.maps.size()) return nullptr;
-		return &_tiled_context.maps[id.id];
+	const tiled::Map& _get_map(MapId id) {
+		return _tiled_context.maps[id.id];
 	}
 
 	std::string_view get_path(MapId map) {
-		if (const tiled::Map* m = _get_map(map)) {
-			return m->path;
-		}
-		return {};
+		const tiled::Map& m = _get_map(map);
+		return m.path;
 	}
 
 	Vector2f get_bottom_right(MapId map) {
-		if (const tiled::Map* m = _get_map(map)) {
-			return { (float)m->width * m->tile_width,
-					 (float)m->height * m->tile_height };
-		}
-		return {};
+		const tiled::Map& m = _get_map(map);
+		return { (float)m.width * m.tile_width,
+				 (float)m.height * m.tile_height };
 	}
 
 	TilesetId get_tileset(std::string_view name) {
@@ -106,22 +101,36 @@ namespace ecs {
 		return {};
 	}
 
-	std::string_view get_image_path(TilesetId tileset) {
-		return _tiled_context.tilesets[tileset.id].image_path;
-	}
-
 	const tiled::Tileset& _get_tileset(TilesetId tileset) {
 		return _tiled_context.tilesets[tileset.id];
 	}
 
+	std::string_view get_image_path(TilesetId tileset) {
+		return _get_tileset(tileset).image_path;
+	}
+
+	Vector2u get_size_in_tiles(TilesetId tileset) {
+		const tiled::Tileset& ts = _get_tileset(tileset);
+		return { ts.width, ts.height };
+	}
+
+	Vector2u get_size_in_pixels(TilesetId tileset) {
+		const tiled::Tileset& ts = _get_tileset(tileset);
+		return { ts.width * ts.tile_width, ts.height * ts.tile_height };
+	}
+
 	TileId get_tile(TilesetId tileset, unsigned int tile_id) {
 		const tiled::Tileset& ts = _get_tileset(tileset);
-		if (tile_id < ts.tile_count) return {};
+		if (tile_id >= ts.tile_count) return {};
 		return { .id = (uint16_t)tile_id, .tileset_id = tileset.id };
 	}
 
 	const tiled::Tile& _get_tile(TileId tile) {
 		return _tiled_context.tilesets[tile.tileset_id].tiles[tile.id];
+	}
+
+	TilesetId get_tileset(TileId tile) {
+		return { tile.tileset_id };
 	}
 
 	std::string_view get_class(TileId tile) {

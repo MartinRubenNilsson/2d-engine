@@ -1,8 +1,5 @@
 #pragma once
-
-namespace tiled {
-	struct Map;
-}
+#include "ecs_tiled_ids.h"
 
 namespace map {
 	enum class TerrainType {
@@ -17,7 +14,7 @@ namespace map {
 
 	std::string to_string(TerrainType type);
 
-	void create_grid(const tiled::Map& map);
+	void create_grid(ecs::MapId map);
 	void destroy_grid();
 
 	Vector2i get_grid_size(); // in tiles
