@@ -104,7 +104,7 @@ namespace ecs {
 	}
 
 	void setup_players(MapId map) {
-		const Vector2f map_bottom_right = get_bottom_right(map);
+		const Vector2f map_bottom_right = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
 			const Vector2f top_left = get_top_left(object);

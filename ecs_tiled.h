@@ -13,17 +13,26 @@ namespace ecs {
 	MapId get_map(std::string_view path);
 	std::vector<MapId> get_all_maps();
 	std::string_view get_path(MapId map);
-	Vector2f get_bottom_right(MapId map);
+	Vector2u get_tile_size(MapId map); // in pixels
+	Vector2u get_size_in_tiles(MapId map);
+	Vector2u get_size_in_pixels(MapId map);
 
 	/// TILESETS
 
 	TilesetId get_tileset(std::string_view name);
 	std::string_view get_image_path(TilesetId tileset);
+	Vector2u get_tile_size(TilesetId tileset); // in pixels
 	Vector2u get_size_in_tiles(TilesetId tileset);
 	Vector2u get_size_in_pixels(TilesetId tileset);
 	TileId get_tile(TilesetId tileset, unsigned int tile_id);
 
 	/// TILES
+
+	struct TileCoord {
+		uint16_t x = 0;
+		uint16_t y = 0;
+		uint16_t layer = 0;
+	};
 
 	struct TextureRect {
 		unsigned int x = 0; // in pixels
@@ -35,6 +44,7 @@ namespace ecs {
 	TilesetId get_tileset(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
+	Vector2u get_size(TileId tile); // in pixels
 	TextureRect get_texture_rect(TileId tile);
 	bool animated(TileId tile);
 	unsigned int get_animation_duration(TileId tile); // duration in milliseconds

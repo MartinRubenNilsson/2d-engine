@@ -57,7 +57,7 @@ namespace ecs {
 	void _setup(MapId map) {
 		setup_tiled(map);
 		setup_tags();
-		setup_sprites();
+		setup_sprites(map);
 		setup_tile_animations();
 		setup_physics();
 		setup_cameras(map);

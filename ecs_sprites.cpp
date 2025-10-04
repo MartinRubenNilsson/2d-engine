@@ -50,7 +50,7 @@ namespace ecs {
 		_registry.emplace_or_replace<SpriteShake>(entity, std::move(shake));
 	}
 
-	void setup_sprites() {
+	void setup_sprites(MapId map) {
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
 			if (!object) {
 				console::log_error("Error 56702: Invalid object in setup_sprites()");
@@ -88,6 +88,49 @@ namespace ecs {
 				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
 			}
 			if (object.tile.flipped_diagonally) {
+				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
+			}
+#endif
+		}
+
+		const Vector2u map_tile_size = get_tile_size(map);
+
+		for (auto [entity, tile, coord] : _registry.view<TileId, TileCoord>().each()) {
+			if (!tile) {
+				console::log_error("Error 91324: Invalid tile in setup_sprites()");
+				continue;
+			}
+			const Vector2u size = get_size(tile); // may be different from map_tile_size!
+
+			sprites::Sprite& sprite = emplace_sprite(entity);
+			update_sprite(sprite, tile);
+			sprite.sorting_layer = coord.layer;
+			// Sensible default: Put the sorting point in the center, or when the tile is
+			// longer than the map grid cell height, put it in the center horizontally and
+			// half a grid cell away from the bottom edge. This makes e.g. trees sort correctly.
+			sprite.sorting_point = {
+				size.x * 0.5f,
+				size.y - map_tile_size.y * 0.5f
+			};
+			// We need to compensate for the fact that the tileset tile size may be
+			// different from the map tileset size.
+			sprite.position = {
+				(float)coord.x * map_tile_size.x,
+				(float)coord.y * map_tile_size.y - size.y + map_tile_size.y
+			};
+
+			// TODO: fix flip flags!!!
+#if 0
+			if (!layer.visible) {
+				sprite.flags &= ~sprites::SPRITE_VISIBLE;
+			}
+			if (gid.flipped_horizontally) {
+				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
+			}
+			if (gid.flipped_vertically) {
+				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
+			}
+			if (gid.flipped_diagonally) {
 				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
 			}
 #endif

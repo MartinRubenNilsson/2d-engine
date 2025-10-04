@@ -41,7 +41,7 @@ namespace ecs {
 	}
 
 	void setup_cameras(MapId map) {
-		const Vector2f map_bottom_right = get_bottom_right(map);
+		const Vector2f map_bottom_right = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, ObjectId>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);

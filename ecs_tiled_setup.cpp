@@ -2,7 +2,6 @@
 #include "ecs_tiled.h"
 #include "tiled.h"
 #include "console.h"
-#include "ecs_sprites.h"
 
 namespace ecs {
 	extern tiled::Context _tiled_context;
@@ -69,64 +68,37 @@ namespace ecs {
 
 		// Create and setup tile entities.
 
-		for (uint8_t layer_id = 0; layer_id < map.layers.size(); ++layer_id) {
+		for (uint16_t layer_id = 0; layer_id < map.layers.size(); ++layer_id) {
 			const tiled::Layer& layer = map.layers[layer_id];
 			if (layer.type != tiled::LayerType::Tile)
+				continue;
+			if (!layer.visible) // TODO: this causes colliders to not load
 				continue;
 
 			// OPTIMIZATION: When iterating through the view of all Tile components, EnTT
 			// returns them in reverse order of creation. Let's therefore CREATE them in reverse
 			// draw order (bottom-to-top and right-to-left) so that when we iterate we access them
 			// in draw order (left-to-right and top-to-bottom). This makes it so we spend less time
-			// sorting them before rendering.
+			// sorting them before rendering (in theory).
+			//
+			// (Notice that map.layers are in top-to-bottom order, so we're already iterating them
+			// in reverse draw order, which is what we want here.)
 
-			for (unsigned int y = layer.height; y--;) {
-				for (unsigned int x = layer.width; x--;) {
+			for (uint16_t y = layer.height; y--;) {
+				for (uint16_t x = layer.width; x--;) {
 
 					const tiled::TileGid gid = layer.tiles[x + y * layer.width];
-					if (gid.tileset_id >= _tiled_context.tilesets.size()) {
-						continue;
-					}
-					const tiled::Tileset& tileset = _tiled_context.tilesets[gid.tileset_id];
-					if (gid.id >= tileset.tiles.size()) {
-						continue;
-					}
+					const TileId tile{
+						.id = (uint16_t)gid.id,
+						.tileset_id = (uint16_t)gid.tileset_id
+					};
+
+					if (!tile) continue;
 
 					const entt::entity entity = _registry.create();
 
-					const TilesetId tileset_id{ (uint16_t)gid.tileset_id };
-					const TileId tile_id{ (uint16_t)gid.id, (uint16_t)gid.tileset_id };
-					_registry.emplace<TileId>(entity, tile_id);
-					_registry.emplace<Vector2u>(entity, x, y);
-
-					const Vector2f position = {
-						(float)x * map.tile_width,
-						(float)y * map.tile_height - tileset.tile_height + map.tile_height
-					};
-					const Vector2f size = { (float)tileset.tile_width, (float)tileset.tile_height };
-					const Vector2f sorting_point = { size.x / 2.f, size.y - map.tile_height / 2.f };
-
-					// EMPLACE SPRITE
-
-					const TextureRect tex_rect = get_texture_rect(tile_id);
-
-					sprites::Sprite& sprite = emplace_sprite(entity);
-					update_sprite(sprite, tile_id);
-					sprite.sorting_layer = (uint8_t)layer_id;
-					sprite.sorting_point = sorting_point;
-					sprite.position = position;
-					if (!layer.visible) {
-						sprite.flags &= ~sprites::SPRITE_VISIBLE;
-					}
-					if (gid.flipped_horizontally) {
-						sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
-					}
-					if (gid.flipped_vertically) {
-						sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
-					}
-					if (gid.flipped_diagonally) {
-						sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
-					}
+					_registry.emplace<TileId>(entity, tile);
+					_registry.emplace<TileCoord>(entity, x, y, layer_id);
 				}
 			}
 		}

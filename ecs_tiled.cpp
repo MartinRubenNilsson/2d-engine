@@ -85,10 +85,19 @@ namespace ecs {
 		return m.path;
 	}
 
-	Vector2f get_bottom_right(MapId map) {
+	Vector2u get_tile_size(MapId map) {
 		const tiled::Map& m = _get_map(map);
-		return { (float)m.width * m.tile_width,
-				 (float)m.height * m.tile_height };
+		return { m.tile_width, m.tile_height };
+	}
+
+	Vector2u get_size_in_tiles(MapId map) {
+		const tiled::Map& m = _get_map(map);
+		return { m.width, m.height };
+	}
+
+	Vector2u get_size_in_pixels(MapId map) {
+		const tiled::Map& m = _get_map(map);
+		return { m.width * m.tile_width, m.height * m.tile_height };
 	}
 
 	TilesetId get_tileset(std::string_view name) {
@@ -107,6 +116,11 @@ namespace ecs {
 
 	std::string_view get_image_path(TilesetId tileset) {
 		return _get_tileset(tileset).image_path;
+	}
+
+	Vector2u get_tile_size(TilesetId tileset) {
+		const tiled::Tileset& ts = _get_tileset(tileset);
+		return { ts.tile_width, ts.tile_height };
 	}
 
 	Vector2u get_size_in_tiles(TilesetId tileset) {
@@ -142,8 +156,13 @@ namespace ecs {
 		return { (const ObjectId*)t.objects.data(), t.objects.size() };
 	}
 
+	Vector2u get_size(TileId tile) {
+		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
+		return { ts.tile_width, ts.tile_height };
+	}
+
 	TextureRect get_texture_rect(TileId tile) {
-		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
+		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
 		TextureRect rect{};
 		rect.x = (tile.id % ts.width) * (ts.tile_width + ts.spacing) + ts.margin;
 		rect.y = (tile.id / ts.width) * (ts.tile_height + ts.spacing) + ts.margin;
