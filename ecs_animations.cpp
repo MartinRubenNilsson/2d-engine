@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "ecs_animations.h"
+#include "ecs_tiled.h"
 #include "tiled.h"
 #include "graphics.h"
 #include "sprites.h"
-#include "map.h"
 
 namespace ecs {
 	extern entt::registry _registry;
+	extern tiled::Context _tiled_context;
 
 #if 0
 	void TileAnimation::set_rotation(int clockwise_quarter_turns) {
@@ -19,13 +20,13 @@ namespace ecs {
 #endif
 
 	unsigned int get_tileset_id(std::string_view name) {
-		return map::find_tileset_by_name(name);
+		return get_tileset(name).id;
 	}
 
 	Handle<graphics::Texture> get_tileset_texture(unsigned int tileset_id) {
-		const tiled::Tileset* tileset_ptr = map::get_tileset(tileset_id);
-		if (!tileset_ptr) return Handle<graphics::Texture>();
-		return graphics::load_texture(tileset_ptr->image_path);
+		TilesetId tileset{ (uint16_t)tileset_id };
+		if (!valid(tileset)) return Handle<graphics::Texture>();
+		return graphics::load_texture(get_image_path(tileset));
 	}
 
 	void update_tile_animations(float dt) {
@@ -43,10 +44,12 @@ namespace ecs {
 				animation._dirty = true;
 			}
 
-			const tiled::Tileset* tileset = map::get_tileset(animation.tileset_id);
-			if (!tileset) continue;
-			if (animation.tile_id >= tileset->tiles.size()) continue;
-			const tiled::Tile& tile = tileset->tiles[animation.tile_id];
+			if (animation.tileset_id >= _tiled_context.tilesets.size())
+				continue;
+			const tiled::Tileset& tileset = _tiled_context.tilesets[animation.tileset_id];
+			if (animation.tile_id >= tileset.tiles.size())
+				continue;
+			const tiled::Tile& tile = tileset.tiles[animation.tile_id];
 
 			if (tile.animation.empty()) continue;
 
@@ -106,15 +109,18 @@ namespace ecs {
 
 			if (!animation._dirty) continue;
 
-			const tiled::Tileset* tileset = map::get_tileset(animation.tileset_id);
-			if (!tileset) continue;
-			if (animation._animated_tile_id >= tileset->tiles.size()) continue;
+			TileId tile{
+				.id = (uint16_t)animation._animated_tile_id,
+				.tileset_id = (uint16_t)animation.tileset_id
+			};
+			if (!valid(tile))
+				continue;
 
 			Vector2u texture_size;
 			graphics::get_texture_size(sprite.texture, texture_size.x, texture_size.y);
 			if (!texture_size.x || !texture_size.y) continue;
 
-			const tiled::TextureRect tex_rect = tiled::get_tile_texture_rect(*tileset, animation._animated_tile_id);
+			const TextureRect tex_rect = get_texture_rect(tile);
 			sprite.tex_position = { (float)tex_rect.x, (float)tex_rect.y };
 			sprite.tex_size = { (float)tex_rect.w, (float)tex_rect.h };
 			sprite.tex_position /= Vector2f(texture_size);

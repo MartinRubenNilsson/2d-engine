@@ -430,7 +430,7 @@ namespace graphics {
 		}
 	}
 
-	Handle<Texture> load_texture(const std::string& path) {
+	Handle<Texture> load_texture(std::string_view path) {
 
 		std::string normalized_path = filesystem::get_normalized_path(path);
 		// KTX2 compressed textures load much MUCH faster, so we prefer those whenever possible.

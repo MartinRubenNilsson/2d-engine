@@ -42,12 +42,14 @@ namespace ecs {
 	}
 
 	void setup_cameras() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, TObject>().each()) {
+		const Vector2f map_bottom_right = get_bottom_right(get_current_map());
+
+		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, ObjectId>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);
-			camera.center = object.get_position();
+			camera.center = get_position(object);
 			camera.confines_min = { 0.f, 0.f };
-			camera.confines_max = object.get_map().get_bottom_right();
-			camera.entity_to_follow = object.get_object("follow");
+			camera.confines_max = map_bottom_right;
+			camera.entity_to_follow = get_entity(object, "follow");
 		}
 	}
 

@@ -1,10 +1,6 @@
 #pragma once
 #include <string_view>
 
-namespace tiled {
-	struct Tileset;
-}
-
 namespace map {
 	extern const float DEFAULT_TRANSITION_DURATION; // seconds
 	extern bool debug;
@@ -21,7 +17,6 @@ namespace map {
 		float duration = DEFAULT_TRANSITION_DURATION; // In seconds; set to 0 to make the transition instant.
 	};
 
-	void initialize();
 	void update(float dt);
 
 	bool transition(const MapTransitionOptions& options);
@@ -33,10 +28,6 @@ namespace map {
 	std::string get_name();
 	unsigned int get_object_layer_index();
 	unsigned int get_next_free_layer_index(); // one past the last layer index
-
-	// Returns the tileset ID, or UINT_MAX if not found.
-	unsigned int find_tileset_by_name(std::string_view name);
-	const tiled::Tileset* get_tileset(unsigned int tileset_id);
 
 	// The transition progress is a value between -1 and 1. It is 0 when not transitioning,
 	// positive when transitioning out of a map, and negative when transitioning in to a map.

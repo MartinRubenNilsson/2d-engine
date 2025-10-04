@@ -59,9 +59,9 @@ namespace ecs {
     }
 
     void setup_slimes() {
-        for (auto [entity, object] : _registry.view<Type<Tag::Slime>, TObject>().each()) {
+        for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
             Slime& slime = _registry.emplace<Slime>(entity);
-            slime.speed = object.get_float("speed");
+            slime.speed = get_float(object, "speed");
 
             _emplace_state_machine_for_slime(entity);
             emplace_ai(entity, AiType::Slime);

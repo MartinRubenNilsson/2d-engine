@@ -1,5 +1,4 @@
 #include "tiled.h"
-#include "tiled_types.h"
 #include <pugixml.hpp>
 #include <zlib.h>
 #include <algorithm>
@@ -79,6 +78,8 @@ namespace tiled {
 	}
 
 	void _load_object(const pugi::xml_node& node, Object& object) {
+		// TODO: this doesn't actually override properties for template objects!
+		// there will be duplicated properties!!!
 		_load_properties(node, object.properties);
 		if (pugi::xml_attribute id = node.attribute("id")) {
 			object.id = id.as_uint();
@@ -121,21 +122,21 @@ namespace tiled {
 		}
 	}
 
-	std::string _get_normalized_path(const std::string& path) {
+	std::string _get_normalized_path(std::string_view path) {
 		return std::filesystem::path(path).lexically_normal().string();
 	}
 
-	std::string _get_parent_path(const std::string& path) {
+	std::string _get_parent_path(std::string_view path) {
 		return std::filesystem::path(path).parent_path().string();
 	}
 
-	unsigned int load_tileset_from_file(Context& context, const std::string& path) {
+	unsigned int load_tileset_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the tileset is already loaded
-		for (unsigned int tileset_id = 0; tileset_id < context.tilesets.size(); ++tileset_id) {
-			if (context.tilesets[tileset_id].path == normalized_path) {
-				return tileset_id;
+		for (unsigned int id = 0; id < context.tilesets.size(); ++id) {
+			if (context.tilesets[id].path == normalized_path) {
+				return id;
 			}
 		}
 
@@ -246,18 +247,51 @@ namespace tiled {
 			}
 		}
 
-		const unsigned int tileset_id = (unsigned int)context.tilesets.size();
+		const unsigned int id = (unsigned int)context.tilesets.size();
 		context.tilesets.emplace_back(std::move(tileset));
-		return tileset_id;
+		return id;
 	}
 
-	unsigned int load_template_from_file(Context& context, const std::string& path) {
+	// PITFALL: Tiled assigns GIDs to tiles by (conceptually) concatenating all tilesets end-to-end
+	// in some arbitrary order. Then, each tile can be assigned a unique index in this concatenated
+	// "mega-tileset". The indexing starts at 1, so in Tiled a GID of 0 means that the tile is empty.
+	//
+	// This means that Tiled GIDs are always with reference to some map, which is not useful for our
+	// purposes. Hence we "resolve" these GIDs to a pair of IDs, one for the tileset and one for the
+	// tile in that tileset. This is done by iterating through all the tilesets used in the map, and,
+	// if the tileset has a range of GIDs which contains the tile GID, then we replace the GID with
+	// the tile ID and the tile's local ID in that tileset.
+	//
+	// We use TileGid::ids to store both the original Tile GID (before resolving) and our pair of IDs
+	// (after resolving), so watch out!
+
+	struct TilesetWithGids {
+		unsigned int id = UINT_MAX; // index into Context::tilesets[]
+		unsigned int first_gid = 0; // The Tiled GID of the first tile in this tileset.
+	};
+
+	void _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
+		tile.id = tile.ids - tileset.first_gid;
+		tile.tileset_id = tileset.id;
+	}
+
+	bool _resolve_gid(TileGid& tile, const std::vector<TilesetWithGids>& tilesets) {
+		for (auto it = tilesets.rbegin(); it != tilesets.rend(); ++it) {
+			if (tile.ids < it->first_gid) continue;
+			_resolve_gid(tile, *it);
+			return true;
+		}
+		tile = {};
+		return false;
+	}
+
+	unsigned int load_object_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the template is already loaded
-		for (unsigned int template_id = 0; template_id < context.templates.size(); ++template_id) {
-			if (context.templates[template_id].template_path == normalized_path) {
-				return template_id;
+		for (unsigned int id = 0; id < context.objects.size(); ++id) {
+			if (context.objects[id].path == normalized_path) {
+				return id;
 			}
 		}
 
@@ -287,7 +321,7 @@ namespace tiled {
 		const pugi::xml_node object_node = template_node.child("object");
 
 		Object object{};
-		object.template_path = std::move(normalized_path);
+		object.path = std::move(normalized_path);
 		_load_object(object_node, object);
 
 		// Load tileset
@@ -295,21 +329,29 @@ namespace tiled {
 			const pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			if (!source_attribute) {
 				if (context.debug_message_callback) {
-					context.debug_message_callback("Tileset source attribute is missing: " + object.template_path);
+					context.debug_message_callback("Tileset source attribute is missing: " + object.path);
 				}
-				return UINT_MAX;
+				object.tile = {};
+			} else {
+				std::string tileset_path = _get_parent_path(object.path);
+				tileset_path += '/';
+				tileset_path += source_attribute.as_string();
+				tileset_path = _get_normalized_path(tileset_path);
+				const unsigned int tileset_id = load_tileset_from_file(context, tileset_path);
+				if (tileset_id >= context.tilesets.size()) {
+					object.tile = {};
+				} else {
+					// first_gid should always be 1 for template objects.
+					const unsigned int first_gid = tileset_node.attribute("firstgid").as_uint();
+					const TilesetWithGids tileset{ tileset_id, first_gid };
+					_resolve_gid(object.tile, tileset);
+				}
 			}
-			object.tileset.first_gid = tileset_node.attribute("firstgid").as_uint();
-			std::string tileset_path = _get_parent_path(object.template_path);
-			tileset_path += '/';
-			tileset_path += source_attribute.as_string();
-			tileset_path = _get_normalized_path(tileset_path);
-			object.tileset.tileset_id = load_tileset_from_file(context, tileset_path); // TODO: handle errors
 		}
 
-		const unsigned int template_id = (unsigned int)context.templates.size();
-		context.templates.emplace_back(std::move(object));
-		return template_id;
+		const unsigned int id = (unsigned int)context.objects.size();
+		context.objects.emplace_back(std::move(object));
+		return id;
 	}
 
 	bool _string_to_layer_type(std::string_view str, LayerType& type) {
@@ -350,7 +392,12 @@ namespace tiled {
 		}
 	}
 
-	void _load_layer_recursive(Context& context, Map& map, const pugi::xml_node& node) {
+	void _load_layer_recursive(
+		Context& context,
+		Map& map,
+		const std::vector<TilesetWithGids>& tileset_references,
+		const pugi::xml_node& node
+	) {
 		// PITFALL: node may be of type <tileset>, and we are only interested in layers,
 		// hence we have an early return if we fail to convert the node name to a LayerType.
 
@@ -459,6 +506,11 @@ namespace tiled {
 						"  Layer: " + layer.name);
 				}
 			}
+			// Resolve GIDs. This converts Tiled GIDs (which are local to this map) into a pair
+			// of IDs which can be used to reference the tile independently of this map.
+			for (TileGid& tile : layer.tiles) {
+				_resolve_gid(tile, tileset_references);
+			}
 		} break;
 		case LayerType::Object: {
 			for (pugi::xml_node object_node : node.children("object")) {
@@ -469,17 +521,17 @@ namespace tiled {
 					template_path += '/';
 					template_path += template_attribute.as_string();
 					template_path = _get_normalized_path(template_path);
-					const unsigned int template_id = load_template_from_file(context, template_path);
-					if (template_id < context.templates.size()) {
-						object = context.templates[template_id];
+					const unsigned int object_id = load_object_from_file(context, template_path);
+					if (object_id < context.objects.size()) {
+						object = context.objects[object_id];
 					}
 				}
 				// By loading the object after copying the template, we can override properties.
 				_load_object(object_node, object);
-				if (object.tile.gid != 0 && object.tileset.first_gid == 0) {
+				if (object.tile.value != UINT32_MAX) {
 					// This happens when the object is not a template and has a tile, in which case
-					// we need to resolve its tileset. (For templates this is done at load time.)
-					object.tileset = find_tileset_link_for_tile_gid(map.tilesets, object.tile.gid);
+					// we need to resolve its GID. (For templates this is done at load time.)
+					_resolve_gid(object.tile, tileset_references);
 				}
 			}
 		} break;
@@ -488,19 +540,19 @@ namespace tiled {
 		} break;
 		case LayerType::Group: {
 			for (pugi::xml_node child_node : node.children()) {
-				_load_layer_recursive(context, map, child_node);
+				_load_layer_recursive(context, map, tileset_references, child_node);
 			}
 		} break;
 		}
 	}
 
-	unsigned int load_map_from_file(Context& context, const std::string& path) {
+	unsigned int load_map_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the map is already loaded
-		for (unsigned int map_id = 0; map_id < context.maps.size(); ++map_id) {
-			if (context.maps[map_id].path == normalized_path) {
-				return map_id;
+		for (unsigned int id = 0; id < context.maps.size(); ++id) {
+			if (context.maps[id].path == normalized_path) {
+				return id;
 			}
 		}
 
@@ -538,6 +590,7 @@ namespace tiled {
 		_load_properties(map_node, map.properties);
 
 		// Load tilesets
+		std::vector<TilesetWithGids> tilesets_with_gids;
 		for (pugi::xml_node tileset_node : map_node.children("tileset")) {
 			pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			// TODO: handle embedded tilesets
@@ -551,24 +604,26 @@ namespace tiled {
 			tileset_path += '/';
 			tileset_path += source_attribute.as_string();
 			tileset_path = _get_normalized_path(tileset_path);
-			TilesetLink& tileset_id = map.tilesets.emplace_back();
-			tileset_id.tileset_id = load_tileset_from_file(context, tileset_path); // TODO: handle errors
-			tileset_id.first_gid = tileset_node.attribute("firstgid").as_uint();
+			const unsigned int tileset_id = load_tileset_from_file(context, tileset_path);
+			if (tileset_id >= context.tilesets.size()) continue;
+			map.tilesets.push_back(tileset_id);
+			const unsigned int first_gid = tileset_node.attribute("firstgid").as_uint();
+			tilesets_with_gids.emplace_back(tileset_id, first_gid);
 		}
 
-		// Sort tilesets by first_gid in ascending order. This is shouldn't be necessary
+		// Sort referenced tilesets by first_gid in ascending order. This is shouldn't be necessary
 		// since Tiled already sorts them this way, but it doesn't hurt to be safe.
-		std::sort(map.tilesets.begin(), map.tilesets.end(), [](const TilesetLink& a, const TilesetLink& b) {
+		std::sort(tilesets_with_gids.begin(), tilesets_with_gids.end(), [](const auto& a, const auto& b) {
 			return a.first_gid < b.first_gid;
 		});
 
 		// Load layers
 		for (pugi::xml_node child_node : map_node.children()) {
-			_load_layer_recursive(context, map, child_node);
+			_load_layer_recursive(context, map, tilesets_with_gids, child_node);
 		}
 
-		const unsigned int map_id = (unsigned int)context.maps.size();
+		const unsigned int id = (unsigned int)context.maps.size();
 		context.maps.emplace_back(std::move(map));
-		return map_id;
+		return id;
 	}
 }

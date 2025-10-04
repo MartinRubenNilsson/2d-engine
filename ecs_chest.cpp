@@ -63,10 +63,10 @@ namespace ecs {
     }
 
     void setup_chests() {
-        for (auto [entity, object] : _registry.view<Type<Tag::Chest>, TObject>().each()) {
+        for (auto [entity, object] : _registry.view<Type<Tag::Chest>, ObjectId>().each()) {
 
-            const Vector2f top_left = object.get_top_left();
-            const std::string_view type = object.get_string("type");
+            const Vector2f top_left = get_top_left(object);
+            const std::string_view type = get_string(object, "type");
 
             Chest& chest = _registry.emplace<Chest>(entity);
             if (type == "bomb") {

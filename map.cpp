@@ -1,19 +1,22 @@
 #include "stdafx.h"
 #include "map.h"
 #include "map_grid.h"
-#include "map_entities.h"
 #include "tiled.h"
-#include "tiled_types.h"
 #include "filesystem.h"
 #include "console.h"
 #include "audio.h"
 #include "ui_textbox.h"
+#include "ecs.h"
+#include "ecs_tiled.h"
+
+namespace ecs {
+	extern tiled::Context _tiled_context;
+}
 
 namespace map {
 	const float DEFAULT_TRANSITION_DURATION = 0.6f; // seconds
 
 	bool debug = false;
-	tiled::Context _tiled_context;
 	std::string _current_map_path;
 	std::string _next_map_path;
 	unsigned int _object_layer_index = 0;
@@ -25,9 +28,10 @@ namespace map {
 #ifdef _DEBUG_IMGUI
 		ImGui::Begin("Maps");
 		if (ImGui::BeginCombo("Map", _current_map_path.c_str())) {
-			for (const tiled::Map& map : _tiled_context.maps) {
-				bool is_selected = (_current_map_path == map.path);
-				const std::string stem = filesystem::get_stem(map.path);
+			for (ecs::MapId map : ecs::get_all_maps()) {
+				std::string_view path = ecs::get_path(map);
+				bool is_selected = (_current_map_path == path);
+				const std::string stem = filesystem::get_stem(path);
 				if (ImGui::Selectable(stem.c_str(), is_selected)) {
 					open(stem);
 				}
@@ -44,60 +48,15 @@ namespace map {
 #endif
 	}
 
-	bool _tiled_file_load_callback(std::string_view path, std::string& contents) {
-		return filesystem::read_text_file(path, contents);
-	}
-
-	void _tiled_debug_message_callback(std::string_view message) {
-		__debugbreak();
-		console::log_error(message);
-	}
-
-	void initialize() {
-		_tiled_context.file_load_callback = _tiled_file_load_callback;
-		_tiled_context.debug_message_callback = _tiled_debug_message_callback;
-
-		// Preload all Tiled assets.
-		const std::span<const filesystem::File> files = filesystem::get_all_files_in_directory("assets/tiled");
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledTileset) continue;
-			tiled::load_tileset_from_file(_tiled_context, file.path);
-		}
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledTemplate) continue;
-			tiled::load_template_from_file(_tiled_context, file.path);
-		}
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledMap) continue;
-			tiled::load_map_from_file(_tiled_context, file.path);
-		}
-	}
-
-	const tiled::Map* _find_map_by_path(std::string_view path) {
-		if (path.empty()) return nullptr;
-		for (const tiled::Map& map : _tiled_context.maps) {
-			if (map.path == path) {
-				return &map;
-			}
-		}
-		return nullptr;
-	}
-
-	const tiled::Map* _find_map_by_path_stem(std::string_view stem) {
-		if (stem.empty()) return nullptr;
-		for (const tiled::Map& map : _tiled_context.maps) {
-			if (filesystem::get_stem(map.path) == stem) {
-				return &map;
-			}
-		}
-		return nullptr;
-	}
-
 	// Returns nullptr if no music event is associated with the map.
 	std::string_view _get_music_event_path_for_map(std::string_view map_path) {
 		if (map_path.find("summer_forest") != std::string::npos)   return "event:/music/map/summer_forest";
 		if (map_path.find("eternal_dungeon") != std::string::npos) return "event:/music/map/eternal_dungeon";
 		return "";
+	}
+
+	void destroy_entities() {
+		ecs::clear();
 	}
 
 	void update(float dt) {
@@ -135,14 +94,14 @@ namespace map {
 
 		if (!shall_change_map) return;
 
-		const tiled::Map* current_map = _find_map_by_path(_current_map_path);
-		const tiled::Map* next_map = _find_map_by_path(_next_map_path);
+		ecs::MapId current_map = ecs::get_map(_current_map_path);
+		ecs::MapId next_map = ecs::get_map(_next_map_path);
 		_current_map_path = _next_map_path;
 		_next_map_path.clear();
 
 		// CLOSE CURRENT MAP
 
-		if (current_map) {
+		if (ecs::valid(current_map)) {
 			_object_layer_index = 0;
 			_next_free_layer_index = 0;
 			audio::stop_all_in_bus(audio::BUS_SOUND);
@@ -151,7 +110,7 @@ namespace map {
 
 		// OPEN NEXT MAP
 
-		if (!next_map) {
+		if (!ecs::valid(next_map)) {
 			destroy_entities();
 			destroy_grid();
 			audio::stop_all_in_bus();
@@ -159,22 +118,24 @@ namespace map {
 		}
 
 		// Resolve the layer index on which to place objects/entities.
-		for (unsigned int layer_index = 0; layer_index < next_map->layers.size(); ++layer_index) {
-			const tiled::Layer& layer = next_map->layers[layer_index];
+		const auto& next_map_tiled = ecs::_tiled_context.maps[next_map.id];
+		const auto& layers = next_map_tiled.layers;
+		for (unsigned int i = 0; i < layers.size(); ++i) {
+			const tiled::Layer& layer = layers[i];
 			if (layer.type == tiled::LayerType::Tile) {
 				if (layer.name.starts_with("object") || layer.name.starts_with("Object")) {
-					_object_layer_index = layer_index;
+					_object_layer_index = i;
 					break;
 				}
 			} else if (layer.type == tiled::LayerType::Object) {
-				_object_layer_index = layer_index;
+				_object_layer_index = i;
 				break;
 			}
 		}
-		_next_free_layer_index = (unsigned int)next_map->layers.size();
+		_next_free_layer_index = (unsigned int)layers.size();
 
-		create_grid(*next_map);
-		create_entities(*next_map);
+		create_grid(next_map_tiled);
+		ecs::setup(next_map_tiled.path);
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {
@@ -191,8 +152,9 @@ namespace map {
 		case MapTransitionType::Open: {
 			if (options.map_name.empty()) return false;
 			if (_current_map_path == options.map_name) return false;
-			if (const tiled::Map* map = _find_map_by_path_stem(options.map_name)) {
-				_next_map_path = map->path;
+			ecs::MapId map = ecs::get_map(options.map_name);
+			if (ecs::valid(map)) {
+				_next_map_path = ecs::get_path(map);
 			} else {
 				console::log_error("Map not found: " + std::string(options.map_name));
 				return false;
@@ -248,21 +210,6 @@ namespace map {
 
 	unsigned int get_next_free_layer_index() {
 		return _next_free_layer_index;
-	}
-
-	unsigned int find_tileset_by_name(std::string_view name) {
-		if (name.empty()) return UINT_MAX;
-		for (unsigned int tileset_id = 0; tileset_id < _tiled_context.tilesets.size(); ++tileset_id) {
-			if (_tiled_context.tilesets[tileset_id].name == name) {
-				return tileset_id;
-			}
-		}
-		return UINT_MAX;
-	}
-
-	const tiled::Tileset* get_tileset(unsigned int tileset_id) {
-		if (tileset_id >= _tiled_context.tilesets.size()) return nullptr;
-		return &_tiled_context.tilesets[tileset_id];
 	}
 
 	float get_transition_progress() {

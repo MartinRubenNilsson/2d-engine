@@ -20,11 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tiled.h" />
-    <ClInclude Include="tiled_types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tiled_loading.cpp" />
-    <ClCompile Include="tiled_utils.cpp" />
+    <ClCompile Include="tiled.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

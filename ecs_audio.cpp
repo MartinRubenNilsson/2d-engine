@@ -8,12 +8,12 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void setup_audio_sources() {
-		for (auto [entity, object] : _registry.view<Type<Tag::AudioSource>, TObject>().each()) {
-			std::string_view event = object.get_string("event");
+		for (auto [entity, object] : _registry.view<Type<Tag::AudioSource>, ObjectId>().each()) {
+			std::string_view event = get_string(object, "event");
 			if (!event.empty()) {
 				audio::create_event({
 					.path = event.data(),
-					.position = object.get_position() });
+					.position = get_position(object) });
 			}
 		}
 	}

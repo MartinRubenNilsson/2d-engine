@@ -104,8 +104,10 @@ namespace ecs {
 	}
 
 	void setup_players() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Player>, TObject>().each()) {
-			const Vector2f top_left = object.get_top_left();
+		const Vector2f map_bottom_right = get_bottom_right(get_current_map());
+
+		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
+			const Vector2f top_left = get_top_left(object);
 
 			Player player{};
 			/*if (last_player) { // TODO
@@ -171,7 +173,7 @@ namespace ecs {
 			Camera camera{};
 			camera.center = top_left;
 			camera.confines_min = { 0.f, 0.f };
-			camera.confines_max = object.get_map().get_bottom_right();
+			camera.confines_max = map_bottom_right;
 			camera.entity_to_follow = entity;
 			emplace_camera(entity, camera);
 			activate_camera(entity, true);

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ecs_grass.h"
-#include "ecs_common.h"
+#include "ecs_lifetime.h"
 #include "ecs_physics.h"
 #include "ecs_pickups.h"
 #include "ecs_uniform_block.h"

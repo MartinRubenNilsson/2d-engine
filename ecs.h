@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace ecs {
 	enum DEBUG_FLAGS {
@@ -12,14 +13,11 @@ namespace ecs {
 	void startup(); // Called on app startup.
 	void shutdown(); // Called on app shutdown.
 
-	void clear();
-	entt::entity create();
-	entt::entity create(entt::entity hint);
+	// TODO: move somewhere else!
 	entt::entity deep_copy(entt::entity entity);
-	bool valid(entt::entity entity);
 
-	void setup(); // Called on map load after entities has been created.
-	void patch(const std::string& patch_id);
+	void clear();
+	void setup(const std::string& map_path);
 	void update(float dt);
 	void handle_window_event(const window::Event& ev);
 

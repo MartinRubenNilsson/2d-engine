@@ -41,7 +41,7 @@ namespace ecs {
 	}
 
 	void setup_physics() {
-		for (auto [entity, object] : _registry.view<TObject>().each()) {
+		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
 
 		}
 	}

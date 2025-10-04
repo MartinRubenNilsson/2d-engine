@@ -62,7 +62,7 @@ namespace graphics {
 	void bind_uniform_buffer_range(unsigned int binding, Handle<Buffer> handle, unsigned int size, unsigned offset = 0);
 
 	Handle<Texture> create_texture(TextureDesc&& desc);
-	Handle<Texture> load_texture(const std::string& path);
+	Handle<Texture> load_texture(std::string_view path);
 	Handle<Texture> copy_texture(Handle<Texture> src);
 	void destroy_texture(Handle<Texture> handle);
 	// Pass an empty handle to unbind any currently bound texture.

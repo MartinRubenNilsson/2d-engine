@@ -57,7 +57,6 @@ int main(int argc, char* argv[]) {
     console::initialize();
     audio::initialize();
     ui::initialize();
-    map::initialize();
     ecs::startup();
 
     for (const filesystem::File& file : filesystem::get_all_files_in_directory("assets/audio/banks")) {

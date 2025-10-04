@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "ecs.h"
-#include "ecs_lifetime.h"
+#include "ecs_tiled.h"
 #include "ecs_patch.h"
+#include "ecs_lifetime.h"
 #include "ecs_physics.h"
 #include "ecs_sprites.h"
 #include "ecs_player.h"
@@ -21,6 +22,7 @@
 namespace ecs {
 	void startup() {
 		startup_physics();
+		startup_tiled_maps();
 	}
 
 	void shutdown() {
@@ -29,19 +31,6 @@ namespace ecs {
 	}
 
 	entt::registry _registry;
-
-	void clear() {
-		clear_entities_to_destroy_at_end_of_frame();
-		_registry.clear();
-	}
-
-	entt::entity create() {
-		return _registry.create();
-	}
-
-	entt::entity create(entt::entity hint) {
-		return _registry.create(hint);
-	}
 
 	entt::entity deep_copy(entt::entity entity) {
 		entt::entity copied_entity = _registry.create();
@@ -59,11 +48,12 @@ namespace ecs {
 		return copied_entity;
 	}
 
-	bool valid(entt::entity entity) {
-		return _registry.valid(entity);
+	void clear() {
+		clear_entities_to_destroy_at_end_of_frame();
+		_registry.clear();
 	}
 
-	void setup() {
+	void _setup() {
 		setup_sprites();
 		setup_cameras();
 		setup_physics();
@@ -76,11 +66,19 @@ namespace ecs {
 		setup_blade_traps();
 	}
 
-	void patch(const std::string& patch_id) {
+	void _patch(const std::string& patch_id) {
 		if (!set_patch(patch_id)) return;
 		Patch& patch = get_patch();
 		patch_entities_to_destroy(patch);
 		patch_chests(patch);
+	}
+
+	void setup(const std::string& map_path) {
+		clear();
+		if (!setup_tiled_map(map_path))
+			return;
+		_setup();
+		_patch(map_path);
 	}
 
 	void update(float dt) {

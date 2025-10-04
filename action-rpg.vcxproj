@@ -189,7 +189,6 @@
     <ClCompile Include="player_outfit.cpp" />
     <ClCompile Include="ecs_portal.cpp" />
     <ClCompile Include="ecs_vfx.cpp" />
-    <ClCompile Include="map_entities.cpp" />
     <ClCompile Include="map_grid.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="postprocessing.cpp" />
@@ -291,7 +290,6 @@
     <ClInclude Include="player_outfit.h" />
     <ClInclude Include="ecs_portal.h" />
     <ClInclude Include="ecs_vfx.h" />
-    <ClInclude Include="map_entities.h" />
     <ClInclude Include="map_grid.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="postprocessing.h" />

@@ -9,11 +9,11 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void setup_portals() {
-		for (auto [entity, object] : _registry.view<Type<Tag::Portal>, TObject>().each()) {
+		for (auto [entity, object] : _registry.view<Type<Tag::Portal>, ObjectId>().each()) {
 			Portal& portal = _registry.emplace<Portal>(entity);
-			portal.target_map = object.get_string("target_map");
-			portal.target_point = object.get_string("target_point");
-			portal.exit_direction = object.get_string("exit_direction");
+			portal.target_map = get_string(object, "target_map");
+			portal.target_point = get_string(object, "target_point");
+			portal.exit_direction = get_string(object, "exit_direction");
 		}
 	}
 

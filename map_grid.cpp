@@ -128,17 +128,17 @@ namespace map {
 				for (int y = 0; y < _grid.size.y; ++y) {
 					for (int x = 0; x < _grid.size.x; ++x) {
 						int index = x + y * _grid.size.x;
-						_grid.tiles[index].passable = (layer.tiles[index].gid == 0);
+						_grid.tiles[index].passable = (layer.tiles[index].ids == 0);
 					}
 				}
 			} else if (layer.name == "Under Sprite 1") {
 				for (int y = 0; y < _grid.size.y; ++y) {
 					for (int x = 0; x < _grid.size.x; ++x) {
 						int index = x + y * _grid.size.x;
-						if (!layer.tiles[index].gid) continue;
+						if (!layer.tiles[index].ids) continue;
+#if 0
 						const tiled::Tile* layer_tile = tiled::find_tile_with_gid(map.tilesets, _tiled_context.tilesets, layer.tiles[index].gid);
 						if (!layer_tile) continue;
-#if 0
 						if (layer_tile->wangtiles.empty()) continue;
 						const tiled::WangTile& wangtile = layer_tile->wangtiles[0];
 						Tile& grid_tile = _grid.tiles[tileset];
