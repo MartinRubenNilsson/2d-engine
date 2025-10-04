@@ -236,6 +236,9 @@
     <ClCompile Include="ecs_physics_events.cpp">
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_physics_setup.cpp">
+      <Filter>game\ecs\physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

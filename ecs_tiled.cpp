@@ -100,6 +100,12 @@ namespace ecs {
 		return { m.width * m.tile_width, m.height * m.tile_height };
 	}
 
+	bool is_layer_visible(MapId map, unsigned int layer) {
+		const tiled::Map& m = _get_map(map);
+		if (layer >= m.layers.size()) return false;
+		return m.layers[layer].visible;
+	}
+
 	TilesetId get_tileset(std::string_view name) {
 		if (name.empty()) return {};
 		for (uint16_t i = 0; i < _tiled_context.tilesets.size(); ++i) {

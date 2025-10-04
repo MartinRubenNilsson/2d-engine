@@ -16,6 +16,7 @@ namespace ecs {
 	Vector2u get_tile_size(MapId map); // in pixels
 	Vector2u get_size_in_tiles(MapId map);
 	Vector2u get_size_in_pixels(MapId map);
+	bool is_layer_visible(MapId map, unsigned int layer);
 
 	/// TILESETS
 

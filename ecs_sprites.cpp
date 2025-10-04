@@ -119,11 +119,12 @@ namespace ecs {
 				(float)coord.y * map_tile_size.y - size.y + map_tile_size.y
 			};
 
-			// TODO: fix flip flags!!!
-#if 0
-			if (!layer.visible) {
+			if (!is_layer_visible(map, coord.layer)) {
 				sprite.flags &= ~sprites::SPRITE_VISIBLE;
 			}
+
+			// TODO: fix flip flags!!!
+#if 0
 			if (gid.flipped_horizontally) {
 				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
 			}
