@@ -1,7 +1,6 @@
 #include "tiled.h"
 #include <pugixml.hpp>
 #include <zlib.h>
-#include <algorithm> // TODO: remove, it is slow to compile!
 #include <filesystem> // TODO: remove, it is slow to compile!
 #include <span>
 #include <cstdlib>
@@ -93,19 +92,23 @@ namespace tiled {
 
 	struct TilesetWithGids {
 		unsigned int id = UINT_MAX; // index into Context::tilesets[]
-		unsigned int first_gid = 0; // The Tiled GID of the first tile in this tileset.
+		unsigned int first_gid = 0; // The Tiled GID of the first tile in the tileset.
+		unsigned int last_gid = 0; // The Tiled GID of the last tile in the tileset.
 	};
 
-	void _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
+	bool _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
+		if (tile.ids < tileset.first_gid || tileset.last_gid < tile.ids)
+			return false;
 		tile.id = tile.ids - tileset.first_gid;
 		tile.tileset_id = tileset.id;
+		return true;
 	}
 
 	bool _resolve_gid(TileGid& tile, std::span<const TilesetWithGids> tilesets) {
-		for (auto it = tilesets.rbegin(); it != tilesets.rend(); ++it) {
-			if (tile.ids < it->first_gid) continue;
-			_resolve_gid(tile, *it);
-			return true;
+		for (const TilesetWithGids&tileset : tilesets) {
+			if (_resolve_gid(tile, tileset)) {
+				return true;
+			}
 		}
 		tile = {};
 		return false;
@@ -340,6 +343,7 @@ namespace tiled {
 				if (tileset.id < context.tilesets.size()) {
 					// NOTE: first_gid should always be 1 for template objects.
 					tileset.first_gid = tileset_node.attribute("firstgid").as_uint();;
+					tileset.last_gid = tileset.first_gid + context.tilesets[tileset.id].tile_count - 1;
 				}
 			}
 		}
@@ -606,14 +610,9 @@ namespace tiled {
 				continue;
 			map.tilesets.push_back(tileset_id);
 			const unsigned int first_gid = tileset_node.attribute("firstgid").as_uint();
-			tilesets.emplace_back(tileset_id, first_gid);
+			const unsigned int last_gid = first_gid + context.tilesets[tileset_id].tile_count - 1;
+			tilesets.emplace_back(tileset_id, first_gid, last_gid);
 		}
-
-		// Sort referenced tilesets by first_gid in ascending order. This is shouldn't be necessary
-		// since Tiled already sorts them this way, but it doesn't hurt to be safe.
-		std::sort(tilesets.begin(), tilesets.end(), [](const TilesetWithGids& a, const TilesetWithGids& b) {
-			return a.first_gid < b.first_gid;
-		});
 
 		// Load layers
 		for (pugi::xml_node child_node : map_node.children()) {
