@@ -209,7 +209,8 @@ namespace tiled {
 		tileset.tile_width = tileset_node.attribute("tilewidth").as_uint();
 		tileset.tile_height = tileset_node.attribute("tileheight").as_uint();
 		tileset.tile_count = tileset_node.attribute("tilecount").as_uint();
-		tileset.columns = tileset_node.attribute("columns").as_uint();
+		tileset.width = tileset_node.attribute("columns").as_uint();
+		tileset.height = tileset.tile_count / tileset.width;
 		tileset.spacing = tileset_node.attribute("spacing").as_uint();
 		tileset.margin = tileset_node.attribute("margin").as_uint();
 		tileset.image_path = _get_parent_path(tileset.path);

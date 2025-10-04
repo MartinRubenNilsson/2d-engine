@@ -1,21 +1,15 @@
 #pragma once
+#include "ecs_tiled.h"
 
 namespace ecs {
-
-	unsigned int get_tileset_id(std::string_view name);
-	Handle<graphics::Texture> get_tileset_texture(unsigned int tileset_id);
-
 	struct TileAnimation {
-		unsigned int tileset_id = UINT_MAX; // index into tiled::Context::tilesets[]
-		unsigned int tile_id = UINT_MAX; // index into tiled::Tileset::tiles[]
-		unsigned int _previous_tile_id = UINT_MAX;
-		unsigned int _animated_tile_id = UINT_MAX;
-		unsigned int _frame_id = 0; // index into tiled::Tile::animation[]
+		TileId tile{}; // The tile that owns the animation.
+		TileId _frame{}; // The current frame in the animation.
 		float progress = 0.f; // aka normalized time, in the range [0, 1]
 		float speed = 1.f;
 		bool loop = true;
-		bool _dirty = false;
 		bool _looped = false;
+		bool _frame_changed = false;
 	};
 
 	struct FlipbookAnimation {

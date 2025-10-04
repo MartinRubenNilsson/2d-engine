@@ -49,8 +49,7 @@ namespace ecs {
 				case ObjectType::Tile: {
 
 					const TileId tile = get_tile(object);
-					if (!valid(tile))
-						break;
+					if (!tile) break;
 
 					const std::span<const ObjectId> objects = get_objects(tile);
 					if (!objects.empty()) {

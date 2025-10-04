@@ -215,10 +215,10 @@ namespace ecs {
 
 			audio::set_listener_position(position);
 			audio::set_parameter_label("terrain", map::to_string(map::get_terrain_type_at(position)));
-			if (animation._dirty && animation._frame_id % 3 == 0) {
-				// Take a step every 3 frames
-				audio::create_event({ .path = "event:/snd_footstep" });
-			}
+			//if (animation._frame_changed && animation._frame_id % 3 == 0) {
+			//	// Take a step every 3 frames
+			//	audio::create_event({ .path = "event:/snd_footstep" });
+			//}
 
 			// UPDATE POST-PROCESSING
 			postprocessing::set_darkness_center(position);
@@ -261,9 +261,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_FOREHAND_STRIKE_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
 					}
 
 					audio::create_event({ .path = "event:/snd_sword_attack" });
@@ -276,9 +276,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_BOW_SHOT_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_BOW_SHOT_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_BOW_SHOT_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
 					}
 
 					animation.progress = 0.f;
@@ -300,9 +300,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_PUSH_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_PUSH_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_PUSH_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_PUSH_DOWN); break;
 					}
 
 					animation.loop = true;
@@ -314,9 +314,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_RUN_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_RUN_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_RUN_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_RUN_DOWN); break;
 					}
 
 					animation.loop = true;
@@ -328,9 +328,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_WALK_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_WALK_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_WALK_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_WALK_DOWN); break;
 					}
 
 					animation.loop = true;
@@ -342,9 +342,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_IDLE_RIGHT; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_IDLE_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_IDLE_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_IDLE_DOWN); break;
 					}
 
 					animation.loop = true;
@@ -367,9 +367,10 @@ namespace ecs {
 					sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
 				}
 #endif
-				if (animation._dirty && animation._frame_id == 1) {
-					_player_attack(player_entity, position + player.look_dir * 16.f);
-				}
+				// TODO
+				//if (animation._frame_changed && animation._frame_id == 1) {
+				//	_player_attack(player_entity, position + player.look_dir * 16.f);
+				//}
 				if (animation.progress == 1.f) {
 					player.state = PlayerState::Normal;
 				}
@@ -381,26 +382,27 @@ namespace ecs {
 					sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
 				}
 #endif
-				if (player.arrows > 0 && animation._dirty && animation._frame_id == 2) {
-					player.arrows--;
-					create_arrow(position + player.look_dir * 16.f, player.look_dir * _PLAYER_ARROW_SPEED);
-				}
+				// TODO
+				//if (player.arrows > 0 && animation._frame_changed && animation._frame_id == 2) {
+				//	player.arrows--;
+				//	create_arrow(position + player.look_dir * 16.f, player.look_dir * _PLAYER_ARROW_SPEED);
+				//}
 				if (animation.progress == 1.f) {
 					player.state = PlayerState::Normal;
 				}
 			} break;
 			case PlayerState::Dying: {
 
-				unsigned int original_tile_id = animation.tile_id;
+				const TileId original_tile = animation.tile;
 
 				switch (dir) {
 				case 'l':
-				case 'r': animation.tile_id = TILE_ID_PLAYER_DYING_RIGHT_DOWN; break;
-				case 'u': animation.tile_id = TILE_ID_PLAYER_DYING_RIGHT_UP; break;
-				case 'd': animation.tile_id = TILE_ID_PLAYER_DYING_RIGHT_DOWN; break;
+				case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
+				case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
+				case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
 				}
 
-				if (animation.tile_id != original_tile_id) { // HACK
+				if (animation.tile != original_tile) { // HACK
 					animation.progress = 0.f;
 				}
 				animation.loop = false;
@@ -409,9 +411,9 @@ namespace ecs {
 
 					switch (dir) {
 					case 'l':
-					case 'r': animation.tile_id = TILE_ID_PLAYER_DEAD_RIGHT_DOWN; break;
-					case 'u': animation.tile_id = TILE_ID_PLAYER_DEAD_RIGHT_UP; break;
-					case 'd': animation.tile_id = TILE_ID_PLAYER_DEAD_RIGHT_DOWN; break;
+					case 'r': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+					case 'u': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
+					case 'd': animation.tile = change(animation.tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
 					}
 
 					kill_player(player_entity);

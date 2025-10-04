@@ -51,30 +51,34 @@ namespace ecs {
 			circle.radius = 4.f;
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
-		{
-			TileAnimation& animation = emplace_tile_animation(entity);
-			animation.tileset_id = get_tileset_id("items1");
+		if (const TilesetId tileset = get_tileset("items1")) {
+			
+			unsigned int tile_id = UINT_MAX;
 			switch (type) {
 			case PickupType::Arrow:
-				animation.tile_id = TILE_ID_ITEM_SPEAR; // placeholder
+				tile_id = TILE_ID_ITEM_SPEAR; // placeholder
 				break;
 			case PickupType::Rupee:
-				animation.tile_id = TILE_ID_ITEM_RUPEE;
+				tile_id = TILE_ID_ITEM_RUPEE;
 				break;
 			case PickupType::Bomb:
-				animation.tile_id = TILE_ID_ITEM_POTION; // placeholder
+				tile_id = TILE_ID_ITEM_POTION; // placeholder
 				break;
 			case PickupType::Heart:
-				animation.tile_id = TILE_ID_ITEM_BERRIES; // placeholder
+				tile_id = TILE_ID_ITEM_BERRIES; // placeholder
 				break;
 			}
 
-			sprites::Sprite& sprite = emplace_sprite(entity);
-			sprite.texture = get_tileset_texture(animation.tileset_id);
-			sprite.sorting_layer = (uint8_t)map::get_object_layer_index();
-			sprite.sorting_point = { 8.f, 8.f };
-			sprite.position = position - sprite.sorting_point;
-			sprite.size = { 16.f, 16.f };
+			if (const TileId tile = get_tile(tileset, tile_id)) {
+				TileAnimation& animation = emplace_tile_animation(entity);
+
+				sprites::Sprite& sprite = emplace_sprite(entity);
+				sprite.texture = get_texture(tileset);
+				sprite.sorting_layer = (uint8_t)map::get_object_layer_index();
+				sprite.sorting_point = { 8.f, 8.f };
+				sprite.position = position - sprite.sorting_point;
+				sprite.size = { 16.f, 16.f };
+			}
 		}
 		return entity;
 	}

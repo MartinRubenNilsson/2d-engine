@@ -11,6 +11,26 @@
 #include "ecs_sprites.h"
 
 namespace ecs {
+	tiled::Context _tiled_context;
+	MapId _current_tiled_map{};
+
+	MapId::operator bool() const {
+		return id < _tiled_context.maps.size();
+	}
+
+	TilesetId::operator bool() const {
+		return id < _tiled_context.tilesets.size();
+	}
+
+	TileId::operator bool() const {
+		return tileset_id < _tiled_context.tilesets.size() &&
+			id < _tiled_context.tilesets[tileset_id].tile_count;
+	}
+
+	ObjectId::operator bool() const {
+		return id < _tiled_context.objects.size();
+	}
+
 	bool _tiled_file_load_callback(std::string_view path, std::string& contents) {
 		return filesystem::read_text_file(path, contents);
 	}
@@ -19,9 +39,6 @@ namespace ecs {
 		__debugbreak();
 		console::log_error(message);
 	}
-
-	tiled::Context _tiled_context;
-	MapId _current_tiled_map{};
 
 	void startup_tiled_maps() {
 		_tiled_context.file_load_callback = _tiled_file_load_callback;
@@ -112,17 +129,22 @@ namespace ecs {
 		return {};
 	}
 
-	bool valid(TilesetId tileset) {
-		return tileset.id < _tiled_context.tilesets.size();
-	}
-
 	std::string_view get_image_path(TilesetId tileset) {
 		return _tiled_context.tilesets[tileset.id].image_path;
 	}
 
-	bool valid(TileId tile) {
-		return tile.tileset_id < _tiled_context.tilesets.size() &&
-			tile.id < _tiled_context.tilesets[tile.tileset_id].tiles.size();
+	Handle<graphics::Texture> get_texture(TilesetId tileset) {
+		return graphics::load_texture(get_image_path(tileset));
+	}
+
+	const tiled::Tileset& _get_tileset(TilesetId tileset) {
+		return _tiled_context.tilesets[tileset.id];
+	}
+
+	TileId get_tile(TilesetId tileset, unsigned int tile_id) {
+		const tiled::Tileset& ts = _get_tileset(tileset);
+		if (tile_id < ts.tile_count) return {};
+		return { .id = (uint16_t)tile_id, .tileset_id = tileset.id };
 	}
 
 	const tiled::Tile& _get_tile(TileId tile) {
@@ -141,8 +163,8 @@ namespace ecs {
 	TextureRect get_texture_rect(TileId tile) {
 		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
 		TextureRect rect{};
-		rect.x = (tile.id % ts.columns) * (ts.tile_width + ts.spacing) + ts.margin;
-		rect.y = (tile.id / ts.columns) * (ts.tile_height + ts.spacing) + ts.margin;
+		rect.x = (tile.id % ts.width) * (ts.tile_width + ts.spacing) + ts.margin;
+		rect.y = (tile.id / ts.width) * (ts.tile_height + ts.spacing) + ts.margin;
 		rect.w = ts.tile_width;
 		rect.h = ts.tile_height;
 		return rect;
@@ -150,6 +172,47 @@ namespace ecs {
 
 	bool animated(TileId tile) {
 		return !_get_tile(tile).animation.empty();
+	}
+
+	unsigned int get_animation_duration(TileId tile) {
+		const auto& animation = _get_tile(tile).animation;
+		unsigned int duration_ms = 0; // in milliseconds
+		for (const tiled::Frame& frame : animation) {
+			duration_ms += frame.duration_ms;
+		}
+		return duration_ms;
+	}
+
+	TileId get_animation_frame(TileId tile, unsigned int time_ms) {
+		const auto& animation = _get_tile(tile).animation;
+		if (animation.empty())
+			return tile;
+		for (const tiled::Frame& frame : animation) {
+			tile.id = frame.tile_id;
+			if (time_ms < frame.duration_ms)
+				break;
+			time_ms -= frame.duration_ms;
+		}
+		return tile;
+	}
+
+	TileId change(TileId tile, unsigned int id) {
+		tile.id = id;
+		return tile ? tile : TileId();
+	}
+
+	TileId offset(TileId tile, int delta_x, int delta_y) {
+		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
+		const unsigned int old_x = tile.id / ts.width;
+		const unsigned int new_x = old_x + delta_x;
+		if (new_x >= ts.width)
+			return tile;
+		const unsigned int old_y = tile.id % ts.width;
+		const unsigned int new_y = old_y + delta_y;
+		if (new_y >= ts.height)
+			return tile;
+		tile.id = (uint16_t)(new_x + new_y * ts.width);
+		return tile;
 	}
 
 	template <tiled::PropertyType type>
@@ -186,10 +249,6 @@ namespace ecs {
 			return std::get<index>(prop.value);
 		}
 		return {};
-	}
-
-	bool valid(ObjectId obj) {
-		return obj.id < _tiled_context.objects.size();
 	}
 
 	entt::entity get_entity(ObjectId obj) {

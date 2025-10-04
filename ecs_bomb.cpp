@@ -67,17 +67,18 @@ namespace ecs {
         set_tag(entity, Tag::Bomb);
         emplace_bomb(entity);
         ignite_bomb(entity);
-        {
-            TileAnimation& animation = emplace_tile_animation(entity);
-            animation.tileset_id = get_tileset_id("items1");
-            animation.tile_id = TILE_ID_ITEM_POTION; // placeholder
+        if (const TilesetId tileset = get_tileset("items1")) {
+            if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_POTION)) { // placeholder
+                TileAnimation& animation = emplace_tile_animation(entity);
+                animation.tile = tile;
 
-            sprites::Sprite& sprite = emplace_sprite(entity);
-            sprite.texture = get_tileset_texture(animation.tileset_id);
-            sprite.sorting_layer = map::get_object_layer_index();
-            sprite.sorting_point = { 8.f, 16.f };
-            sprite.position = position - sprite.sorting_point;
-            sprite.size = { 16.f, 16.f };
+                sprites::Sprite& sprite = emplace_sprite(entity);
+                sprite.texture = get_texture(tileset);
+                sprite.sorting_layer = map::get_object_layer_index();
+                sprite.sorting_point = { 8.f, 16.f };
+                sprite.position = position - sprite.sorting_point;
+                sprite.size = { 16.f, 16.f };
+            }
         }
         {
             b2BodyDef body_def = b2DefaultBodyDef();

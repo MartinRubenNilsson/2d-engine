@@ -23,27 +23,27 @@ namespace ecs {
             const float dist_to_player = length(world.player.position - knowledge.me.position);
 
             switch (type) {
-            case AiType::None:
-                break; // Do nothing
-            case AiType::Slime:
-            {
+                case AiType::None:
+                    break; // Do nothing
+                case AiType::Slime:
+                {
 
-                if (action.type == AiActionType::Flee && action.status == AiActionStatus::Running) {
-                } else if (action.type == AiActionType::Pursue && action.status == AiActionStatus::Running) {
-                } else if (player_exists && dist_to_player < 25.f) {
-                    ai_flee(entity, world.player.entity, knowledge.me.p_speed, 60.f);
-                } else if (player_exists && dist_to_player < 100.f) {
-                    ai_pursue(entity, world.player.entity, knowledge.me.p_speed, 35.f, true);
-                } else if (action.type == AiActionType::Wait && action.status == AiActionStatus::Running) {
-                } else if (action.type == AiActionType::Wander && action.status == AiActionStatus::Succeeded) {
-                    float duration = random::range_f(0.5f, 1.5f);
-                    ai_wait(entity, duration);
-                } else if (action.type != AiActionType::Wander) {
-                    float duration = random::range_f(1.f, 3.f);
-                    ai_wander(entity, knowledge.initial_position, 20.f, 50.f, duration);
-                }
+                    if (action.type == AiActionType::Flee && action.status == AiActionStatus::Running) {
+                    } else if (action.type == AiActionType::Pursue && action.status == AiActionStatus::Running) {
+                    } else if (player_exists && dist_to_player < 25.f) {
+                        ai_flee(entity, world.player.entity, knowledge.me.p_speed, 60.f);
+                    } else if (player_exists && dist_to_player < 100.f) {
+                        ai_pursue(entity, world.player.entity, knowledge.me.p_speed, 35.f, true);
+                    } else if (action.type == AiActionType::Wait && action.status == AiActionStatus::Running) {
+                    } else if (action.type == AiActionType::Wander && action.status == AiActionStatus::Succeeded) {
+                        float duration = random::range_f(0.5f, 1.5f);
+                        ai_wait(entity, duration);
+                    } else if (action.type != AiActionType::Wander) {
+                        float duration = random::range_f(1.f, 3.f);
+                        ai_wander(entity, knowledge.initial_position, 20.f, 50.f, duration);
+                    }
 
-            } break;
+                } break;
             }
         }
     }
@@ -58,19 +58,20 @@ namespace ecs {
         for (auto [entity, animation, ai_type, body] :
             _registry.view<TileAnimation, const AiType, b2BodyId>().each()) {
             switch (ai_type) {
-            case AiType::Slime:
-            {
-                Vector2f velocity = b2Body_GetLinearVelocity(body);
-                if (!is_zero(velocity)) {
-                    switch (get_direction(velocity)) {
-                    case 'd': animation.tile_id = TILE_ID_SLIME_WALK_DOWN; break;
-                    case 'r': animation.tile_id = TILE_ID_SLIME_WALK_RIGHT; break;
-                    case 'u': animation.tile_id = TILE_ID_SLIME_WALK_UP; break;
-                    case 'l': animation.tile_id = TILE_ID_SLIME_WALK_LEFT; break;
+                case AiType::Slime: {
+                    Vector2f velocity = b2Body_GetLinearVelocity(body);
+                    unsigned int tile_id = UINT_MAX;
+                    if (!is_zero(velocity)) {
+                        switch (get_direction(velocity)) {
+                            case 'd': tile_id = TILE_ID_SLIME_WALK_DOWN; break;
+                            case 'r': tile_id = TILE_ID_SLIME_WALK_RIGHT; break;
+                            case 'u': tile_id = TILE_ID_SLIME_WALK_UP; break;
+                            case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
+                        }
                     }
-                }
-                animation.speed = length(velocity) / 32.f;
-            } break;
+                    animation.tile = change(animation.tile, tile_id);
+                    animation.speed = length(velocity) / 32.f;
+                } break;
             }
         }
     }

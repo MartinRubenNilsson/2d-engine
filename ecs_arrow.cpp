@@ -37,17 +37,18 @@ namespace ecs {
 			arrow.lifetime = 0.f; // unused right now
 		}
 		const Vector2f pivot = { 8.f, 8.f };
-		{
-			TileAnimation& animation = emplace_tile_animation(entity);
-			animation.tileset_id = get_tileset_id("items1");
-			animation.tile_id = TILE_ID_ITEM_SPEAR; // placeholder
+		if (const TilesetId tileset = get_tileset("items1")) {
+			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
+				TileAnimation& animation = emplace_tile_animation(entity);
+				animation.tile = tile;
 
-			sprites::Sprite& sprite = emplace_sprite(entity);
-			sprite.texture = get_tileset_texture(animation.tileset_id);
-			sprite.sorting_layer = map::get_object_layer_index();
-			sprite.sorting_point = pivot;
-			sprite.position = position - pivot;
-			sprite.size = { 16.f, 16.f };
+				sprites::Sprite& sprite = emplace_sprite(entity);
+				sprite.texture = get_texture(tileset);
+				sprite.sorting_layer = map::get_object_layer_index();
+				sprite.sorting_point = pivot;
+				sprite.position = position - pivot;
+				sprite.size = { 16.f, 16.f };
+			}
 		}
 		{
 			b2BodyDef body_def = b2DefaultBodyDef();

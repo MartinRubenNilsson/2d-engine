@@ -6,19 +6,31 @@ namespace ecs {
 
 	struct MapId {
 		uint16_t id = UINT16_MAX;
+
+		operator bool() const; // checks if the ID is valid
+		auto operator<=>(const MapId&) const = default;
 	};
 
 	struct TilesetId {
 		uint16_t id = UINT16_MAX;
+
+		operator bool() const; // checks if the ID is valid
+		auto operator<=>(const TilesetId&) const = default;
 	};
 
 	struct TileId {
 		uint16_t id = UINT16_MAX;
 		uint16_t tileset_id = UINT16_MAX;
+
+		operator bool() const; // checks if both IDs are valid
+		auto operator<=>(const TileId&) const = default;
 	};
 
 	struct ObjectId {
 		uint32_t id = UINT32_MAX;
+
+		operator bool() const; // checks if the ID is valid
+		auto operator<=>(const ObjectId&) const = default;
 	};
 
 	/// MAPS
@@ -36,8 +48,9 @@ namespace ecs {
 
 	TilesetId get_tileset(std::string_view name);
 
-	bool valid(TilesetId tileset);
 	std::string_view get_image_path(TilesetId tileset);
+	Handle<graphics::Texture> get_texture(TilesetId tileset);
+	TileId get_tile(TilesetId tileset, unsigned int tile_id);
 
 	/// TILES
 
@@ -48,11 +61,14 @@ namespace ecs {
 		unsigned int h = 0; // in pixels
 	};
 
-	bool valid(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
 	TextureRect get_texture_rect(TileId tile);
 	bool animated(TileId tile);
+	unsigned int get_animation_duration(TileId tile); // duration in milliseconds
+	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
+	TileId change(TileId tile, unsigned int id);
+	TileId offset(TileId tile, int delta_x, int delta_y);
 
 	/// OBJECTS
 
@@ -66,7 +82,6 @@ namespace ecs {
 		Text, // not supported right now
 	};
 
-	bool valid(ObjectId obj);
 	entt::entity get_entity(ObjectId obj);
 	ObjectType get_type(ObjectId obj);
 	std::string_view get_name(ObjectId obj);

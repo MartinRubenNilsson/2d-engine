@@ -29,14 +29,12 @@ namespace ecs {
         chest->opened = true;
 
         if (TileAnimation* animation = get_tile_animation(entity)) {
-            // At the time I'm writing this code, the treasure chest tileset has 6 rows and 5 columns. 
-            // Each chest's closed sprite is on an even row and its corresponding open sprite is right below it.
-            constexpr unsigned int COLUMNS = 5;
-            unsigned int x = animation->tile_id / COLUMNS;
-            unsigned int y = animation->tile_id % COLUMNS;
-            if (x % 2 == 0) {
-                // If the chest is closed, we open it by setting the tile to the one right below it.
-                animation->tile_id = (x + 1) * COLUMNS + y;
+            // At the time I'm writing this, chest's corresponding closed tile
+            // is right below the open tile in the tileset.
+            if (TileId open_tile = offset(animation->tile, 0, 1)) {
+                animation->tile = open_tile;
+                animation->_frame = open_tile;
+                animation->_frame_changed = true;
             }
         }
 

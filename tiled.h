@@ -153,7 +153,8 @@ namespace tiled {
 		std::vector<Tile> tiles; // size = tile_count
 		std::vector<WangSet> wangsets;
 		unsigned int tile_count = 0;
-		unsigned int columns = 0;
+		unsigned int width = 0; // in tiles
+		unsigned int height = 0; // in tiles
 		unsigned int tile_width = 0; // in pixels
 		unsigned int tile_height = 0; // in pixels
 		unsigned int spacing = 0; // in pixels
