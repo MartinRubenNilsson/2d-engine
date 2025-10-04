@@ -29,6 +29,10 @@ namespace ecs {
 		return graphics::load_texture(get_image_path(tileset));
 	}
 
+	void setup_tile_animations() {
+
+	}
+
 	void update_tile_animations(float dt) {
 		for (auto [entity, animation] : _registry.view<TileAnimation>().each()) {
 

@@ -2,7 +2,6 @@
 #include "ecs_tags.h"
 
 namespace ecs {
-
 	void startup_physics(); // Called on app startup.
 	void shutdown_physics(); // Called on app shutdown.
 

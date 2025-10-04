@@ -18,7 +18,7 @@ namespace ecs {
 	};
 
 	struct ObjectId {
-		uint16_t id = UINT16_MAX;
+		uint32_t id = UINT32_MAX;
 	};
 
 	/// MAPS
@@ -49,6 +49,8 @@ namespace ecs {
 	};
 
 	bool valid(TileId tile);
+	std::string_view get_class(TileId tile);
+	std::span<const ObjectId> get_objects(TileId tile);
 	TextureRect get_texture_rect(TileId tile);
 
 	/// OBJECTS
@@ -66,9 +68,13 @@ namespace ecs {
 	bool valid(ObjectId obj);
 	entt::entity get_entity(ObjectId obj);
 	ObjectType get_type(ObjectId obj);
+	std::string_view get_name(ObjectId obj);
+	std::string_view get_class(ObjectId obj);
+	TileId get_tile(ObjectId obj);
 	// PITFALL: For tile objects this is the bottom left!
 	Vector2f get_position(ObjectId obj);
 	Vector2f get_top_left(ObjectId obj); // in world space
+	Vector2f get_size(ObjectId obj);
 	std::string_view get_string(ObjectId obj, std::string_view name);
 	int get_int(ObjectId obj, std::string_view name);
 	float get_float(ObjectId obj, std::string_view name);

@@ -131,6 +131,15 @@ namespace ecs {
 		return _tiled_context.tilesets[tile.tileset_id].tiles[tile.id];
 	}
 
+	std::string_view get_class(TileId tile) {
+		return _get_tile(tile).class_;
+	}
+
+	std::span<const ObjectId> get_objects(TileId tile) {
+		const tiled::Tile& t = _get_tile(tile);
+		return { (const ObjectId*)t.objects.data(), t.objects.size() };
+	}
+
 	TextureRect get_texture_rect(TileId tile) {
 		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
 		TextureRect rect{};
@@ -189,18 +198,36 @@ namespace ecs {
 		return (ObjectType)_get_object(obj).type;
 	}
 
+	std::string_view get_name(ObjectId obj) {
+		return _get_object(obj).name;
+	}
+
+	std::string_view get_class(ObjectId obj) {
+		return _get_object(obj).class_;
+	}
+
+	TileId get_tile(ObjectId obj) {
+		const tiled::TileGid gid = _get_object(obj).tile;
+		return { (uint16_t)gid.id, (uint16_t)gid.tileset_id };
+	}
+
 	Vector2f get_position(ObjectId obj) {
-		const tiled::Object& object = _get_object(obj);
-		return { object.x, object.y };
+		const tiled::Object& o = _get_object(obj);
+		return { o.x, o.y };
 	}
 
 	Vector2f get_top_left(ObjectId obj) {
-		const tiled::Object& object = _get_object(obj);
-		Vector2f p = { object.x, object.y };
-		if (object.type == tiled::ObjectType::Tile) {
-			p.y -= object.height;
+		const tiled::Object& o = _get_object(obj);
+		Vector2f p = { o.x, o.y };
+		if (o.type == tiled::ObjectType::Tile) {
+			p.y -= o.height;
 		}
 		return p;
+	}
+
+	Vector2f get_size(ObjectId obj) {
+		const tiled::Object& o = _get_object(obj);
+		return { o.width, o.height };
 	}
 
 	std::string_view get_string(ObjectId obj, std::string_view name) {
@@ -245,19 +272,13 @@ namespace ecs {
 
 		for (const tiled::Layer& layer : map->layers) {
 			if (layer.type != tiled::LayerType::Object) continue;
-			for (unsigned int object_id : layer.objects) {
+			for (uint32_t object_id : layer.objects) {
 				const tiled::Object& object = _tiled_context.objects[object_id];
 
 				entt::entity entity = _registry.create((entt::entity)object.id_in_map);
 				assert(entity == (entt::entity)object.id_in_map);
 
-				_registry.emplace<ObjectId>(entity, (uint16_t)object_id);
-
-				// TODO: Move to setup_tags()
-				Tag tag = Tag::None;
-				if (!object.class_.empty() && string_to_tag(object.class_, tag)) {
-					set_tag(entity, tag);
-				}
+				_registry.emplace<ObjectId>(entity, object_id);
 
 				// In Tiled, objects are positioned by their top-left corner...
 				Vector2f position_top_left = Vector2f(object.x, object.y);
@@ -325,105 +346,6 @@ namespace ecs {
 							animation.tileset_id = object.tile.tileset_id;
 							animation.tile_id = object.tile.id;
 						}
-
-						if (!tile.objects.empty()) {
-
-							// DETERMINE PIVOT
-
-							Vector2f pivot;
-
-							for (unsigned int tile_object_id : tile.objects) {
-								const tiled::Object& tile_object = _tiled_context.objects[tile_object_id];
-								if (tile_object.type != tiled::ObjectType::Point) continue;
-								if (tile_object.name != "pivot") continue;
-								pivot.x = tile_object.x;
-								pivot.y = tile_object.y;
-							}
-
-							sprite.sorting_point = pivot;
-
-							// EMPLACE SPRITE-BODY ATTACHMENT
-
-							make_sprite_follow_body(entity);
-
-							// EMPLACE BODY
-
-							b2BodyDef body_def = b2DefaultBodyDef();
-							body_def.type = b2_dynamicBody;
-							body_def.fixedRotation = true;
-							body_def.position = position_top_left;
-							b2BodyId body = emplace_body(entity, body_def);
-
-							for (unsigned int tile_object_id : tile.objects) {
-								const tiled::Object& collider = _tiled_context.objects[tile_object_id];
-
-								const float coll_x = collider.x;
-								const float coll_y = collider.y;
-								const float coll_hw = collider.width / 2.f;
-								const float coll_hh = collider.height / 2.f;
-								const Vector2f coll_center = { coll_x + coll_hw, coll_y + coll_hh };
-
-								switch (collider.type) {
-									case tiled::ObjectType::Rectangle: {
-
-										b2ShapeDef shape_def = b2DefaultShapeDef();
-										shape_def.filter = get_physics_filter_for_tag(tag);
-										b2Polygon box = b2MakeOffsetBox(coll_hw, coll_hh, coll_center, 0.f);
-										b2CreatePolygonShape(body, &shape_def, &box);
-
-									} break;
-									case tiled::ObjectType::Ellipse: {
-
-										b2ShapeDef shape_def = b2DefaultShapeDef();
-										shape_def.filter = get_physics_filter_for_tag(tag);
-										b2Circle circle{};
-										circle.center = coll_center;
-										circle.radius = coll_hw;
-										b2CreateCircleShape(body, &shape_def, &circle);
-
-									} break;
-								}
-							}
-						}
-
-					} break;
-					default: { // Rectangle, Ellipse, Point, Polygon, Polyline
-
-						// CREATE SENSORS
-
-						b2BodyDef body_def = b2DefaultBodyDef();
-						body_def.type = b2_staticBody;
-						body_def.fixedRotation = true;
-						body_def.position = position_top_left;
-						b2BodyId body = emplace_body(entity, body_def);
-
-						const float hw = object.width / 2.f;
-						const float hh = object.height / 2.f;
-						const Vector2f center = { hw, hh };
-
-						switch (object.type) {
-							case tiled::ObjectType::Rectangle: {
-
-								b2ShapeDef shape_def = b2DefaultShapeDef();
-								shape_def.isSensor = true;
-								shape_def.filter = get_physics_filter_for_tag(tag);
-								b2Polygon box = b2MakeOffsetBox(hw, hh, center, 0.f);
-								b2CreatePolygonShape(body, &shape_def, &box);
-
-							} break;
-							case tiled::ObjectType::Ellipse: {
-
-								b2ShapeDef shape_def = b2DefaultShapeDef();
-								shape_def.isSensor = true;
-								shape_def.filter = get_physics_filter_for_tag(tag);
-								b2Circle circle{};
-								circle.center = center;
-								circle.radius = hw;
-								b2CreateCircleShape(body, &shape_def, &circle);
-
-							} break;
-						}
-
 					} break;
 				}
 			}
@@ -465,12 +387,6 @@ namespace ecs {
 					};
 					const Vector2f size = { (float)tileset.tile_width, (float)tileset.tile_height };
 					const Vector2f sorting_point = { size.x / 2.f, size.y - map->tile_height / 2.f };
-
-					// TODO: move to setup_tags()
-					Tag tag = Tag::None;
-					if (!tile.class_.empty() && string_to_tag(tile.class_, tag)) {
-						set_tag(entity, tag);
-					}
 
 					// EMPLACE SPRITE
 
@@ -524,9 +440,9 @@ namespace ecs {
 						body_def.fixedRotation = true;
 						body = emplace_body(entity, body_def);
 
-						for (unsigned int tile_object_id : tile.objects) {
+						for (uint32_t tile_object_id : tile.objects) {
 							const tiled::Object& collider = _tiled_context.objects[tile_object_id];
-							const ObjectId object_id{ (uint16_t)tile_object_id };
+							const ObjectId object_id{ tile_object_id };
 
 							const Vector2f collider_center(collider.x, collider.y);
 							const Vector2f collider_half_size(collider.width / 2.f, collider.height / 2.f);

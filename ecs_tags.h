@@ -20,7 +20,8 @@ namespace ecs {
 	template <Tag tag>
 	struct Type {};
 
-	bool string_to_tag(std::string_view string, Tag& tag);
+	// Returns Tag::None if the string isn't a valid tag.
+	Tag string_to_tag(std::string_view string);
 	std::string_view tag_to_string(Tag tag);
 
 	// Emplaces or replaces the Tag component while also emplacing the corresponding
@@ -29,4 +30,6 @@ namespace ecs {
 	Tag get_tag(entt::entity entity);
 
 	entt::entity find_entity_by_tag(Tag tag);
+
+	void setup_tags();
 }

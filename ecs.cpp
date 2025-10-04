@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ecs.h"
 #include "ecs_tiled.h"
+#include "ecs_tags.h"
 #include "ecs_patch.h"
 #include "ecs_lifetime.h"
 #include "ecs_physics.h"
@@ -54,9 +55,10 @@ namespace ecs {
 	}
 
 	void _setup() {
+		setup_tags();
 		setup_sprites();
-		setup_cameras();
 		setup_physics();
+		setup_cameras();
 		setup_audio_sources();
 		setup_portals();
 		setup_grass();

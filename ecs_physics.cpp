@@ -14,6 +14,7 @@
 #endif
 
 namespace ecs {
+	constexpr float _PHYSICS_LENGTH_UNITS_PER_METER = 16.f; // 16 pixels per meter
 	constexpr float _PHYSICS_TIME_STEP = 1.f / 60.f;
 	constexpr int _PHYSICS_SUB_STEP_COUNT = 4;
 
@@ -27,7 +28,7 @@ namespace ecs {
 	}
 
 	void startup_physics() {
-		b2SetLengthUnitsPerMeter(16.f); // 16 pixels per meter
+		b2SetLengthUnitsPerMeter(_PHYSICS_LENGTH_UNITS_PER_METER);
 		b2WorldDef world_def = b2DefaultWorldDef();
 		world_def.gravity = { 0.f, 0.f }; // no gravity
 		_physics_world = b2CreateWorld(&world_def);
@@ -42,7 +43,113 @@ namespace ecs {
 
 	void setup_physics() {
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+			const Tag tag = get_tag(entity);
 
+			switch (get_type(object)) {
+				case ObjectType::Tile: {
+
+					const TileId tile = get_tile(object);
+					if (!valid(tile))
+						break;
+
+					const std::span<const ObjectId> objects = get_objects(tile);
+					if (!objects.empty()) {
+
+						// DETERMINE PIVOT
+
+						Vector2f pivot;
+
+						for (ObjectId tile_object : objects) {
+							if (get_type(tile_object) != ObjectType::Point)
+								continue;
+							if (get_name(tile_object) != "pivot")
+								continue;
+							pivot = get_position(tile_object);
+						}
+
+						// TODO!
+						//sprite.sorting_point = pivot;
+
+						// EMPLACE SPRITE-BODY ATTACHMENT
+
+						// TODO!
+						//make_sprite_follow_body(entity);
+
+						// EMPLACE BODY
+
+						b2BodyDef body_def = b2DefaultBodyDef();
+						body_def.type = b2_dynamicBody;
+						body_def.fixedRotation = true;
+						body_def.position = get_top_left(object);
+						b2BodyId body = emplace_body(entity, body_def);
+
+						for (ObjectId collider : objects) {
+
+							const Vector2f pos = get_position(collider);
+							const Vector2f half_size = get_size(collider) * 0.5f;
+							const Vector2f center = pos + half_size;
+
+							switch (get_type(collider)) {
+								case ObjectType::Rectangle: {
+
+									b2ShapeDef shape_def = b2DefaultShapeDef();
+									shape_def.filter = get_physics_filter_for_tag(tag);
+									b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
+									b2CreatePolygonShape(body, &shape_def, &box);
+
+								} break;
+								case ObjectType::Ellipse: {
+
+									b2ShapeDef shape_def = b2DefaultShapeDef();
+									shape_def.filter = get_physics_filter_for_tag(tag);
+									b2Circle circle{};
+									circle.center = center;
+									circle.radius = half_size.x;
+									b2CreateCircleShape(body, &shape_def, &circle);
+
+								} break;
+							}
+						}
+					}
+				} break;
+				default: { // Rectangle, Ellipse, Point, Polygon, Polyline
+
+					// CREATE SENSORS
+
+					b2BodyDef body_def = b2DefaultBodyDef();
+					body_def.type = b2_staticBody;
+					body_def.fixedRotation = true;
+					body_def.position = get_top_left(object);
+					b2BodyId body = emplace_body(entity, body_def);
+
+					const Vector2f half_size = get_position(object);
+					const Vector2f center = half_size;
+
+					switch (get_type(object)) {
+						case ObjectType::Rectangle: {
+
+							b2ShapeDef shape_def = b2DefaultShapeDef();
+							shape_def.isSensor = true;
+							shape_def.filter = get_physics_filter_for_tag(tag);
+							b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
+							b2CreatePolygonShape(body, &shape_def, &box);
+
+						} break;
+						case ObjectType::Ellipse: {
+
+							b2ShapeDef shape_def = b2DefaultShapeDef();
+							shape_def.isSensor = true;
+							shape_def.filter = get_physics_filter_for_tag(tag);
+							b2Circle circle{};
+							circle.center = center;
+							circle.radius = half_size.x;
+							b2CreateCircleShape(body, &shape_def, &circle);
+
+						} break;
+					}
+
+				} break;
+			}
 		}
 	}
 

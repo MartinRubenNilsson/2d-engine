@@ -25,6 +25,7 @@ namespace ecs {
 		float time = 0.f;
 	};
 
+	void setup_tile_animations();
 	void update_tile_animations(float dt);
 	void update_flipbook_animations(float dt);
 	void update_animated_sprites(float dt);

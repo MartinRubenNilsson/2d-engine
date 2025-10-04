@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "ecs_tags.h"
-#include "magic_enum/magic_enum_switch.hpp"
+#include "ecs_tiled.h"
+#include <magic_enum/magic_enum_switch.hpp>
 
 using namespace entt::literals;
 
 namespace ecs {
-	bool string_to_tag(std::string_view string, Tag& tag) {
+	Tag string_to_tag(std::string_view string) {
 		char sanitized_string[64] = {}; // lowercase alphabetic characters only
 		for (size_t i = 0, j = 0; i < string.size() && j < std::size(sanitized_string); ++i) {
 			if (!isalpha(string[i])) continue;
@@ -13,9 +14,8 @@ namespace ecs {
 		}
 		auto value = magic_enum::enum_cast<Tag>(sanitized_string, magic_enum::case_insensitive);
 		if (!value.has_value())
-			return false;
-		tag = value.value();
-		return true;
+			return Tag::None;
+		return value.value();
 	}
 
 	std::string_view tag_to_string(Tag tag) {
@@ -58,5 +58,19 @@ namespace ecs {
 			entity = _registry.view<Type<tag>>().front();
 		}, tag);
 		return entity;
+	}
+
+	void setup_tags() {
+		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+			std::string_view class_ = get_class(object);
+			if (class_.empty()) continue;
+			set_tag(entity, string_to_tag(class_));
+		}
+
+		for (auto [entity, tile] : _registry.view<TileId>().each()) {
+			std::string_view class_ = get_class(tile);
+			if (class_.empty()) continue;
+			set_tag(entity, string_to_tag(class_));
+		}
 	}
 }
