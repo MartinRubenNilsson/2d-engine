@@ -164,8 +164,8 @@ namespace ecs {
 
 			// Top left corner in the tile grid.
 			const Vector2f position = {
-				tile_pos.x * map_tile_size.x,
-				tile_pos.y * map_tile_size.y
+				(float)tile_pos.x * map_tile_size.x,
+				(float)tile_pos.y * map_tile_size.y
 			};
 
 			b2BodyDef body_def = b2DefaultBodyDef();

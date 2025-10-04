@@ -59,7 +59,7 @@ namespace ecs {
 		setup_tags();
 		setup_sprites(map);
 		setup_tile_animations();
-		setup_physics();
+		setup_physics(map);
 		setup_cameras(map);
 		setup_audio_sources();
 		setup_portals();
