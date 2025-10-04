@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ecs_tiled.h"
 #include "tiled.h"
-#include "console.h"
 #include "filesystem.h"
+#include "console.h"
 
 namespace ecs {
 	tiled::Context _tiled_context;

@@ -28,6 +28,28 @@ namespace ecs {
 		}
 	}
 
+	TileId _get_tile(PickupType type) {
+		const TilesetId tileset = get_tileset("items1");
+		if (!tileset)
+			return {};
+		unsigned int tile_id = UINT_MAX;
+		switch (type) {
+			case PickupType::Arrow:
+				tile_id = TILE_ID_ITEM_SPEAR; // placeholder
+				break;
+			case PickupType::Rupee:
+				tile_id = TILE_ID_ITEM_RUPEE;
+				break;
+			case PickupType::Bomb:
+				tile_id = TILE_ID_ITEM_POTION; // placeholder
+				break;
+			case PickupType::Heart:
+				tile_id = TILE_ID_ITEM_BERRIES; // placeholder
+				break;
+		}
+		return get_tile(tileset, tile_id);
+	}
+
 	entt::entity create_pickup(PickupType type, const Vector2f& position) {
 		entt::entity entity = _registry.create();
 		set_tag(entity, Tag::Pickup);
@@ -47,31 +69,12 @@ namespace ecs {
 			circle.radius = 4.f;
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
-		if (const TilesetId tileset = get_tileset("items1")) {
-			
-			unsigned int tile_id = UINT_MAX;
-			switch (type) {
-			case PickupType::Arrow:
-				tile_id = TILE_ID_ITEM_SPEAR; // placeholder
-				break;
-			case PickupType::Rupee:
-				tile_id = TILE_ID_ITEM_RUPEE;
-				break;
-			case PickupType::Bomb:
-				tile_id = TILE_ID_ITEM_POTION; // placeholder
-				break;
-			case PickupType::Heart:
-				tile_id = TILE_ID_ITEM_BERRIES; // placeholder
-				break;
-			}
-
-			if (const TileId tile = get_tile(tileset, tile_id)) {
-				sprites::Sprite& sprite = emplace_sprite(entity);
-				update_sprite(sprite, tile);
-				sprite.sorting_layer = get_object_layer();
-				sprite.sorting_point = { 8.f, 8.f };
-				sprite.position = position - sprite.sorting_point;
-			}
+		if (const TileId tile = _get_tile(type)) {
+			sprites::Sprite& sprite = emplace_sprite(entity);
+			update_sprite(sprite, tile);
+			sprite.sorting_layer = get_object_layer();
+			sprite.sorting_point = { 8.f, 8.f };
+			sprite.position = position - sprite.sorting_point;
 		}
 		return entity;
 	}
@@ -82,10 +85,6 @@ namespace ecs {
 
 	Pickup* get_pickup(entt::entity entity) {
 		return _registry.try_get<Pickup>(entity);
-	}
-
-	bool remove_pickup(entt::entity entity) {
-		return _registry.remove<Pickup>(entity);
 	}
 }
 

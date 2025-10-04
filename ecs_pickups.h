@@ -25,5 +25,4 @@ namespace ecs
 
 	Pickup& emplace_pickup(entt::entity entity);
 	Pickup* get_pickup(entt::entity entity);
-	bool remove_pickup(entt::entity entity);
 }
