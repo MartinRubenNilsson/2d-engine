@@ -103,8 +103,8 @@ namespace ecs {
 		apply_damage_in_box({ DamageType::Melee, 1, entity }, box_min, box_max, ~CC_Player);
 	}
 
-	void setup_players() {
-		const Vector2f map_bottom_right = get_bottom_right(get_current_map());
+	void setup_players(MapId map) {
+		const Vector2f map_bottom_right = get_bottom_right(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
 			const Vector2f top_left = get_top_left(object);

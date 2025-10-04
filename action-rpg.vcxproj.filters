@@ -230,6 +230,9 @@
     <ClCompile Include="ecs_lifetime.cpp">
       <Filter>game\ecs\lifetime</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_tiled_setup.cpp">
+      <Filter>game\ecs\tiled</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -489,6 +492,9 @@
     </ClInclude>
     <ClInclude Include="ecs_lifetime.h">
       <Filter>game\ecs\lifetime</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_tiled_ids.h">
+      <Filter>game\ecs\tiled</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

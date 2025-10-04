@@ -23,7 +23,7 @@
 namespace ecs {
 	void startup() {
 		startup_physics();
-		startup_tiled_maps();
+		startup_tiled();
 	}
 
 	void shutdown() {
@@ -54,17 +54,18 @@ namespace ecs {
 		_registry.clear();
 	}
 
-	void _setup() {
+	void _setup(MapId map) {
+		setup_tiled(map);
 		setup_tags();
 		setup_sprites();
 		setup_tile_animations();
 		setup_physics();
-		setup_cameras();
+		setup_cameras(map);
 		setup_audio_sources();
 		setup_portals();
 		setup_grass();
 		setup_chests();
-		setup_players();
+		setup_players(map);
 		setup_slimes();
 		setup_blade_traps();
 	}
@@ -78,9 +79,9 @@ namespace ecs {
 
 	void setup(const std::string& map_path) {
 		clear();
-		if (!setup_tiled_map(map_path))
-			return;
-		_setup();
+		const MapId map = get_map(map_path);
+		if (!map) return;
+		_setup(map);
 		_patch(map_path);
 	}
 

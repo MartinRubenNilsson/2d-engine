@@ -8,6 +8,7 @@
 #include "ecs_damage.h"
 #include "tile_ids.h"
 #include "audio.h"
+#include "graphics.h"
 
 namespace map {
 	unsigned int get_object_layer_index();
@@ -43,7 +44,7 @@ namespace ecs {
 				animation.tile = tile;
 
 				sprites::Sprite& sprite = emplace_sprite(entity);
-				sprite.texture = get_texture(tileset);
+				sprite.texture = graphics::load_texture(get_image_path(tileset));
 				sprite.sorting_layer = map::get_object_layer_index();
 				sprite.sorting_point = pivot;
 				sprite.position = position - pivot;

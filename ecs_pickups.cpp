@@ -5,6 +5,7 @@
 #include "ecs_physics.h"
 #include "ecs_animations.h"
 #include "tile_ids.h"
+#include "graphics.h"
 
 namespace map {
 	unsigned int get_object_layer_index();
@@ -73,7 +74,7 @@ namespace ecs {
 				TileAnimation& animation = emplace_tile_animation(entity);
 
 				sprites::Sprite& sprite = emplace_sprite(entity);
-				sprite.texture = get_texture(tileset);
+				sprite.texture = graphics::load_texture(get_image_path(tileset));
 				sprite.sorting_layer = (uint8_t)map::get_object_layer_index();
 				sprite.sorting_point = { 8.f, 8.f };
 				sprite.position = position - sprite.sorting_point;

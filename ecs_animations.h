@@ -12,6 +12,9 @@ namespace ecs {
 		bool _frame_changed = false;
 	};
 
+	void setup_tile_animations();
+	void update_tile_animations(float dt);
+
 	struct FlipbookAnimation {
 		unsigned int rows = 0;
 		unsigned int columns = 0;
@@ -19,8 +22,6 @@ namespace ecs {
 		float time = 0.f;
 	};
 
-	void setup_tile_animations();
-	void update_tile_animations(float dt);
 	void update_flipbook_animations(float dt);
 	void update_animated_sprites(float dt);
 

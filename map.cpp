@@ -101,7 +101,7 @@ namespace map {
 
 		// CLOSE CURRENT MAP
 
-		if (ecs::valid(current_map)) {
+		if (current_map) {
 			_object_layer_index = 0;
 			_next_free_layer_index = 0;
 			audio::stop_all_in_bus(audio::BUS_SOUND);
@@ -110,7 +110,7 @@ namespace map {
 
 		// OPEN NEXT MAP
 
-		if (!ecs::valid(next_map)) {
+		if (!next_map) {
 			destroy_entities();
 			destroy_grid();
 			audio::stop_all_in_bus();
@@ -152,8 +152,7 @@ namespace map {
 		case MapTransitionType::Open: {
 			if (options.map_name.empty()) return false;
 			if (_current_map_path == options.map_name) return false;
-			ecs::MapId map = ecs::get_map(options.map_name);
-			if (ecs::valid(map)) {
+			if (ecs::MapId map = ecs::get_map(options.map_name)) {
 				_next_map_path = ecs::get_path(map);
 			} else {
 				console::log_error("Map not found: " + std::string(options.map_name));

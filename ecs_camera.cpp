@@ -4,7 +4,6 @@
 #include "ecs_tiled.h"
 #include "random.h"
 #include "easings.h"
-#include "map.h"
 
 namespace ecs {
 	const Vector2f DEFAULT_CAMERA_SIZE = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT };
@@ -41,8 +40,8 @@ namespace ecs {
 		return confined_center;
 	}
 
-	void setup_cameras() {
-		const Vector2f map_bottom_right = get_bottom_right(get_current_map());
+	void setup_cameras(MapId map) {
+		const Vector2f map_bottom_right = get_bottom_right(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, ObjectId>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);

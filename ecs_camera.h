@@ -31,7 +31,7 @@ namespace ecs {
 		entt::entity entity_to_follow = entt::null;
 	};
 
-	void setup_cameras();
+	void setup_cameras(MapId map);
 	void update_cameras(float dt);
 
 	void get_active_camera_view(Vector2f& center, Vector2f& size); // Hard-cuts when activating new camera.
