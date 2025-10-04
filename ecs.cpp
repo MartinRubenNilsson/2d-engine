@@ -19,6 +19,7 @@
 #include "ecs_grass.h"
 #include "ecs_audio.h"
 #include "ecs_slime.h"
+#include "ecs_task.h"
 
 namespace ecs {
 	void startup() {
@@ -92,8 +93,9 @@ namespace ecs {
 		update_pickups(dt);
 		update_bombs(dt);
 		update_blade_traps(dt);
-		update_slimes(dt);
 		update_state_machines(dt);
+		update_tasks(dt);
+		update_slimes(dt);
 		update_ai_logic(dt); // TODO remove
 		update_ai_graphics(dt); // TODO remove
 		update_lifetimes(dt);

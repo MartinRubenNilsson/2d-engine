@@ -7,7 +7,9 @@
 #include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "ecs_physics.h"
+#include "ecs_task.h"
 #include "audio.h"
+#include "random.h"
 
 namespace ecs {
     struct Slime {
@@ -58,15 +60,25 @@ namespace ecs {
         return true;
     }
 
+    void _wander_then_wait_then_repeat(entt::entity entity) {
+        wander(entity, 20.f, 50.f, random::range_f(1.f, 3.f));
+        then(entity, [](entt::entity entity) {
+            wait(entity, random::range_f(0.5f, 1.5f));
+            then(entity, _wander_then_wait_then_repeat);
+        });
+    }
+
     void setup_slimes() {
         for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
             Slime& slime = _registry.emplace<Slime>(entity);
             slime.speed = get_float(object, "speed");
 
-            _emplace_state_machine_for_slime(entity);
-            emplace_ai(entity, AiType::Slime);
-
             set_damage_handler(entity, _handle_damage_to_slime);
+
+            _wander_then_wait_then_repeat(entity);
+            //_emplace_state_machine_for_slime(entity);
+            //emplace_ai(entity, AiType::Slime);
+
         }
     }
 
