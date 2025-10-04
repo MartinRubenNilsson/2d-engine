@@ -5,6 +5,7 @@
 #include "ecs_tiled.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
+#include "ecs_physics_events.h"
 #include "ecs_damage.h"
 #include "tile_ids.h"
 #include "audio.h"

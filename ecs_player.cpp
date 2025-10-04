@@ -2,6 +2,7 @@
 #include "ecs_player.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
+#include "ecs_physics_events.h"
 #include "ecs_arrow.h"
 #include "ecs_sprites.h"
 #include "ecs_animations.h"

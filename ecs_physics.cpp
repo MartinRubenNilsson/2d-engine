@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
+#include "ecs_physics_events.h"
 #include "ecs_tiled.h"
 #include "console.h"
 #include "ecs_sprites.h" // TODO: don't include here!
@@ -617,18 +618,5 @@ namespace ecs {
 
 	bool remove_body(entt::entity entity) {
 		return _registry.remove<b2BodyId>(entity);
-	}
-
-	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler) {
-		if (handler) {
-			_registry.emplace_or_replace<PhysicsEventHandler>(entity, handler);
-		} else {
-			_registry.remove<PhysicsEventHandler>(entity);
-		}
-	}
-
-	PhysicsEventHandler get_physics_event_handler(entt::entity entity) {
-		PhysicsEventHandler* handler_ptr = _registry.try_get<PhysicsEventHandler>(entity);
-		return handler_ptr ? *handler_ptr : nullptr;
 	}
 }

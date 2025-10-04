@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
+    <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_tiled.cpp" />
     <ClCompile Include="ecs_states.cpp" />
@@ -233,6 +234,7 @@
   <ItemGroup>
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_patch.h" />
+    <ClInclude Include="ecs_physics_events.h" />
     <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_states.h" />
     <ClInclude Include="audio.h" />

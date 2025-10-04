@@ -233,6 +233,9 @@
     <ClCompile Include="ecs_tiled_setup.cpp">
       <Filter>game\ecs\tiled</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_physics_events.cpp">
+      <Filter>game\ecs\physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -495,6 +498,9 @@
     </ClInclude>
     <ClInclude Include="ecs_tiled_ids.h">
       <Filter>game\ecs\tiled</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_physics_events.h">
+      <Filter>game\ecs\physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
