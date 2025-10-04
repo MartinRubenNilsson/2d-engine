@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ecs_ai.h"
-#include "ecs_ai_knowledge.h"
 #include "ecs_ai_action.h"
 #include "ecs_animations.h"
 #include "ecs_tiled.h"
@@ -15,11 +14,11 @@ namespace ecs {
     extern entt::registry _registry;
 
     void _update_ai_decision_making(float dt) {
-        const AiWorld& world = get_ai_world();
+#if 0
         const bool player_exists = _registry.valid(world.player.entity);
 
         for (auto [entity, knowledge, type, action] :
-            _registry.view<const AiKnowledge, const AiType, const AiAction>().each()) {
+            _registry.view<const AiType, const AiAction>().each()) {
 
             const float dist_to_player = length(world.player.position - knowledge.me.position);
 
@@ -47,10 +46,10 @@ namespace ecs {
                 } break;
             }
         }
+#endif
     }
 
     void update_ai_logic(float dt) {
-        update_ai_knowledge_and_world(dt);
         _update_ai_decision_making(dt);
         update_ai_actions(dt);
     }
@@ -64,13 +63,13 @@ namespace ecs {
 
         uint32_t paths_drawn = 0;
 
-        for (auto [entity, knowledge, action] : _registry.view<const AiKnowledge, const AiAction>().each()) {
+        for (auto [entity, body, action] : _registry.view<b2BodyId, const AiAction>().each()) {
 
             // DRAW ACTION TYPE
             {
                 std::string_view action_type_string = to_string(action.type);
                 text.string.assign(action_type_string.begin(), action_type_string.end());
-                text.position = knowledge.me.position + Vector2f(-8.f, -10.f);
+                text.position = b2Body_GetWorldCenterOfMass(body) + Vector2f(-8.f, -10.f);
                 text::render(text);
             }
 
@@ -94,7 +93,6 @@ namespace ecs {
     }
 
     void emplace_ai(entt::entity entity, AiType type) {
-        emplace_ai_knowledge(entity);
         _registry.emplace_or_replace<AiType>(entity, type);
         _registry.emplace_or_replace<AiAction>(entity);
     }

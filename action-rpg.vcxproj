@@ -186,7 +186,6 @@
     <ClCompile Include="shapes.cpp" />
     <ClCompile Include="ecs_ai_action.cpp" />
     <ClCompile Include="ecs_ai.cpp" />
-    <ClCompile Include="ecs_ai_knowledge.cpp" />
     <ClCompile Include="ecs_arrow.cpp" />
     <ClCompile Include="ecs_bomb.cpp" />
     <ClCompile Include="ecs_camera.cpp" />
@@ -290,7 +289,6 @@
     <ClInclude Include="shapes.h" />
     <ClInclude Include="ecs_ai_action.h" />
     <ClInclude Include="ecs_ai.h" />
-    <ClInclude Include="ecs_ai_knowledge.h" />
     <ClInclude Include="ecs_bomb.h" />
     <ClInclude Include="ecs_camera.h" />
     <ClInclude Include="ecs_damage.h" />

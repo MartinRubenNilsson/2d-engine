@@ -34,9 +34,6 @@
     <ClCompile Include="ecs_ai_action.cpp">
       <Filter>game\ecs\ai</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_ai_knowledge.cpp">
-      <Filter>game\ecs\ai</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_ai.cpp">
       <Filter>game\ecs\ai</Filter>
     </ClCompile>
@@ -282,9 +279,6 @@
     </ClInclude>
     <ClInclude Include="ui_hud.h">
       <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_ai_knowledge.h">
-      <Filter>game\ecs\ai</Filter>
     </ClInclude>
     <ClInclude Include="ecs_ai_action.h">
       <Filter>game\ecs\ai</Filter>
