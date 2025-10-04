@@ -30,7 +30,26 @@ namespace ecs {
 	}
 
 	void setup_tile_animations() {
+		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+			if (get_type(object) != ObjectType::Tile)
+				continue;
+			const TileId tile = get_tile(object);
+			if (!valid(tile))
+				continue;
+			TileAnimation& animation = emplace_tile_animation(entity);
+			animation.tileset_id = tile.tileset_id;
+			animation.tile_id = tile.id;
+		}
 
+		for (auto [entity, tile] : _registry.view<TileId>().each()) {
+			// The majority of tiles are not animated and don't change during gameplay,
+			// so let's only add an animation component if the tile is actually animated.
+			if (!animated(tile))
+				continue;
+			TileAnimation& animation = emplace_tile_animation(entity);
+			animation.tileset_id = tile.tileset_id;
+			animation.tile_id = tile.id;
+		}
 	}
 
 	void update_tile_animations(float dt) {

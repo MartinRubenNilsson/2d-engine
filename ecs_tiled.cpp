@@ -8,9 +8,7 @@
 
 // TODO: move into own files
 #include "ecs_physics.h"
-#include "ecs_physics_filters.h"
 #include "ecs_sprites.h"
-#include "ecs_animations.h"
 
 namespace ecs {
 	bool _tiled_file_load_callback(std::string_view path, std::string& contents) {
@@ -148,6 +146,10 @@ namespace ecs {
 		rect.w = ts.tile_width;
 		rect.h = ts.tile_height;
 		return rect;
+	}
+
+	bool animated(TileId tile) {
+		return !_get_tile(tile).animation.empty();
 	}
 
 	template <tiled::PropertyType type>
@@ -339,13 +341,6 @@ namespace ecs {
 						if (object.tile.flipped_diagonally) {
 							sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
 						}
-
-						// EMPLACE ANIMATION
-						{
-							TileAnimation& animation = emplace_tile_animation(entity);
-							animation.tileset_id = object.tile.tileset_id;
-							animation.tile_id = object.tile.id;
-						}
 					} break;
 				}
 			}
@@ -376,7 +371,7 @@ namespace ecs {
 					}
 					const tiled::Tile& tile = tileset.tiles[gid.id];
 
-					entt::entity entity = _registry.create();
+					const entt::entity entity = _registry.create();
 
 					const TileId tile_id{ (uint16_t)gid.id, (uint16_t)gid.tileset_id };
 					_registry.emplace<TileId>(entity, tile_id);
@@ -415,16 +410,6 @@ namespace ecs {
 					}
 					if (gid.flipped_diagonally) {
 						sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
-					}
-
-					// EMPLACE ANIMATION
-
-					// The majority of tiles are not animated and don't change during gameplay,
-					// so let's only add an animation component if the tile is actually animated.
-					if (!tile.animation.empty()) {
-						TileAnimation& animation = emplace_tile_animation(entity);
-						animation.tileset_id = gid.tileset_id;
-						animation.tile_id = gid.id;
 					}
 
 					// EMPLACE BODY

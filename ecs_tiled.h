@@ -52,6 +52,7 @@ namespace ecs {
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
 	TextureRect get_texture_rect(TileId tile);
+	bool animated(TileId tile);
 
 	/// OBJECTS
 

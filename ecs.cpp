@@ -57,6 +57,7 @@ namespace ecs {
 	void _setup() {
 		setup_tags();
 		setup_sprites();
+		setup_tile_animations();
 		setup_physics();
 		setup_cameras();
 		setup_audio_sources();
