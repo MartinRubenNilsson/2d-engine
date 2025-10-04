@@ -526,12 +526,15 @@ namespace ecs {
 
 						for (unsigned int tile_object_id : tile.objects) {
 							const tiled::Object& collider = _tiled_context.objects[tile_object_id];
+							const ObjectId object_id{ (uint16_t)tile_object_id };
 
 							const Vector2f collider_center(collider.x, collider.y);
 							const Vector2f collider_half_size(collider.width / 2.f, collider.height / 2.f);
 
 							b2ShapeDef shape_def = b2DefaultShapeDef();
-							//get<tiled::PropertyType::Bool>(collider.properties, "sensor", shape_def.isSensor);
+							if (get_bool(object_id, "sensor")) {
+								shape_def.isSensor = true;
+							}
 
 							switch (collider.type) {
 								case tiled::ObjectType::Rectangle: {
