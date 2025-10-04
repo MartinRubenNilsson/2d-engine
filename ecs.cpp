@@ -70,8 +70,8 @@ namespace ecs {
 		setup_blade_traps();
 	}
 
-	void _patch(const std::string& patch_id) {
-		if (!set_patch(patch_id)) return;
+	void _patch(MapId map) {
+		if (!set_patch(map)) return;
 		Patch& patch = get_patch();
 		patch_entities_to_destroy(patch);
 		patch_chests(patch);
@@ -82,7 +82,7 @@ namespace ecs {
 		const MapId map = get_map(map_path);
 		if (!map) return;
 		_setup(map);
-		_patch(map_path);
+		_patch(map);
 	}
 
 	void update(float dt) {
