@@ -1,8 +1,9 @@
 #include "tiled.h"
 #include <pugixml.hpp>
 #include <zlib.h>
-#include <algorithm>
-#include <filesystem> //TODO: remove
+#include <algorithm> // TODO: remove, it is slow to compile!
+#include <filesystem> // TODO: remove, it is slow to compile!
+#include <span>
 #include <cstdlib>
 
 namespace tiled {
@@ -77,7 +78,40 @@ namespace tiled {
 		}
 	}
 
-	void _load_object(const pugi::xml_node& node, Object& object) {
+	// PITFALL: Tiled assigns GIDs to tiles by (conceptually) concatenating all tilesets end-to-end
+	// in some arbitrary order. Then, each tile can be assigned a unique index in this concatenated
+	// "mega-tileset". The indexing starts at 1, so in Tiled a GID of 0 means that the tile is empty.
+	//
+	// This means that Tiled GIDs are always with reference to some map, which is not useful for our
+	// purposes. Hence we "resolve" these GIDs to a pair of IDs, one for the tileset and one for the
+	// tile in that tileset. This is done by iterating through all the tilesets used in the map, and,
+	// if the tileset has a range of GIDs which contains the tile GID, then we replace the GID with
+	// the tile ID and the tile's local ID in that tileset.
+	//
+	// We use TileGid::ids to store both the original Tile GID (before resolving) and our pair of IDs
+	// (after resolving), so watch out!
+
+	struct TilesetWithGids {
+		unsigned int id = UINT_MAX; // index into Context::tilesets[]
+		unsigned int first_gid = 0; // The Tiled GID of the first tile in this tileset.
+	};
+
+	void _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
+		tile.id = tile.ids - tileset.first_gid;
+		tile.tileset_id = tileset.id;
+	}
+
+	bool _resolve_gid(TileGid& tile, std::span<const TilesetWithGids> tilesets) {
+		for (auto it = tilesets.rbegin(); it != tilesets.rend(); ++it) {
+			if (tile.ids < it->first_gid) continue;
+			_resolve_gid(tile, *it);
+			return true;
+		}
+		tile = {};
+		return false;
+	}
+
+	void _load_object(const pugi::xml_node& node, Object& object, std::span<const TilesetWithGids> tilesets) {
 		// TODO: this doesn't actually override properties for template objects!
 		// there will be duplicated properties!!!
 		_load_properties(node, object.properties);
@@ -119,6 +153,7 @@ namespace tiled {
 		if (pugi::xml_attribute gid = node.attribute("gid")) {
 			object.type = ObjectType::Tile;
 			object.tile.value = gid.as_uint();
+			_resolve_gid(object.tile, tilesets);
 		}
 	}
 
@@ -195,7 +230,7 @@ namespace tiled {
 			_load_properties(tile_node, tile.properties);
 			for (pugi::xml_node object_node : tile_node.child("objectgroup").children("object")) {
 				tile.objects.push_back((unsigned int)context.objects.size());
-				_load_object(object_node, context.objects.emplace_back());
+				_load_object(object_node, context.objects.emplace_back(), {});
 			}
 			for (pugi::xml_node frame_node : tile_node.child("animation").children("frame")) {
 				Frame& frame = tile.animation.emplace_back();
@@ -253,39 +288,6 @@ namespace tiled {
 		return id;
 	}
 
-	// PITFALL: Tiled assigns GIDs to tiles by (conceptually) concatenating all tilesets end-to-end
-	// in some arbitrary order. Then, each tile can be assigned a unique index in this concatenated
-	// "mega-tileset". The indexing starts at 1, so in Tiled a GID of 0 means that the tile is empty.
-	//
-	// This means that Tiled GIDs are always with reference to some map, which is not useful for our
-	// purposes. Hence we "resolve" these GIDs to a pair of IDs, one for the tileset and one for the
-	// tile in that tileset. This is done by iterating through all the tilesets used in the map, and,
-	// if the tileset has a range of GIDs which contains the tile GID, then we replace the GID with
-	// the tile ID and the tile's local ID in that tileset.
-	//
-	// We use TileGid::ids to store both the original Tile GID (before resolving) and our pair of IDs
-	// (after resolving), so watch out!
-
-	struct TilesetWithGids {
-		unsigned int id = UINT_MAX; // index into Context::tilesets[]
-		unsigned int first_gid = 0; // The Tiled GID of the first tile in this tileset.
-	};
-
-	void _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
-		tile.id = tile.ids - tileset.first_gid;
-		tile.tileset_id = tileset.id;
-	}
-
-	bool _resolve_gid(TileGid& tile, const std::vector<TilesetWithGids>& tilesets) {
-		for (auto it = tilesets.rbegin(); it != tilesets.rend(); ++it) {
-			if (tile.ids < it->first_gid) continue;
-			_resolve_gid(tile, *it);
-			return true;
-		}
-		tile = {};
-		return false;
-	}
-
 	unsigned int load_object_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
@@ -318,37 +320,35 @@ namespace tiled {
 			}
 			return UINT_MAX;
 		}
+
 		const pugi::xml_node template_node = doc.child("template");
-		const pugi::xml_node object_node = template_node.child("object");
 
-		Object object{};
-		object.path = std::move(normalized_path);
-		_load_object(object_node, object);
-
-		// Load tileset
+		// Load tileset (if there is one)
+		TilesetWithGids tileset{};
 		if (pugi::xml_node tileset_node = template_node.child("tileset")) {
 			const pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			if (!source_attribute) {
 				if (context.debug_message_callback) {
-					context.debug_message_callback("Tileset source attribute is missing: " + object.path);
+					context.debug_message_callback("Tileset source attribute is missing: " + normalized_path);
 				}
-				object.tile = {};
 			} else {
-				std::string tileset_path = _get_parent_path(object.path);
+				std::string tileset_path = _get_parent_path(normalized_path);
 				tileset_path += '/';
 				tileset_path += source_attribute.as_string();
 				tileset_path = _get_normalized_path(tileset_path);
-				const unsigned int tileset_id = load_tileset_from_file(context, tileset_path);
-				if (tileset_id >= context.tilesets.size()) {
-					object.tile = {};
-				} else {
-					// first_gid should always be 1 for template objects.
-					const unsigned int first_gid = tileset_node.attribute("firstgid").as_uint();
-					const TilesetWithGids tileset{ tileset_id, first_gid };
-					_resolve_gid(object.tile, tileset);
+				tileset.id = load_tileset_from_file(context, tileset_path);
+				if (tileset.id < context.tilesets.size()) {
+					// NOTE: first_gid should always be 1 for template objects.
+					tileset.first_gid = tileset_node.attribute("firstgid").as_uint();;
 				}
 			}
 		}
+
+		const pugi::xml_node object_node = template_node.child("object");
+
+		Object object{};
+		object.path = std::move(normalized_path);
+		_load_object(object_node, object, std::span(&tileset, 1));
 
 		const unsigned int id = (unsigned int)context.objects.size();
 		context.objects.emplace_back(std::move(object));
@@ -529,12 +529,7 @@ namespace tiled {
 					}
 				}
 				// By loading the object after copying the template, we can override properties.
-				_load_object(object_node, object);
-				if (object.tile.value != UINT32_MAX) {
-					// This happens when the object is not a template and has a tile, in which case
-					// we need to resolve its GID. (For templates this is done at load time.)
-					_resolve_gid(object.tile, tilesets_with_gids);
-				}
+				_load_object(object_node, object, tilesets_with_gids);
 			}
 		} break;
 		case LayerType::Image: {
@@ -592,7 +587,7 @@ namespace tiled {
 		_load_properties(map_node, map.properties);
 
 		// Load tilesets
-		std::vector<TilesetWithGids> tilesets_with_gids;
+		std::vector<TilesetWithGids> tilesets;
 		for (pugi::xml_node tileset_node : map_node.children("tileset")) {
 			pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			// TODO: handle embedded tilesets
@@ -607,21 +602,22 @@ namespace tiled {
 			tileset_path += source_attribute.as_string();
 			tileset_path = _get_normalized_path(tileset_path);
 			const unsigned int tileset_id = load_tileset_from_file(context, tileset_path);
-			if (tileset_id >= context.tilesets.size()) continue;
+			if (tileset_id >= context.tilesets.size())
+				continue;
 			map.tilesets.push_back(tileset_id);
 			const unsigned int first_gid = tileset_node.attribute("firstgid").as_uint();
-			tilesets_with_gids.emplace_back(tileset_id, first_gid);
+			tilesets.emplace_back(tileset_id, first_gid);
 		}
 
 		// Sort referenced tilesets by first_gid in ascending order. This is shouldn't be necessary
 		// since Tiled already sorts them this way, but it doesn't hurt to be safe.
-		std::sort(tilesets_with_gids.begin(), tilesets_with_gids.end(), [](const auto& a, const auto& b) {
+		std::sort(tilesets.begin(), tilesets.end(), [](const TilesetWithGids& a, const TilesetWithGids& b) {
 			return a.first_gid < b.first_gid;
 		});
 
 		// Load layers
 		for (pugi::xml_node child_node : map_node.children()) {
-			_load_layer_recursive(context, map, tilesets_with_gids, child_node);
+			_load_layer_recursive(context, map, tilesets, child_node);
 		}
 
 		const unsigned int id = (unsigned int)context.maps.size();
