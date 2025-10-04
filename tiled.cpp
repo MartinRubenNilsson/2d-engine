@@ -119,7 +119,7 @@ namespace tiled {
 		// there will be duplicated properties!!!
 		_load_properties(node, object.properties);
 		if (pugi::xml_attribute id = node.attribute("id")) {
-			object.id_in_map = id.as_uint();
+			object.uid = id.as_uint();
 		}
 		if (pugi::xml_attribute name = node.attribute("name")) {
 			object.name = name.as_string();

@@ -75,9 +75,9 @@ namespace tiled {
 	};
 
 	struct Object {
-		// This is a unique id for the object with respect to the map it's in
-		// (and NOT an index into Context::objects[]). Valid IDs are >= 1.
-		unsigned int id_in_map = 0; 
+		// This is a unique ID for the object among all objects in the map
+		// (and NOT an index into Context::objects[]). Valid UIDs are >= 1.
+		unsigned int uid = 0; 
 		ObjectType type = ObjectType::Rectangle;
 		std::string path; // empty if not a template object
 		std::string name;

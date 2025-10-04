@@ -2,10 +2,11 @@
 #include "ecs_sprites.h"
 #include "ecs_tiled.h"
 #include "ecs_uniform_block.h"
-#include "random.h"
+#include "sprites.h"
 #include "graphics.h"
 #include "graphics_globals.h"
-#include "sprites.h"
+#include "random.h"
+#include "console.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -50,8 +51,46 @@ namespace ecs {
 	}
 
 	void setup_sprites() {
-		for (auto [entity, tile] : _registry.view<TileId>().each()) {
+		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+			if (!object) {
+				console::log_error("Error 56702: Invalid object in setup_sprites()");
+				continue;
+			}
+			if (get_type(object) != ObjectType::Tile)
+				continue;
 
+			const TileId tile = get_tile(object);
+			if (!tile) {
+				console::log_error("Error 18639: Invalid tile for object " + std::string(get_name(object)));
+				continue;
+			}
+
+			sprites::Sprite& sprite = emplace_sprite(entity);
+			update_sprite(sprite, tile);
+			// PITFALL: We don't set the sorting layer to the layer index here.
+			// This is because we want all objects to be on the same layer, so they
+			// are rendered in the correct order. This sorting layer may also be the
+			// index of a tile layer so that certain static tiles are rendered as if
+			// they were objects, e.g. trees and other props.
+			sprite.sorting_layer = get_object_layer();
+			sprite.sorting_point = get_size(object) * 0.5f; // sensible default: center the sorting point
+			sprite.position = get_top_left(object); // PITFALL: get_position() returns the bottom left for tile objects!
+
+			// TODO: fix flip flags!!!
+#if 0
+			if (!layer.visible) {
+				sprite.flags &= ~sprites::SPRITE_VISIBLE;
+			}
+			if (object.tile.flipped_horizontally) {
+				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
+			}
+			if (object.tile.flipped_vertically) {
+				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
+			}
+			if (object.tile.flipped_diagonally) {
+				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
+			}
+#endif
 		}
 	}
 

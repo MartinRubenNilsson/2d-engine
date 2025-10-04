@@ -234,7 +234,7 @@ namespace ecs {
 	}
 
 	entt::entity get_entity(ObjectId obj) {
-		return (entt::entity)_get_object(obj).id_in_map;
+		return (entt::entity)_get_object(obj).uid;
 	}
 
 	ObjectType get_type(ObjectId obj) {
