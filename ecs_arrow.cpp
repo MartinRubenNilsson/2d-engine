@@ -16,8 +16,8 @@ namespace ecs {
 	void _on_arrow_physics_event(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
 			// Destroy the arrow and apply damage to the other entity
-			destroy_at_end_of_frame(ev.entity_a);
-			apply_damage(ev.entity_b, { .type = DamageType::Projectile, .amount = 1 });
+			destroy_at_end_of_frame(ev.entity);
+			apply_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
 		}
 	}
 

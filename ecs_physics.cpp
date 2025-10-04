@@ -46,91 +46,54 @@ namespace ecs {
 
 	void setup_physics(MapId map) {
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+
 			const Tag tag = get_tag(entity);
+			const ObjectType object_type = get_type(object);
 
-			switch (get_type(object)) {
-				case ObjectType::Tile: {
+			if (object_type == ObjectType::Tile) {
 
-					const TileId tile = get_tile(object);
-					if (!tile) break;
+				const TileId tile = get_tile(object);
+				if (!tile) continue; // invalid tile
 
-					const std::span<const ObjectId> objects = get_objects(tile);
-					if (!objects.empty()) {
+				const std::span<const ObjectId> objects = get_objects(tile);
+				if (objects.empty()) continue;
 
-						// DETERMINE PIVOT
+#if 0
+				// DETERMINE PIVOT
 
-						Vector2f pivot;
+				Vector2f pivot;
 
-						for (ObjectId tile_object : objects) {
-							if (get_type(tile_object) != ObjectType::Point)
-								continue;
-							if (get_name(tile_object) != "pivot")
-								continue;
-							pivot = get_position(tile_object);
-						}
+				for (ObjectId tile_object : objects) {
+					if (get_type(tile_object) != ObjectType::Point)
+						continue;
+					if (get_name(tile_object) != "pivot")
+						continue;
+					pivot = get_position(tile_object);
+				}
+#endif
 
-						// TODO!
-						//sprite.sorting_point = pivot;
+				// EMPLACE SPRITE-BODY ATTACHMENT
 
-						// EMPLACE SPRITE-BODY ATTACHMENT
+				make_sprite_follow_body(entity);
 
-						make_sprite_follow_body(entity);
+				// EMPLACE BODY
 
-						// EMPLACE BODY
+				b2BodyDef body_def = b2DefaultBodyDef();
+				body_def.type = b2_dynamicBody;
+				body_def.fixedRotation = true;
+				body_def.position = get_top_left(object);
+				b2BodyId body = emplace_body(entity, body_def);
 
-						b2BodyDef body_def = b2DefaultBodyDef();
-						body_def.type = b2_dynamicBody;
-						body_def.fixedRotation = true;
-						body_def.position = get_top_left(object);
-						b2BodyId body = emplace_body(entity, body_def);
+				for (ObjectId collider : objects) {
 
-						for (ObjectId collider : objects) {
+					const Vector2f pos = get_position(collider);
+					const Vector2f half_size = get_size(collider) * 0.5f;
+					const Vector2f center = pos + half_size;
 
-							const Vector2f pos = get_position(collider);
-							const Vector2f half_size = get_size(collider) * 0.5f;
-							const Vector2f center = pos + half_size;
-
-							switch (get_type(collider)) {
-								case ObjectType::Rectangle: {
-
-									b2ShapeDef shape_def = b2DefaultShapeDef();
-									shape_def.filter = get_physics_filter_for_tag(tag);
-									b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
-									b2CreatePolygonShape(body, &shape_def, &box);
-
-								} break;
-								case ObjectType::Ellipse: {
-
-									b2ShapeDef shape_def = b2DefaultShapeDef();
-									shape_def.filter = get_physics_filter_for_tag(tag);
-									b2Circle circle{};
-									circle.center = center;
-									circle.radius = half_size.x;
-									b2CreateCircleShape(body, &shape_def, &circle);
-
-								} break;
-							}
-						}
-					}
-				} break;
-				default: { // Rectangle, Ellipse, Point, Polygon, Polyline
-
-					// CREATE SENSORS
-
-					b2BodyDef body_def = b2DefaultBodyDef();
-					body_def.type = b2_staticBody;
-					body_def.fixedRotation = true;
-					body_def.position = get_top_left(object);
-					b2BodyId body = emplace_body(entity, body_def);
-
-					const Vector2f half_size = get_position(object);
-					const Vector2f center = half_size;
-
-					switch (get_type(object)) {
+					switch (get_type(collider)) {
 						case ObjectType::Rectangle: {
 
 							b2ShapeDef shape_def = b2DefaultShapeDef();
-							shape_def.isSensor = true;
 							shape_def.filter = get_physics_filter_for_tag(tag);
 							b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
 							b2CreatePolygonShape(body, &shape_def, &box);
@@ -139,7 +102,6 @@ namespace ecs {
 						case ObjectType::Ellipse: {
 
 							b2ShapeDef shape_def = b2DefaultShapeDef();
-							shape_def.isSensor = true;
 							shape_def.filter = get_physics_filter_for_tag(tag);
 							b2Circle circle{};
 							circle.center = center;
@@ -148,6 +110,43 @@ namespace ecs {
 
 						} break;
 					}
+				}
+
+				continue; // move on to next object
+			}
+			
+			// Rectangle, Ellipse, Point, Polygon, Polyline
+
+			// CREATE SENSORS
+
+			b2BodyDef body_def = b2DefaultBodyDef();
+			body_def.type = b2_staticBody;
+			body_def.fixedRotation = true;
+			body_def.position = get_top_left(object);
+			b2BodyId body = emplace_body(entity, body_def);
+
+			const Vector2f half_size = get_size(object) * 0.5f;
+			const Vector2f center = half_size;
+
+			switch (object_type) {
+				case ObjectType::Rectangle: {
+
+					b2ShapeDef shape_def = b2DefaultShapeDef();
+					shape_def.isSensor = true;
+					shape_def.filter = get_physics_filter_for_tag(tag);
+					b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
+					b2CreatePolygonShape(body, &shape_def, &box);
+
+				} break;
+				case ObjectType::Ellipse: {
+
+					b2ShapeDef shape_def = b2DefaultShapeDef();
+					shape_def.isSensor = true;
+					shape_def.filter = get_physics_filter_for_tag(tag);
+					b2Circle circle{};
+					circle.center = center;
+					circle.radius = half_size.x;
+					b2CreateCircleShape(body, &shape_def, &circle);
 
 				} break;
 			}
@@ -269,22 +268,22 @@ namespace ecs {
 					const b2SensorBeginTouchEvent& b2_ev = sensor_events.beginEvents[i];
 					PhysicsEvent ev{};
 					ev.type = PhysicsEventType::SensorBeginTouch;
-					ev.shape_a = b2_ev.sensorShapeId;
-					ev.shape_b = b2_ev.visitorShapeId;
-					ev.body_a = b2Shape_GetBody(b2_ev.sensorShapeId);
-					ev.body_b = b2Shape_GetBody(b2_ev.visitorShapeId);
-					ev.entity_a = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_a);
-					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
-					ev.tag_a = get_tag(ev.entity_a);
-					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+					ev.shape = b2_ev.sensorShapeId;
+					ev.other_shape = b2_ev.visitorShapeId;
+					ev.body = b2Shape_GetBody(b2_ev.sensorShapeId);
+					ev.other_body = b2Shape_GetBody(b2_ev.visitorShapeId);
+					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
+					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
+					ev.tag = get_tag(ev.entity);
+					ev.other_tag = get_tag(ev.other_entity);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
 						handler(ev);
 					}
-					std::swap(ev.shape_a, ev.shape_b);
-					std::swap(ev.body_a, ev.body_b);
-					std::swap(ev.entity_a, ev.entity_b);
-					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					std::swap(ev.shape, ev.other_shape);
+					std::swap(ev.body, ev.other_body);
+					std::swap(ev.entity, ev.other_entity);
+					std::swap(ev.tag, ev.other_tag);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
 						handler(ev);
 					}
 				}
@@ -292,22 +291,22 @@ namespace ecs {
 					const b2SensorEndTouchEvent& b2_ev = sensor_events.endEvents[i];
 					PhysicsEvent ev{};
 					ev.type = PhysicsEventType::SensorEndTouch;
-					ev.shape_a = b2_ev.sensorShapeId;
-					ev.shape_b = b2_ev.visitorShapeId;
-					ev.body_a = b2Shape_GetBody(b2_ev.sensorShapeId);
-					ev.body_b = b2Shape_GetBody(b2_ev.visitorShapeId);
-					ev.entity_a = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_a);
-					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
-					ev.tag_a = get_tag(ev.entity_a);
-					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+					ev.shape = b2_ev.sensorShapeId;
+					ev.other_shape = b2_ev.visitorShapeId;
+					ev.body = b2Shape_GetBody(b2_ev.sensorShapeId);
+					ev.other_body = b2Shape_GetBody(b2_ev.visitorShapeId);
+					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
+					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
+					ev.tag = get_tag(ev.entity);
+					ev.other_tag = get_tag(ev.other_entity);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
 						handler(ev);
 					}
-					std::swap(ev.shape_a, ev.shape_b);
-					std::swap(ev.body_a, ev.body_b);
-					std::swap(ev.entity_a, ev.entity_b);
-					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					std::swap(ev.shape, ev.other_shape);
+					std::swap(ev.body, ev.other_body);
+					std::swap(ev.entity, ev.other_entity);
+					std::swap(ev.tag, ev.other_tag);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
 						handler(ev);
 					}
 				}
@@ -320,23 +319,23 @@ namespace ecs {
 					const b2ContactBeginTouchEvent& b2_ev = contact_events.beginEvents[i];
 					PhysicsEvent ev{};
 					ev.type = PhysicsEventType::ContactBeginTouch;
-					ev.shape_a = b2_ev.shapeIdA;
-					ev.shape_b = b2_ev.shapeIdB;
-					ev.body_a = b2Shape_GetBody(b2_ev.shapeIdA);
-					ev.body_b = b2Shape_GetBody(b2_ev.shapeIdB);
-					ev.entity_a = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_a);
-					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
-					ev.tag_a = get_tag(ev.entity_a);
-					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+					ev.shape = b2_ev.shapeIdA;
+					ev.other_shape = b2_ev.shapeIdB;
+					ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
+					ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
+					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
+					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
+					ev.tag = get_tag(ev.entity);
+					ev.other_tag = get_tag(ev.other_entity);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
 						handler(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
-					std::swap(ev.shape_a, ev.shape_b);
-					std::swap(ev.body_a, ev.body_b);
-					std::swap(ev.entity_a, ev.entity_b);
-					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					std::swap(ev.shape, ev.other_shape);
+					std::swap(ev.body, ev.other_body);
+					std::swap(ev.entity, ev.other_entity);
+					std::swap(ev.tag, ev.other_tag);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
 						handler(ev);
 					}
 				}
@@ -344,23 +343,23 @@ namespace ecs {
 					const b2ContactEndTouchEvent& b2_ev = contact_events.endEvents[i];
 					PhysicsEvent ev{};
 					ev.type = PhysicsEventType::ContactEndTouch;
-					ev.shape_a = b2_ev.shapeIdA;
-					ev.shape_b = b2_ev.shapeIdB;
-					ev.body_a = b2Shape_GetBody(b2_ev.shapeIdA);
-					ev.body_b = b2Shape_GetBody(b2_ev.shapeIdB);
-					ev.entity_a = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_a);
-					ev.entity_b = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body_b);
-					ev.tag_a = get_tag(ev.entity_a);
-					ev.tag_b = get_tag(ev.entity_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) {
+					ev.shape = b2_ev.shapeIdA;
+					ev.other_shape = b2_ev.shapeIdB;
+					ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
+					ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
+					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
+					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
+					ev.tag = get_tag(ev.entity);
+					ev.other_tag = get_tag(ev.other_entity);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
 						handler(ev);
 					}
 					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
-					std::swap(ev.shape_a, ev.shape_b);
-					std::swap(ev.body_a, ev.body_b);
-					std::swap(ev.entity_a, ev.entity_b);
-					std::swap(ev.tag_a, ev.tag_b);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity_a)) { // SIC: ev.entity_a since we swapped
+					std::swap(ev.shape, ev.other_shape);
+					std::swap(ev.body, ev.other_body);
+					std::swap(ev.entity, ev.other_entity);
+					std::swap(ev.tag, ev.other_tag);
+					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
 						handler(ev);
 					}
 				}

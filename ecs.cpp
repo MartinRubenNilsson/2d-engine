@@ -71,9 +71,11 @@ namespace ecs {
 	}
 
 	void _patch(MapId map) {
-		if (!set_patch(map)) return;
+		map_to_patch = map;
+		if (!has_patch()) return;
 		Patch& patch = get_patch();
 		patch_entities_to_destroy(patch);
+		patch_players(patch);
 		patch_chests(patch);
 	}
 
@@ -87,7 +89,6 @@ namespace ecs {
 	void update(float dt) {
 		update_physics(dt);
 		update_players(dt);
-		update_portals(dt);
 		update_pickups(dt);
 		update_bombs(dt);
 		update_blade_traps(dt);

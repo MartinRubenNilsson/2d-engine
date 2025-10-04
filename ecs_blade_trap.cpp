@@ -121,10 +121,10 @@ namespace ecs {
 
 	void _handle_physics_event_for_blade_trap(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (get_current_state(ev.entity_a) == "extending") {
-				transition_to_state(ev.entity_a, "impacting");
+			if (get_current_state(ev.entity) == "extending") {
+				transition_to_state(ev.entity, "impacting");
 			}
-			apply_damage(ev.entity_b, { .type = DamageType::Melee, .amount = 1 });
+			apply_damage(ev.other_entity, { .type = DamageType::Melee, .amount = 1 });
 		}
 	}
 

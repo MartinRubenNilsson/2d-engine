@@ -10,7 +10,6 @@
 #include "ecs_bomb.h"
 #include "ecs_damage.h"
 #include "ecs_interactions.h"
-#include "ecs_portal.h"
 #include "player_outfit.h"
 #include "console.h"
 #include "audio.h"
@@ -27,7 +26,9 @@
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
+#include "ecs_portal.h"
 #include "ecs_lifetime.h"
+#include "ecs_patch.h"
 #include "graphics_globals.h"
 
 namespace ecs {
@@ -178,6 +179,20 @@ namespace ecs {
 			camera.entity_to_follow = entity;
 			emplace_camera(entity, camera);
 			activate_camera(entity, true);
+		}
+	}
+
+	void _teleport_players_to_portal(std::string_view portal_name) {
+		entt::entity portal_entity = get_portal_with_name(portal_name);
+		if (portal_entity == entt::null) return;
+		for (auto [player_entity] : _registry.view<Type<Tag::Player>>().each()) {
+			teleport_entity_to_portal(player_entity, portal_entity);
+		}
+	}
+
+	void patch_players(const Patch& patch) {
+		if (!patch.portal_to_exit.empty()) {
+			_teleport_players_to_portal(patch.portal_to_exit);
 		}
 	}
 
@@ -685,20 +700,18 @@ namespace ecs {
 
 	void on_player_physics_event(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::SensorBeginTouch) {
-			if (ev.tag_b == Tag::Pickup) {
-				_on_player_begin_touch_pickup(ev.entity_a, ev.entity_b);
-			} else if (ev.tag_b == Tag::Portal) {
-				activate_portal(ev.entity_b);
+			if (ev.other_tag == Tag::Pickup) {
+				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
 			}
 		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (ev.tag_b == Tag::PushableBlock) {
-				_on_player_begin_touch_pushable_block(ev.entity_a, ev.entity_b);
-			} else if (ev.tag_b == Tag::Slime) {
-				apply_damage_to_player(ev.entity_a, { DamageType::Melee, 1 });
+			if (ev.other_tag == Tag::PushableBlock) {
+				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
+			} else if (ev.other_tag == Tag::Slime) {
+				apply_damage_to_player(ev.entity, { DamageType::Melee, 1 });
 			} 
 		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
-			if (ev.tag_b == Tag::PushableBlock) {
-				_on_player_end_touch_pushable_block(ev.entity_a, ev.entity_b);
+			if (ev.other_tag == Tag::PushableBlock) {
+				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
 			}
 		}
 	}

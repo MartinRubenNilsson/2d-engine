@@ -133,15 +133,12 @@
    </properties>
    <point/>
   </object>
-  <object id="29" template="../templates/portal.tx" name="portal to cave platform" x="32" y="304">
+  <object id="29" name="cave_portal" type="portal" x="32" y="304" width="16" height="16">
    <properties>
-    <property name="exit_direction" value="left"/>
-    <property name="target_map" value="muddy_cave_00"/>
-    <property name="target_point" value="cave platform"/>
+    <property name="direction" value="down"/>
+    <property name="map" value="muddy_cave_00"/>
+    <property name="portal" value="cave_portal"/>
    </properties>
-  </object>
-  <object id="30" name="cave entrance" x="41.6667" y="336.333">
-   <point/>
   </object>
   <object id="31" type="chest" gid="3489" x="112" y="368" width="32" height="32"/>
   <object id="34" type="chest" gid="3492" x="176" y="448" width="32" height="32">
