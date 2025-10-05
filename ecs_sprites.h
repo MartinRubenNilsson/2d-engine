@@ -5,6 +5,8 @@ namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity);
 	sprites::Sprite* get_sprite(entt::entity entity);
 
+	// Loading the texture (or fetching it if already loaded) can be expensive
+	// or maybe not desired (if we have tileset variants), so it is optional.
 	void update_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
 
 	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = { 0.f, 0.f });
