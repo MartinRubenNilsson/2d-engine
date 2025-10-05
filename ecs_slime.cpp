@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ecs_slime.h"
 #include "ecs_tags.h"
-#include "ecs_ai.h"
 #include "ecs_damage.h"
 #include "ecs_lifetime.h"
 #include "ecs_states.h"
@@ -58,13 +57,16 @@ namespace ecs {
         return true;
     }
 
-    void _wander_then_wait_then_pursue_then_repeat(entt::entity e) {
+    void _do_slime_task(entt::entity e) {
         wander(e, 20.f, 50.f, random::range_f(1.f, 3.f));
         then(e, [](entt::entity e) {
             wait(e, random::range_f(0.5f, 1.5f));
             then(e, [](entt::entity e) {
-                pursue(e, find_entity_with_tag(Tag::Player), 20.f, 32.f);
-                then(e, _wander_then_wait_then_pursue_then_repeat);
+                pursue(e, find_entity_with_tag(Tag::Player), 30.f, 32.f);
+                then(e, [](entt::entity e) {
+                    flee(e, find_entity_with_tag(Tag::Player), 50.f, 16.f * 5);
+                    then(e, _do_slime_task);
+                });
             });
         });
     }
@@ -76,10 +78,7 @@ namespace ecs {
 
             set_damage_handler(entity, _handle_damage_to_slime);
 
-            _wander_then_wait_then_pursue_then_repeat(entity);
-            //_emplace_state_machine_for_slime(entity);
-            //emplace_ai(entity, AiType::Slime);
-
+            _do_slime_task(entity);
         }
     }
 

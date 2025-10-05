@@ -55,6 +55,7 @@ namespace ecs {
 		_update_wait_tasks(dt);
 		_update_wander_tasks(dt);
 		_update_pursue_tasks(dt);
+		_update_flee_tasks(dt);
 		_update_tasks_that_are_done(dt); // must be done last!
 	}
 

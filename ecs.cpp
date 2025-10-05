@@ -7,7 +7,6 @@
 #include "ecs_physics.h"
 #include "ecs_sprites.h"
 #include "ecs_player.h"
-#include "ecs_ai.h"
 #include "ecs_animations.h"
 #include "ecs_camera.h"
 #include "ecs_pickups.h"
@@ -96,7 +95,6 @@ namespace ecs {
 		update_state_machines(dt);
 		update_tasks(dt);
 		update_slimes(dt);
-		update_ai_logic(dt); // TODO remove
 		update_lifetimes(dt);
 		destroy_entities_to_be_destroyed_at_end_of_frame();
 		update_animations(dt);

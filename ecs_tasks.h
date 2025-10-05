@@ -13,6 +13,7 @@ namespace ecs {
 	void wait(entt::entity entity, float time);
 	void wander(entt::entity entity, float speed, float radius, float time);
 	void pursue(entt::entity entity, entt::entity target, float speed, float acceptance_radius, bool pathfind = true);
+	void flee(entt::entity entity, entt::entity target_entity, float speed, float safety_radius);
 
 	void update_tasks(float dt);
 	void debug_draw_tasks();

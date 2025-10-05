@@ -151,6 +151,7 @@
     <ClCompile Include="ecs_physics_setup.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_tasks.cpp" />
+    <ClCompile Include="ecs_task_flee.cpp" />
     <ClCompile Include="ecs_task_pursue.cpp" />
     <ClCompile Include="ecs_task_wait.cpp" />
     <ClCompile Include="ecs_task_wander.cpp" />
@@ -184,8 +185,6 @@
     <ClCompile Include="platform_windows.cpp" />
     <ClCompile Include="renderdoc.cpp" />
     <ClCompile Include="shapes.cpp" />
-    <ClCompile Include="ecs_ai_action.cpp" />
-    <ClCompile Include="ecs_ai.cpp" />
     <ClCompile Include="ecs_arrow.cpp" />
     <ClCompile Include="ecs_bomb.cpp" />
     <ClCompile Include="ecs_camera.cpp" />
@@ -289,8 +288,6 @@
     <ClInclude Include="vertices.h" />
     <ClInclude Include="window_events.h" />
     <ClInclude Include="shapes.h" />
-    <ClInclude Include="ecs_ai_action.h" />
-    <ClInclude Include="ecs_ai.h" />
     <ClInclude Include="ecs_bomb.h" />
     <ClInclude Include="ecs_camera.h" />
     <ClInclude Include="ecs_damage.h" />

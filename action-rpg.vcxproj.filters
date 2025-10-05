@@ -31,12 +31,6 @@
     <ClCompile Include="ui_textbox_presets.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_ai_action.cpp">
-      <Filter>game\ecs\ai</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs_ai.cpp">
-      <Filter>game\ecs\ai</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_physics.cpp">
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
@@ -237,16 +231,19 @@
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tasks.cpp">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\ai\tasks</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_wander.cpp">
-      <Filter>game\ecs\tasks\implementations</Filter>
+      <Filter>game\ecs\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_pursue.cpp">
-      <Filter>game\ecs\tasks\implementations</Filter>
+      <Filter>game\ecs\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_wait.cpp">
-      <Filter>game\ecs\tasks\implementations</Filter>
+      <Filter>game\ecs\ai\tasks\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_task_flee.cpp">
+      <Filter>game\ecs\ai\tasks\implementations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -279,12 +276,6 @@
     </ClInclude>
     <ClInclude Include="ui_hud.h">
       <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_ai_action.h">
-      <Filter>game\ecs\ai</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_ai.h">
-      <Filter>game\ecs\ai</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics.h">
       <Filter>game\ecs\physics</Filter>
@@ -509,13 +500,13 @@
       <Filter>game\ecs\physics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tasks.h">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="ecs_task_status.h">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="ecs_task_impl.h">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="vec2.h">
       <Filter>math</Filter>
@@ -639,10 +630,10 @@
     <Filter Include="game\ecs\lifetime">
       <UniqueIdentifier>{0cc4bc17-e65d-41dd-9af6-8de480f78e9b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\tasks">
+    <Filter Include="game\ecs\ai\tasks">
       <UniqueIdentifier>{4be998a3-1cb4-4993-8984-957586847102}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\tasks\implementations">
+    <Filter Include="game\ecs\ai\tasks\implementations">
       <UniqueIdentifier>{65478eb0-56d4-4d87-8c8c-7dae91063ec9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

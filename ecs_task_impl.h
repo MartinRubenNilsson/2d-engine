@@ -17,6 +17,7 @@ namespace ecs {
 	void _update_wait_tasks(float dt);
 	void _update_wander_tasks(float dt);
 	void _update_pursue_tasks(float dt);
+	void _update_flee_tasks(float dt);
 
 	void _debug_draw_pursue_tasks();
 }
