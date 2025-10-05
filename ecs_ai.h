@@ -12,7 +12,6 @@ namespace ecs {
 	};
 
 	void update_ai_logic(float dt);
-	void debug_draw_ai();
 
 	void emplace_ai(entt::entity entity, AiType type);
 }

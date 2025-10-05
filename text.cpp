@@ -19,7 +19,7 @@ namespace text {
         const float letter_spacing = whitespace_width * (text.letter_spacing_factor - 1.f);
         whitespace_width += letter_spacing;
         const float line_spacing = fonts::get_line_spacing(*font) * text.line_spacing_factor;
-        Vector2f current_point; // In unscaled coordinates
+        Vec2f current_point; // In unscaled coordinates
 
         std::vector<graphics::Vertex> vertices;
 
@@ -44,17 +44,17 @@ namespace text {
 
             const fonts::Glyph glyph = fonts::get_glyph(*font, codepoint);
 
-            const Vector2f pos0 = current_point + Vector2f((float)glyph.x0, (float)glyph.y0);
-            const Vector2f pos1 = current_point + Vector2f((float)glyph.x1, (float)glyph.y1);
-            Vector2f tex0 = Vector2f((float)glyph.s0, (float)glyph.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
-            Vector2f tex1 = Vector2f((float)glyph.s1, (float)glyph.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
+            const Vec2f pos0 = current_point + Vec2f((float)glyph.x0, (float)glyph.y0);
+            const Vec2f pos1 = current_point + Vec2f((float)glyph.x1, (float)glyph.y1);
+            Vec2f tex0 = Vec2f((float)glyph.s0, (float)glyph.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
+            Vec2f tex1 = Vec2f((float)glyph.s1, (float)glyph.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
             std::swap(tex0.y, tex1.y); // Flip y-axis
-            vertices.emplace_back(Vector2f(pos0.x, pos0.y), colors::WHITE, Vector2f(tex0.x, tex0.y));
-            vertices.emplace_back(Vector2f(pos1.x, pos0.y), colors::WHITE, Vector2f(tex1.x, tex0.y));
-            vertices.emplace_back(Vector2f(pos0.x, pos1.y), colors::WHITE, Vector2f(tex0.x, tex1.y));
-            vertices.emplace_back(Vector2f(pos0.x, pos1.y), colors::WHITE, Vector2f(tex0.x, tex1.y));
-            vertices.emplace_back(Vector2f(pos1.x, pos0.y), colors::WHITE, Vector2f(tex1.x, tex0.y));
-            vertices.emplace_back(Vector2f(pos1.x, pos1.y), colors::WHITE, Vector2f(tex1.x, tex1.y));
+            vertices.emplace_back(Vec2f(pos0.x, pos0.y), colors::WHITE, Vec2f(tex0.x, tex0.y));
+            vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
+            vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
+            vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
+            vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
+            vertices.emplace_back(Vec2f(pos1.x, pos1.y), colors::WHITE, Vec2f(tex1.x, tex1.y));
 
             current_point.x += glyph.advance_width + letter_spacing;
             previous_codepoint = codepoint;

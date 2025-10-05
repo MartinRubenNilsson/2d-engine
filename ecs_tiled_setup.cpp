@@ -72,7 +72,7 @@ namespace ecs {
 					continue;
 				const TileId tile = get_tile(object);
 				if (!tile) {
-					console::log_error("Error 10391 : Invalid tile for tile object");
+					console::log_error("Error 10391: Invalid tile for tile object");
 					continue;
 				}
 
@@ -99,6 +99,7 @@ namespace ecs {
 			for (uint16_t y = layer.height; y--;) {
 				for (uint16_t x = layer.width; x--;) {
 
+					// TODO: flip flags
 					const tiled::TileGid gid = layer.tiles[x + y * layer.width];
 					const TileId tile{
 						.id = (uint16_t)gid.id,

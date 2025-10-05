@@ -3,8 +3,6 @@
 #include "ecs_tiled.h"
 #include <magic_enum/magic_enum_switch.hpp>
 
-using namespace entt::literals;
-
 namespace ecs {
 	Tag string_to_tag(std::string_view string) {
 		char sanitized_string[64] = {}; // lowercase alphabetic characters only
@@ -52,7 +50,7 @@ namespace ecs {
 		return _registry.get<Tag>(entity);
 	}
 
-	entt::entity find_entity_by_tag(Tag tag) {
+	entt::entity find_entity_with_tag(Tag tag) {
 		entt::entity entity = entt::null;
 		magic_enum::enum_switch([&entity](auto tag) {
 			entity = _registry.view<Type<tag>>().front();
@@ -61,15 +59,26 @@ namespace ecs {
 	}
 
 	void setup_tags() {
-		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
-			std::string_view class_ = get_class(object);
+		// We try three different ways to get the Tiled class of the entity:
+		//	1. Use the object class (if the entity is an object with a nonempty class).
+		//	2. Otherwise use the tile class (if the entity is or has a tile with a nonempty class).
+		//	3. Otherwise use the tileset class (if nonempty).
+
+		for (auto [entity, tile] : _registry.view<TileId>().each()) {
+			std::string_view class_ = get_class(tile); // 2.
+			if (class_.empty()) {
+				class_ = get_class(get_tileset(tile)); // 3.
+				if (!class_.empty())
+					class_ = class_;
+			}
 			if (class_.empty()) continue;
 			set_tag(entity, string_to_tag(class_));
 		}
 
-		for (auto [entity, tile] : _registry.view<TileId>().each()) {
-			std::string_view class_ = get_class(tile);
+		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
+			std::string_view class_ = get_class(object); // 1.
 			if (class_.empty()) continue;
+			// This may (intentionally) override the tag if it has been set by the previous loop.
 			set_tag(entity, string_to_tag(class_));
 		}
 	}

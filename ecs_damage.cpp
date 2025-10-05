@@ -30,7 +30,7 @@ namespace ecs {
 	// This is used for record-keeping so we don't apply the same damage to the same entity multiple times.
 	std::unordered_set<entt::entity> _entities_that_took_damage;
 
-	bool apply_damage_in_box(const Damage& damage, const Vector2f& box_min, const Vector2f& box_max, uint32_t mask_bits) {
+	bool apply_damage_in_box(const Damage& damage, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
 		//debug::draw_box(box_min, box_max, Color::Red, 0.2f);
 		for (const OverlapHit& hit : overlap_box(box_min, box_max, mask_bits)) {
 			if (hit.entity == damage.source) continue; // For now, entities can't damage themselves
@@ -43,7 +43,7 @@ namespace ecs {
 		return any_entity_took_damage;
 	}
 
-	bool apply_damage_in_circle(const Damage& damage, const Vector2f& center, float radius, uint32_t mask_bits) {
+	bool apply_damage_in_circle(const Damage& damage, const Vec2f& center, float radius, uint32_t mask_bits) {
 		//debug::draw_circle(center, radius, Color::Red, 0.2f);
 		for (const OverlapHit& hit : overlap_circle(center, radius, mask_bits)) {
 			if (hit.entity == damage.source) continue; // For now, entities can't damage themselves

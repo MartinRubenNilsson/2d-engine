@@ -25,7 +25,7 @@ namespace ecs {
 		return _registry.emplace_or_replace<Arrow>(entity, arrow);
 	}
 
-	entt::entity create_arrow(const Vector2f& position, const Vector2f& velocity) {
+	entt::entity create_arrow(const Vec2f& position, const Vec2f& velocity) {
 		entt::entity entity = _registry.create();
 		set_tag(entity, Tag::Arrow);
 		{
@@ -33,7 +33,7 @@ namespace ecs {
 			arrow.damage = 1;
 			arrow.lifetime = 0.f; // unused right now
 		}
-		const Vector2f pivot = { 8.f, 8.f };
+		const Vec2f pivot = { 8.f, 8.f };
 		if (const TilesetId tileset = get_tileset("items1")) {
 			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
 				sprites::Sprite& sprite = emplace_sprite(entity);

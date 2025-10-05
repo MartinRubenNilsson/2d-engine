@@ -236,17 +236,17 @@
     <ClCompile Include="ecs_physics_setup.cpp">
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_task.cpp">
-      <Filter>game\ecs\tasks</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs_task_wait.cpp">
+    <ClCompile Include="ecs_tasks.cpp">
       <Filter>game\ecs\tasks</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_wander.cpp">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_pursue.cpp">
-      <Filter>game\ecs\tasks</Filter>
+      <Filter>game\ecs\tasks\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_task_wait.cpp">
+      <Filter>game\ecs\tasks\implementations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -463,9 +463,6 @@
     <ClInclude Include="kdtree.h">
       <Filter>math\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="vector2.h">
-      <Filter>math\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="kdtree_test.h">
       <Filter>math\geometry</Filter>
     </ClInclude>
@@ -511,8 +508,17 @@
     <ClInclude Include="ecs_physics_events.h">
       <Filter>game\ecs\physics</Filter>
     </ClInclude>
-    <ClInclude Include="ecs_task.h">
+    <ClInclude Include="ecs_tasks.h">
       <Filter>game\ecs\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_task_status.h">
+      <Filter>game\ecs\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_task_impl.h">
+      <Filter>game\ecs\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="vec2.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -635,6 +641,9 @@
     </Filter>
     <Filter Include="game\ecs\tasks">
       <UniqueIdentifier>{4be998a3-1cb4-4993-8984-957586847102}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\tasks\implementations">
+      <UniqueIdentifier>{65478eb0-56d4-4d87-8c8c-7dae91063ec9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

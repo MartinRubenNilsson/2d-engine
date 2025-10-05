@@ -29,7 +29,7 @@ namespace ecs {
 	bool apply_damage(entt::entity entity, const Damage& damage);
 
 	// Applies damage to all entities that intersect the given box. Returns true if any entity was damaged.
-	bool apply_damage_in_box(const Damage& damage, const Vector2f& box_min, const Vector2f& box_max, uint32_t mask_bits = UINT32_MAX);
+	bool apply_damage_in_box(const Damage& damage, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
 	// Applies damage to all entities that intersect the given circle. Returns true if any entity was damaged.
-	bool apply_damage_in_circle(const Damage& damage, const Vector2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
+	bool apply_damage_in_circle(const Damage& damage, const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
 }

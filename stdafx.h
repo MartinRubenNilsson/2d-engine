@@ -32,7 +32,7 @@ using namespace std::literals::string_literals;
 
 #include "fwd.h"
 #include "handle.h"
-#include "vector2.h"
+#include "vec2.h"
 #include "color.h"
 #include "math.h"
 #include "ecs_tiled_ids.h"

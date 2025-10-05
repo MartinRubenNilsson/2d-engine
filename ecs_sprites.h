@@ -7,7 +7,7 @@ namespace ecs {
 
 	void update_sprite(sprites::Sprite& sprite, TileId tile);
 
-	void make_sprite_follow_body(entt::entity entity, const Vector2f& offset = { 0.f, 0.f });
+	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = { 0.f, 0.f });
 
 	// Makes the Sprite's color blink.
 	struct SpriteBlink {
@@ -34,12 +34,12 @@ namespace ecs {
 		float magnitude = 0.f; // in pixels
 		float exponent = 0.f;
 		unsigned int _random_seed = 0; // auto-generated at emplace time
-		Vector2f _original_position; // for internal use only!
+		Vec2f _original_position; // for internal use only!
 	};
 
 	void make_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
 
 	void setup_sprites(MapId map);
 	void update_sprites(float dt);
-	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max);
+	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max);
 }

@@ -90,15 +90,15 @@ namespace sprites {
 
 		for (const Sprite& sprite : _sprites) {
 
-			const Vector2f tl = sprite.position; // top-left
-			const Vector2f br = sprite.position + sprite.size; // bottom-right
-			const Vector2f tr = { br.x, tl.y }; // top-right
-			const Vector2f bl = { tl.x, br.y }; // bottom-left
+			const Vec2f tl = sprite.position; // top-left
+			const Vec2f br = sprite.position + sprite.size; // bottom-right
+			const Vec2f tr = { br.x, tl.y }; // top-right
+			const Vec2f bl = { tl.x, br.y }; // bottom-left
 
-			Vector2f tex_tl = sprite.tex_position; // top-left
-			Vector2f tex_br = sprite.tex_position + sprite.tex_size; // bottom-right
-			Vector2f tex_tr = { tex_br.x, tex_tl.y }; // top-right
-			Vector2f tex_bl = { tex_tl.x, tex_br.y }; // bottom-left
+			Vec2f tex_tl = sprite.tex_position; // top-left
+			Vec2f tex_br = sprite.tex_position + sprite.tex_size; // bottom-right
+			Vec2f tex_tr = { tex_br.x, tex_tl.y }; // top-right
+			Vec2f tex_bl = { tex_tl.x, tex_br.y }; // bottom-left
 
 			if (sprite.flags & SPRITE_FLIP_HORIZONTALLY) {
 				std::swap(tex_tl, tex_tr);

@@ -13,18 +13,21 @@ namespace ecs {
 	MapId get_map(std::string_view path);
 	std::vector<MapId> get_all_maps();
 	std::string_view get_path(MapId map);
-	Vector2u get_tile_size(MapId map); // in pixels
-	Vector2u get_size_in_tiles(MapId map);
-	Vector2u get_size_in_pixels(MapId map);
+	std::string_view get_name(MapId map); // this is just the path stem (filename without extension)
+	Vec2u get_tile_size(MapId map); // in pixels
+	Vec2u get_size_in_tiles(MapId map);
+	Vec2u get_size_in_pixels(MapId map);
 	bool is_layer_visible(MapId map, unsigned int layer);
 
 	/// TILESETS
 
 	TilesetId get_tileset(std::string_view name);
+	std::string_view get_name(TilesetId tileset);
+	std::string_view get_class(TilesetId tileset);
 	std::string_view get_image_path(TilesetId tileset);
-	Vector2u get_tile_size(TilesetId tileset); // in pixels
-	Vector2u get_size_in_tiles(TilesetId tileset);
-	Vector2u get_size_in_pixels(TilesetId tileset);
+	Vec2u get_tile_size(TilesetId tileset); // in pixels
+	Vec2u get_size_in_tiles(TilesetId tileset);
+	Vec2u get_size_in_pixels(TilesetId tileset);
 	TileId get_tile(TilesetId tileset, unsigned int tile_id);
 
 	/// TILES
@@ -45,7 +48,7 @@ namespace ecs {
 	TilesetId get_tileset(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
-	Vector2u get_size(TileId tile); // in pixels
+	Vec2u get_size(TileId tile); // in pixels
 	TextureRect get_texture_rect(TileId tile);
 	bool animated(TileId tile);
 	unsigned int get_animation_duration(TileId tile); // duration in milliseconds
@@ -71,10 +74,10 @@ namespace ecs {
 	std::string_view get_class(ObjectId obj);
 	TileId get_tile(ObjectId obj);
 	// PITFALL: For tile objects this is the bottom left!
-	Vector2f get_position(ObjectId obj);
-	Vector2f get_top_left(ObjectId obj); // in world space
-	Vector2f get_size(ObjectId obj);
-	std::span<const Vector2f> get_points(ObjectId obj);
+	Vec2f get_position(ObjectId obj);
+	Vec2f get_top_left(ObjectId obj); // in world space
+	Vec2f get_size(ObjectId obj);
+	std::span<const Vec2f> get_points(ObjectId obj);
 	std::string_view get_string(ObjectId obj, std::string_view name);
 	int get_int(ObjectId obj, std::string_view name);
 	float get_float(ObjectId obj, std::string_view name);

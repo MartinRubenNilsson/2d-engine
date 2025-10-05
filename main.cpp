@@ -215,13 +215,13 @@ int main(int argc, char* argv[]) {
         int window_framebuffer_height = 0;
         window::get_framebuffer_size(window_framebuffer_width, window_framebuffer_height);
 
-        Vector2f camera_min = { 0.f, 0.f };
-		Vector2f camera_max = { (float)window_framebuffer_width, (float)window_framebuffer_height };
+        Vec2f camera_min = { 0.f, 0.f };
+		Vec2f camera_max = { (float)window_framebuffer_width, (float)window_framebuffer_height };
         if (map::is_open()) {
             ecs::get_camera_bounds(camera_min, camera_max);
         }
-        const Vector2f camera_center = (camera_min + camera_max) / 2.f;
-        const Vector2f camera_size = camera_max - camera_min;
+        const Vec2f camera_center = (camera_min + camera_max) / 2.f;
+        const Vec2f camera_size = camera_max - camera_min;
 
         // Update frame uniform buffer
         {

@@ -7,7 +7,7 @@
 #include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "ecs_animations.h"
-#include "ecs_task.h"
+#include "ecs_tasks.h"
 #include "audio.h"
 #include "random.h"
 
@@ -58,11 +58,14 @@ namespace ecs {
         return true;
     }
 
-    void _wander_then_wait_then_repeat(entt::entity entity) {
-        wander(entity, 20.f, 50.f, random::range_f(1.f, 3.f));
-        then(entity, [](entt::entity entity) {
-            wait(entity, random::range_f(0.5f, 1.5f));
-            then(entity, _wander_then_wait_then_repeat);
+    void _wander_then_wait_then_pursue_then_repeat(entt::entity e) {
+        wander(e, 20.f, 50.f, random::range_f(1.f, 3.f));
+        then(e, [](entt::entity e) {
+            wait(e, random::range_f(0.5f, 1.5f));
+            then(e, [](entt::entity e) {
+                pursue(e, find_entity_with_tag(Tag::Player), 20.f, 32.f);
+                then(e, _wander_then_wait_then_pursue_then_repeat);
+            });
         });
     }
 
@@ -73,7 +76,7 @@ namespace ecs {
 
             set_damage_handler(entity, _handle_damage_to_slime);
 
-            _wander_then_wait_then_repeat(entity);
+            _wander_then_wait_then_pursue_then_repeat(entity);
             //_emplace_state_machine_for_slime(entity);
             //emplace_ai(entity, AiType::Slime);
 
@@ -90,9 +93,9 @@ namespace ecs {
 
     void update_slimes(float dt) {
         for (auto [entity, slime, body, tile, anim] : _registry.view<Slime, b2BodyId, TileId, TileAnimation>().each()) {
-            Vector2f velocity = b2Body_GetLinearVelocity(body);
+            Vec2f velocity = b2Body_GetLinearVelocity(body);
             unsigned int tile_id = UINT_MAX;
-            if (!is_zero(velocity)) {
+            if (velocity != Vec2f::ZERO) {
                 switch (get_direction(velocity)) {
                     case 'd': tile_id = TILE_ID_SLIME_WALK_DOWN; break;
                     case 'r': tile_id = TILE_ID_SLIME_WALK_RIGHT; break;

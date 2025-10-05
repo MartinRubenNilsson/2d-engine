@@ -11,7 +11,7 @@ namespace ecs {
 	struct Portal {
 		std::string map; // The name of the map to which the player will be teleported.
 		std::string portal; // The name of the exit portal to which player will be teleported.
-		Vector2u direction; // The direction the player will exit the portal.
+		Vec2u direction; // The direction the player will exit the portal.
 		bool activated = false;
 	};
 
@@ -74,9 +74,9 @@ namespace ecs {
 		if (!portal_body) return false;
 		Portal* portal = _registry.try_get<Portal>(portal_entity);
 		if (!portal) return false;
-		Vector2f position = b2Body_GetPosition(*portal_body);
-		position += Vector2f(8.f, 8.f); // center of portal (hopefully)
-		position += (Vector2f)portal->direction * 16.f;
+		Vec2f position = b2Body_GetPosition(*portal_body);
+		position += Vec2f(8.f, 8.f); // center of portal (hopefully)
+		position += (Vec2f)portal->direction * 16.f;
 		b2Body_SetTransform(*body, position, b2Body_GetRotation(*body));
 		return true;
 	}

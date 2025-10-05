@@ -10,5 +10,5 @@ namespace ecs {
 	void interact_with(entt::entity entity);
 
 	// Calls the interaction handler for all entities that intersect the given box.
-	void interact_with_all_entities_in_box(const Vector2f& box_min, const Vector2f& box_max);
+	void interact_with_all_entities_in_box(const Vec2f& box_min, const Vec2f& box_max);
 }

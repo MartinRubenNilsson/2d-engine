@@ -9,7 +9,7 @@
 namespace ecs {
     extern entt::registry _registry;
 
-    entt::entity create_vfx(VfxType type, const Vector2f& position) {
+    entt::entity create_vfx(VfxType type, const Vec2f& position) {
         entt::entity entity = _registry.create();
 
         sprites::Sprite& sprite = emplace_sprite(entity);

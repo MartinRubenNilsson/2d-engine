@@ -165,7 +165,7 @@ namespace ecs {
 	}
 
 	void _b2_debug_draw_polygon(const b2Vec2* vertices, int vertexCount, b2HexColor color, void* context) {
-		shapes::add_polygon((const Vector2f*)vertices, vertexCount, _b2HexColor_to_Color(color));
+		shapes::add_polygon((const Vec2f*)vertices, vertexCount, _b2HexColor_to_Color(color));
 	}
 
 	void _b2_debug_draw_solid_polygon(b2Transform transform, const b2Vec2* vertices, int vertexCount, float radius, b2HexColor color, void* context) {
@@ -173,7 +173,7 @@ namespace ecs {
 		for (int i = 0; i < vertexCount; ++i) {
 			transformed_vertices[i] = b2TransformPoint(transform, vertices[i]);
 		}
-		shapes::add_polygon((const Vector2f*)transformed_vertices, vertexCount, _b2HexColor_to_Color(color));
+		shapes::add_polygon((const Vec2f*)transformed_vertices, vertexCount, _b2HexColor_to_Color(color));
 	}
 
 	void _b2_debug_draw_circle(b2Vec2 center, float radius, b2HexColor color, void* context) {
@@ -224,7 +224,7 @@ namespace ecs {
 #endif
 	}
 
-	bool raycast_closest(const Vector2f& ray_start, const Vector2f& ray_end, uint32_t mask_bits, RaycastHit* hit) {
+	bool raycast_closest(const Vec2f& ray_start, const Vec2f& ray_end, uint32_t mask_bits, RaycastHit* hit) {
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
 		query_filter.maskBits = mask_bits;
 
@@ -241,7 +241,7 @@ namespace ecs {
 		return result.hit;
 	}
 
-	std::vector<RaycastHit> raycast(const Vector2f& ray_start, const Vector2f& ray_end, uint32_t mask_bits) {
+	std::vector<RaycastHit> raycast(const Vec2f& ray_start, const Vec2f& ray_end, uint32_t mask_bits) {
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
 		query_filter.maskBits = mask_bits;
 
@@ -263,9 +263,9 @@ namespace ecs {
 		return hits;
 	}
 
-	std::vector<OverlapHit> overlap_box(const Vector2f& box_min, const Vector2f& box_max, uint32_t mask_bits) {
-		const Vector2f box_half_size = 0.5 * (box_max - box_min);
-		const Vector2f box_center = 0.5 * (box_min + box_max);
+	std::vector<OverlapHit> overlap_box(const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
+		const Vec2f box_half_size = 0.5 * (box_max - box_min);
+		const Vec2f box_center = 0.5 * (box_min + box_max);
 		b2Polygon box = b2MakeOffsetBox(box_half_size.x, box_half_size.y, box_center, 0.f);
 
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
@@ -285,7 +285,7 @@ namespace ecs {
 		return hits;
 	}
 
-	std::vector<OverlapHit> overlap_circle(const Vector2f& center, float radius, uint32_t mask_bits) {
+	std::vector<OverlapHit> overlap_circle(const Vec2f& center, float radius, uint32_t mask_bits) {
 		b2Circle circle{};
 		circle.center = center;
 		circle.radius = radius;

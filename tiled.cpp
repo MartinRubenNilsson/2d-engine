@@ -168,6 +168,10 @@ namespace tiled {
 		return std::filesystem::path(path).parent_path().string();
 	}
 
+	std::string _get_path_stem(std::string_view path) {
+		return std::filesystem::path(path).stem().string();
+	}
+
 	unsigned int load_tileset_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
@@ -584,6 +588,7 @@ namespace tiled {
 
 		Map map{};
 		map.path = std::move(normalized_path);
+		map.name = _get_path_stem(map.path);
 		map.class_ = map_node.attribute("class").as_string();
 		map.width = map_node.attribute("width").as_uint();
 		map.height = map_node.attribute("height").as_uint();

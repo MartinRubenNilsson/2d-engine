@@ -8,7 +8,6 @@
 #include "shapes.h"
 #include "text.h"
 #include "fonts.h"
-#include "tile_ids.h"
 
 namespace ecs {
     extern entt::registry _registry;
@@ -38,9 +37,6 @@ namespace ecs {
                     } else if (action.type == AiActionType::Wander && action.status == AiActionStatus::Succeeded) {
                         float duration = random::range_f(0.5f, 1.5f);
                         ai_wait(entity, duration);
-                    } else if (action.type != AiActionType::Wander) {
-                        float duration = random::range_f(1.f, 3.f);
-                        ai_wander(entity, knowledge.initial_position, 20.f, 50.f, duration);
                     }
 
                 } break;
@@ -52,44 +48,6 @@ namespace ecs {
     void update_ai_logic(float dt) {
         _update_ai_decision_making(dt);
         update_ai_actions(dt);
-    }
-
-    void debug_draw_ai() {
-#ifdef _DEBUG
-        text::Text text{};
-        text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
-        text.pixel_height = 48.f;
-        text.scale = { 0.1f, 0.1f };
-
-        uint32_t paths_drawn = 0;
-
-        for (auto [entity, body, action] : _registry.view<b2BodyId, const AiAction>().each()) {
-
-            // DRAW ACTION TYPE
-            {
-                std::string_view action_type_string = to_string(action.type);
-                text.string.assign(action_type_string.begin(), action_type_string.end());
-                text.position = b2Body_GetWorldCenterOfMass(body) + Vector2f(-8.f, -10.f);
-                text::render(text);
-            }
-
-            // DRAW ACTION PATH
-
-            if (action.path.size() >= 2) {
-                for (size_t i = 0; i + 1 < action.path.size(); ++i) {
-                    Vector2f p1 = map::get_tile_center(action.path[i]);
-                    Vector2f p2 = map::get_tile_center(action.path[i + 1]);
-                    Color color = random::color((uint32_t)entity * 2);
-                    p1.x += paths_drawn * 2.f;
-                    p1.y += paths_drawn * 2.f;
-                    p2.x += paths_drawn * 2.f;
-                    p2.y += paths_drawn * 2.f;
-                    shapes::add_line(p1, p2, color);
-                }
-                ++paths_drawn;
-            }
-        }
-#endif
     }
 
     void emplace_ai(entt::entity entity, AiType type) {

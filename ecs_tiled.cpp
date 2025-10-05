@@ -81,21 +81,24 @@ namespace ecs {
 	}
 
 	std::string_view get_path(MapId map) {
-		const tiled::Map& m = _get_map(map);
-		return m.path;
+		return _get_map(map).path;
 	}
 
-	Vector2u get_tile_size(MapId map) {
+	std::string_view get_name(MapId map) {
+		return _get_map(map).name;
+	}
+
+	Vec2u get_tile_size(MapId map) {
 		const tiled::Map& m = _get_map(map);
 		return { m.tile_width, m.tile_height };
 	}
 
-	Vector2u get_size_in_tiles(MapId map) {
+	Vec2u get_size_in_tiles(MapId map) {
 		const tiled::Map& m = _get_map(map);
 		return { m.width, m.height };
 	}
 
-	Vector2u get_size_in_pixels(MapId map) {
+	Vec2u get_size_in_pixels(MapId map) {
 		const tiled::Map& m = _get_map(map);
 		return { m.width * m.tile_width, m.height * m.tile_height };
 	}
@@ -120,21 +123,29 @@ namespace ecs {
 		return _tiled_context.tilesets[tileset.id];
 	}
 
+	std::string_view get_name(TilesetId tileset) {
+		return _get_tileset(tileset).name;
+	}
+
+	std::string_view get_class(TilesetId tileset) {
+		return _get_tileset(tileset).class_;
+	}
+
 	std::string_view get_image_path(TilesetId tileset) {
 		return _get_tileset(tileset).image_path;
 	}
 
-	Vector2u get_tile_size(TilesetId tileset) {
+	Vec2u get_tile_size(TilesetId tileset) {
 		const tiled::Tileset& ts = _get_tileset(tileset);
 		return { ts.tile_width, ts.tile_height };
 	}
 
-	Vector2u get_size_in_tiles(TilesetId tileset) {
+	Vec2u get_size_in_tiles(TilesetId tileset) {
 		const tiled::Tileset& ts = _get_tileset(tileset);
 		return { ts.width, ts.height };
 	}
 
-	Vector2u get_size_in_pixels(TilesetId tileset) {
+	Vec2u get_size_in_pixels(TilesetId tileset) {
 		const tiled::Tileset& ts = _get_tileset(tileset);
 		return { ts.width * ts.tile_width, ts.height * ts.tile_height };
 	}
@@ -162,7 +173,7 @@ namespace ecs {
 		return { (const ObjectId*)t.objects.data(), t.objects.size() };
 	}
 
-	Vector2u get_size(TileId tile) {
+	Vec2u get_size(TileId tile) {
 		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
 		return { ts.tile_width, ts.tile_height };
 	}
@@ -280,28 +291,28 @@ namespace ecs {
 		return { (uint16_t)gid.id, (uint16_t)gid.tileset_id };
 	}
 
-	Vector2f get_position(ObjectId obj) {
+	Vec2f get_position(ObjectId obj) {
 		const tiled::Object& o = _get_object(obj);
 		return { o.x, o.y };
 	}
 
-	Vector2f get_top_left(ObjectId obj) {
+	Vec2f get_top_left(ObjectId obj) {
 		const tiled::Object& o = _get_object(obj);
-		Vector2f p = { o.x, o.y };
+		Vec2f p = { o.x, o.y };
 		if (o.type == tiled::ObjectType::Tile) {
 			p.y -= o.height;
 		}
 		return p;
 	}
 
-	Vector2f get_size(ObjectId obj) {
+	Vec2f get_size(ObjectId obj) {
 		const tiled::Object& o = _get_object(obj);
 		return { o.width, o.height };
 	}
 
-	std::span<const Vector2f> get_points(ObjectId obj) {
+	std::span<const Vec2f> get_points(ObjectId obj) {
 		const tiled::Object& o = _get_object(obj);
-		return { (const Vector2f*)o.points.data(), o.points.size() };
+		return { (const Vec2f*)o.points.data(), o.points.size() };
 	}
 
 	std::string_view get_string(ObjectId obj, std::string_view name) {

@@ -25,8 +25,8 @@ namespace graphics {
 	};
 
 	struct DarknessUniformBlock {
-		Vector2f resolution;
-		Vector2f center;
+		Vec2f resolution;
+		Vec2f center;
 
 		float intensity = 0.f;
 		float padding0 = 0.f;
@@ -42,8 +42,8 @@ namespace graphics {
 	};
 
 	struct ShockwaveUniformBlock {
-		Vector2f resolution; // in pixels
-		Vector2f center; // in pixels
+		Vec2f resolution; // in pixels
+		Vec2f center; // in pixels
 
 		float force;
 		float size;

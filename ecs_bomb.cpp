@@ -31,7 +31,7 @@ namespace ecs {
                     .color = { 255, 0, 0, 255 } });
             }
 
-            const Vector2f center = b2Body_GetPosition(body);
+            const Vec2f center = b2Body_GetPosition(body);
             audio::set_event_position(bomb.fuse_sound, center);
 
             if (!bomb.explosion_timer.finished()) continue;
@@ -55,7 +55,7 @@ namespace ecs {
         return _registry.try_get<Bomb>(entity);
     }
 
-    entt::entity create_bomb(const Vector2f& position) {
+    entt::entity create_bomb(const Vec2f& position) {
         if (!overlap_circle(position, 4.f).empty()) {
             return entt::null;
         }

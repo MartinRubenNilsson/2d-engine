@@ -1,5 +1,5 @@
 #pragma once
-#include "vector2.h"
+#include "vec2.h"
 
 // CONSTANTS
 
@@ -21,28 +21,32 @@ float lerp_angle(float a, float b, float t);
 
 // All functions are safe to call on zero vectors, and all angles are in radians.
 
-bool is_zero(const Vector2f& v);
-float length_squared(const Vector2f& v);
-float length(const Vector2f& v);
-Vector2f unit_vector(float angle);
-Vector2f normalize(const Vector2f& v);
-Vector2f abs(const Vector2f& v);
-Vector2f rotate_90deg(const Vector2f& v);
-float dot(const Vector2f& a, const Vector2f& b); // Dot product
-float det(const Vector2f& a, const Vector2f& b); // Determinant, aka 2D cross product
-float angle_unsigned(const Vector2f& a, const Vector2f& b);
-float angle_signed(const Vector2f& a, const Vector2f& b);
-bool is_clockwise(const Vector2f& a, const Vector2f& b); // True if b is clockwise of a
-Vector2f rotate(const Vector2f& v, float angle);
-Vector2f min(const Vector2f& a, const Vector2f& b);
-Vector2f max(const Vector2f& a, const Vector2f& b);
-Vector2f lerp(const Vector2f& a, const Vector2f& b, float t);
-Vector2f lerp_polar(const Vector2f& a, const Vector2f& b, float t);
-Vector2f damp(const Vector2f& a, const Vector2f& b, float damping, float dt);
-Vector2f clamp(const Vector2f& v, const Vector2f& min, const Vector2f& max);
-char get_direction(const Vector2f& v); // Returns the direction ('r', 'l', 'u', 'd') in which v points.
+float length_squared(const Vec2f& v);
+float length(const Vec2f& v);
+Vec2f unit(float angle);
+Vec2f normalize(const Vec2f& v);
+Vec2f abs(const Vec2f& v);
+Vec2f perp(const Vec2f& v); // rotates v 90 deg clockwise
+float dot(const Vec2f& a, const Vec2f& b); // Dot product
+float det(const Vec2f& a, const Vec2f& b); // Determinant, aka 2D cross product
+Vec2f complex_conjugate(const Vec2f& v);
+Vec2f complex_product(const Vec2f& a, const Vec2f& b);
+Vec2f complex_square(const Vec2f& v);
+float angle_unsigned(const Vec2f& a, const Vec2f& b);
+float angle_signed(const Vec2f& a, const Vec2f& b);
+bool clockwise(const Vec2f& a, const Vec2f& b); // True if b is clockwise of a
+Vec2f rotate(const Vec2f& v, float angle);
+Vec2f min(const Vec2f& a, const Vec2f& b);
+Vec2f max(const Vec2f& a, const Vec2f& b);
+Vec2f lerp(const Vec2f& a, const Vec2f& b, float t);
+Vec2f lerp_polar(const Vec2f& a, const Vec2f& b, float t);
+Vec2f damp(const Vec2f& a, const Vec2f& b, float damping, float dt); // time-dependent damping
+Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max);
+
+// TODO: move to own file
+char get_direction(const Vec2f& v); // Returns the general direction ('r', 'l', 'u', 'd') in which v points.
 
 // COMPUTATIONAL GEOMETRY
 
-bool is_convex(std::span<const Vector2f> polygon);
-std::vector<Vector2f> triangulate(std::span<const Vector2f>polygon); // Returns a list of triangles.
+bool convex(std::span<const Vec2f> polygon);
+std::vector<Vec2f> triangulate(std::span<const Vec2f>polygon); // Returns a list of triangles.

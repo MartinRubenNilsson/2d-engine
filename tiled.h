@@ -182,6 +182,7 @@ namespace tiled {
 
 	struct Map {
 		std::string path;
+		std::string name; // this is just the path stem (filename without extension)
 		std::string class_;
 		std::vector<Property> properties;
 		std::vector<unsigned int> tilesets; // indices into Context::tilesets[]

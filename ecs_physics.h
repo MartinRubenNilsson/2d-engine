@@ -12,13 +12,13 @@ namespace ecs {
 		b2ShapeId shape = b2_nullShapeId;
 		b2BodyId body = b2_nullBodyId;
 		entt::entity entity = entt::null;
-		Vector2f point;
-		Vector2f normal;
+		Vec2f point;
+		Vec2f normal;
 		float fraction = 0.f; // 0 = start of ray, 1 = end of ray
 	};
 
-	bool raycast_closest(const Vector2f& ray_start, const Vector2f& ray_end, uint32_t mask_bits = UINT32_MAX, RaycastHit* hit = nullptr);
-	std::vector<RaycastHit> raycast(const Vector2f& ray_start, const Vector2f& ray_end, uint32_t mask_bits = UINT32_MAX);
+	bool raycast_closest(const Vec2f& ray_start, const Vec2f& ray_end, uint32_t mask_bits = UINT32_MAX, RaycastHit* hit = nullptr);
+	std::vector<RaycastHit> raycast(const Vec2f& ray_start, const Vec2f& ray_end, uint32_t mask_bits = UINT32_MAX);
 
 	struct OverlapHit {
 		b2ShapeId shape = b2_nullShapeId;
@@ -26,8 +26,8 @@ namespace ecs {
 		entt::entity entity = entt::null;
 	};
 
-	std::vector<OverlapHit> overlap_box(const Vector2f& box_min, const Vector2f& box_max, uint32_t mask_bits = UINT32_MAX);
-	std::vector<OverlapHit> overlap_circle(const Vector2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
+	std::vector<OverlapHit> overlap_box(const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
+	std::vector<OverlapHit> overlap_circle(const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
 
 	b2ShapeDef get_shape_def(b2ShapeId shape);
 	b2BodyDef get_body_def(b2BodyId body);

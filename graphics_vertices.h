@@ -1,11 +1,11 @@
 #pragma once
 #include "color.h"
-#include "vector2.h"
+#include "vec2.h"
 
 namespace graphics {
 	struct Vertex {
-		Vector2f position;
+		Vec2f position;
 		Color color;
-		Vector2f tex_coord;
+		Vec2f tex_coord;
 	};
 }

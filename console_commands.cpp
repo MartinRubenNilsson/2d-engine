@@ -28,10 +28,10 @@ namespace console {
 		return "";
 	}
 
-	Vector2f get_vector2f(const Arg& arg) {
-		if (std::holds_alternative<Vector2f>(arg)) return std::get<Vector2f>(arg);
-		log_error("Invalid argument type: expected Vector2f");
-		return Vector2f{};
+	Vec2f get_vector2f(const Arg& arg) {
+		if (std::holds_alternative<Vec2f>(arg)) return std::get<Vec2f>(arg);
+		log_error("Invalid argument type: expected Vec2f");
+		return Vec2f{};
 	}
 
 	std::string_view _command_param_type_to_string(ParamType type) {
@@ -41,7 +41,7 @@ namespace console {
 		case ParamType::Int:      return "INT";
 		case ParamType::Float:    return "FLOAT";
 		case ParamType::String:   return "STRING";
-		case ParamType::Vector2f: return "VEC2F";
+		case ParamType::Vec2f: return "VEC2F";
 		default:                  return "UNKNOWN";
 		}
 	}
@@ -115,7 +115,7 @@ namespace console {
 		case ParamType::Int:      return 0;
 		case ParamType::Float:    return 0.f;
 		case ParamType::String:   return std::string{};
-		case ParamType::Vector2f: return Vector2f{};
+		case ParamType::Vec2f: return Vec2f{};
 		default:                  return std::monostate{};
 		}
 	}
@@ -136,7 +136,7 @@ namespace console {
 				is >> value;
 			}
 		}
-		void operator()(Vector2f& value) { is >> value.x >> value.y; }
+		void operator()(Vec2f& value) { is >> value.x >> value.y; }
 	};
 
 	void parse_and_execute_command(std::string_view command_line) {

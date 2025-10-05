@@ -9,7 +9,7 @@
 #include "audio.h"
 
 namespace ecs {
-	Vector2f _get_direction_for_update_count(unsigned int update_count) {
+	Vec2f _get_direction_for_update_count(unsigned int update_count) {
 		switch (update_count % 4) {
 			case 0: return { 1.f, 0.f };
 			case 1: return { 0.f, 1.f };
@@ -24,8 +24,8 @@ namespace ecs {
 
 	struct BladeTrap {
 		unsigned int update_count = 0;
-		Vector2f direction;
-		Vector2f start_position;
+		Vec2f direction;
+		Vec2f start_position;
 		Handle<audio::Event> audio_event;
 	};
 
@@ -36,12 +36,12 @@ namespace ecs {
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
 		// Raycast in a cardinal direction to see if there's moving in it.
 		trap.direction = _get_direction_for_update_count(trap.update_count);
-		const Vector2f ray_start = b2Body_GetPosition(body);
-		const Vector2f ray_end = ray_start + trap.direction * 16.f * 10.f; // raycast 10 tiles
+		const Vec2f ray_start = b2Body_GetPosition(body);
+		const Vec2f ray_end = ray_start + trap.direction * 16.f * 10.f; // raycast 10 tiles
 		RaycastHit hit{};
 		if (!raycast_closest(ray_start, ray_end, CM_Default, &hit))
 			return; // We don't see anything.
-		if (is_zero(b2Body_GetLinearVelocity(hit.body)))
+		if (b2Body_GetLinearVelocity(hit.body) == b2Vec2_zero)
 			return; // We see something, but it's not moving.
 		// Start extending.
 		transition_to_state(entity, "extending");
@@ -88,10 +88,10 @@ namespace ecs {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
 		// Check if we're within one pixel of the start position.
-		const Vector2f to_start = trap.start_position - b2Body_GetPosition(body);
+		const Vec2f to_start = trap.start_position - b2Body_GetPosition(body);
 		const float dist_to_start = length(to_start);
 		if (dist_to_start >= 1.f) {
-			const Vector2 dir_to_start = to_start / dist_to_start;
+			const Vec2 dir_to_start = to_start / dist_to_start;
 			b2Body_SetLinearVelocity(body, dir_to_start * _BLADE_TRAP_RETRACT_SPEED);
 			return;
 		}
@@ -131,7 +131,7 @@ namespace ecs {
 	void setup_blade_traps() {
 		for (auto [entity, sprite] : _registry.view<Type<Tag::BladeTrap>, sprites::Sprite>().each()) {
 
-			const Vector2f center = { 8.f, 8.f };
+			const Vec2f center = { 8.f, 8.f };
 
 			// Setup blade trap.
 			{

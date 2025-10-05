@@ -7,14 +7,14 @@
 
 namespace kdtree_test {
 	int _size = 10000;
-	std::vector<Vector2f> _kdtree;
+	std::vector<Vec2f> _kdtree;
 	double _cursor_x = 0;
 	double _cursor_y = 0;
 	bool _use_kdtree = true;
 
 	void _generate_points(int framebuffer_width, int framebuffer_height) {
 		_kdtree.resize(_size);
-		for (Vector2f& point : _kdtree) {
+		for (Vec2f& point : _kdtree) {
 			point.x = random::range_f(0.f, (float)framebuffer_width);
 			point.y = random::range_f(0.f, (float)framebuffer_height);
 		}
@@ -41,7 +41,7 @@ namespace kdtree_test {
 	}
 
 	void add_debug_shapes_to_render_queue() {
-		const Vector2f cursor_position = { (float)_cursor_x, (float)_cursor_y };
+		const Vec2f cursor_position = { (float)_cursor_x, (float)_cursor_y };
 		size_t nearest_index = SIZE_MAX;
 		float nearest_distance_sq = FLT_MAX;
 		if (_use_kdtree) {

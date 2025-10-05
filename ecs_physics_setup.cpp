@@ -26,7 +26,7 @@ namespace ecs {
 #if 0
 				// DETERMINE PIVOT
 
-				Vector2f pivot;
+				Vec2f pivot;
 
 				for (ObjectId tile_object : objects) {
 					if (get_type(tile_object) != ObjectType::Point)
@@ -51,9 +51,9 @@ namespace ecs {
 
 				for (ObjectId collider : objects) {
 
-					const Vector2f pos = get_position(collider);
-					const Vector2f half_size = get_size(collider) * 0.5f;
-					const Vector2f center = pos + half_size;
+					const Vec2f pos = get_position(collider);
+					const Vec2f half_size = get_size(collider) * 0.5f;
+					const Vec2f center = pos + half_size;
 
 					switch (get_type(collider)) {
 						case ObjectType::Rectangle: {
@@ -90,8 +90,8 @@ namespace ecs {
 			body_def.position = get_top_left(object);
 			b2BodyId body = emplace_body(entity, body_def);
 
-			const Vector2f half_size = get_size(object) * 0.5f;
-			const Vector2f center = half_size;
+			const Vec2f half_size = get_size(object) * 0.5f;
+			const Vec2f center = half_size;
 
 			switch (object_type) {
 				case ObjectType::Rectangle: {
@@ -117,7 +117,7 @@ namespace ecs {
 			}
 		}
 
-		const Vector2u map_tile_size = get_tile_size(map);
+		const Vec2u map_tile_size = get_tile_size(map);
 
 		for (auto [entity, tile, tile_pos] : _registry.view<TileId, TileCoord>().each()) {
 			if (!tile)
@@ -128,7 +128,7 @@ namespace ecs {
 				continue;
 
 			// Top left corner in the tile grid.
-			const Vector2f position = {
+			const Vec2f position = {
 				(float)tile_pos.x * map_tile_size.x,
 				(float)tile_pos.y * map_tile_size.y
 			};
@@ -140,8 +140,8 @@ namespace ecs {
 			b2BodyId body = emplace_body(entity, body_def);
 
 			for (const ObjectId collider : colliders) {
-				const Vector2f center = get_position(collider);
-				const Vector2f half_size = get_size(collider) * 0.5f;
+				const Vec2f center = get_position(collider);
+				const Vec2f half_size = get_size(collider) * 0.5f;
 
 				b2ShapeDef shape_def = b2DefaultShapeDef();
 				if (get_bool(collider, "sensor")) {
@@ -168,14 +168,14 @@ namespace ecs {
 					} break;
 					case ObjectType::Polygon: {
 
-						const std::span<const Vector2f> points = get_points(collider);
+						const std::span<const Vec2f> points = get_points(collider);
 						const int32_t count = (int32_t)points.size();
 						if (count < 3) {
 							console::log_error("Too few points in polygon collider! Got " + std::to_string(count) + ", need >= 3.");
 							break;
 						}
 
-						if (count <= b2_maxPolygonVertices && is_convex(points)) {
+						if (count <= b2_maxPolygonVertices && convex(points)) {
 
 							b2Vec2 polygon_points[b2_maxPolygonVertices];
 							for (int32_t i = 0; i < count; ++i) {
@@ -192,7 +192,7 @@ namespace ecs {
 						}
 
 						//TODO: fix triangulate()
-						const std::vector<Vector2f> triangles = triangulate(points);
+						const std::vector<Vec2f> triangles = triangulate(points);
 						for (size_t i = 0; i < triangles.size(); i += 3) {
 							b2Vec2 triangle_points[3];
 							for (size_t j = 0; j < 3; ++j) {

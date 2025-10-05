@@ -16,14 +16,14 @@ namespace ecs {
 	// trauma_decay:       The trauma decreases by this amount per second.
 	// entity_to_follow:   If not null, the camera will try to center its view on this entity.
 
-	extern const Vector2f DEFAULT_CAMERA_SIZE;
+	extern const Vec2f DEFAULT_CAMERA_SIZE;
 
 	struct Camera {
-		Vector2f center;
-		Vector2f size = DEFAULT_CAMERA_SIZE;
-		Vector2f confines_min = { -FLT_MAX, -FLT_MAX };
-		Vector2f confines_max = { FLT_MAX, FLT_MAX };
-		Vector2f shake_offset;
+		Vec2f center;
+		Vec2f size = DEFAULT_CAMERA_SIZE;
+		Vec2f confines_min = { -FLT_MAX, -FLT_MAX };
+		Vec2f confines_max = { FLT_MAX, FLT_MAX };
+		Vec2f shake_offset;
 		float shake_amplitude = 6.f;
 		float shake_frequency = 10.f;
 		float trauma = 0.f;
@@ -34,8 +34,8 @@ namespace ecs {
 	void setup_cameras(MapId map);
 	void update_cameras(float dt);
 
-	void get_active_camera_view(Vector2f& center, Vector2f& size); // Hard-cuts when activating new camera.
-	void get_blended_camera_view(Vector2f& center, Vector2f& size); // Smoothly transitions between cameras.
+	void get_active_camera_view(Vec2f& center, Vec2f& size); // Hard-cuts when activating new camera.
+	void get_blended_camera_view(Vec2f& center, Vec2f& size); // Smoothly transitions between cameras.
 
 	Camera& emplace_camera(entt::entity entity, const Camera& camera = {});
 	Camera* get_camera(entt::entity entity);

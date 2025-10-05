@@ -2,15 +2,15 @@
 #include "kdtree.h"
 
 namespace kdtree {
-	bool _compare_x(const Vector2f& a, const Vector2f& b) {
+	bool _compare_x(const Vec2f& a, const Vec2f& b) {
 		return a.x < b.x;
 	}
 
-	bool _compare_y(const Vector2f& a, const Vector2f& b) {
+	bool _compare_y(const Vec2f& a, const Vec2f& b) {
 		return a.y < b.y;
 	}
 
-	void _build_recursively(std::span<Vector2f> kdtree, bool compare_x) {
+	void _build_recursively(std::span<Vec2f> kdtree, bool compare_x) {
 		const size_t size = kdtree.size();
 		if (size <= 1) return;
 		const size_t left_size = size / 2; // Also the index of the median point
@@ -20,11 +20,11 @@ namespace kdtree {
 		_build_recursively(kdtree.last(right_size), !compare_x);
 	}
 
-	void build(std::span<Vector2f> kdtree) {
+	void build(std::span<Vec2f> kdtree) {
 		_build_recursively(kdtree, true);
 	}
 
-	void _query_nearest_recursive(std::span<const Vector2f> kdtree, const Vector2f& point, const Vector2f** nearest_point, float& nearest_distance_sq, bool compare_x) {
+	void _query_nearest_recursive(std::span<const Vec2f> kdtree, const Vec2f& point, const Vec2f** nearest_point, float& nearest_distance_sq, bool compare_x) {
 		const size_t size = kdtree.size();
 		// 1. If the tree is empty, return immediately.
 		if (size == 0) return;
@@ -38,10 +38,10 @@ namespace kdtree {
 			return;
 		}
 		size_t mid_point_index = size / 2; // Also the size of the left subtree
-		const Vector2f& mid_point = kdtree[mid_point_index];
+		const Vec2f& mid_point = kdtree[mid_point_index];
 		const float signed_distance_to_split_plane = compare_x ? mid_point.x - point.x : mid_point.y - point.y;
-		std::span<const Vector2f> nearest_subtree = kdtree.first(mid_point_index); // The left subtree
-		std::span<const Vector2f> other_subtree = kdtree.last(size - mid_point_index - 1); // The right subtree
+		std::span<const Vec2f> nearest_subtree = kdtree.first(mid_point_index); // The left subtree
+		std::span<const Vec2f> other_subtree = kdtree.last(size - mid_point_index - 1); // The right subtree
 		if (signed_distance_to_split_plane < 0.f) {
 			// The point is on the right side of the split plane, so swap the subtrees.
 			std::swap(nearest_subtree, other_subtree);
@@ -62,9 +62,9 @@ namespace kdtree {
 		}
 	}
 
-	void query_nearest(std::span<const Vector2f> kdtree, const Vector2f& point, size_t& nearest_index, float& nearest_distance_sq) {
+	void query_nearest(std::span<const Vec2f> kdtree, const Vec2f& point, size_t& nearest_index, float& nearest_distance_sq) {
 		nearest_index = SIZE_MAX;
-		const Vector2f* nearest_point = nullptr;
+		const Vec2f* nearest_point = nullptr;
 		_query_nearest_recursive(kdtree, point, &nearest_point, nearest_distance_sq, true);
 		if (nearest_point) {
 			nearest_index = nearest_point - kdtree.data();

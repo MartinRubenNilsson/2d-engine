@@ -26,11 +26,11 @@ namespace sprites {
 		Handle<graphics::Buffer> uniform_buffer;
 		uint16_t uniform_buffer_size = 0; // size in bytes of the uniform buffer
 		uint16_t uniform_buffer_offset = 0; // offset in bytes into the uniform buffer; must be a multiple of 256
-		Vector2f sorting_point;
-		Vector2f position; // top-left corner position in world space
-		Vector2f size; // width and height in world space
-		Vector2f tex_position = { 0.f, 0.f }; // top-left corner in normalized texture coordinates
-		Vector2f tex_size = { 1.f, 1.f }; // width and height in normalized texture coordinates
+		Vec2f sorting_point;
+		Vec2f position; // top-left corner position in world space
+		Vec2f size; // width and height in world space
+		Vec2f tex_position = { 0.f, 0.f }; // top-left corner in normalized texture coordinates
+		Vec2f tex_size = { 1.f, 1.f }; // width and height in normalized texture coordinates
 		Color color = colors::WHITE;
 		uint8_t sorting_layer = 0;
 		uint8_t flags = SPRITE_VISIBLE;

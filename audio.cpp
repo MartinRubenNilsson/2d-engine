@@ -131,7 +131,7 @@ namespace audio {
 		}
 	}
 
-	FMOD_3D_ATTRIBUTES _pos_to_3d_attributes(const Vector2f& position) {
+	FMOD_3D_ATTRIBUTES _pos_to_3d_attributes(const Vec2f& position) {
 		FMOD_3D_ATTRIBUTES attributes{};
 		attributes.position = { position.x / _PIXELS_PER_FMOD_UNIT, -position.y / _PIXELS_PER_FMOD_UNIT, 0.f };
 		attributes.forward = { 0.f, 0.f, 1.f };
@@ -139,16 +139,16 @@ namespace audio {
 		return attributes;
 	}
 
-	Vector2f _3d_attributes_to_pos(const FMOD_3D_ATTRIBUTES& attributes) {
+	Vec2f _3d_attributes_to_pos(const FMOD_3D_ATTRIBUTES& attributes) {
 		return { attributes.position.x * _PIXELS_PER_FMOD_UNIT, -attributes.position.y * _PIXELS_PER_FMOD_UNIT };
 	}
 
-	void set_listener_position(const Vector2f& position) {
+	void set_listener_position(const Vec2f& position) {
 		FMOD_3D_ATTRIBUTES attributes = _pos_to_3d_attributes(position);
 		FMOD_Studio_System_SetListenerAttributes(_system, 0, &attributes, nullptr);
 	}
 
-	Vector2f get_listener_position() {
+	Vec2f get_listener_position() {
 		FMOD_3D_ATTRIBUTES attributes{};
 		FMOD_Studio_System_GetListenerAttributes(_system, 0, &attributes, nullptr);
 		return _3d_attributes_to_pos(attributes);
@@ -258,7 +258,7 @@ namespace audio {
 		return true;
 	}
 
-	bool set_event_position(Handle<Event> handle, const Vector2f& position) {
+	bool set_event_position(Handle<Event> handle, const Vec2f& position) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
 		if (!instance) return false;
 		FMOD_3D_ATTRIBUTES attributes = _pos_to_3d_attributes(position);
@@ -266,7 +266,7 @@ namespace audio {
 		return true;
 	}
 
-	bool get_event_position(Handle<Event> handle, Vector2f& position) {
+	bool get_event_position(Handle<Event> handle, Vec2f& position) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
 		if (!instance) return false;
 		FMOD_3D_ATTRIBUTES attributes{};

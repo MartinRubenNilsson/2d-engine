@@ -8,7 +8,7 @@ namespace console {
 		Int,
 		Float,
 		String,
-		Vector2f
+		Vec2f
 	};
 
 	struct Param {
@@ -23,7 +23,7 @@ namespace console {
 		int,
 		float,
 		std::string,
-		Vector2f
+		Vec2f
 	>;
 
 	// Please use these instead of std::get<> so we can avoid exceptions.
@@ -32,7 +32,7 @@ namespace console {
 	bool get_int(const Arg& arg);
 	bool get_float(const Arg& arg);
 	std::string get_string(const Arg& arg);
-	Vector2f get_vector2f(const Arg& arg);
+	Vec2f get_vector2f(const Arg& arg);
 
 	constexpr size_t MAX_PARAMS = 8; // Maximum number of parameters for a command
 	using ParamList = std::array<Param, MAX_PARAMS>;

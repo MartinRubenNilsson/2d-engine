@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.1" name="collision" tilewidth="16" tileheight="16" tilecount="128" columns="16">
+<tileset version="1.10" tiledversion="1.11.2" name="collision" class="collider" tilewidth="16" tileheight="16" tilecount="128" columns="16">
  <image source="../extras/collision &amp; alpha.png" width="256" height="128"/>
  <tile id="0">
   <objectgroup draworder="index" id="7">

@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "map_grid.h"
 #include "tiled.h"
-#include "console.h"
+#include "ecs_tags.h"
+#include "ecs_tiled.h"
 
 namespace ecs {
+	extern entt::registry _registry;
 	extern tiled::Context _tiled_context; // TODO: remove
 }
 
@@ -15,21 +17,13 @@ namespace map {
 			CLOSED,
 		};
 
-		Vector2i position{ -1, -1 };
-		bool passable = true;
 		TerrainType terrains[tiled::WangTile::COUNT] = {};
-		Vector2i parent{ -1, -1 };
+		Vec2i parent{ -1, -1 };
 		float g = FLT_MAX;
 		float h = FLT_MAX;
+		bool passable = true;
 		State state = UNVISITED;
 	};
-
-	void _reset_a_star_state(Tile& tile) {
-		tile.parent = Vector2i(-1, -1);
-		tile.g = FLT_MAX;
-		tile.h = FLT_MAX;
-		tile.state = Tile::UNVISITED;
-	}
 
 	class TilePriorityQueue {
 		struct CompareByF {
@@ -65,29 +59,15 @@ namespace map {
 	};
 
 	struct TileGrid {
-		Vector2i size; // in tiles
-		Vector2i tile_size; // in pixels
+		Vec2i size; // in tiles
+		Vec2i tile_size; // in pixels
 		std::vector<Tile> tiles; // tiles.size() == size.x * size.y
 		TilePriorityQueue open_tiles;
 	};
 
-	// The order of these directions has been chosen to minimize cache misses
-	// when iterating over the array while pathfinding, so don't change it.
-	const Vector2i _ALLOWED_MOVEMENT_DIRECTIONS[] =
-	{
-		//Vector2i(-1, -1),
-		Vector2i(0, -1),
-		//Vector2i( 1, -1),
-		Vector2i(-1,  0),
-		Vector2i(1,  0),
-		//Vector2i(-1,  1),
-		Vector2i(0,  1),
-		//Vector2i( 1,  1),
-	};
-
 	TileGrid _grid;
 
-	Tile* _get_tile(const Vector2i& position) {
+	Tile* _get_tile(const Vec2i& position) {
 		if (position.x < 0) return nullptr;
 		if (position.y < 0) return nullptr;
 		if (position.x >= _grid.size.x) return nullptr;
@@ -112,35 +92,31 @@ namespace map {
 		if (!map_id) return;
 
 		const tiled::Map& map = ecs::_tiled_context.maps[map_id.id];
-		_grid.size = Vector2i(map.width, map.height);
-		_grid.tile_size = Vector2i(map.tile_width, map.tile_height);
+		_grid.size = Vec2i(map.width, map.height);
+		_grid.tile_size = Vec2i(map.tile_width, map.tile_height);
 		_grid.tiles.resize(_grid.size.x * _grid.size.y);
 		_grid.open_tiles.clear();
 
-		for (int y = 0; y < _grid.size.y; ++y) {
-			for (int x = 0; x < _grid.size.x; ++x) {
-				int index = x + y * _grid.size.x;
-				_grid.tiles[index].position = Vector2i(x, y);
-				_grid.tiles[index].passable = true;
-			}
+		for (Tile& tile : _grid.tiles) {
+			tile.passable = true;
 		}
 
+		using namespace ecs;
+
+		// Mark tiles above colliders as non-passable.
+		for (auto [entity, coord] : _registry.view<Type<Tag::Collider>, TileCoord>().each()) {
+			_grid.tiles[coord.x + coord.y * _grid.size.x].passable = false;
+		}
+
+#if 0
 		for (const tiled::Layer& layer : map.layers) {
 			if (layer.tiles.size() != _grid.tiles.size())
 				continue;
-			if (layer.name == "Collision") {
-				for (int y = 0; y < _grid.size.y; ++y) {
-					for (int x = 0; x < _grid.size.x; ++x) {
-						int index = x + y * _grid.size.x;
-						_grid.tiles[index].passable = (layer.tiles[index].ids == 0);
-					}
-				}
-			} else if (layer.name == "Under Sprite 1") {
+			else if (layer.name == "Under Sprite 1") {
 				for (int y = 0; y < _grid.size.y; ++y) {
 					for (int x = 0; x < _grid.size.x; ++x) {
 						int index = x + y * _grid.size.x;
 						if (!layer.tiles[index].ids) continue;
-#if 0
 						const tiled::Tile* layer_tile = tiled::find_tile_with_gid(map.tilesets, _tiled_context.tilesets, layer.tiles[index].gid);
 						if (!layer_tile) continue;
 						if (layer_tile->wangtiles.empty()) continue;
@@ -150,41 +126,41 @@ namespace map {
 							if (!wangtile.wangcolors[i]) continue;
 							grid_tile.terrains[i] = _terrain_name_to_type(wangtile.wangcolors[i]->name);
 						}
-#endif
 					}
 				}
 			}
 		}
+#endif
 	}
 
 	void destroy_grid() {
 		_grid = TileGrid();
 	}
 
-	Vector2i get_grid_size() {
+	Vec2i get_grid_size() {
 		return _grid.size;
 	}
 
-	Vector2i get_tile_size() {
+	Vec2i get_tile_size() {
 		return _grid.tile_size;
 	}
 
-	Vector2i world_to_tile(const Vector2f& world_pos) {
+	Vec2i world_to_tile(const Vec2f& world_pos) {
 		if (!_grid.tile_size.x || !_grid.tile_size.y)
-			return Vector2i(-1, -1); // Invalid tile size (grid not initialized?)
-		return Vector2i(
+			return Vec2i(-1, -1); // Invalid tile size (grid not initialized?)
+		return Vec2i(
 			(int)floor(world_pos.x / _grid.tile_size.x),
 			(int)floor(world_pos.y / _grid.tile_size.y));
 	}
 
-	Vector2f get_tile_center(const Vector2i& tile) {
-		return Vector2f(
+	Vec2f get_tile_center(const Vec2i& tile) {
+		return Vec2f(
 			(tile.x + 0.5f) * _grid.tile_size.x,
 			(tile.y + 0.5f) * _grid.tile_size.y);
 	}
 
-	TerrainType get_terrain_type_at(const Vector2f& world_pos) {
-		Vector2i tile_pos = world_to_tile(world_pos);
+	TerrainType get_terrain_type_at(const Vec2f& world_pos) {
+		Vec2i tile_pos = world_to_tile(world_pos);
 		Tile* tile = _get_tile(tile_pos);
 		if (!tile) return TerrainType::None;
 		const bool left = (int)world_pos.x % _grid.tile_size.x < _grid.tile_size.x / 2;
@@ -195,24 +171,49 @@ namespace map {
 		return tile->terrains[corner];
 	}
 
-	int _manhattan_distance(const Vector2i& a, const Vector2i& b) {
-		return std::abs(b.x - a.x) + std::abs(b.y - a.y);
+	int _manhattan_distance(const Vec2i& a, const Vec2i& b) {
+		return abs(b.x - a.x) + abs(b.y - a.y);
 	}
 
-	float _euclidean_distance(const Vector2i& a, const Vector2i& b) {
+	float _euclidean_distance(const Vec2i& a, const Vec2i& b) {
 		int dx = b.x - a.x;
 		int dy = b.y - a.y;
-		return std::sqrt((float)(dx * dx + dy * dy));
+		return sqrt((float)(dx * dx + dy * dy));
 	}
 
-	float _euclidean_distance_on_grid(const Vector2i& a, const Vector2i& b) {
+	float _euclidean_distance_on_grid(const Vec2i& a, const Vec2i& b) {
 		constexpr float SQRT_2 = 1.41421356237f;
-		int dx = std::abs(b.x - a.x);
-		int dy = std::abs(b.y - a.y);
-		return std::abs(dx - dy) + std::min(dx, dy) * SQRT_2;
+		int dx = abs(b.x - a.x);
+		int dy = abs(b.y - a.y);
+		return abs(dx - dy) + std::min(dx, dy) * SQRT_2;
 	}
 
-	bool pathfind(const Vector2i& start, const Vector2i& end, std::vector<Vector2i>& path) {
+	void _reset_a_star_state(Tile& tile) {
+		tile.parent = { -1, -1 };
+		tile.g = FLT_MAX;
+		tile.h = FLT_MAX;
+		tile.state = Tile::UNVISITED;
+	}
+
+	Vec2i _get_position(const Tile* tile) {
+		int i = tile - _grid.tiles.data();
+		return { i % _grid.size.x, i / _grid.size.x };
+	}
+
+	// The order of these directions has been chosen to minimize cache misses
+	// when iterating over the array while pathfinding, so don't change it.
+	constexpr Vec2i _ALLOWED_MOVEMENT_DIRECTIONS[] = {
+		//Vec2i(-1, -1),
+		Vec2i(0, -1),
+		//Vec2i( 1, -1),
+		Vec2i(-1,  0),
+		Vec2i(1,  0),
+		//Vec2i(-1,  1),
+		Vec2i(0,  1),
+		//Vec2i( 1,  1),
+	};
+
+	bool pathfind(const Vec2i& start, const Vec2i& end, std::vector<Vec2i>& path) {
 		if (start == end)
 			return false; // Does this make sense?
 
@@ -241,34 +242,37 @@ namespace map {
 		bool path_found = false;
 		while (!_grid.open_tiles.empty()) {
 
-			Tile* current_tile = _grid.open_tiles.top();
-			if (current_tile == end_tile) {
+			Tile* tile = _grid.open_tiles.top();
+			if (tile == end_tile) {
 				path_found = true;
 				break;
 			}
 
 			_grid.open_tiles.pop();
-			current_tile->state = Tile::CLOSED;
+			tile->state = Tile::CLOSED;
 
-			const Vector2i current_pos = current_tile->position;
-			const float current_g = current_tile->g;
+			const Vec2i pos = _get_position(tile);
 
-			for (const Vector2i& direction : _ALLOWED_MOVEMENT_DIRECTIONS) {
+			for (const Vec2i& dir : _ALLOWED_MOVEMENT_DIRECTIONS) {
 
-				Vector2i neighbor_pos = current_pos + direction;
+				const Vec2i neighbor_pos = pos + dir;
 				Tile* neighbor_tile = _get_tile(neighbor_pos);
-				if (!neighbor_tile) continue;
-				if (!neighbor_tile->passable) continue;
-				if (neighbor_tile->state == Tile::CLOSED) continue;
+				if (!neighbor_tile)
+					continue;
+				if (neighbor_tile->state == Tile::CLOSED)
+					continue;
+				if (!neighbor_tile->passable)
+					continue;
 
-				float tentative_neighbor_g = current_g +
-					_manhattan_distance(current_pos, neighbor_pos);
-				if (tentative_neighbor_g >= neighbor_tile->g) continue;
+				const float new_neighbor_g = tile->g + _manhattan_distance(pos, neighbor_pos);
+				if (new_neighbor_g >= neighbor_tile->g)
+					continue;
 
-				neighbor_tile->parent = current_pos;
-				neighbor_tile->g = tentative_neighbor_g;
+				neighbor_tile->parent = pos;
+				neighbor_tile->g = new_neighbor_g;
 				neighbor_tile->h = _euclidean_distance_on_grid(neighbor_pos, end);
-				if (neighbor_tile->state == Tile::OPEN) continue;
+				if (neighbor_tile->state == Tile::OPEN)
+					continue;
 
 				neighbor_tile->state = Tile::OPEN;
 				_grid.open_tiles.push(neighbor_tile);
@@ -280,7 +284,7 @@ namespace map {
 
 		path.clear();
 		for (Tile* tile = end_tile; tile; tile = _get_tile(tile->parent))
-			path.push_back(tile->position);
+			path.push_back(_get_position(tile));
 		std::reverse(path.begin(), path.end());
 
 		return true;

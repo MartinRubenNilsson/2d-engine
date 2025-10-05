@@ -108,8 +108,8 @@ namespace map {
 			return;
 		}
 
-		create_grid(next_map);
 		ecs::setup(next_map);
+		create_grid(next_map);
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {

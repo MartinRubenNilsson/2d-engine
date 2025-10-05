@@ -7,27 +7,27 @@
 #include "easings.h"
 
 namespace ecs {
-	const Vector2f DEFAULT_CAMERA_SIZE = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT };
+	const Vec2f DEFAULT_CAMERA_SIZE = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT };
 	const float _CAMERA_BLEND_DURATION = 1.f;
 
 	extern entt::registry _registry;
 
 	entt::entity _active_camera_entity = entt::null;
-	Vector2f _last_active_camera_center;
-	Vector2f _last_active_camera_size = DEFAULT_CAMERA_SIZE;
-	Vector2f _active_camera_center;
-	Vector2f _active_camera_size = DEFAULT_CAMERA_SIZE;
+	Vec2f _last_active_camera_center;
+	Vec2f _last_active_camera_size = DEFAULT_CAMERA_SIZE;
+	Vec2f _active_camera_center;
+	Vec2f _active_camera_size = DEFAULT_CAMERA_SIZE;
 	float _camera_shake_time = 0.f;
 	float _camera_blend_time = _CAMERA_BLEND_DURATION;
 
-	Vector2f _confine_camera_center(
-		const Vector2f& camera_center,
-		const Vector2f& camera_size,
-		const Vector2f& confines_min,
-		const Vector2f& confines_max) {
-		const Vector2f center_min = confines_min + camera_size / 2.f;
-		const Vector2f center_max = confines_max - camera_size / 2.f;
-		Vector2f confined_center = camera_center;
+	Vec2f _confine_camera_center(
+		const Vec2f& camera_center,
+		const Vec2f& camera_size,
+		const Vec2f& confines_min,
+		const Vec2f& confines_max) {
+		const Vec2f center_min = confines_min + camera_size / 2.f;
+		const Vec2f center_max = confines_max - camera_size / 2.f;
+		Vec2f confined_center = camera_center;
 		if (center_min.x < center_max.x) {
 			confined_center.x = std::clamp(confined_center.x, center_min.x, center_max.x);
 		} else {
@@ -42,7 +42,7 @@ namespace ecs {
 	}
 
 	void setup_cameras(MapId map) {
-		const Vector2f map_bottom_right = get_size_in_pixels(map);
+		const Vec2f map_bottom_right = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, ObjectId>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);
@@ -77,7 +77,7 @@ namespace ecs {
 			}
 
 			// Make sure shake_offset doesn't push the camera outside its confines.
-			Vector2f shaky_center = camera.center + camera.shake_offset;
+			Vec2f shaky_center = camera.center + camera.shake_offset;
 			shaky_center = _confine_camera_center(shaky_center, camera.size, camera.confines_min, camera.confines_max);
 			camera.shake_offset = shaky_center - camera.center;
 		}
@@ -92,12 +92,12 @@ namespace ecs {
 		}
 	}
 
-	void get_active_camera_view(Vector2f& center, Vector2f& size) {
+	void get_active_camera_view(Vec2f& center, Vec2f& size) {
 		center = _active_camera_center;
 		size = _active_camera_size;
 	}
 
-	void get_blended_camera_view(Vector2f& center, Vector2f& size) {
+	void get_blended_camera_view(Vec2f& center, Vec2f& size) {
 		float blend_factor = ease_out_expo(_camera_blend_time / _CAMERA_BLEND_DURATION);
 		center = lerp(_last_active_camera_center, _active_camera_center, blend_factor);
 		size = lerp(_last_active_camera_size, _active_camera_size, blend_factor);

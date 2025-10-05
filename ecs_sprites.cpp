@@ -22,9 +22,9 @@ namespace ecs {
 		sprite.tex_size = { (float)rect.w, (float)rect.h };
 		sprite.size = sprite.tex_size;
 		const TilesetId tileset = get_tileset(tile); // tileset is valid if tile is
-		const Vector2u tileset_size = get_size_in_pixels(tileset);
-		sprite.tex_position /= Vector2f(tileset_size);
-		sprite.tex_size /= Vector2f(tileset_size);
+		const Vec2u tileset_size = get_size_in_pixels(tileset);
+		sprite.tex_position /= Vec2f(tileset_size);
+		sprite.tex_size /= Vec2f(tileset_size);
 		sprite.texture = graphics::load_texture(get_image_path(tileset));
 	}
 
@@ -34,10 +34,10 @@ namespace ecs {
 
 	// Makes the Sprite follow along a b2BodyId as the latter moves.
 	struct SpriteFollowBody {
-		Vector2f offset; // the sprite's position relative to the body's position
+		Vec2f offset; // the sprite's position relative to the body's position
 	};
 
-	void make_sprite_follow_body(entt::entity entity, const Vector2f& offset) {
+	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset) {
 		_registry.emplace_or_replace<SpriteFollowBody>(entity, offset);
 	}
 
@@ -93,14 +93,14 @@ namespace ecs {
 #endif
 		}
 
-		const Vector2u map_tile_size = get_tile_size(map);
+		const Vec2u map_tile_size = get_tile_size(map);
 
 		for (auto [entity, tile, coord] : _registry.view<TileId, TileCoord>().each()) {
 			if (!tile) {
 				console::log_error("Error 91324: Invalid tile in setup_sprites()");
 				continue;
 			}
-			const Vector2u size = get_size(tile); // may be different from map_tile_size!
+			const Vec2u size = get_size(tile); // may be different from map_tile_size!
 
 			sprites::Sprite& sprite = emplace_sprite(entity);
 			update_sprite(sprite, tile);
@@ -206,7 +206,7 @@ namespace ecs {
 		}
 	}
 
-	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max) {
+	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max) {
 		graphics::ScopedDebugGroup debug_group("ecs::draw_sprites()");
 
 		_blink_sprites_before_drawing();

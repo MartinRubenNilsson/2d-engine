@@ -99,18 +99,18 @@ namespace ecs {
 		}
 	}
 
-	void _player_attack(entt::entity entity, const Vector2f& position) {
-		Vector2f box_min = position - Vector2f(6.f, 6.f);
-		Vector2f box_max = position + Vector2f(6.f, 6.f);
+	void _player_attack(entt::entity entity, const Vec2f& position) {
+		Vec2f box_min = position - Vec2f(6.f, 6.f);
+		Vec2f box_max = position + Vec2f(6.f, 6.f);
 		apply_damage_in_box({ DamageType::Melee, 1, entity }, box_min, box_max, ~CC_Player);
 	}
 
 	void setup_players(MapId map) {
-		const Vector2f map_size_in_pixels = get_size_in_pixels(map);
+		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
-			const Vector2f top_left = get_top_left(object);
-			const Vector2f pivot = { 32.f, 42.f };
+			const Vec2f top_left = get_top_left(object);
+			const Vec2f pivot = { 32.f, 42.f };
 
 			{
 				player::Outfit outfit{};
@@ -194,9 +194,9 @@ namespace ecs {
 
 			// GET PHYSICS STATE
 
-			const Vector2f position = b2Body_GetPosition(body);
-			const Vector2f velocity = b2Body_GetLinearVelocity(body);
-			Vector2f new_velocity; // will be modified differently depending on the state
+			const Vec2f position = b2Body_GetPosition(body);
+			const Vec2f velocity = b2Body_GetLinearVelocity(body);
+			Vec2f new_velocity; // will be modified differently depending on the state
 
 			enum class HeldItemType {
 				None,
@@ -228,7 +228,7 @@ namespace ecs {
 			switch (player.state) {
 				case PlayerState::Normal: {
 
-					Vector2f new_move_dir;
+					Vec2f new_move_dir;
 					float new_move_speed = 0.f;
 
 					if (player.input_flags & INPUT_LEFT)  new_move_dir.x--;
@@ -236,7 +236,7 @@ namespace ecs {
 					if (player.input_flags & INPUT_UP)    new_move_dir.y--;
 					if (player.input_flags & INPUT_DOWN)  new_move_dir.y++;
 
-					if (!is_zero(new_move_dir)) {
+					if (new_move_dir != Vec2f::ZERO) {
 						player.look_dir = new_move_dir;
 						new_move_dir = normalize(new_move_dir);
 						if (player.input_flags & INPUT_STEALTH) {
@@ -283,7 +283,7 @@ namespace ecs {
 
 					} else if (player.input_flags & INPUT_DROP_BOMB && player.bombs > 0) {
 
-						const Vector2f bomb_position = position + player.look_dir * 16.f;
+						const Vec2f bomb_position = position + player.look_dir * 16.f;
 						if (create_bomb(bomb_position) != entt::null) {
 							player.bombs--;
 							audio::create_event({ .path = "event:/player/place_bomb" });
@@ -291,7 +291,7 @@ namespace ecs {
 							audio::create_event({ .path = "event:/player/error" });
 						}
 
-					} else if (player.touching_pushable_block && !is_zero(new_velocity)) {
+					} else if (player.touching_pushable_block && new_velocity != Vec2f::ZERO) {
 
 						switch (dir) {
 							case 'l':
@@ -348,9 +348,9 @@ namespace ecs {
 					}
 
 					if (player.input_flags & INPUT_INTERACT) {
-						const Vector2f box_center = position + player.look_dir * 16.f;
-						const Vector2f box_min = box_center - Vector2f(6.f, 6.f);
-						const Vector2f box_max = box_center + Vector2f(6.f, 6.f);
+						const Vec2f box_center = position + player.look_dir * 16.f;
+						const Vec2f box_min = box_center - Vec2f(6.f, 6.f);
+						const Vec2f box_max = box_center + Vec2f(6.f, 6.f);
 						interact_with_all_entities_in_box(box_min, box_max);
 					}
 
@@ -464,7 +464,7 @@ namespace ecs {
 			ImGui::SetNextItemOpen(player_count == 1, ImGuiCond_Appearing);
 			if (!ImGui::TreeNode(tree_node_label.c_str())) continue;
 
-			Vector2f position = b2Body_GetPosition(body);
+			Vec2f position = b2Body_GetPosition(body);
 			ImGui::Text("Position: %.1f, %.1f", position.x, position.y);
 			ImGui::Text("Terrain: %s", map::to_string(map::get_terrain_type_at(position)).c_str());
 			ImGui::Text("State: %s", magic_enum::enum_name(player.state).data());

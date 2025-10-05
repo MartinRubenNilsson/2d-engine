@@ -17,8 +17,8 @@ namespace audio
 
 	// LISTENERS
 
-	void set_listener_position(const Vector2f& position);
-	Vector2f get_listener_position();
+	void set_listener_position(const Vec2f& position);
+	Vec2f get_listener_position();
 
 	// GLOBAL PARAMETERS
 
@@ -34,7 +34,7 @@ namespace audio
 	struct EventDesc {
 		std::string path;
 		float volume = 1.f;
-		Vector2f position;
+		Vec2f position;
 		bool start = true;
 		bool release = true;
 	};
@@ -43,8 +43,8 @@ namespace audio
 	bool stop_event(Handle<Event> handle);
 	bool set_event_volume(Handle<Event> handle, float volume);
 	bool get_event_volume(Handle<Event> handle, float& volume);
-	bool set_event_position(Handle<Event> handle, const Vector2f& position);
-	bool get_event_position(Handle<Event> handle, Vector2f& position);
+	bool set_event_position(Handle<Event> handle, const Vec2f& position);
+	bool get_event_position(Handle<Event> handle, Vec2f& position);
 
 	// BUSES
 

@@ -200,7 +200,7 @@ namespace console {
 			.name = "kill_player",
 			.desc = "Kills the player",
 			.callback = [](const ArgList& args) {
-				ecs::kill_player(ecs::find_entity_by_tag(ecs::Tag::Player));
+				ecs::kill_player(ecs::find_entity_with_tag(ecs::Tag::Player));
 			}
 		});
 		add_command({
@@ -218,11 +218,11 @@ namespace console {
 			.desc = "Spawns a VFX in the game world",
 			.params = {
 				Param{ ParamType::String, "type", "The type of VFX" },
-				Param{ ParamType::Vector2f, "position", "The position to spawn the VFX at" },
+				Param{ ParamType::Vec2f, "position", "The position to spawn the VFX at" },
 			},
 			.callback = [](const ArgList& args) {
 				std::string type_str = get_string(args[0]);
-				Vector2f position = get_vector2f(args[1]);
+				Vec2f position = get_vector2f(args[1]);
 				auto type = magic_enum::enum_cast<ecs::VfxType>(type_str, magic_enum::case_insensitive);
 				if (type.has_value()) {
 					create_vfx(type.value(), position);

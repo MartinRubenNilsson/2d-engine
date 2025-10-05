@@ -7,5 +7,5 @@ namespace ecs
 		Explosion,
 	};
 
-	entt::entity create_vfx(VfxType type, const Vector2f& position);
+	entt::entity create_vfx(VfxType type, const Vec2f& position);
 }

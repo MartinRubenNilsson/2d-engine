@@ -20,98 +20,103 @@ float lerp_angle(float a, float b, float t) {
 	return a + angle * t;
 }
 
-bool is_zero(const Vector2f& v) {
-	return v.x == 0 && v.y == 0;
-}
-
-float length_squared(const Vector2f& v) {
+float length_squared(const Vec2f& v) {
 	return v.x * v.x + v.y * v.y;
 }
 
-float length(const Vector2f& v) {
+float length(const Vec2f& v) {
 	return sqrt(length_squared(v));
 }
 
-Vector2f unit_vector(float angle) {
-	return Vector2f(cos(angle), sin(angle));
+Vec2f unit(float angle) {
+	return { cos(angle), sin(angle) };
 }
 
-Vector2f normalize(const Vector2f& v) {
+Vec2f normalize(const Vec2f& v) {
 	if (float len = length(v))
 		return v / len;
-	return Vector2f(0.f, 0.f);
+	return { 0.f, 0.f };
 }
 
-Vector2f abs(const Vector2f& v) {
-	return Vector2f(abs(v.x), abs(v.y));
+Vec2f abs(const Vec2f& v) {
+	return { abs(v.x), abs(v.y) };
 }
 
-Vector2f rotate_90deg(const Vector2f& v) {
-	return Vector2f(-v.y, v.x);
+Vec2f perp(const Vec2f& v) {
+	return { -v.y, v.x };
 }
 
-float dot(const Vector2f& a, const Vector2f& b) {
+float dot(const Vec2f& a, const Vec2f& b) {
 	return a.x * b.x + a.y * b.y;
 }
 
-float det(const Vector2f& a, const Vector2f& b) {
+float det(const Vec2f& a, const Vec2f& b) {
 	return a.x * b.y - a.y * b.x;
 }
 
-float angle_unsigned(const Vector2f& a, const Vector2f& b) {
+Vec2f complex_conjugate(const Vec2f& v) {
+	return { v.x, -v.y };
+}
+
+Vec2f complex_product(const Vec2f& a, const Vec2f& b) {
+	return { a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x };
+}
+
+Vec2f complex_square(const Vec2f& v) {
+	return { v.x * v.x - v.y * v.y, 2.f * v.x * v.y };
+}
+
+float angle_unsigned(const Vec2f& a, const Vec2f& b) {
 	if (float len2 = length_squared(a) * length_squared(b)) {
 		return acos(dot(a, b) / sqrt(len2));
 	}
 	return 0.f;
 }
 
-float angle_signed(const Vector2f& a, const Vector2f& b) {
+float angle_signed(const Vec2f& a, const Vec2f& b) {
 	return atan2(det(a, b), dot(a, b));
 }
 
-bool is_clockwise(const Vector2f& a, const Vector2f& b) {
+bool clockwise(const Vec2f& a, const Vec2f& b) {
 	return det(a, b) > 0; // Since y-axis is down, this is the opposite of the usual definition.
 }
 
-Vector2f rotate(const Vector2f& v, float angle) {
+Vec2f rotate(const Vec2f& v, float angle) {
 	float c = cos(angle);
 	float s = sin(angle);
-	return Vector2f(v.x * c - v.y * s, v.x * s + v.y * c);
+	return { v.x * c - v.y * s, v.x * s + v.y * c };
 }
 
-Vector2f min(const Vector2f& a, const Vector2f& b) {
-	return Vector2f(std::min(a.x, b.x), std::min(a.y, b.y));
+Vec2f min(const Vec2f& a, const Vec2f& b) {
+	return { std::min(a.x, b.x), std::min(a.y, b.y) };
 }
 
-Vector2f max(const Vector2f& a, const Vector2f& b) {
-	return Vector2f(std::max(a.x, b.x), std::max(a.y, b.y));
+Vec2f max(const Vec2f& a, const Vec2f& b) {
+	return { std::max(a.x, b.x), std::max(a.y, b.y) };
 }
 
-Vector2f lerp(const Vector2f& a, const Vector2f& b, float t) {
+Vec2f lerp(const Vec2f& a, const Vec2f& b, float t) {
 	return a + (b - a) * t;
 }
 
-Vector2f lerp_polar(const Vector2f& a, const Vector2f& b, float t) {
+Vec2f lerp_polar(const Vec2f& a, const Vec2f& b, float t) {
 	float len = lerp(length(a), length(b), t);
 	float angle = lerp_angle(atan2(a.y, a.x), atan2(b.y, b.x), t);
-	return unit_vector(angle) * len;
+	return unit(angle) * len;
 }
 
-Vector2f damp(const Vector2f& a, const Vector2f& b, float damping, float dt) {
+Vec2f damp(const Vec2f& a, const Vec2f& b, float damping, float dt) {
 	damping = std::clamp(damping, 0.f, 1.f);
 	dt = std::max(dt, 0.f);
 	if (!damping && !dt) return a;
 	return lerp(a, b, 1.f - std::pow(damping, dt));
 }
 
-Vector2f clamp(const Vector2f& v, const Vector2f& min, const Vector2f& max) {
-	return Vector2f(
-		std::clamp(v.x, min.x, max.x),
-		std::clamp(v.y, min.y, max.y)
-	);
+Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max) {
+	return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y) };
 }
 
-char get_direction(const Vector2f& v) {
+char get_direction(const Vec2f& v) {
 	if (v.x >= +abs(v.y)) return 'r';
 	if (v.x <= -abs(v.y)) return 'l';
 	if (v.y >= +abs(v.x)) return 'd';
@@ -119,7 +124,7 @@ char get_direction(const Vector2f& v) {
 	return ' '; // This should never happen.
 }
 
-bool is_convex(std::span<const Vector2f> polygon) {
+bool convex(std::span<const Vec2f> polygon) {
 	float first_nonzero_det = 0;
 	const size_t vertex_count = polygon.size();
 	for (size_t i = 0; i < vertex_count; ++i) {
@@ -137,7 +142,8 @@ bool is_convex(std::span<const Vector2f> polygon) {
 	return true;
 }
 
-std::vector<Vector2f> triangulate(std::span<const Vector2f> polygon) {
+std::vector<Vec2f> triangulate(std::span<const Vec2f> polygon) {
+	// TODO!!! This is not correct, the implementation is wrong.
 	//Ear clipping algorithm: https://www.youtube.com/watch?v=d9tytAQbpXM
 	size_t vertex_count = polygon.size();
 	assert(vertex_count >= 3);
@@ -154,25 +160,25 @@ std::vector<Vector2f> triangulate(std::span<const Vector2f> polygon) {
 		}
 		size_t i0 = (i1 + vertex_count - 1) % vertex_count;
 		size_t i2 = (i1 + 1) % vertex_count;
-		Vector2f v10 = polygon[i0] - polygon[i1];
-		Vector2f v12 = polygon[i2] - polygon[i1];
-		is_polygon_clockwise = is_clockwise(v10, v12);
+		Vec2f v10 = polygon[i0] - polygon[i1];
+		Vec2f v12 = polygon[i2] - polygon[i1];
+		is_polygon_clockwise = clockwise(v10, v12);
 	}
 	std::vector<float> angles(vertex_count);
 	for (size_t i = 0; i < vertex_count; ++i) {
 		size_t i0 = (i + vertex_count - 1) % vertex_count;
 		size_t i1 = i;
 		size_t i2 = (i + 1) % vertex_count;
-		Vector2f v10 = polygon[i0] - polygon[i1];
-		Vector2f v12 = polygon[i2] - polygon[i1];
+		Vec2f v10 = polygon[i0] - polygon[i1];
+		Vec2f v12 = polygon[i2] - polygon[i1];
 		float angle = angle_unsigned(v10, v12);
-		if (is_clockwise(v10, v12) != is_polygon_clockwise) {
+		if (clockwise(v10, v12) != is_polygon_clockwise) {
 			angle = M_2PI - angle;
 		}
 		angles[i1] = angle;
 	}
-	std::vector<Vector2f> polygon_copy(polygon.begin(), polygon.end());
-	std::vector<Vector2f> triangles;
+	std::vector<Vec2f> polygon_copy(polygon.begin(), polygon.end());
+	std::vector<Vec2f> triangles;
 	while (vertex_count > 3) {
 		size_t i2 = 0; // Will be the ear tip, i.e. the vertex with the smallest angle.
 		for (size_t i = 1; i < vertex_count; ++i) {
@@ -188,19 +194,19 @@ std::vector<Vector2f> triangulate(std::span<const Vector2f> polygon) {
 		triangles.push_back(polygon_copy[i2]);
 		triangles.push_back(polygon_copy[i3]);
 		{
-			Vector2f v10 = polygon_copy[i0] - polygon_copy[i1];
-			Vector2f v13 = polygon_copy[i3] - polygon_copy[i1];
+			Vec2f v10 = polygon_copy[i0] - polygon_copy[i1];
+			Vec2f v13 = polygon_copy[i3] - polygon_copy[i1];
 			float angle = angle_unsigned(v10, v13);
-			if (is_clockwise(v10, v13) != is_polygon_clockwise) {
+			if (clockwise(v10, v13) != is_polygon_clockwise) {
 				angle = M_2PI - angle;
 			}
 			angles[i1] = angle;
 		}
 		{
-			Vector2f v31 = polygon_copy[i1] - polygon_copy[i3];
-			Vector2f v34 = polygon_copy[i4] - polygon_copy[i3];
+			Vec2f v31 = polygon_copy[i1] - polygon_copy[i3];
+			Vec2f v34 = polygon_copy[i4] - polygon_copy[i3];
 			float angle = angle_unsigned(v31, v34);
-			if (is_clockwise(v31, v34) != is_polygon_clockwise) {
+			if (clockwise(v31, v34) != is_polygon_clockwise) {
 				angle = M_2PI - angle;
 			}
 			angles[i3] = angle;

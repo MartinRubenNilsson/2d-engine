@@ -11,5 +11,5 @@ namespace ecs {
 
     Arrow& emplace_arrow(entt::entity entity, const Arrow& arrow = {});
 
-    entt::entity create_arrow(const Vector2f& position, const Vector2f& velocity);
+    entt::entity create_arrow(const Vec2f& position, const Vec2f& velocity);
 }

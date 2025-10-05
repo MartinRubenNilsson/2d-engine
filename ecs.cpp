@@ -19,7 +19,7 @@
 #include "ecs_grass.h"
 #include "ecs_audio.h"
 #include "ecs_slime.h"
-#include "ecs_task.h"
+#include "ecs_tasks.h"
 
 namespace ecs {
 	void startup() {
@@ -109,8 +109,8 @@ namespace ecs {
 		handle_window_event_for_players(event);
 	}
 
-	void get_camera_bounds(Vector2f& min, Vector2f& max) {
-		Vector2f center, size;
+	void get_camera_bounds(Vec2f& min, Vec2f& max) {
+		Vec2f center, size;
 		ecs::get_blended_camera_view(center, size);
 		min = center - size / 2.f;
 		max = center + size / 2.f;
@@ -123,8 +123,8 @@ namespace ecs {
 			debug_draw_physics();
 		}
 		if (debug_flags & DEBUG_AI) {
+			debug_draw_tasks();
 			debug_draw_state_machines();
-			debug_draw_ai();
 		}
 		if (debug_flags & DEBUG_PLAYER) {
 			show_player_debug_window();

@@ -33,7 +33,7 @@ namespace ecs {
 	struct Player {
 		unsigned int input_flags = 0;
 		PlayerState state = PlayerState::Normal;
-		Vector2f look_dir = { 0.f, 1.f };
+		Vec2f look_dir = { 0.f, 1.f };
 		Timer hurt_timer = { 1.f };
 		int max_health = 3;
 		int health = 3;

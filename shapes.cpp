@@ -14,34 +14,34 @@ namespace shapes {
 	};
 
 	struct Point {
-		Vector2f position;
+		Vec2f position;
 		Color color = colors::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Line {
-		Vector2f p1;
-		Vector2f p2;
+		Vec2f p1;
+		Vec2f p2;
 		Color color = colors::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Box {
-		Vector2f min;
-		Vector2f max;
+		Vec2f min;
+		Vec2f max;
 		Color color = colors::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Polygon {
-		Vector2f points[MAX_POLYGON_VERTICES];
+		Vec2f points[MAX_POLYGON_VERTICES];
 		unsigned int count = 0;
 		Color color = colors::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Circle {
-		Vector2f center;
+		Vec2f center;
 		float radius = 0.f;
 		Color color = colors::WHITE;
 		float lifetime = 0.f;
@@ -63,7 +63,7 @@ namespace shapes {
 	eastl::vector<Circle> _circles;
 	eastl::vector<Batch> _batches;
 
-	bool _cull_point(const ViewBounds& bounds, const Vector2f& position) {
+	bool _cull_point(const ViewBounds& bounds, const Vec2f& position) {
 		if (position.x < bounds.min_x) return true;
 		if (position.x > bounds.max_x) return true;
 		if (position.y < bounds.min_y) return true;
@@ -71,7 +71,7 @@ namespace shapes {
 		return false;
 	}
 
-	bool _cull_line(const ViewBounds& bounds, const Vector2f& p1, const Vector2f& p2) {
+	bool _cull_line(const ViewBounds& bounds, const Vec2f& p1, const Vec2f& p2) {
 		if (p1.x < bounds.min_x && p2.x < bounds.min_x) return true;
 		if (p1.x > bounds.max_x && p2.x > bounds.max_x) return true;
 		if (p1.y < bounds.min_y && p2.y < bounds.min_y) return true;
@@ -79,7 +79,7 @@ namespace shapes {
 		return false;
 	}
 
-	bool _cull_box(const ViewBounds& bounds, const Vector2f& min, const Vector2f& max) {
+	bool _cull_box(const ViewBounds& bounds, const Vec2f& min, const Vec2f& max) {
 		if (max.x < bounds.min_x) return true;
 		if (min.x > bounds.max_x) return true;
 		if (max.y < bounds.min_y) return true;
@@ -87,10 +87,10 @@ namespace shapes {
 		return false;
 	}
 
-	bool _cull_polygon(const ViewBounds& bounds, const Vector2f* points, size_t count) {
+	bool _cull_polygon(const ViewBounds& bounds, const Vec2f* points, size_t count) {
 		if (count < 3) return true;
-		Vector2f min = points[0];
-		Vector2f max = points[0];
+		Vec2f min = points[0];
+		Vec2f max = points[0];
 		for (size_t i = 1; i < count; ++i) {
 			min.x = std::min(min.x, points[i].x);
 			min.y = std::min(min.y, points[i].y);
@@ -100,7 +100,7 @@ namespace shapes {
 		return _cull_box(bounds, min, max);
 	}
 
-	bool _cull_circle(const ViewBounds& bounds, const Vector2f& center, float radius) {
+	bool _cull_circle(const ViewBounds& bounds, const Vec2f& center, float radius) {
 		if (center.x + radius < bounds.min_x) return true;
 		if (center.x - radius > bounds.max_x) return true;
 		if (center.y + radius < bounds.min_y) return true;
@@ -133,7 +133,7 @@ namespace shapes {
 		_update_lifetimes(_circles, dt);
 	}
 
-	void draw_all(std::string_view debug_group_name, const Vector2f& camera_min, const Vector2f& camera_max) {
+	void draw_all(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
 
 		// SETUP
 
@@ -180,10 +180,10 @@ namespace shapes {
 			draw.primitive = graphics::Primitives::LineStrip;
 			draw.vertex_count = 5;
 			draw.vertex_offset = (unsigned int)graphics::temp_vertices.size();
-			graphics::temp_vertices.emplace_back(Vector2f{ box.min.x, box.min.y }, box.color);
-			graphics::temp_vertices.emplace_back(Vector2f{ box.max.x, box.min.y }, box.color);
-			graphics::temp_vertices.emplace_back(Vector2f{ box.max.x, box.max.y }, box.color);
-			graphics::temp_vertices.emplace_back(Vector2f{ box.min.x, box.max.y }, box.color);
+			graphics::temp_vertices.emplace_back(Vec2f{ box.min.x, box.min.y }, box.color);
+			graphics::temp_vertices.emplace_back(Vec2f{ box.max.x, box.min.y }, box.color);
+			graphics::temp_vertices.emplace_back(Vec2f{ box.max.x, box.max.y }, box.color);
+			graphics::temp_vertices.emplace_back(Vec2f{ box.min.x, box.max.y }, box.color);
 			graphics::temp_vertices.emplace_back(graphics::temp_vertices[draw.vertex_offset]);
 		}
 
@@ -213,7 +213,7 @@ namespace shapes {
 			draw.vertex_offset = (unsigned int)graphics::temp_vertices.size();
 			for (unsigned int i = 0; i < SUBDIVISIONS; ++i) {
 				const float angle = i * ANGLE_STEP;
-				const Vector2f position = circle.center + circle.radius * Vector2f{ cos(angle), sin(angle) };
+				const Vec2f position = circle.center + circle.radius * Vec2f{ cos(angle), sin(angle) };
 				graphics::temp_vertices.emplace_back(position, circle.color);
 			}
 			graphics::temp_vertices.emplace_back(graphics::temp_vertices[draw.vertex_offset]);
@@ -248,33 +248,33 @@ namespace shapes {
 		graphics::temp_vertices.clear();
 	}
 
-	void add_point(const Vector2f& point, const Color& color, float lifetime) {
+	void add_point(const Vec2f& point, const Color& color, float lifetime) {
 		if (lifetime <= 0.f && _cull_point(_last_calculated_view_bounds, point)) return;
 		_points.emplace_back(point, color, lifetime);
 	}
 
-	void add_line(const Vector2f& p1, const Vector2f& p2, const Color& color, float lifetime) {
+	void add_line(const Vec2f& p1, const Vec2f& p2, const Color& color, float lifetime) {
 		if (lifetime <= 0.f && _cull_line(_last_calculated_view_bounds, p1, p2)) return;
 		_lines.emplace_back(p1, p2, color, lifetime);
 	}
 
-	void add_box(const Vector2f& min, const Vector2f& max, const Color& color, float lifetime) {
+	void add_box(const Vec2f& min, const Vec2f& max, const Color& color, float lifetime) {
 		if (lifetime <= 0.f && _cull_box(_last_calculated_view_bounds, min, max)) return;
 		_boxes.emplace_back(min, max, color, lifetime);
 	}
 
-	void add_polygon(const Vector2f* points, unsigned int count, const Color& color, float lifetime) {
+	void add_polygon(const Vec2f* points, unsigned int count, const Color& color, float lifetime) {
 		count = std::min(count, MAX_POLYGON_VERTICES);
 		if (count < 3) return;
 		if (lifetime <= 0.f && _cull_polygon(_last_calculated_view_bounds, points, count)) return;
 		Polygon& polygon = _polygons.emplace_back();
-		memcpy(polygon.points, points, count * sizeof(Vector2f));
+		memcpy(polygon.points, points, count * sizeof(Vec2f));
 		polygon.count = count;
 		polygon.color = color;
 		polygon.lifetime = lifetime;
 	}
 
-	void add_circle(const Vector2f& center, float radius, const Color& color, float lifetime) {
+	void add_circle(const Vec2f& center, float radius, const Color& color, float lifetime) {
 		if (lifetime <= 0.f && _cull_circle(_last_calculated_view_bounds, center, radius)) return;
 		_circles.emplace_back(center, radius, color, lifetime);
 	}

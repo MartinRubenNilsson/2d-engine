@@ -5,7 +5,7 @@
 
 namespace postprocessing {
 	struct Shockwave {
-		Vector2f position_ws; // ws = world space
+		Vec2f position_ws; // ws = world space
 		float force = 0.f;
 		float size = 0.f;
 		float thickness = 0.f;
@@ -15,7 +15,7 @@ namespace postprocessing {
 
 	std::vector<Shockwave> _shockwaves;
 	float _darkness_intensity = 0.f;
-	Vector2f _darkness_center_ws; // ws = world space
+	Vec2f _darkness_center_ws; // ws = world space
 	float _screen_transition_progress = 0.f;
 	size_t _gaussian_blur_iterations = 0;
 
@@ -37,26 +37,26 @@ namespace postprocessing {
 		_update_shockwaves(dt);
 	}
 
-	Vector2f _map_world_to_target(
-		const Vector2f& pos_ws,
-		const Vector2f& camera_min_ws,
-		const Vector2f& camera_max_ws,
+	Vec2f _map_world_to_target(
+		const Vec2f& pos_ws,
+		const Vec2f& camera_min_ws,
+		const Vec2f& camera_max_ws,
 		unsigned int target_width,
 		unsigned int target_height
 	) {
 		const float x = (pos_ws.x - camera_min_ws.x) / (camera_max_ws.x - camera_min_ws.x) * target_width;
 		const float y = (pos_ws.y - camera_min_ws.y) / (camera_max_ws.y - camera_min_ws.y) * target_height;
-		return Vector2f(x, y);
+		return Vec2f(x, y);
 	}
 
-	void _render_shockwaves(const Vector2f& camera_min, const Vector2f& camera_max) {
+	void _render_shockwaves(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_shockwaves.empty()) return;
 		if (graphics::shockwave_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group("postprocessing::_render_shockwaves()");
 		graphics::bind_fragment_shader(graphics::shockwave_frag);
 		graphics::bind_uniform_buffer(1, graphics::shockwave_uniform_buffer);
 		graphics::ShockwaveUniformBlock shockwave_ub{};
-		shockwave_ub.resolution = Vector2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
+		shockwave_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		for (const Shockwave& shockwave : _shockwaves) {
 			shockwave_ub.center = _map_world_to_target(
 				shockwave.position_ws, camera_min, camera_max,
@@ -72,7 +72,7 @@ namespace postprocessing {
 		}
 	}
 
-	void _render_darkness(const Vector2f& camera_min, const Vector2f& camera_max) {
+	void _render_darkness(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_darkness_intensity == 0.f) return;
 		if (graphics::darkness_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group("postprocesssing::_render_darkness()");
@@ -80,7 +80,7 @@ namespace postprocessing {
 		graphics::bind_framebuffer(graphics::game_ping_framebuffer);
 		graphics::bind_fragment_shader(graphics::darkness_frag);
 		graphics::DarknessUniformBlock darkness_ub{};
-		darkness_ub.resolution = Vector2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
+		darkness_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		darkness_ub.center = _map_world_to_target(
 			_darkness_center_ws, camera_min, camera_max,
 			GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
@@ -132,7 +132,7 @@ namespace postprocessing {
 		graphics::bind_sampler(0, graphics::nearest_sampler);
 	}
 
-	void render(const Vector2f& camera_min, const Vector2f& camera_max) {
+	void render(const Vec2f& camera_min, const Vec2f& camera_max) {
 		graphics::ScopedDebugGroup debug_group("postprocessing::render()");
 		graphics::set_primitives(graphics::Primitives::TriangleList);
 		graphics::bind_vertex_shader(graphics::fullscreen_vert);
@@ -142,7 +142,7 @@ namespace postprocessing {
 		_render_gaussian_blur();
 	}
 
-	void add_shockwave(const Vector2f& position_ws) {
+	void add_shockwave(const Vec2f& position_ws) {
 		Shockwave shockwave{};
 		shockwave.position_ws = position_ws; // ws = world space
 		shockwave.force = 0.2f;
@@ -155,7 +155,7 @@ namespace postprocessing {
 		_darkness_intensity = std::clamp(intensity, 0.f, 1.f);
 	}
 
-	void set_darkness_center(const Vector2f& position_in_world_space) {
+	void set_darkness_center(const Vec2f& position_in_world_space) {
 		_darkness_center_ws = position_in_world_space;
 	}
 

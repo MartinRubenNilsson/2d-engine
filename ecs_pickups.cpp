@@ -51,7 +51,7 @@ namespace ecs {
 		return get_tile(tileset, tile_id);
 	}
 
-	entt::entity create_pickup(PickupType type, const Vector2f& position) {
+	entt::entity create_pickup(PickupType type, const Vec2f& position) {
 		entt::entity entity = _registry.create();
 		set_tag(entity, Tag::Pickup);
 		{

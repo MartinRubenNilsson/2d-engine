@@ -59,7 +59,7 @@ namespace background
 		}
 	}
 
-	void draw_sprites(const Vector2f& camera_min, const Vector2f& camera_max)
+	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max)
 	{
 		if (_type == Type::None) return;
 		graphics::ScopedDebugGroup debug_group("background::draw_sprites()");

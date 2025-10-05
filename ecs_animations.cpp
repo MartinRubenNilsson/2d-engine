@@ -111,15 +111,15 @@ namespace ecs {
 			if (!animation._frame)
 				continue;
 
-			Vector2u texture_size;
+			Vec2u texture_size;
 			graphics::get_texture_size(sprite.texture, texture_size.x, texture_size.y);
 			if (!texture_size.x || !texture_size.y) continue;
 
 			const TextureRect tex_rect = get_texture_rect(animation._frame);
 			sprite.tex_position = { (float)tex_rect.x, (float)tex_rect.y };
 			sprite.tex_size = { (float)tex_rect.w, (float)tex_rect.h };
-			sprite.tex_position /= Vector2f(texture_size);
-			sprite.tex_size /= Vector2f(texture_size);
+			sprite.tex_position /= Vec2f(texture_size);
+			sprite.tex_size /= Vec2f(texture_size);
 		}
 
 		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const FlipbookAnimation>().each()) {

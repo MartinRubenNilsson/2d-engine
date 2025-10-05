@@ -3,6 +3,7 @@
 namespace ecs {
 	enum class Tag {
 		None,
+		Collider, // static level geometry
 		Player,
 		Slime,
 		PushableBlock,
@@ -29,7 +30,7 @@ namespace ecs {
 	void set_tag(entt::entity entity, Tag new_tag);
 	Tag get_tag(entt::entity entity);
 
-	entt::entity find_entity_by_tag(Tag tag);
+	entt::entity find_entity_with_tag(Tag tag);
 
 	void setup_tags();
 }

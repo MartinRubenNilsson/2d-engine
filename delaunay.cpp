@@ -14,10 +14,10 @@ namespace delaunay {
 	// Check if point d is inside the circumcircle of triangle abc.
 	// Returns true if point d is inside the circumcircle and a, b, c are oriented counter-clockwise,
 	// or if point d is outside the circumcircle and a, b, c are oriented clockwise, and returns false otherwise.
-	bool _in_circle(const Vector2f& a, const Vector2f& b, const Vector2f& c, const Vector2f& d) {
-		const Vector2f da = a - d;
-		const Vector2f db = b - d;
-		const Vector2f dc = c - d;
+	bool _in_circle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d) {
+		const Vec2f da = a - d;
+		const Vec2f db = b - d;
+		const Vec2f dc = c - d;
 		const float det = _determinant(
 			da.x, da.y, length_squared(da),
 			db.x, db.y, length_squared(db),
@@ -26,7 +26,7 @@ namespace delaunay {
 		return det > 0.f;
 	}
 
-	void build_bowyer_watson(std::span<const Vector2f> points, std::vector<unsigned int>& indices) {
+	void build_bowyer_watson(std::span<const Vec2f> points, std::vector<unsigned int>& indices) {
 		//TODO
 	}
 }

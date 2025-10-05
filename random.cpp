@@ -49,13 +49,13 @@ namespace random
 		return Color(dist(_seeded_engine), dist(_seeded_engine), dist(_seeded_engine));
 	}
 
-	Vector2f on_circle(float radius)
+	Vec2f on_circle(float radius)
 	{
 		float angle = range_f(0, PI_2);
-		return Vector2f(cos(angle) * radius, sin(angle) * radius);
+		return Vec2f(cos(angle) * radius, sin(angle) * radius);
 	}
 
-	Vector2f in_circle(float radius)
+	Vec2f in_circle(float radius)
 	{
 		// http://mathworld.wolfram.com/DiskPointPicking.html
 		float r = sqrt(range_f(0.0f, radius));
