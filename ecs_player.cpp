@@ -67,7 +67,7 @@ namespace ecs {
 	enum INPUT_FLAGS : unsigned int {
 		// Continuous actions
 
-		INPUT_LEFT = (1 << 0),
+		INPUT_W = (1 << 0),
 		INPUT_E = (1 << 1),
 		INPUT_N = (1 << 2),
 		INPUT_S = (1 << 3),
@@ -91,9 +91,9 @@ namespace ecs {
 	};
 
 	struct Player {
+		Direction dir = Direction::S;
 		unsigned int input_flags = 0;
 		PlayerState state = PlayerState::Normal;
-		Vec2f look_dir = { 0.f, 1.f };
 		Timer hurt_timer = { 1.f };
 		int max_health = 3;
 		int health = 3;
@@ -116,7 +116,7 @@ namespace ecs {
 		if (ev.type == window::EventType::KeyPress) {
 			switch (ev.key.code) {
 				case window::Key::Left:
-					_input_flags_to_enable |= INPUT_LEFT;
+					_input_flags_to_enable |= INPUT_W;
 					break;
 				case window::Key::Right:
 					_input_flags_to_enable |= INPUT_E;
@@ -149,7 +149,7 @@ namespace ecs {
 		} else if (ev.type == window::EventType::KeyRelease) {
 			switch (ev.key.code) {
 				case window::Key::Left:
-					_input_flags_to_disable |= INPUT_LEFT;
+					_input_flags_to_disable |= INPUT_W;
 					break;
 				case window::Key::Right:
 					_input_flags_to_disable |= INPUT_E;
@@ -373,7 +373,7 @@ namespace ecs {
 			// UPDATE POST-PROCESSING
 			postprocessing::set_darkness_center(position);
 
-			const Direction dir = to_cardinal(player.look_dir);
+			const Direction dir = player.dir;
 
 			switch (dir) {
 				case Direction::E: tile.flipped_horizontally = false; break;
@@ -386,13 +386,17 @@ namespace ecs {
 					Vec2f new_move_dir;
 					float new_move_speed = 0.f;
 
-					if (player.input_flags & INPUT_LEFT)  new_move_dir.x--;
-					if (player.input_flags & INPUT_E) new_move_dir.x++;
-					if (player.input_flags & INPUT_N)    new_move_dir.y--;
-					if (player.input_flags & INPUT_S)  new_move_dir.y++;
+					if (player.input_flags & INPUT_W)
+						new_move_dir.x--;
+					if (player.input_flags & INPUT_E)
+						new_move_dir.x++;
+					if (player.input_flags & INPUT_N)
+						new_move_dir.y--;
+					if (player.input_flags & INPUT_S)
+						new_move_dir.y++;
 
 					if (new_move_dir != Vec2f::ZERO) {
-						player.look_dir = new_move_dir;
+						player.dir = to_cardinal(new_move_dir);
 						new_move_dir = normalize(new_move_dir);
 						if (player.input_flags & INPUT_STEALTH) {
 							new_move_speed = _PLAYER_STEALTH_SPEED;
@@ -438,7 +442,7 @@ namespace ecs {
 
 					} else if (player.input_flags & INPUT_DROP_BOMB && player.bombs > 0) {
 
-						const Vec2f bomb_position = position + player.look_dir * 16.f;
+						const Vec2f bomb_position = position + to_unit(player.dir) * 16.f;
 						if (create_bomb(bomb_position) != entt::null) {
 							player.bombs--;
 							audio::create_event({ .path = "event:/player/place_bomb" });
@@ -503,7 +507,7 @@ namespace ecs {
 					}
 
 					if (player.input_flags & INPUT_INTERACT) {
-						const Vec2f box_center = position + player.look_dir * 16.f;
+						const Vec2f box_center = position + to_unit(player.dir) * 16.f;
 						const Vec2f box_min = box_center - Vec2f(6.f, 6.f);
 						const Vec2f box_max = box_center + Vec2f(6.f, 6.f);
 						interact_with_all_entities_in_box(box_min, box_max);
@@ -527,16 +531,15 @@ namespace ecs {
 				} break;
 				case PlayerState::ShootingBow: {
 					held_item_type = HeldItemType::Bow;
+					if (dir != Direction::E) {
+						tile.flipped_horizontally = false;
+					}
 #if 0
-					if (tile_dir != Direction::E) {
-						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
+					if (player.arrows > 0 && anim.get_progress() > ???) {
+						player.arrows--;
+						create_arrow(position + to_unit(player.dir) * 16.f, to_unit(player.dir)* _PLAYER_ARROW_SPEED);
 					}
 #endif
-					// TODO
-					//if (player.arrows > 0 && animation._frame_changed && animation._frame_id == 2) {
-					//	player.arrows--;
-					//	create_arrow(position + player.look_dir * 16.f, player.look_dir * _PLAYER_ARROW_SPEED);
-					//}
 					if (anim.done()) {
 						player.state = PlayerState::Normal;
 					}

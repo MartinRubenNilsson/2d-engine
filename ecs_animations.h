@@ -4,6 +4,7 @@ namespace ecs {
 	class TileAnimation {
 	public:
 		void set_progress(float progress);
+		float get_progress() const;
 		void set_speed(float speed);
 		void set_loop(bool loop);
 

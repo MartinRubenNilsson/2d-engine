@@ -12,6 +12,10 @@ namespace ecs {
 		_progress = std::clamp(progress, 0.f, 1.f);
 	}
 
+	float TileAnimation::get_progress() const {
+		return _progress;
+	}
+
 	void TileAnimation::set_speed(float speed) {
 		_speed = std::max(speed, 0.f);
 	}
