@@ -22,7 +22,6 @@
 #include "map_grid.h"
 #include "postprocessing.h"
 #include "shapes.h"
-#include "tile_ids.h"
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
@@ -33,18 +32,45 @@
 #include "timer.h"
 
 namespace ecs {
-	const float _PLAYER_WALK_SPEED = 60.f;
-	const float _PLAYER_RUN_SPEED = 136.f;
-	const float _PLAYER_STEALTH_SPEED = 36.f;
-	const float _PLAYER_ARROW_SPEED = 160.f;
+
+	// player.tsx
+	enum TILE_ID_PLAYER {
+		TILE_ID_PLAYER_IDLE_S = 0,
+		TILE_ID_PLAYER_IDLE_N = 16,
+		TILE_ID_PLAYER_IDLE_E = 32,
+		TILE_ID_PLAYER_PUSH_S = 8,
+		TILE_ID_PLAYER_PUSH_N = 24,
+		TILE_ID_PLAYER_PUSH_E = 40,
+		TILE_ID_PLAYER_WALK_S = 48,
+		TILE_ID_PLAYER_WALK_N = 52,
+		TILE_ID_PLAYER_WALK_E = 64,
+		TILE_ID_PLAYER_RUN_S = 51,
+		TILE_ID_PLAYER_RUN_N = 55,
+		TILE_ID_PLAYER_RUN_E = 70,
+		TILE_ID_PLAYER_FOREHAND_STRIKE_S = 132,
+		TILE_ID_PLAYER_FOREHAND_STRIKE_N = 148,
+		TILE_ID_PLAYER_FOREHAND_STRIKE_E = 164,
+		TILE_ID_PLAYER_BOW_SHOT_S = 133,
+		TILE_ID_PLAYER_BOW_SHOT_N = 149,
+		TILE_ID_PLAYER_BOW_SHOT_E = 165,
+		TILE_ID_PLAYER_DYING_SE = 178,
+		TILE_ID_PLAYER_DYING_NE = 181,
+		TILE_ID_PLAYER_DEAD_SE = 180,
+		TILE_ID_PLAYER_DEAD_NE = 183,
+	};
+
+	constexpr float _PLAYER_WALK_SPEED = 60.f;
+	constexpr float _PLAYER_RUN_SPEED = 136.f;
+	constexpr float _PLAYER_STEALTH_SPEED = 36.f;
+	constexpr float _PLAYER_ARROW_SPEED = 160.f;
 
 	enum INPUT_FLAGS : unsigned int {
 		// Continuous actions
 
 		INPUT_LEFT = (1 << 0),
-		INPUT_RIGHT = (1 << 1),
-		INPUT_UP = (1 << 2),
-		INPUT_DOWN = (1 << 3),
+		INPUT_E = (1 << 1),
+		INPUT_N = (1 << 2),
+		INPUT_S = (1 << 3),
 		INPUT_RUN = (1 << 4),
 		INPUT_STEALTH = (1 << 5),
 
@@ -93,13 +119,13 @@ namespace ecs {
 					_input_flags_to_enable |= INPUT_LEFT;
 					break;
 				case window::Key::Right:
-					_input_flags_to_enable |= INPUT_RIGHT;
+					_input_flags_to_enable |= INPUT_E;
 					break;
 				case window::Key::Up:
-					_input_flags_to_enable |= INPUT_UP;
+					_input_flags_to_enable |= INPUT_N;
 					break;
 				case window::Key::Down:
-					_input_flags_to_enable |= INPUT_DOWN;
+					_input_flags_to_enable |= INPUT_S;
 					break;
 				case window::Key::LShift:
 					_input_flags_to_enable |= INPUT_RUN;
@@ -126,13 +152,13 @@ namespace ecs {
 					_input_flags_to_disable |= INPUT_LEFT;
 					break;
 				case window::Key::Right:
-					_input_flags_to_disable |= INPUT_RIGHT;
+					_input_flags_to_disable |= INPUT_E;
 					break;
 				case window::Key::Up:
-					_input_flags_to_disable |= INPUT_UP;
+					_input_flags_to_disable |= INPUT_N;
 					break;
 				case window::Key::Down:
-					_input_flags_to_disable |= INPUT_DOWN;
+					_input_flags_to_disable |= INPUT_S;
 					break;
 				case window::Key::LShift:
 					_input_flags_to_disable |= INPUT_RUN;
@@ -347,11 +373,11 @@ namespace ecs {
 			// UPDATE POST-PROCESSING
 			postprocessing::set_darkness_center(position);
 
-			const char dir = get_direction(player.look_dir);
+			const Direction dir = to_cardinal(player.look_dir);
 
 			switch (dir) {
-				case 'l': tile.flipped_horizontally = true; break;
-				case 'r': tile.flipped_horizontally = false; break;
+				case Direction::E: tile.flipped_horizontally = false; break;
+				case Direction::W: tile.flipped_horizontally = true; break;
 			}
 
 			switch (player.state) {
@@ -361,9 +387,9 @@ namespace ecs {
 					float new_move_speed = 0.f;
 
 					if (player.input_flags & INPUT_LEFT)  new_move_dir.x--;
-					if (player.input_flags & INPUT_RIGHT) new_move_dir.x++;
-					if (player.input_flags & INPUT_UP)    new_move_dir.y--;
-					if (player.input_flags & INPUT_DOWN)  new_move_dir.y++;
+					if (player.input_flags & INPUT_E) new_move_dir.x++;
+					if (player.input_flags & INPUT_N)    new_move_dir.y--;
+					if (player.input_flags & INPUT_S)  new_move_dir.y++;
 
 					if (new_move_dir != Vec2f::ZERO) {
 						player.look_dir = new_move_dir;
@@ -384,10 +410,10 @@ namespace ecs {
 					if (player.input_flags & INPUT_SWING_SWORD) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_S); break;
 						}
 
 						audio::create_event({ .path = "event:/snd_sword_attack" });
@@ -399,10 +425,10 @@ namespace ecs {
 					} else if (player.input_flags & INPUT_SHOOT_BOW && player.arrows > 0) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_BOW_SHOT_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_BOW_SHOT_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_BOW_SHOT_S); break;
 						}
 
 						anim.set_progress(0.f);
@@ -423,52 +449,52 @@ namespace ecs {
 					} else if (player.touching_pushable_block && new_velocity != Vec2f::ZERO) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_PUSH_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_PUSH_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_PUSH_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_PUSH_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_PUSH_S); break;
 						}
 
 						anim.set_loop(true);
-						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_RUN_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_RUN_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_RUN_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
 						}
 
 						anim.set_loop(true);
-						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else if (new_move_speed >= _PLAYER_WALK_SPEED) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_WALK_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_WALK_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_WALK_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
 						}
 
 						anim.set_loop(true);
-						if (anim.looped() && (dir == 'u' || dir == 'd')) {
+						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_IDLE_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_IDLE_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
 						}
 
 						anim.set_progress(0.f);
@@ -487,7 +513,7 @@ namespace ecs {
 				case PlayerState::SwingingSword: {
 					held_item_type = HeldItemType::Sword;
 #if 0
-					if (tile_dir != 'r') {
+					if (tile_dir != Direction::E) {
 						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
 					}
 #endif
@@ -502,7 +528,7 @@ namespace ecs {
 				case PlayerState::ShootingBow: {
 					held_item_type = HeldItemType::Bow;
 #if 0
-					if (tile_dir != 'r') {
+					if (tile_dir != Direction::E) {
 						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
 					}
 #endif
@@ -520,10 +546,10 @@ namespace ecs {
 					const TileId original_tile = tile;
 
 					switch (dir) {
-						case 'l':
-						case 'r': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
-						case 'u': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
-						case 'd': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
+						case Direction::W: [[fallthrough]];
+						case Direction::E: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
+						case Direction::N: replace(tile, TILE_ID_PLAYER_DYING_NE); break;
+						case Direction::S: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
 					}
 
 					if (tile != original_tile) { // HACK
@@ -534,10 +560,10 @@ namespace ecs {
 					if (anim.done()) {
 
 						switch (dir) {
-							case 'l':
-							case 'r': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
-							case 'u': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
-							case 'd': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+							case Direction::W: [[fallthrough]];
+							case Direction::E: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
+							case Direction::N: replace(tile, TILE_ID_PLAYER_DEAD_NE); break;
+							case Direction::S: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
 						}
 
 						kill_player(entity);
@@ -552,18 +578,6 @@ namespace ecs {
 
 			b2Body_SetLinearVelocity(body, new_velocity);
 
-#if 0
-			// UPDATE SPRITE COLOR
-
-			if (player.hurt_timer.running()) {
-				constexpr float BLINK_PERIOD = 0.15f;
-				float fraction = fmod(player.hurt_timer.get_time(), BLINK_PERIOD) / BLINK_PERIOD;
-				sprite.color.a = (unsigned char)(255 * fraction);
-			} else {
-				sprite.color.a = 255;
-			}
-#endif
-
 			// UPDATE HUD
 
 			ui::bindings::hud_player_health = player.health;
@@ -577,6 +591,17 @@ namespace ecs {
 			player.input_flags &= ~INPUT_SWING_SWORD;
 			player.input_flags &= ~INPUT_SHOOT_BOW;
 			player.input_flags &= ~INPUT_DROP_BOMB;
+		}
+
+		// Blink while hurt.
+		for (auto [entity, player, sprite] : _registry.view<Player, sprites::Sprite>().each()) {
+			if (player.hurt_timer.running()) {
+				constexpr float BLINK_PERIOD = 0.15f;
+				float fraction = fmod(player.hurt_timer.get_time(), BLINK_PERIOD) / BLINK_PERIOD;
+				sprite.color.a = (unsigned char)(255 * fraction);
+			} else {
+				sprite.color.a = 255;
+			}
 		}
 
 		_input_flags_to_enable = 0;

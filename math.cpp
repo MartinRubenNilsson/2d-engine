@@ -116,14 +116,6 @@ Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max) {
 	return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y) };
 }
 
-char get_direction(const Vec2f& v) {
-	if (v.x >= +abs(v.y)) return 'r';
-	if (v.x <= -abs(v.y)) return 'l';
-	if (v.y >= +abs(v.x)) return 'd';
-	if (v.y <= -abs(v.x)) return 'u';
-	return ' '; // This should never happen.
-}
-
 bool convex(std::span<const Vec2f> polygon) {
 	float first_nonzero_det = 0;
 	const size_t vertex_count = polygon.size();

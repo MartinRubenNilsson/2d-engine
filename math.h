@@ -43,9 +43,6 @@ Vec2f lerp_polar(const Vec2f& a, const Vec2f& b, float t);
 Vec2f damp(const Vec2f& a, const Vec2f& b, float damping, float dt); // time-dependent damping
 Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max);
 
-// TODO: move to own file
-char get_direction(const Vec2f& v); // Returns the general direction ('r', 'l', 'u', 'd') in which v points.
-
 // COMPUTATIONAL GEOMETRY
 
 bool convex(std::span<const Vec2f> polygon);

@@ -35,4 +35,5 @@ using namespace std::literals::string_literals;
 #include "vec2.h"
 #include "color.h"
 #include "math.h"
+#include "direction.h"
 #include "ecs_tiled_ids.h"

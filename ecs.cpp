@@ -88,7 +88,7 @@ namespace ecs {
 		_patch(map);
 	}
 
-	void update(float dt) {
+	void _update_logic(float dt) {
 		update_physics(dt);
 		update_players(dt);
 		update_pickups(dt);
@@ -96,13 +96,21 @@ namespace ecs {
 		update_blade_traps(dt);
 		update_state_machines(dt);
 		update_tasks(dt);
-		update_slimes(dt);
 		update_lifetimes(dt);
 		destroy_entities_to_be_destroyed_at_end_of_frame();
+	}
+
+	void _update_graphics(float dt) {
+		update_slimes_graphics(dt);
 		update_animations(dt);
 		update_animated_sprites(dt);
 		update_sprites(dt);
 		update_cameras(dt);
+	}
+
+	void update(float dt) {
+		_update_logic(dt);
+		_update_graphics(dt);
 	}
 
 	void handle_window_event(const window::Event& event) {

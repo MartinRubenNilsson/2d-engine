@@ -42,26 +42,26 @@ namespace ecs {
 
     // slime.tsx
     enum TILE_ID_SLIME {
-        TILE_ID_SLIME_WALK_DOWN = 0,
-        TILE_ID_SLIME_WALK_RIGHT = 4,
-        TILE_ID_SLIME_WALK_UP = 8,
-        TILE_ID_SLIME_WALK_LEFT = 12,
+        TILE_ID_SLIME_WALK_S = 0,
+        TILE_ID_SLIME_WALK_E = 4,
+        TILE_ID_SLIME_WALK_N = 8,
+        TILE_ID_SLIME_WALK_W = 12,
     };
 
-    void update_slimes(float dt) {
+    void update_slimes_graphics(float dt) {
         for (auto [entity, body, tile, anim] : _registry.view<Type<Tag::Slime>, b2BodyId, TileId, TileAnimation>().each()) {
             Vec2f velocity = b2Body_GetLinearVelocity(body);
-            unsigned int tile_id = UINT_MAX;
-            if (velocity != Vec2f::ZERO) {
-                switch (get_direction(velocity)) {
-                    case 'd': tile_id = TILE_ID_SLIME_WALK_DOWN; break;
-                    case 'r': tile_id = TILE_ID_SLIME_WALK_RIGHT; break;
-                    case 'u': tile_id = TILE_ID_SLIME_WALK_UP; break;
-                    case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
-                }
+            if (velocity == Vec2f::ZERO) {
+                anim.set_progress(0.f);
+                continue;
             }
-            replace(tile, tile_id);
-            anim.set_speed(length(velocity) / 32.f);
+            switch (to_cardinal(velocity)) {
+                case Direction::S: replace(tile, TILE_ID_SLIME_WALK_S); break;
+                case Direction::E: replace(tile, TILE_ID_SLIME_WALK_E); break;
+                case Direction::N: replace(tile, TILE_ID_SLIME_WALK_N); break;
+                case Direction::W: replace(tile, TILE_ID_SLIME_WALK_W); break;
+            }
+            anim.set_speed(length(velocity) / 16.f);
         }
     }
 }
