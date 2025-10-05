@@ -214,24 +214,24 @@ namespace ecs {
 		return tile;
 	}
 
-	TileId change(TileId tile, unsigned int id) {
+	void replace(TileId& tile, unsigned int id) {
 		TileId new_tile = tile;
 		new_tile.id = id;
-		return new_tile ? new_tile : tile;
+		if (!new_tile) return;
+		tile = new_tile;
 	}
 
-	TileId offset(TileId tile, int delta_x, int delta_y) {
+	void replace_step(TileId& tile, int step_x, int step_y) {
 		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
 		const unsigned int old_x = tile.id % ts.width;
-		const unsigned int new_x = (int)old_x + delta_x;
+		const unsigned int new_x = (int)old_x + step_x;
 		if (new_x >= ts.width)
-			return tile;
+			return;
 		const unsigned int old_y = tile.id / ts.width;
-		const unsigned int new_y = (int)old_y + delta_y;
+		const unsigned int new_y = (int)old_y + step_y;
 		if (new_y >= ts.height)
-			return tile;
+			return;
 		tile.id = (uint16_t)(new_x + new_y * ts.width);
-		return tile;
 	}
 
 	template <tiled::PropertyType type>

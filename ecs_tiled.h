@@ -53,8 +53,8 @@ namespace ecs {
 	bool animated(TileId tile);
 	unsigned int get_animation_duration(TileId tile); // duration in milliseconds
 	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
-	TileId change(TileId tile, unsigned int id);
-	TileId offset(TileId tile, int delta_x, int delta_y);
+	void replace(TileId& tile, unsigned int id);
+	void replace_step(TileId& tile, int step_x, int step_y);
 
 	/// OBJECTS
 

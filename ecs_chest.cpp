@@ -30,7 +30,7 @@ namespace ecs {
         chest->opened = true;
 
         if (TileId* tile = _registry.try_get<TileId>(entity)) {
-            *tile = offset(*tile, 0, 1);
+            replace_step(*tile, 0, 1);
             if (sprites::Sprite* sprite = _registry.try_get<sprites::Sprite>(entity)) {
                 update_sprite(*sprite, *tile);
             }

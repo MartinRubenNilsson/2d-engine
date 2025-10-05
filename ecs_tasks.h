@@ -2,6 +2,7 @@
 #include "ecs_task_status.h"
 
 namespace ecs {
+	std::string_view get_current_task(entt::entity entity);
 	TaskStatus status(entt::entity entity);
 	bool succeeded(entt::entity entity); // check if status = Succeeded
 	bool failed(entt::entity entity); // check if status = Failed

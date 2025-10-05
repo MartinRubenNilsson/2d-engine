@@ -3,7 +3,6 @@
 #include "ecs_tags.h"
 #include "ecs_damage.h"
 #include "ecs_lifetime.h"
-#include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "ecs_animations.h"
 #include "ecs_tasks.h"
@@ -11,44 +10,7 @@
 #include "random.h"
 
 namespace ecs {
-    struct Slime {
-        float speed = 0.f;
-    };
-
     extern entt::registry _registry;
-
-    void _update_waiting_slime(entt::entity entity, float dt) {
-        // TODO
-    }
-
-    void _update_wandering_slime(entt::entity entity, float dt) {
-        // TODO
-    }
-
-    void _update_pursuing_slime(entt::entity entity, float dt) {
-        // TODO
-    }
-
-    void _update_fleeing_slime(entt::entity entity, float dt) {
-        // TODO
-    }
-
-    void _emplace_state_machine_for_slime(entt::entity entity) {
-        StateMachine& sm = emplace_state_machine(entity);
-        StateHandle waiting = add_state(sm, {
-            .id = "waiting",
-            .update = _update_wandering_slime });
-        add_state(sm, {
-            .id = "wandering",
-            .update = _update_wandering_slime });
-        add_state(sm, {
-            .id = "pursuing",
-            .update = _update_pursuing_slime });
-        add_state(sm, {
-            .id = "fleeing",
-            .update = _update_fleeing_slime });
-        transition(sm, waiting, entity);
-    }
 
     bool _handle_damage_to_slime(entt::entity entity, const Damage& damage) {
         // Die immediately.
@@ -73,11 +35,7 @@ namespace ecs {
 
     void setup_slimes() {
         for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
-            Slime& slime = _registry.emplace<Slime>(entity);
-            slime.speed = get_float(object, "speed");
-
             set_damage_handler(entity, _handle_damage_to_slime);
-
             _do_slime_task(entity);
         }
     }
@@ -91,7 +49,7 @@ namespace ecs {
     };
 
     void update_slimes(float dt) {
-        for (auto [entity, slime, body, tile, anim] : _registry.view<Slime, b2BodyId, TileId, TileAnimation>().each()) {
+        for (auto [entity, body, tile, anim] : _registry.view<Type<Tag::Slime>, b2BodyId, TileId, TileAnimation>().each()) {
             Vec2f velocity = b2Body_GetLinearVelocity(body);
             unsigned int tile_id = UINT_MAX;
             if (velocity != Vec2f::ZERO) {
@@ -102,7 +60,7 @@ namespace ecs {
                     case 'l': tile_id = TILE_ID_SLIME_WALK_LEFT; break;
                 }
             }
-            tile = change(tile, tile_id);
+            replace(tile, tile_id);
             anim.set_speed(length(velocity) / 32.f);
         }
     }

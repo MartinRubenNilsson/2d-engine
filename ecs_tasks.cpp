@@ -7,6 +7,12 @@
 namespace ecs {
 	extern entt::registry _registry;
 
+	std::string_view get_current_task(entt::entity entity) {
+		const Task* task = _registry.try_get<Task>(entity);
+		if (!task) return {};
+		return task->name;
+	}
+
 	TaskStatus status(entt::entity entity) {
 		const Task* task = _registry.try_get<Task>(entity);
 		if (!task) return TaskStatus::Failed;

@@ -256,9 +256,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_DOWN); break;
 						}
 
 						audio::create_event({ .path = "event:/snd_sword_attack" });
@@ -271,9 +271,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_BOW_SHOT_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_BOW_SHOT_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_BOW_SHOT_DOWN); break;
 						}
 
 						anim.set_progress(0.f);
@@ -295,9 +295,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_PUSH_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_PUSH_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_PUSH_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_PUSH_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_PUSH_DOWN); break;
 						}
 
 						anim.set_loop(true);
@@ -309,9 +309,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_RUN_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_RUN_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_RUN_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_RUN_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_RUN_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_RUN_DOWN); break;
 						}
 
 						anim.set_loop(true);
@@ -323,9 +323,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_WALK_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_WALK_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_WALK_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_WALK_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_WALK_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_WALK_DOWN); break;
 						}
 
 						anim.set_loop(true);
@@ -337,9 +337,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_IDLE_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_IDLE_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_IDLE_RIGHT); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_IDLE_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_IDLE_DOWN); break;
 						}
 
 						anim.set_progress(0.f);
@@ -392,9 +392,9 @@ namespace ecs {
 
 					switch (dir) {
 						case 'l':
-						case 'r': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
-						case 'u': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
-						case 'd': tile = change(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
+						case 'r': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
+						case 'u': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_UP); break;
+						case 'd': replace(tile, TILE_ID_PLAYER_DYING_RIGHT_DOWN); break;
 					}
 
 					if (tile != original_tile) { // HACK
@@ -406,9 +406,9 @@ namespace ecs {
 
 						switch (dir) {
 							case 'l':
-							case 'r': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
-							case 'u': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
-							case 'd': tile = change(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+							case 'r': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
+							case 'u': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_UP); break;
+							case 'd': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
 						}
 
 						kill_player(player_entity);
