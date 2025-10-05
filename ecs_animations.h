@@ -20,7 +20,7 @@ namespace ecs {
 		bool _frame_changed = false;
 
 		friend void _update_tile_animations(float dt);
-		friend void update_animated_sprites(float dt);
+		friend void _update_tile_animated_sprites(float dt);
 	};
 
 	TileAnimation& emplace_tile_animation(entt::entity entity);

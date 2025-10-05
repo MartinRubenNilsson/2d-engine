@@ -83,6 +83,16 @@ namespace ecs {
 		}
 	}
 
+	void _update_tile_animated_sprites(float dt) {
+		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const TileAnimation>().each()) {
+			if (!animation._frame_changed)
+				continue; // No need to update the sprite if the frame hasn't changed.
+			if (!animation._frame)
+				continue;
+			update_sprite(sprite, animation._frame, false);
+		}
+	}
+
 	FlipbookAnimation& emplace_flipbook_animation(entt::entity entity) {
 		return _registry.emplace_or_replace<FlipbookAnimation>(entity);
 	}
@@ -100,24 +110,7 @@ namespace ecs {
 		}
 	}
 
-	void setup_animations() {
-		_setup_tile_animations();
-	}
-
-	void update_animations(float dt) {
-		_update_tile_animations(dt);
-		_update_flipbook_animations(dt);
-	}
-
-	void update_animated_sprites(float dt) {
-		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const TileAnimation>().each()) {
-			if (!animation._frame_changed)
-				continue; // No need to update the sprite if the frame hasn't changed.
-			if (!animation._frame)
-				continue;
-			update_sprite(sprite, animation._frame, false);
-		}
-
+	void _update_flipbook_animated_sprites(float dt) {
 		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const FlipbookAnimation>().each()) {
 			if (animation.rows <= 0) continue;
 			if (animation.columns <= 0) continue;
@@ -129,5 +122,19 @@ namespace ecs {
 			sprite.tex_position = { col * frame_width, row * frame_height };
 			sprite.tex_size = { frame_width, frame_height };
 		}
+	}
+
+	void setup_animations() {
+		_setup_tile_animations();
+	}
+
+	void update_animations(float dt) {
+		_update_tile_animations(dt);
+		_update_flipbook_animations(dt);
+	}
+
+	void update_animated_sprites(float dt) {
+		_update_tile_animated_sprites(dt);
+		_update_flipbook_animated_sprites(dt);
 	}
 }
