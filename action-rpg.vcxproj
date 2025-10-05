@@ -145,6 +145,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
     <ClCompile Include="ecs_physics_events.cpp" />
@@ -235,6 +236,7 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="direction.h" />
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_patch.h" />
     <ClInclude Include="ecs_physics_events.h" />

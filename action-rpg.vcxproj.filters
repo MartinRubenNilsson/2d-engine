@@ -245,6 +245,7 @@
     <ClCompile Include="ecs_task_flee.cpp">
       <Filter>game\ecs\ai\tasks\implementations</Filter>
     </ClCompile>
+    <ClCompile Include="direction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -509,6 +510,9 @@
       <Filter>game\ecs\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="vec2.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="direction.h">
       <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
