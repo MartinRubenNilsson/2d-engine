@@ -39,15 +39,11 @@ namespace tiled {
 	};
 
 	// A 32-bit integer that stores a pair of IDs in the lower 28 bits and flip flags in the upper 4 bits.
-	// These GIDs ("global IDs") are global in the sense that they may refer to a tile from any tileset.
+	// These TileId:s are global in the sense that they may refer to a tile from any tileset.
 	//
-	struct TileGid {
+	struct TileId {
 		union {
-			uint32_t value = UINT32_MAX;
-			struct {
-				uint32_t ids : 28;
-				uint32_t flip_flags : 4;
-			};
+			uint32_t value = 0x0FFFFFFF; // set flip flags to 0 and remaining bits to 1
 			struct {
 				uint32_t id : 16; // index into Tileset::tiles[]
 				uint32_t tileset_id : 12; // index into Context::tilesets[]
@@ -84,7 +80,7 @@ namespace tiled {
 		std::string class_;
 		std::vector<Property> properties;
 		std::vector<Point> points; // in pixels; relative to position; only relevant if type = Polygon/Polyline
-		TileGid tile; // only relevant if type = Tile
+		TileId tile; // only relevant if type = Tile
 		float x = 0.f; // in pixels
 		float y = 0.f; // in pixels
 		float width = 0.f; // in pixels
@@ -173,7 +169,7 @@ namespace tiled {
 		std::string name;
 		std::string class_;
 		std::vector<Property> properties;
-		std::vector<TileGid> tiles; // nonempty if type = Tile; in that case size = width * height
+		std::vector<TileId> tiles; // nonempty if type = Tile; in that case size = width * height
 		std::vector<unsigned int> objects; // indices into Context::objects[], empty if type != Object 
 		unsigned int width = 0; // in tiles
 		unsigned int height = 0; // in tiles

@@ -52,7 +52,8 @@ namespace ecs {
 			animation._frame_changed = (animation._frame != old_frame);
 			animation._looped = false;
 
-			if (!animated(tile)) continue;
+			if (!animated(tile))
+				continue;
 
 			const unsigned int duration_ms = get_animation_duration(tile);
 			if (duration_ms == 0)

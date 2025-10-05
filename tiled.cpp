@@ -77,7 +77,7 @@ namespace tiled {
 		}
 	}
 
-	// PITFALL: Tiled assigns GIDs to tiles by (conceptually) concatenating all tilesets end-to-end
+	// Tiled assigns GIDs (global IDs) to tiles by (conceptually) concatenating all tilesets end-to-end
 	// in some arbitrary order. Then, each tile can be assigned a unique index in this concatenated
 	// "mega-tileset". The indexing starts at 1, so in Tiled a GID of 0 means that the tile is empty.
 	//
@@ -87,34 +87,44 @@ namespace tiled {
 	// if the tileset has a range of GIDs which contains the tile GID, then we replace the GID with
 	// the tile ID and the tile's local ID in that tileset.
 	//
-	// We use TileGid::ids to store both the original Tile GID (before resolving) and our pair of IDs
-	// (after resolving), so watch out!
+	struct TileGid {
+		union {
+			uint32_t value = 0; // SIC: 0, not UINT32_MAX
+			struct {
+				uint32_t gid : 28;
+				uint32_t flip_flags : 4;
+			};
+		};
+	};
 
-	struct TilesetWithGids {
+	struct TilesetGids {
 		unsigned int id = UINT_MAX; // index into Context::tilesets[]
 		unsigned int first_gid = 0; // The Tiled GID of the first tile in the tileset.
 		unsigned int last_gid = 0; // The Tiled GID of the last tile in the tileset.
 	};
 
-	bool _resolve_gid(TileGid& tile, const TilesetWithGids& tileset) {
-		if (tile.ids < tileset.first_gid || tileset.last_gid < tile.ids)
+	bool _resolve_gid(TileId& tile_out, TileGid tile_in, const TilesetGids& tileset) {
+		if (tile_in.gid < tileset.first_gid)
 			return false;
-		tile.id = tile.ids - tileset.first_gid;
-		tile.tileset_id = tileset.id;
+		if (tile_in.gid > tileset.last_gid)
+			return false;
+		tile_out.value = tile_in.value; // copy flip flags
+		tile_out.id = tile_in.gid - tileset.first_gid;
+		tile_out.tileset_id = tileset.id;
 		return true;
 	}
 
-	bool _resolve_gid(TileGid& tile, std::span<const TilesetWithGids> tilesets) {
-		for (const TilesetWithGids&tileset : tilesets) {
-			if (_resolve_gid(tile, tileset)) {
+	bool _resolve_gid(TileId& tile_out, TileGid tile_in, std::span<const TilesetGids> tilesets) {
+		for (const TilesetGids& tileset : tilesets) {
+			if (_resolve_gid(tile_out, tile_in, tileset)) {
 				return true;
 			}
 		}
-		tile = {};
+		tile_out = {};
 		return false;
 	}
 
-	void _load_object(const pugi::xml_node& node, Object& object, std::span<const TilesetWithGids> tilesets) {
+	void _load_object(const pugi::xml_node& node, Object& object, std::span<const TilesetGids> tilesets) {
 		// TODO: this doesn't actually override properties for template objects!
 		// there will be duplicated properties!!!
 		_load_properties(node, object.properties);
@@ -155,8 +165,8 @@ namespace tiled {
 		}
 		if (pugi::xml_attribute gid = node.attribute("gid")) {
 			object.type = ObjectType::Tile;
-			object.tile.value = gid.as_uint();
-			_resolve_gid(object.tile, tilesets);
+			TileGid tile_gid{ .value = gid.as_uint() };
+			_resolve_gid(object.tile, tile_gid, tilesets);
 		}
 	}
 
@@ -332,7 +342,7 @@ namespace tiled {
 		const pugi::xml_node template_node = doc.child("template");
 
 		// Load tileset (if there is one)
-		TilesetWithGids tileset{};
+		TilesetGids tileset{};
 		if (pugi::xml_node tileset_node = template_node.child("tileset")) {
 			const pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			if (!source_attribute) {
@@ -405,7 +415,7 @@ namespace tiled {
 	void _load_layer_recursive(
 		Context& context,
 		Map& map,
-		const std::vector<TilesetWithGids>& tilesets_with_gids,
+		const std::vector<TilesetGids>& tilesets_with_gids,
 		const pugi::xml_node& node
 	) {
 		// PITFALL: node may be of type <tileset>, and we are only interested in layers,
@@ -518,8 +528,8 @@ namespace tiled {
 			}
 			// Resolve GIDs. This converts Tiled GIDs (which are local to this map) into a pair
 			// of IDs which can be used to reference the tile independently of this map.
-			for (TileGid& tile : layer.tiles) {
-				_resolve_gid(tile, tilesets_with_gids);
+			for (TileId& tile : layer.tiles) {
+				_resolve_gid(tile, (TileGid&)tile, tilesets_with_gids);
 			}
 		} break;
 		case LayerType::Object: {
@@ -597,7 +607,7 @@ namespace tiled {
 		_load_properties(map_node, map.properties);
 
 		// Load tilesets
-		std::vector<TilesetWithGids> tilesets;
+		std::vector<TilesetGids> tilesets;
 		for (pugi::xml_node tileset_node : map_node.children("tileset")) {
 			pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			// TODO: handle embedded tilesets

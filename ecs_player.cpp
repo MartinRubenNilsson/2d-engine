@@ -30,12 +30,57 @@
 #include "ecs_lifetime.h"
 #include "ecs_patch.h"
 #include "graphics_globals.h"
+#include "timer.h"
 
 namespace ecs {
 	const float _PLAYER_WALK_SPEED = 60.f;
 	const float _PLAYER_RUN_SPEED = 136.f;
 	const float _PLAYER_STEALTH_SPEED = 36.f;
 	const float _PLAYER_ARROW_SPEED = 160.f;
+
+	enum INPUT_FLAGS : unsigned int {
+		// Continuous actions
+
+		INPUT_LEFT = (1 << 0),
+		INPUT_RIGHT = (1 << 1),
+		INPUT_UP = (1 << 2),
+		INPUT_DOWN = (1 << 3),
+		INPUT_RUN = (1 << 4),
+		INPUT_STEALTH = (1 << 5),
+
+		// One-shot actions
+
+		INPUT_INTERACT = (1 << 6),
+		INPUT_SWING_SWORD = (1 << 7),
+		INPUT_SHOOT_BOW = (1 << 8),
+		INPUT_DROP_BOMB = (1 << 9),
+	};
+
+	enum class PlayerState {
+		Normal,
+		SwingingSword,
+		ShootingBow,
+		Dying,
+		Dead
+	};
+
+	struct Player {
+		unsigned int input_flags = 0;
+		PlayerState state = PlayerState::Normal;
+		Vec2f look_dir = { 0.f, 1.f };
+		Timer hurt_timer = { 1.f };
+		int max_health = 3;
+		int health = 3;
+		int arrows = 10;
+		int bombs = 5;
+		int rupees = 10;
+		entt::entity held_item = entt::null;
+		bool touching_pushable_block = false;
+
+		// It really is the pushable block that's making the sound,
+		// but I can't be bothered to make a separate component for it rn.
+		Handle<audio::Event> stone_sliding_sound;
+	};
 
 	extern entt::registry _registry;
 	unsigned int _input_flags_to_enable = 0;
@@ -102,7 +147,92 @@ namespace ecs {
 	void _player_attack(entt::entity entity, const Vec2f& position) {
 		Vec2f box_min = position - Vec2f(6.f, 6.f);
 		Vec2f box_max = position + Vec2f(6.f, 6.f);
-		apply_damage_in_box({ DamageType::Melee, 1, entity }, box_min, box_max, ~CC_Player);
+		apply_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
+	}
+
+	void _on_player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
+		Player* player = _registry.try_get<Player>(player_entity);
+		if (!player) return;
+		Pickup* pickup = get_pickup(pickup_entity);
+		if (!pickup) return;
+
+		switch (pickup->type) {
+			case PickupType::Arrow: {
+				player->arrows++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Rupee: {
+				player->rupees++;
+				audio::create_event({ .path = "event:/snd_pickup_rupee" });
+			} break;
+			case PickupType::Bomb: {
+				player->bombs++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Heart: {
+				player->health = std::min(player->health + 1, player->max_health);
+				//TODO
+				//audio::play("event:/snd_pickup_heart");
+			} break;
+		}
+
+		destroy_at_end_of_frame(pickup_entity);
+	}
+
+	void _on_player_begin_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
+		Player* player = _registry.try_get<Player>(player_entity);
+		if (!player) return;
+		player->touching_pushable_block = true;
+		audio::stop_event(player->stone_sliding_sound); // Stop any previously playing sound
+		player->stone_sliding_sound = audio::create_event({ .path = "event:/props/stone_slide" });
+		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
+			b2Body_SetType(body, b2_dynamicBody);
+		}
+	}
+
+	void _on_player_end_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
+		Player* player = _registry.try_get<Player>(player_entity);
+		if (!player) return;
+		player->touching_pushable_block = false;
+		audio::stop_event(player->stone_sliding_sound);
+		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
+			b2Body_SetType(body, b2_staticBody);
+		}
+	}
+
+	bool _handle_damage_to_player(entt::entity entity, const Damage& damage) {
+		if (damage.amount <= 0) return false;
+		Player* player = _registry.try_get<Player>(entity);
+		if (!player) return false;
+		if (player->health <= 0) return false; // Player is already dead
+		if (player->hurt_timer.running()) return false; // Player is invulnerable
+		player->health = std::max(0, player->health - damage.amount);
+		add_trauma_to_active_camera(0.8f);
+		if (player->health > 0) { // Player survived
+			audio::create_event({ .path = "event:/snd_player_hurt" });
+			player->hurt_timer.start();
+		} else { // Player died
+			player->state = PlayerState::Dying;
+		}
+		return true;
+	}
+
+	void _handle_physics_event_for_player(const PhysicsEvent& ev) {
+		if (ev.type == PhysicsEventType::SensorBeginTouch) {
+			if (ev.other_tag == Tag::Pickup) {
+				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
+			}
+		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
+			if (ev.other_tag == Tag::PushableBlock) {
+				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
+			} else if (ev.other_tag == Tag::Slime) {
+				_handle_damage_to_player(ev.entity, { DamageType::Touch, 1 });
+			}
+		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
+			if (ev.other_tag == Tag::PushableBlock) {
+				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
+			}
+		}
 	}
 
 	void setup_players(MapId map) {
@@ -140,14 +270,13 @@ namespace ecs {
 			emplace_tile_animation(entity);
 
 			{
-				Player player{};
+				Player& player = _registry.emplace<Player>(entity);
 				player.held_item = _registry.create();
 				emplace_tile_animation(player.held_item);
-				emplace_player(entity, player);
 			}
 
 			set_physics_event_handler(entity, _handle_physics_event_for_player);
-			set_damage_handler(entity, apply_damage_to_player);
+			set_damage_handler(entity, _handle_damage_to_player);
 
 			{
 				Camera camera{};
@@ -473,10 +602,10 @@ namespace ecs {
 			ImGui::Text("Rupees: %d", player.rupees);
 
 			if (ImGui::Button("Apply 1 Damage")) {
-				apply_damage_to_player(entity, { DamageType::Default, 1 });
+				_handle_damage_to_player(entity, { DamageType::Default, 1 });
 			}
 			if (ImGui::Button("Kill")) {
-				apply_damage_to_player(entity, { DamageType::Default, 999 });
+				_handle_damage_to_player(entity, { DamageType::Default, 999 });
 			}
 
 			if (ImGui::Button("Give 5 Arrows")) {
@@ -505,119 +634,15 @@ namespace ecs {
 #endif // _DEBUG_IMGUI
 	}
 
-	entt::entity find_player_entity() {
-		return _registry.view<Player>().front();
-	}
-
-	Player& emplace_player(entt::entity entity, const Player& player) {
-		return _registry.emplace_or_replace<Player>(entity, player);
-	}
-
-	Player* get_player(entt::entity entity) {
-		return _registry.try_get<Player>(entity);
-	}
-
-	bool remove_player(entt::entity entity) {
-		return _registry.remove<Player>(entity);
-	}
-
-	bool has_player(entt::entity entity) {
-		return _registry.all_of<Player>(entity);
-	}
-
 	bool kill_player(entt::entity entity) {
-		if (!_registry.all_of<Player>(entity)) return false;
+		if (!_registry.all_of<Player>(entity))
+			return false;
 		detach_camera(entity);
 		audio::stop_all_in_bus();
 		audio::create_event({ .path = "event:/snd_player_die" });
 		audio::create_event({ .path = "event:/mus_coffin_dance" });
 		ui::open_or_enqueue_textbox_presets("player/die");
 		ui::bindings::hud_player_health = 0;
-		return true;
-	}
-
-	void _on_player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
-		Player* player = get_player(player_entity);
-		if (!player) return;
-		Pickup* pickup = get_pickup(pickup_entity);
-		if (!pickup) return;
-
-		switch (pickup->type) {
-			case PickupType::Arrow: {
-				player->arrows++;
-				audio::create_event({ .path = "event:/snd_pickup" });
-			} break;
-			case PickupType::Rupee: {
-				player->rupees++;
-				audio::create_event({ .path = "event:/snd_pickup_rupee" });
-			} break;
-			case PickupType::Bomb: {
-				player->bombs++;
-				audio::create_event({ .path = "event:/snd_pickup" });
-			} break;
-			case PickupType::Heart: {
-				player->health = std::min(player->health + 1, player->max_health);
-				//TODO
-				//audio::play("event:/snd_pickup_heart");
-			} break;
-		}
-
-		destroy_at_end_of_frame(pickup_entity);
-	}
-
-	void _on_player_begin_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
-		Player* player = get_player(player_entity);
-		if (!player) return;
-		player->touching_pushable_block = true;
-		audio::stop_event(player->stone_sliding_sound); // Stop any previously playing sound
-		player->stone_sliding_sound = audio::create_event({ .path = "event:/props/stone_slide" });
-		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
-			b2Body_SetType(body, b2_dynamicBody);
-		}
-	}
-
-	void _on_player_end_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
-		Player* player = get_player(player_entity);
-		if (!player) return;
-		player->touching_pushable_block = false;
-		audio::stop_event(player->stone_sliding_sound);
-		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
-			b2Body_SetType(body, b2_staticBody);
-		}
-	}
-
-	void _handle_physics_event_for_player(const PhysicsEvent& ev) {
-		if (ev.type == PhysicsEventType::SensorBeginTouch) {
-			if (ev.other_tag == Tag::Pickup) {
-				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
-			}
-		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (ev.other_tag == Tag::PushableBlock) {
-				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
-			} else if (ev.other_tag == Tag::Slime) {
-				apply_damage_to_player(ev.entity, { DamageType::Melee, 1 });
-			}
-		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
-			if (ev.other_tag == Tag::PushableBlock) {
-				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
-			}
-		}
-	}
-
-	bool apply_damage_to_player(entt::entity entity, const Damage& damage) {
-		if (damage.amount <= 0) return false;
-		Player* player = get_player(entity);
-		if (!player) return false;
-		if (player->health <= 0) return false; // Player is already dead
-		if (player->hurt_timer.running()) return false; // Player is invulnerable
-		player->health = std::max(0, player->health - damage.amount);
-		add_trauma_to_active_camera(0.8f);
-		if (player->health > 0) { // Player survived
-			audio::create_event({ .path = "event:/snd_player_hurt" });
-			player->hurt_timer.start();
-		} else { // Player died
-			player->state = PlayerState::Dying;
-		}
 		return true;
 	}
 }

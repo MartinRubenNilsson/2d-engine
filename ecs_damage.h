@@ -1,14 +1,11 @@
 #pragma once
 
 namespace ecs {
-	//Not really used right now, but could be useful for future features.
 	enum class DamageType {
 		Default,
-		Melee,
+		Touch,
 		Projectile,
 		Explosion,
-		//Magic,
-		//Environment,
 	};
 
 	struct Damage {

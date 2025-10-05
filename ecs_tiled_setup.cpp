@@ -99,14 +99,8 @@ namespace ecs {
 			for (uint16_t y = layer.height; y--;) {
 				for (uint16_t x = layer.width; x--;) {
 
-					// TODO: flip flags
-					const tiled::TileGid gid = layer.tiles[x + y * layer.width];
-					const TileId tile{
-						.id = (uint16_t)gid.id,
-						.tileset_id = (uint16_t)gid.tileset_id
-					};
-
-					if (!tile) continue;
+					const TileId tile = { .value = layer.tiles[x + y * layer.width].value };
+					if (!tile) continue; // skip empty or invalid tiles
 
 					const entt::entity entity = _registry.create();
 

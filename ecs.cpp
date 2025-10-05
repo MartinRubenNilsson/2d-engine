@@ -39,9 +39,11 @@ namespace ecs {
 			if (!storage.contains(entity)) continue;
 			if (storage.type() == entt::type_id<b2BodyId>()) {
 				deep_copy_and_emplace_body(copied_entity, *(b2BodyId*)storage.value(entity));
+#if 0
 			} else if (storage.type() == entt::type_id<Player>()) {
 				// TODO: deep copy player, since it holds a held item entity
 				storage.push(copied_entity, storage.value(entity));
+#endif
 			} else {
 				storage.push(copied_entity, storage.value(entity));
 			}

@@ -153,7 +153,10 @@ namespace ecs {
 	TileId get_tile(TilesetId tileset, unsigned int tile_id) {
 		const tiled::Tileset& ts = _get_tileset(tileset);
 		if (tile_id >= ts.tile_count) return {};
-		return { .id = (uint16_t)tile_id, .tileset_id = tileset.id };
+		TileId tile{}; // flip flags will be off by default
+		tile.id = tile_id;
+		tile.tileset_id = tileset.id;
+		return tile;
 	}
 
 	const tiled::Tile& _get_tile(TileId tile) {
@@ -161,7 +164,7 @@ namespace ecs {
 	}
 
 	TilesetId get_tileset(TileId tile) {
-		return { tile.tileset_id };
+		return { (uint16_t)tile.tileset_id };
 	}
 
 	std::string_view get_class(TileId tile) {
@@ -217,7 +220,8 @@ namespace ecs {
 	void replace(TileId& tile, unsigned int id) {
 		TileId new_tile = tile;
 		new_tile.id = id;
-		if (!new_tile) return;
+		if (!new_tile)
+			return;
 		tile = new_tile;
 	}
 
@@ -287,8 +291,7 @@ namespace ecs {
 	}
 
 	TileId get_tile(ObjectId obj) {
-		const tiled::TileGid gid = _get_object(obj).tile;
-		return { (uint16_t)gid.id, (uint16_t)gid.tileset_id };
+		return { .value = _get_object(obj).tile.value };
 	}
 
 	Vec2f get_position(ObjectId obj) {

@@ -124,7 +124,7 @@ namespace ecs {
 			if (get_current_state(ev.entity) == "extending") {
 				transition_to_state(ev.entity, "impacting");
 			}
-			apply_damage(ev.other_entity, { .type = DamageType::Melee, .amount = 1 });
+			apply_damage(ev.other_entity, { .type = DamageType::Touch, .amount = 1 });
 		}
 	}
 
