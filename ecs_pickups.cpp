@@ -72,7 +72,7 @@ namespace ecs {
 		}
 		if (const TileId tile = _get_tile(type)) {
 			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile);
+			update_sprite(sprite, tile, true);
 			sprite.sorting_layer = get_object_layer();
 			sprite.sorting_point = { 8.f, 8.f };
 			sprite.position = position - sprite.sorting_point;

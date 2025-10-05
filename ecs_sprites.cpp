@@ -15,7 +15,7 @@ namespace ecs {
 		return _registry.emplace_or_replace<sprites::Sprite>(entity);
 	}
 
-	void update_sprite(sprites::Sprite& sprite, TileId tile) {
+	void update_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture) {
 		if (!tile) return;
 		const TextureRect rect = get_texture_rect(tile);
 		sprite.tex_position = { (float)rect.x, (float)rect.y };
@@ -25,7 +25,24 @@ namespace ecs {
 		const Vec2u tileset_size = get_size_in_pixels(tileset);
 		sprite.tex_position /= Vec2f(tileset_size);
 		sprite.tex_size /= Vec2f(tileset_size);
-		sprite.texture = graphics::load_texture(get_image_path(tileset));
+		if (load_texture) {
+			sprite.texture = graphics::load_texture(get_image_path(tileset));
+		}
+		if (tile.flipped_horizontally) {
+			sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
+		} else {
+			sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
+		}
+		if (tile.flipped_vertically) {
+			sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
+		} else {
+			sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
+		}
+		if (tile.flipped_diagonally) {
+			sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
+		} else {
+			sprite.flags &= ~sprites::SPRITE_FLIP_DIAGONALLY;
+		}
 	}
 
 	sprites::Sprite* get_sprite(entt::entity entity) {
@@ -66,7 +83,7 @@ namespace ecs {
 			}
 
 			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile);
+			update_sprite(sprite, tile, true);
 			// PITFALL: We don't set the sorting layer to the layer index here.
 			// This is because we want all objects to be on the same layer, so they
 			// are rendered in the correct order. This sorting layer may also be the
@@ -75,16 +92,6 @@ namespace ecs {
 			sprite.sorting_layer = get_object_layer();
 			sprite.sorting_point = get_size(object) * 0.5f; // sensible default: center the sorting point
 			sprite.position = get_top_left(object); // PITFALL: get_position() returns the bottom left for tile objects!
-
-			if (tile.flipped_horizontally) {
-				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
-			}
-			if (tile.flipped_vertically) {
-				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
-			}
-			if (tile.flipped_diagonally) {
-				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
-			}
 		}
 
 		const Vec2u map_tile_size = get_tile_size(map);
@@ -97,7 +104,7 @@ namespace ecs {
 			const Vec2u size = get_size(tile); // may be different from map_tile_size!
 
 			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile);
+			update_sprite(sprite, tile, true);
 			sprite.sorting_layer = (uint8_t)coord.layer;
 			// Sensible default: Put the sorting point in the center, or when the tile is
 			// longer than the map grid cell height, put it in the center horizontally and
@@ -115,16 +122,6 @@ namespace ecs {
 
 			if (!is_layer_visible(map, coord.layer)) {
 				sprite.flags &= ~sprites::SPRITE_VISIBLE;
-			}
-
-			if (tile.flipped_horizontally) {
-				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
-			}
-			if (tile.flipped_vertically) {
-				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
-			}
-			if (tile.flipped_diagonally) {
-				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
 			}
 		}
 	}

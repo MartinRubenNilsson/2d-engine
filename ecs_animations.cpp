@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ecs_animations.h"
+#include "ecs_sprites.h"
 #include "ecs_tiled.h"
 #include "graphics.h"
 #include "sprites.h"
@@ -106,21 +107,11 @@ namespace ecs {
 
 	void update_animated_sprites(float dt) {
 		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const TileAnimation>().each()) {
-
 			if (!animation._frame_changed)
 				continue; // No need to update the sprite if the frame hasn't changed.
 			if (!animation._frame)
 				continue;
-
-			Vec2u texture_size;
-			graphics::get_texture_size(sprite.texture, texture_size.x, texture_size.y);
-			if (!texture_size.x || !texture_size.y) continue;
-
-			const TextureRect tex_rect = get_texture_rect(animation._frame);
-			sprite.tex_position = { (float)tex_rect.x, (float)tex_rect.y };
-			sprite.tex_size = { (float)tex_rect.w, (float)tex_rect.h };
-			sprite.tex_position /= Vec2f(texture_size);
-			sprite.tex_size /= Vec2f(texture_size);
+			update_sprite(sprite, animation._frame, false);
 		}
 
 		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const FlipbookAnimation>().each()) {

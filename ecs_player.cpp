@@ -307,8 +307,8 @@ namespace ecs {
 	void update_players(float dt) {
 		const bool player_accepts_input = (dt > 0.f && window::has_focus() && !console::has_focus());
 
-		for (auto [player_entity, player, body, sprite, tile, anim] :
-			_registry.view<Player, b2BodyId, sprites::Sprite, TileId, TileAnimation>().each()) {
+		for (auto [entity, player, body, tile, anim] :
+			_registry.view<Player, b2BodyId, TileId, TileAnimation>().each()) {
 
 			if (player_accepts_input) {
 				player.input_flags |= _input_flags_to_enable;
@@ -350,8 +350,8 @@ namespace ecs {
 			const char dir = get_direction(player.look_dir);
 
 			switch (dir) {
-				case 'l': sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY; break;
-				case 'r': sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY; break;
+				case 'l': tile.flipped_horizontally = true; break;
+				case 'r': tile.flipped_horizontally = false; break;
 			}
 
 			switch (player.state) {
@@ -431,7 +431,7 @@ namespace ecs {
 
 						anim.set_loop(true);
 						if (anim.looped() && (dir == 'u' || dir == 'd')) {
-							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
@@ -445,7 +445,7 @@ namespace ecs {
 
 						anim.set_loop(true);
 						if (anim.looped() && (dir == 'u' || dir == 'd')) {
-							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else if (new_move_speed >= _PLAYER_WALK_SPEED) {
@@ -459,7 +459,7 @@ namespace ecs {
 
 						anim.set_loop(true);
 						if (anim.looped() && (dir == 'u' || dir == 'd')) {
-							sprite.flags ^= sprites::SPRITE_FLIP_HORIZONTALLY;
+							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 
 					} else {
@@ -473,7 +473,7 @@ namespace ecs {
 
 						anim.set_progress(0.f);
 						anim.set_loop(false);
-						sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
+						//sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
 					}
 
 					if (player.input_flags & INPUT_INTERACT) {
@@ -540,7 +540,7 @@ namespace ecs {
 							case 'd': replace(tile, TILE_ID_PLAYER_DEAD_RIGHT_DOWN); break;
 						}
 
-						kill_player(player_entity);
+						kill_player(entity);
 						player.state = PlayerState::Dead;
 					}
 
@@ -552,6 +552,7 @@ namespace ecs {
 
 			b2Body_SetLinearVelocity(body, new_velocity);
 
+#if 0
 			// UPDATE SPRITE COLOR
 
 			if (player.hurt_timer.running()) {
@@ -561,6 +562,7 @@ namespace ecs {
 			} else {
 				sprite.color.a = 255;
 			}
+#endif
 
 			// UPDATE HUD
 

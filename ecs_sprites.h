@@ -5,7 +5,7 @@ namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity);
 	sprites::Sprite* get_sprite(entt::entity entity);
 
-	void update_sprite(sprites::Sprite& sprite, TileId tile);
+	void update_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
 
 	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = { 0.f, 0.f });
 
