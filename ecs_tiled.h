@@ -56,6 +56,10 @@ namespace ecs {
 	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
 	void replace(TileId& tile, unsigned int id); // preserves flip flags
 	void replace_step(TileId& tile, int step_x, int step_y); // preserves flip flags
+	void flip_x(TileId& tile, bool flip); // set whether to flip the tile horizontally
+	void flip_y(TileId& tile, bool flip); // set whether to flip the tile vertically
+	bool flipped_x(TileId tile);
+	bool flipped_y(TileId tile);
 
 	/// OBJECTS
 

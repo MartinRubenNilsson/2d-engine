@@ -76,21 +76,15 @@ namespace ecs {
 			sprite.sorting_point = get_size(object) * 0.5f; // sensible default: center the sorting point
 			sprite.position = get_top_left(object); // PITFALL: get_position() returns the bottom left for tile objects!
 
-			// TODO: fix flip flags!!!
-#if 0
-			if (!layer.visible) {
-				sprite.flags &= ~sprites::SPRITE_VISIBLE;
-			}
-			if (object.tile.flipped_horizontally) {
+			if (tile.flipped_horizontally) {
 				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
 			}
-			if (object.tile.flipped_vertically) {
+			if (tile.flipped_vertically) {
 				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
 			}
-			if (object.tile.flipped_diagonally) {
+			if (tile.flipped_diagonally) {
 				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
 			}
-#endif
 		}
 
 		const Vec2u map_tile_size = get_tile_size(map);
@@ -123,18 +117,15 @@ namespace ecs {
 				sprite.flags &= ~sprites::SPRITE_VISIBLE;
 			}
 
-			// TODO: fix flip flags!!!
-#if 0
-			if (gid.flipped_horizontally) {
+			if (tile.flipped_horizontally) {
 				sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
 			}
-			if (gid.flipped_vertically) {
+			if (tile.flipped_vertically) {
 				sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
 			}
-			if (gid.flipped_diagonally) {
+			if (tile.flipped_diagonally) {
 				sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
 			}
-#endif
 		}
 	}
 

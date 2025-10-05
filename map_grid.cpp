@@ -196,7 +196,7 @@ namespace map {
 	}
 
 	Vec2i _get_position(const Tile* tile) {
-		int i = tile - _grid.tiles.data();
+		int i = (int)(tile - _grid.tiles.data());
 		return { i % _grid.size.x, i / _grid.size.x };
 	}
 

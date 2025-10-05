@@ -238,6 +238,22 @@ namespace ecs {
 		tile.id = (uint16_t)(new_x + new_y * ts.width);
 	}
 
+	void flip_x(TileId& tile, bool flip) {
+		tile.flipped_horizontally = flip;
+	}
+
+	void flip_y(TileId& tile, bool flip) {
+		tile.flipped_vertically = flip;
+	}
+
+	bool flipped_x(TileId tile) {
+		return tile.flipped_horizontally;
+	}
+
+	bool flipped_y(TileId tile) {
+		return tile.flipped_diagonally;
+	}
+
 	template <tiled::PropertyType type>
 	struct GetPropertyRetVal {
 		using Type = std::variant_alternative_t<(size_t)type, tiled::PropertyValue>;
