@@ -95,6 +95,10 @@ Vec2f max(const Vec2f& a, const Vec2f& b) {
 	return { std::max(a.x, b.x), std::max(a.y, b.y) };
 }
 
+Vec2f round(const Vec2f& v) {
+	return { round(v.x), round(v.y) };
+}
+
 Vec2f lerp(const Vec2f& a, const Vec2f& b, float t) {
 	return a + (b - a) * t;
 }

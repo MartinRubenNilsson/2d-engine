@@ -144,6 +144,8 @@ namespace ecs {
 		ecs::get_blended_camera_view(center, size);
 		min = center - size / 2.f;
 		max = center + size / 2.f;
+		min = round(min); // snap to pixel
+		max = round(max); // snap to pixel
 	}
 
 	int debug_flags = 0;
