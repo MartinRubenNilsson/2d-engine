@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ecs_task_impl.h"
 #include "ecs_physics.h"
+#include "ecs_physics_queries.h"
 #include "map_grid.h" // TODO: put this in ecs instead
 #include "random.h"
 #include "shapes.h"

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ecs_interactions.h"
-#include "ecs_physics.h"
+#include "ecs_physics_queries.h"
 #include "ecs_physics_filters.h"
 //#include "shapes.h"
 

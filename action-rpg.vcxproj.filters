@@ -254,6 +254,9 @@
     <ClCompile Include="ecs_sprites_setup.cpp">
       <Filter>game\ecs\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_physics_queries.cpp">
+      <Filter>game\ecs\physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -519,6 +522,9 @@
     </ClInclude>
     <ClInclude Include="direction.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_physics_queries.h">
+      <Filter>game\ecs\physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -38,8 +38,8 @@ namespace ecs {
 			}
 			const b2BodyId body = _registry.get<b2BodyId>(entity);
 			const b2BodyId target_body = _registry.get<b2BodyId>(flee.target_entity);
-			const Vec2f pos = b2Body_GetPosition(body);
-			const Vec2f target_pos = b2Body_GetPosition(target_body);
+			const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
+			const Vec2f target_pos = b2Body_GetWorldCenterOfMass(target_body);
 			const Vec2f to_target = target_pos - pos;
 			const float dist_to_target = length(to_target);
 			if (dist_to_target >= flee.safety_radius) {

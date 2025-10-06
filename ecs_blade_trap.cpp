@@ -4,6 +4,7 @@
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_physics_events.h"
+#include "ecs_physics_queries.h"
 #include "ecs_damage.h"
 #include "ecs_states.h"
 #include "audio.h"

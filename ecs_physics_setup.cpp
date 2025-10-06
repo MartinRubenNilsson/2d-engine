@@ -115,7 +115,7 @@ namespace ecs {
 			// means that the tile may extend *above* (or below) the grid cell. We need to compensate
 			// for this when we position the body.
 
-			const float height_overshoot = size.y - map_tile_size.y;
+			const float height_overshoot = (float)size.y - map_tile_size.y;
 			const Vec2f top_left = {
 				(float)coord.x * map_tile_size.x,
 				(float)coord.y * map_tile_size.y - height_overshoot // compensate for overshoot

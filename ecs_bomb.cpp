@@ -4,6 +4,7 @@
 #include "ecs_lifetime.h"
 #include "ecs_camera.h"
 #include "ecs_physics.h"
+#include "ecs_physics_queries.h"
 #include "ecs_vfx.h"
 #include "ecs_damage.h"
 #include "ecs_tiled.h"
