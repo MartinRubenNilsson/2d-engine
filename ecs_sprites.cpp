@@ -1,12 +1,10 @@
 #include "stdafx.h"
 #include "ecs_sprites.h"
-#include "ecs_tiled.h"
 #include "ecs_uniform_block.h"
 #include "sprites.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "random.h"
-#include "console.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -15,34 +13,10 @@ namespace ecs {
 		return _registry.emplace_or_replace<sprites::Sprite>(entity);
 	}
 
-	void update_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture) {
-		if (!tile) return;
-		const TextureRect rect = get_texture_rect(tile);
-		sprite.tex_position = { (float)rect.x, (float)rect.y };
-		sprite.tex_size = { (float)rect.w, (float)rect.h };
-		sprite.size = sprite.tex_size;
-		const TilesetId tileset = get_tileset(tile); // tileset is valid if tile is
-		const Vec2u tileset_size = get_size_in_pixels(tileset);
-		sprite.tex_position /= Vec2f(tileset_size);
-		sprite.tex_size /= Vec2f(tileset_size);
-		if (load_texture) {
-			sprite.texture = graphics::load_texture(get_image_path(tileset));
-		}
-		if (tile.flipped_horizontally) {
-			sprite.flags |= sprites::SPRITE_FLIP_HORIZONTALLY;
-		} else {
-			sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
-		}
-		if (tile.flipped_vertically) {
-			sprite.flags |= sprites::SPRITE_FLIP_VERTICALLY;
-		} else {
-			sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
-		}
-		if (tile.flipped_diagonally) {
-			sprite.flags |= sprites::SPRITE_FLIP_DIAGONALLY;
-		} else {
-			sprite.flags &= ~sprites::SPRITE_FLIP_DIAGONALLY;
-		}
+	sprites::Sprite& emplace_sprite(entt::entity entity, TileId tile) {
+		sprites::Sprite& sprite = emplace_sprite(entity);
+		setup_sprite(sprite, tile, true);
+		return sprite;
 	}
 
 	sprites::Sprite* get_sprite(entt::entity entity) {
@@ -67,68 +41,8 @@ namespace ecs {
 		_registry.emplace_or_replace<SpriteShake>(entity, std::move(shake));
 	}
 
-	void setup_sprites(MapId map) {
-		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
-			if (!object) {
-				console::log_error("Error 56702: Invalid object in setup_sprites()");
-				continue;
-			}
-			if (get_type(object) != ObjectType::Tile)
-				continue;
-
-			const TileId tile = get_tile(object);
-			if (!tile) {
-				console::log_error("Error 18639: Invalid tile for object " + std::string(get_name(object)));
-				continue;
-			}
-
-			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile, true);
-			// PITFALL: We don't set the sorting layer to the layer index here.
-			// This is because we want all objects to be on the same layer, so they
-			// are rendered in the correct order. This sorting layer may also be the
-			// index of a tile layer so that certain static tiles are rendered as if
-			// they were objects, e.g. trees and other props.
-			sprite.sorting_layer = get_object_layer();
-			sprite.sorting_point = get_size(object) * 0.5f; // sensible default: center the sorting point
-			sprite.position = get_top_left(object); // PITFALL: get_position() returns the bottom left for tile objects!
-		}
-
-		const Vec2u map_tile_size = get_tile_size(map);
-
-		for (auto [entity, tile, coord] : _registry.view<TileId, TileCoord>().each()) {
-			if (!tile) {
-				console::log_error("Error 91324: Invalid tile in setup_sprites()");
-				continue;
-			}
-			const Vec2u size = get_size(tile); // may be different from map_tile_size!
-
-			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile, true);
-			sprite.sorting_layer = (uint8_t)coord.layer;
-			// Sensible default: Put the sorting point in the center, or when the tile is
-			// longer than the map grid cell height, put it in the center horizontally and
-			// half a grid cell away from the bottom edge. This makes e.g. trees sort correctly.
-			sprite.sorting_point = {
-				size.x * 0.5f,
-				size.y - map_tile_size.y * 0.5f
-			};
-			// We need to compensate for the fact that the tileset tile size may be
-			// different from the map tileset size.
-			sprite.position = {
-				(float)coord.x * map_tile_size.x,
-				(float)coord.y * map_tile_size.y - size.y + map_tile_size.y
-			};
-
-			if (!is_layer_visible(map, coord.layer)) {
-				sprite.flags &= ~sprites::SPRITE_VISIBLE;
-			}
-		}
-	}
-
 	void _update_sprites_following_bodies() {
-		for (auto [entity, sprite, body, follow] :
-			_registry.view<sprites::Sprite, b2BodyId, SpriteFollowBody>().each()) {
+		for (auto [entity, sprite, body, follow] : _registry.view<sprites::Sprite, b2BodyId, SpriteFollowBody>().each()) {
 			sprite.position = b2Body_GetPosition(body) + follow.offset;
 		}
 	}
@@ -200,34 +114,29 @@ namespace ecs {
 		_blink_sprites_before_drawing();
 		_shake_sprites_before_drawing();
 
-		//TODO: don't to frustum culling twice, store ptrs in a vector or something
-		//or maybe emplace a tag?
-
 		std::vector<UniformBlock> blocks;
 
-		for (auto [entity, sprite, block] : _registry.view<sprites::Sprite, const UniformBlock>().each()) {
+		for (auto [entity, sprite] : _registry.view<sprites::Sprite>().each()) {
 			if (!(sprite.flags & sprites::SPRITE_VISIBLE)) continue;
 			if (sprite.position.x > camera_max.x) continue;
 			if (sprite.position.y > camera_max.y) continue;
 			if (sprite.position.x + sprite.size.x < camera_min.x) continue;
 			if (sprite.position.y + sprite.size.y < camera_min.y) continue;
-			sprite.uniform_buffer = graphics::sprite_uniform_buffer;
-			sprite.uniform_buffer_size = (uint32_t)sizeof(UniformBlock);
-			sprite.uniform_buffer_offset = (uint32_t)(blocks.size() * sizeof(UniformBlock));
-			blocks.push_back(block);
+			if (const UniformBlock* block = _registry.try_get<const UniformBlock>(entity)) {
+				sprite.uniform_buffer = graphics::sprite_uniform_buffer;
+				sprite.uniform_buffer_size = (uint32_t)sizeof(UniformBlock);
+				sprite.uniform_buffer_offset = (uint32_t)(blocks.size() * sizeof(UniformBlock));
+				blocks.push_back(*block);
+			} else {
+				sprite.uniform_buffer = {};
+				sprite.uniform_buffer_size = 0;
+				sprite.uniform_buffer_offset = 0;
+			}
+			sprites::add(sprite);
 		}
 
 		graphics::update_buffer(graphics::sprite_uniform_buffer,
 			blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
-
-		for (auto [entity, sprite] : _registry.view<const sprites::Sprite>().each()) {
-			if (!(sprite.flags & sprites::SPRITE_VISIBLE)) continue;
-			if (sprite.position.x > camera_max.x) continue;
-			if (sprite.position.y > camera_max.y) continue;
-			if (sprite.position.x + sprite.size.x < camera_min.x) continue;
-			if (sprite.position.y + sprite.size.y < camera_min.y) continue;
-			sprites::add(sprite);
-		}
 
 		sprites::sort();
 		sprites::draw();

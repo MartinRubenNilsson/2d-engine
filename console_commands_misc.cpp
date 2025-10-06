@@ -183,9 +183,10 @@ namespace console {
 				Param{ ParamType::Int, "entity", "The ID of the entity to destroy" },
 			},
 			.callback = [](const ArgList& args) {
-				ecs::destroy_at_end_of_frame((entt::entity)get_int(args[0]));
+				ecs::destroy_later((entt::entity)get_int(args[0]));
 			}
 		});
+#if 0
 		add_command({
 			.name = "clone",
 			.desc = "Clone an entity",
@@ -196,6 +197,7 @@ namespace console {
 				ecs::deep_copy((entt::entity)get_int(args[0]));
 			}
 		});
+#endif
 		add_command({
 			.name = "kill_player",
 			.desc = "Kills the player",

@@ -3,7 +3,7 @@
 #include "ecs_tags.h"
 
 namespace ecs {
-	b2Filter get_physics_filter_for_tag(Tag tag) {
+	b2Filter get_physics_filter(Tag tag) {
 		b2Filter filter = b2DefaultFilter();
 		switch (tag) {
 			case Tag::Player:

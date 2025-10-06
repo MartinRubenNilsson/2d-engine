@@ -33,37 +33,38 @@ namespace ecs {
 
 	entt::registry _registry;
 
+	// TODO: move somewhere else
+#if 0
 	entt::entity deep_copy(entt::entity entity) {
 		entt::entity copied_entity = _registry.create();
 		for (auto [name, storage] : _registry.storage()) {
 			if (!storage.contains(entity)) continue;
 			if (storage.type() == entt::type_id<b2BodyId>()) {
 				deep_copy_and_emplace_body(copied_entity, *(b2BodyId*)storage.value(entity));
-#if 0
-			} else if (storage.type() == entt::type_id<Player>()) {
-				// TODO: deep copy player, since it holds a held item entity
-				storage.push(copied_entity, storage.value(entity));
-#endif
 			} else {
 				storage.push(copied_entity, storage.value(entity));
 			}
 		}
 		return copied_entity;
 	}
+#endif
 
 	void clear() {
-		clear_entities_to_destroy_at_end_of_frame();
+		clear_entities_to_be_destroyed_later();
 		_registry.clear();
 	}
 
-	void _setup(MapId map) {
+	void _setup_essentials(MapId map) {
 		setup_tiled(map);
 		setup_tags();
+		setup_physics(map);
 		setup_sprites(map);
 		setup_animations();
-		setup_physics(map);
 		setup_cameras(map);
 		setup_audio_sources();
+	}
+
+	void _setup_game(MapId map) {
 		setup_portals();
 		setup_grass();
 		setup_chests();
@@ -72,13 +73,26 @@ namespace ecs {
 		setup_blade_traps();
 	}
 
+	void _setup(MapId map) {
+		_setup_essentials(map);
+		_setup_game(map);
+	}
+
+	void _patch_essentials(const Patch& patch) {
+		patch_entities_to_destroy(patch);
+	}
+
+	void _patch_game(const Patch& patch) {
+		patch_players(patch);
+		patch_chests(patch);
+	}
+
 	void _patch(MapId map) {
 		map_to_patch = map;
 		if (!has_patch()) return;
 		Patch& patch = get_patch();
-		patch_entities_to_destroy(patch);
-		patch_players(patch);
-		patch_chests(patch);
+		_patch_essentials(patch);
+		_patch_game(patch);
 	}
 
 	void setup(MapId map) {
@@ -88,20 +102,25 @@ namespace ecs {
 		_patch(map);
 	}
 
-	void _update_logic(float dt) {
-		update_physics(dt);
+	void _update_game_logic(float dt) {
 		update_players(dt);
 		update_pickups(dt);
 		update_bombs(dt);
 		update_blade_traps(dt);
+	}
+
+	void _update_essential_logic(float dt) {
 		update_state_machines(dt);
 		update_tasks(dt);
 		update_lifetimes(dt);
-		destroy_entities_to_be_destroyed_at_end_of_frame();
+		destroy_entities_to_be_destroyed_later();
 	}
 
-	void _update_graphics(float dt) {
+	void _update_game_graphics(float dt) {
 		update_slimes_graphics(dt);
+	}
+
+	void _update_essential_graphics(float dt) {
 		update_animations(dt);
 		update_animated_sprites(dt);
 		update_sprites(dt);
@@ -109,8 +128,11 @@ namespace ecs {
 	}
 
 	void update(float dt) {
-		_update_logic(dt);
-		_update_graphics(dt);
+		update_physics(dt);
+		_update_game_logic(dt);
+		_update_essential_logic(dt);
+		_update_game_graphics(dt);
+		_update_essential_graphics(dt);
 	}
 
 	void handle_window_event(const window::Event& event) {

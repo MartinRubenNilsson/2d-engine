@@ -101,7 +101,6 @@ namespace ecs {
 		int arrows = 10;
 		int bombs = 5;
 		int rupees = 10;
-		entt::entity held_item = entt::null;
 		bool touching_pushable_block = false;
 
 		// It really is the pushable block that's making the sound,
@@ -203,7 +202,7 @@ namespace ecs {
 			} break;
 		}
 
-		destroy_at_end_of_frame(pickup_entity);
+		destroy_later(pickup_entity);
 	}
 
 	void _on_player_begin_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
@@ -293,27 +292,11 @@ namespace ecs {
 				sprite->texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
 				sprite->sorting_point = pivot;
 			}
-			{
-				b2BodyDef body_def = b2DefaultBodyDef();
-				body_def.type = b2_dynamicBody;
-				body_def.position = top_left + pivot;
-				body_def.fixedRotation = true;
-				b2BodyId body = emplace_body(entity, body_def);
-				b2ShapeDef shape_def = b2DefaultShapeDef();
-				shape_def.filter = get_physics_filter_for_tag(Tag::Player);
-				b2Circle circle{};
-				circle.radius = 7.f;
-				b2CreateCircleShape(body, &shape_def, &circle);
-			}
-
-			make_sprite_follow_body(entity, -pivot);
 
 			emplace_tile_animation(entity);
 
 			{
 				Player& player = _registry.emplace<Player>(entity);
-				player.held_item = _registry.create();
-				emplace_tile_animation(player.held_item);
 			}
 
 			set_physics_event_handler(entity, _handle_physics_event_for_player);
@@ -321,7 +304,6 @@ namespace ecs {
 
 			{
 				Camera camera{};
-				camera.center = top_left;
 				camera.confines_min = { 0.f, 0.f };
 				camera.confines_max = map_size_in_pixels;
 				camera.entity_to_follow = entity;
@@ -364,7 +346,7 @@ namespace ecs {
 
 			// GET PHYSICS STATE
 
-			const Vec2f position = b2Body_GetPosition(body);
+			const Vec2f position = b2Body_GetWorldCenterOfMass(body);
 			const Vec2f velocity = b2Body_GetLinearVelocity(body);
 			Vec2f new_velocity; // will be modified differently depending on the state
 
@@ -638,7 +620,7 @@ namespace ecs {
 			ImGui::SetNextItemOpen(player_count == 1, ImGuiCond_Appearing);
 			if (!ImGui::TreeNode(tree_node_label.c_str())) continue;
 
-			Vec2f position = b2Body_GetPosition(body);
+			Vec2f position = b2Body_GetWorldCenterOfMass(body);
 			ImGui::Text("Position: %.1f, %.1f", position.x, position.y);
 			ImGui::Text("Terrain: %s", map::to_string(map::get_terrain_type_at(position)).c_str());
 			ImGui::Text("State: %s", magic_enum::enum_name(player.state).data());

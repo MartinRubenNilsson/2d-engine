@@ -148,9 +148,11 @@
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
+    <ClCompile Include="ecs_physics_debugging.cpp" />
     <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_physics_setup.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
+    <ClCompile Include="ecs_sprites_setup.cpp" />
     <ClCompile Include="ecs_tasks.cpp" />
     <ClCompile Include="ecs_task_flee.cpp" />
     <ClCompile Include="ecs_task_pursue.cpp" />

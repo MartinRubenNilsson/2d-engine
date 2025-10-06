@@ -26,11 +26,11 @@ namespace sprites {
 		Handle<graphics::Buffer> uniform_buffer;
 		uint16_t uniform_buffer_size = 0; // size in bytes of the uniform buffer
 		uint16_t uniform_buffer_offset = 0; // offset in bytes into the uniform buffer; must be a multiple of 256
-		Vec2f sorting_point;
 		Vec2f position; // top-left corner position in world space
 		Vec2f size; // width and height in world space
 		Vec2f tex_position = { 0.f, 0.f }; // top-left corner in normalized texture coordinates
 		Vec2f tex_size = { 1.f, 1.f }; // width and height in normalized texture coordinates
+		Vec2f sorting_point; // relative to position
 		Color color = colors::WHITE;
 		uint8_t sorting_layer = 0;
 		uint8_t flags = SPRITE_VISIBLE;
@@ -56,17 +56,16 @@ namespace sprites {
 	//
 	bool operator<(const Sprite& left, const Sprite& right);
 
-	// DRAWING
+	// Adds a sprite to be sorted and drawn later.
+	void add(const Sprite& sprite);
+	// Sorts all added sprites by draw order.
+	void sort();
+	// Draws all added sprites and removes them.
+	void draw();
 
-	void add(const Sprite& sprite); // Adds a sprite to be sorted and drawn later.
-	void sort(); // Sorts all added sprites by draw order.
-	void draw(); // Draws all added sprites.
-
-	// DRAWING STATISTICS
-
-	void clear_drawing_statistics();
-	unsigned int get_sprites_drawn();
-	unsigned int get_batches_drawn();
-	unsigned int get_largest_batch_sprite_count();
-	unsigned int get_largest_batch_vertex_count();
+	void clear_statistics();
+	unsigned int get_num_sprites_drawn();
+	unsigned int get_num_batches_drawn();
+	unsigned int get_num_sprites_in_largest_batch();
+	unsigned int get_num_vertices_in_largest_batch();
 }

@@ -3,11 +3,8 @@
  <image source="Slime_Medium_Red.png" width="128" height="128"/>
  <tile id="0">
   <objectgroup draworder="index" id="3">
-   <object id="8" x="10" y="10" width="12" height="12">
+   <object id="8" x="9.90909" y="11.8182" width="12" height="12">
     <ellipse/>
-   </object>
-   <object id="9" name="pivot" x="15.875" y="19.9375">
-    <point/>
    </object>
   </objectgroup>
   <animation>

@@ -51,10 +51,10 @@ namespace sprites {
 	eastl::vector<Sprite> _sprites;
 	eastl::vector<Batch> _batches;
 
-	unsigned int _sprites_drawn = 0;
-	unsigned int _batches_drawn = 0;
-	unsigned int _largest_batch_sprite_count = 0;
-	unsigned int _largest_batch_vertex_count = 0;
+	unsigned int _num_sprites_drawn = 0;
+	unsigned int _num_batches_drawn = 0;
+	unsigned int _num_sprites_in_largest_batch = 0;
+	unsigned int _num_vertices_in_largest_batch = 0;
 
 	void add(const Sprite& sprite) {
 		_sprites.push_back(sprite);
@@ -196,38 +196,38 @@ namespace sprites {
 			}
 			
 			graphics::draw(batch.vertex_count, batch.vertex_offset);
-			_largest_batch_sprite_count = std::max(_largest_batch_sprite_count, batch.sprite_count);
-			_largest_batch_vertex_count = std::max(_largest_batch_vertex_count, batch.vertex_count);
+			_num_sprites_in_largest_batch = std::max(_num_sprites_in_largest_batch, batch.sprite_count);
+			_num_vertices_in_largest_batch = std::max(_num_vertices_in_largest_batch, batch.vertex_count);
 		}
 
-		_sprites_drawn += (unsigned int)_sprites.size();
-		_batches_drawn += (unsigned int)_batches.size();
+		_num_sprites_drawn += (unsigned int)_sprites.size();
+		_num_batches_drawn += (unsigned int)_batches.size();
 
 		_sprites.clear();
 		_batches.clear();
 		graphics::temp_vertices.clear();
 	}
 
-	void clear_drawing_statistics() {
-		_sprites_drawn = 0;
-		_batches_drawn = 0;
-		_largest_batch_sprite_count = 0;
-		_largest_batch_vertex_count = 0;
+	void clear_statistics() {
+		_num_sprites_drawn = 0;
+		_num_batches_drawn = 0;
+		_num_sprites_in_largest_batch = 0;
+		_num_vertices_in_largest_batch = 0;
 	}
 
-	unsigned int get_sprites_drawn() {
-		return _sprites_drawn;
+	unsigned int get_num_sprites_drawn() {
+		return _num_sprites_drawn;
 	}
 
-	unsigned int get_batches_drawn() {
-		return _batches_drawn;
+	unsigned int get_num_batches_drawn() {
+		return _num_batches_drawn;
 	}
 
-	unsigned int get_largest_batch_sprite_count() {
-		return _largest_batch_sprite_count;
+	unsigned int get_num_sprites_in_largest_batch() {
+		return _num_sprites_in_largest_batch;
 	}
 
-	unsigned int get_largest_batch_vertex_count() {
-		return _largest_batch_vertex_count;
+	unsigned int get_num_vertices_in_largest_batch() {
+		return _num_vertices_in_largest_batch;
 	}
 }

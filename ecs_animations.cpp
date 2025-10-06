@@ -89,7 +89,7 @@ namespace ecs {
 				continue; // No need to update the sprite if the frame hasn't changed.
 			if (!animation._frame)
 				continue;
-			update_sprite(sprite, animation._frame, false);
+			setup_sprite(sprite, animation._frame, false);
 		}
 	}
 

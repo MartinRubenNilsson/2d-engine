@@ -209,7 +209,7 @@ int main(int argc, char* argv[]) {
 
         // RENDER
 
-        sprites::clear_drawing_statistics();
+        sprites::clear_statistics();
 
         int window_framebuffer_width = 0;
         int window_framebuffer_height = 0;
@@ -347,9 +347,9 @@ int main(int argc, char* argv[]) {
             ImGui::PlotLines("##dt", dt_buffer, 256, buffer_offset, overlay_text, 0.f, 0.01f, ImVec2(0, 80));
             sprintf(overlay_text, "%.f FPS", smoothed_fps);
             ImGui::PlotLines("##fps", fps_buffer, 256, buffer_offset, overlay_text, 0.f, 600.f, ImVec2(0, 80));
-            ImGui::Value("Sprites Drawn", sprites::get_sprites_drawn());
-            ImGui::Value("Batches Drawn", sprites::get_batches_drawn());
-            ImGui::Value("Largest Batch", sprites::get_largest_batch_sprite_count());
+            ImGui::Value("Sprites Drawn", sprites::get_num_sprites_drawn());
+            ImGui::Value("Batches Drawn", sprites::get_num_batches_drawn());
+            ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
             ImGui::End();
         }
         if (debug_textboxes) {

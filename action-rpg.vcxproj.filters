@@ -248,6 +248,12 @@
     <ClCompile Include="direction.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_physics_debugging.cpp">
+      <Filter>game\ecs\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_sprites_setup.cpp">
+      <Filter>game\ecs\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

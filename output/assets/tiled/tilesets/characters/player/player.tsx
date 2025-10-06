@@ -3,7 +3,7 @@
  <image source="../../../../textures/character/01body/fbas_01body_human_00.png" width="1024" height="1024"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="26.125" y="35.75" width="11.125" height="11.125">
+   <object id="1" x="26.125" y="36.4773" width="11.125" height="11.125">
     <ellipse/>
    </object>
   </objectgroup>

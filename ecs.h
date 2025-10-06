@@ -12,13 +12,11 @@ namespace ecs {
 	void startup(); // Called on app startup.
 	void shutdown(); // Called on app shutdown.
 
-	// TODO: move somewhere else!
-	entt::entity deep_copy(entt::entity entity);
-
 	void clear();
 	void setup(MapId map);
 	void update(float dt);
 	void handle_window_event(const window::Event& ev);
+	// TODO: handle ui even
 
 	void get_camera_bounds(Vec2f& min, Vec2f& max);
 	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max);

@@ -3,15 +3,11 @@
 
 namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity);
+	sprites::Sprite& emplace_sprite(entt::entity entity, TileId tile);
 	sprites::Sprite* get_sprite(entt::entity entity);
 
-	// Loading the texture (or fetching it if already loaded) can be expensive
-	// or maybe not desired (if we have tileset variants), so it is optional.
-	void update_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
+	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = Vec2f::ZERO);
 
-	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = { 0.f, 0.f });
-
-	// Makes the Sprite's color blink.
 	struct SpriteBlink {
 		float duration = 0.f; // in seconds
 		float interval = 0.f; // in seconds
@@ -21,7 +17,6 @@ namespace ecs {
 
 	void make_sprite_blink(entt::entity entity, SpriteBlink&& blink = SpriteBlink());
 
-	// Makes the Sprite shake.
 	struct SpriteShake {
 		// The duration decreases by dt each frame, while the magnitude decreases
 		// in such a way that the two values always satisfy the following power law:
@@ -41,6 +36,9 @@ namespace ecs {
 
 	void make_sprite_shake(entt::entity entity, SpriteShake&& shake = SpriteShake());
 
+	// Loading the texture (or fetching it if already loaded) can be expensive
+	// or maybe not desired (if we have tileset variants), so it is optional.
+	void setup_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
 	void setup_sprites(MapId map);
 	void update_sprites(float dt);
 	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max);

@@ -32,7 +32,7 @@ namespace ecs {
         if (TileId* tile = _registry.try_get<TileId>(entity)) {
             replace_step(*tile, 0, 1);
             if (sprites::Sprite* sprite = _registry.try_get<sprites::Sprite>(entity)) {
-                update_sprite(*sprite, *tile, false);
+                setup_sprite(*sprite, *tile, false);
             }
         }
 

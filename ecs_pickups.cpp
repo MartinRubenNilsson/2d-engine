@@ -14,7 +14,7 @@ namespace ecs {
 		for (auto [entity, pickup] : _registry.view<Pickup>().each()) {
 			pickup.timer.update(dt);
 			if (pickup.timer.finished()) {
-				destroy_at_end_of_frame(entity);
+				destroy_later(entity);
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace ecs {
 		}
 		if (const TileId tile = _get_tile(type)) {
 			sprites::Sprite& sprite = emplace_sprite(entity);
-			update_sprite(sprite, tile, true);
+			setup_sprite(sprite, tile, true);
 			sprite.sorting_layer = get_object_layer();
 			sprite.sorting_point = { 8.f, 8.f };
 			sprite.position = position - sprite.sorting_point;

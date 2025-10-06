@@ -16,7 +16,7 @@ namespace ecs {
 	void _handle_physics_event_for_arrow(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
 			// Destroy the arrow and apply damage to the other entity
-			destroy_at_end_of_frame(ev.entity);
+			destroy_later(ev.entity);
 			apply_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
 		}
 	}
@@ -37,7 +37,7 @@ namespace ecs {
 		if (const TilesetId tileset = get_tileset("items1")) {
 			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
 				sprites::Sprite& sprite = emplace_sprite(entity);
-				update_sprite(sprite, tile, true);
+				setup_sprite(sprite, tile, true);
 				sprite.sorting_layer = get_object_layer();
 				sprite.sorting_point = pivot;
 				sprite.position = position - pivot;
@@ -50,7 +50,7 @@ namespace ecs {
 			body_def.linearVelocity = velocity;
 			b2BodyId body = emplace_body(entity, body_def);
 			b2ShapeDef shape_def = b2DefaultShapeDef();
-			shape_def.filter = get_physics_filter_for_tag(Tag::Arrow);
+			shape_def.filter = get_physics_filter(Tag::Arrow);
 			b2Circle circle{};
 			circle.radius = 6.f;
 			b2CreateCircleShape(body, &shape_def, &circle);

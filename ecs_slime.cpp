@@ -15,7 +15,7 @@ namespace ecs {
     bool _handle_damage_to_slime(entt::entity entity, const Damage& damage) {
         // Die immediately.
         audio::create_event({ .path = "event:/snd_slime_dying" });
-        destroy_at_end_of_frame(entity);
+        destroy_later(entity);
         return true;
     }
 

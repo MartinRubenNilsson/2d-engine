@@ -1,8 +1,6 @@
 #pragma once
 
 namespace ecs {
-	enum class Tag;
-
 	// The collision category bits. Normally you would just set one bit.
 	enum CollisionCategory : uint32_t {
 		CC_None = 0,
@@ -26,5 +24,5 @@ namespace ecs {
 		CG_Default = 0,
 	};
 
-	b2Filter get_physics_filter_for_tag(Tag tag);
+	b2Filter get_physics_filter(enum class Tag tag);
 }

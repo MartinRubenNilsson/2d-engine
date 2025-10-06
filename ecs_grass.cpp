@@ -17,13 +17,13 @@ namespace ecs {
 	bool _handle_damage_to_grass(entt::entity entity, const Damage& damage) {
 		b2BodyId body = get_body(entity);
 		if (B2_IS_NULL(body)) return false;
-		const Vec2f position = b2Body_GetPosition(body);
+		const Vec2f position = b2Body_GetWorldCenterOfMass(body);
 		audio::create_event({ .path = "event:/snd_cut_grass" });
 		if (random::chance(0.2f)) {
 			PickupType pickup_type = (PickupType)random::range_i(0, (int)PickupType::Count - 1);
 			create_pickup(pickup_type, position + Vec2f(8.f, 20.f));
 		}
-		destroy_at_end_of_frame(entity);
+		destroy_later(entity);
 		return true;
 	}
 
@@ -36,7 +36,6 @@ namespace ecs {
 	void setup_grass() {
 		for (auto [entity, sprite] : _registry.view<Type<Tag::Grass>, sprites::Sprite>().each()) {
 			sprite.vertex_shader = graphics::grass_vert;
-			sprite.sorting_point = { 8.f, 28.f };
 			{
 				GrassUniformBlock block{};
 				block.position = sprite.position;

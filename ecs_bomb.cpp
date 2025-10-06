@@ -40,7 +40,7 @@ namespace ecs {
             apply_damage_in_circle({ DamageType::Explosion, 2, entity }, center, bomb.explosion_radius);
             add_trauma_to_active_camera(0.8f);
             create_vfx(VfxType::Explosion, center);
-            destroy_at_end_of_frame(entity);
+            destroy_later(entity);
             audio::create_event({ .path = "event:/snd_bomb_explosion", .position = center });
             audio::stop_event(bomb.fuse_sound);
             postprocessing::add_shockwave(center);
@@ -67,7 +67,7 @@ namespace ecs {
         if (const TilesetId tileset = get_tileset("items1")) {
             if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_POTION)) { // placeholder
                 sprites::Sprite& sprite = emplace_sprite(entity);
-                update_sprite(sprite, tile, true);
+                setup_sprite(sprite, tile, true);
                 sprite.sorting_layer = get_object_layer();
                 sprite.sorting_point = { 8.f, 16.f };
                 sprite.position = position - sprite.sorting_point;

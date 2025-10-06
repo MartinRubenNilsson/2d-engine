@@ -3,16 +3,15 @@
 #include "ecs_physics_filters.h"
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
-#include "ecs_sprites.h"
 #include "console.h"
 
 namespace ecs {
 	extern entt::registry _registry;
 
 	void _create_shapes(b2BodyId body, const b2ShapeDef& def, ObjectId object) {
-		// PITFALL: Calling get_position() for non-tile objects returns the top left,
-		// but for tile objects it returns the bottom left! Hence we call get_top_left()
-		// here to make sure we're consistent.
+
+		// PITFALL: Calling get_position() for non-tile objects returns the top left, but
+		// for tile objects it returns the bottom left! get_top_left() was made to fix this.
 		const Vec2f top_left = get_top_left(object);
 		const Vec2f half_size = get_size(object) * 0.5f;
 		const Vec2f center = top_left + half_size;
@@ -34,7 +33,7 @@ namespace ecs {
 			} break;
 			case ObjectType::Point: {
 
-				// This case is not supported.
+				// Not supported.
 
 			} break;
 			case ObjectType::Polygon: {
@@ -45,6 +44,8 @@ namespace ecs {
 					console::log_error("Too few points in polygon collider! Got " + std::to_string(num_points) + ", need >= 3.");
 					break;
 				}
+
+				// Box2D supports convex polygons with a small maximum number of points.
 
 				if (num_points <= b2_maxPolygonVertices && convex(points)) {
 
@@ -62,7 +63,11 @@ namespace ecs {
 					break;
 				}
 
+				// Either the polygon have too many vertices or it's concave.
+				// In either case we need to split it into smaller convex shapes.
+
 				//TODO: fix triangulate()! it has broken math.
+				//TODO: make triangulate() return index buffer?
 				const std::vector<Vec2f> triangles = triangulate(points);
 				for (size_t i = 0; i < triangles.size(); i += 3) {
 					b2Vec2 triangle_points[3];
@@ -81,7 +86,12 @@ namespace ecs {
 			} break;
 			case ObjectType::Polyline: {
 
-				// This case is not supported.
+				// Not supported.
+
+			} break;
+			case ObjectType::Text: {
+
+				// Not supported.
 
 			} break;
 		}
@@ -91,22 +101,29 @@ namespace ecs {
 
 		const Vec2u map_tile_size = get_tile_size(map);
 
-		// Setup colliders for static level scenery. These are the tiles that have a TileCoord.
+		// Setup static colliders for the level scenery. These are the tiles that have a TileCoord.
 		for (auto [entity, tile, coord] : _registry.view<TileId, TileCoord>().each()) {
 
 			const std::span<const ObjectId> colliders = get_objects(tile);
 			if (colliders.empty())
 				continue;
 
-			// Top left corner in the tile grid.
-			const Vec2f pos = {
+			const Vec2u size = get_size(tile);
+
+			// PITFALL: The tile size may be greater (or smaller) than the tile grid used by the map!
+			// In that case the tile's *bottom left* is aligned to the grid cell's bottom left. This
+			// means that the tile may extend *above* (or below) the grid cell. We need to compensate
+			// for this when we position the body.
+
+			const float height_overshoot = size.y - map_tile_size.y;
+			const Vec2f top_left = {
 				(float)coord.x * map_tile_size.x,
-				(float)coord.y * map_tile_size.y
+				(float)coord.y * map_tile_size.y - height_overshoot // compensate for overshoot
 			};
 
 			b2BodyDef body_def = b2DefaultBodyDef();
 			body_def.type = b2_staticBody;
-			body_def.position = pos;
+			body_def.position = top_left;
 			body_def.fixedRotation = true;
 			b2BodyId body = emplace_body(entity, body_def);
 
@@ -119,113 +136,48 @@ namespace ecs {
 			}
 		}
 
+		// Setup colliders for objects. Tile objects are assumed to be dynamic,
+		// while other objects are assumed to be static sensors.
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
 
 			const Tag tag = get_tag(entity);
 			const ObjectType type = get_type(object);
 
+			b2BodyDef body_def = b2DefaultBodyDef();
+			body_def.position = get_top_left(object);
+			body_def.fixedRotation = true;
+
+			b2ShapeDef shape_def = b2DefaultShapeDef();
+			shape_def.filter = get_physics_filter(tag);
+
 			if (type == ObjectType::Tile) {
 
 				const TileId tile = get_tile(object);
-				if (!tile) continue; // invalid tile
+				if (!tile)
+					continue; // invalid tile
 
-				const std::span<const ObjectId> objects = get_objects(tile);
-				if (objects.empty()) continue; // no colliders
-
-#if 0
-				// DETERMINE PIVOT
-
-				Vec2f pivot;
-
-				for (ObjectId tile_object : objects) {
-					if (get_type(tile_object) != ObjectType::Point)
-						continue;
-					if (get_name(tile_object) != "pivot")
-						continue;
-					pivot = get_position(tile_object);
-				}
-#endif
-
-				// EMPLACE SPRITE-BODY ATTACHMENT
-
-				make_sprite_follow_body(entity);
-
-				// EMPLACE BODY
-
-				b2BodyDef body_def = b2DefaultBodyDef();
+				const std::span<const ObjectId> colliders = get_objects(tile);
+				if (colliders.empty())
+					continue; // no colliders
+				
 				body_def.type = b2_dynamicBody;
-				body_def.fixedRotation = true;
-				body_def.position = get_top_left(object);
 				b2BodyId body = emplace_body(entity, body_def);
 
-				for (const ObjectId collider : objects) {
-
-					const Vec2f collider_pos = get_position(collider); // relative to parent object
-					const Vec2f collider_half_size = get_size(collider) * 0.5f;
-					const Vec2f collider_center = collider_pos + collider_half_size;
-
-					switch (get_type(collider)) {
-						case ObjectType::Rectangle: {
-
-							b2ShapeDef shape_def = b2DefaultShapeDef();
-							shape_def.filter = get_physics_filter_for_tag(tag);
-							b2Polygon box = b2MakeOffsetBox(
-								collider_half_size.x,
-								collider_half_size.y, collider_center, 0.f);
-							b2CreatePolygonShape(body, &shape_def, &box);
-
-						} break;
-						case ObjectType::Ellipse: {
-
-							b2ShapeDef shape_def = b2DefaultShapeDef();
-							shape_def.filter = get_physics_filter_for_tag(tag);
-							b2Circle circle{};
-							circle.center = collider_center;
-							circle.radius = collider_half_size.x;
-							b2CreateCircleShape(body, &shape_def, &circle);
-
-						} break;
-					}
+				for (const ObjectId collider : colliders) {
+					_create_shapes(body, shape_def, collider);
 				}
 
 				continue; // move on to next object
 			}
 
-			// Rectangle, Ellipse, Point, Polygon, Polyline
+			// Rectangle, Ellipse, Point, Polygon, Polyline, Text
 
-			// CREATE SENSORS
-
-			b2BodyDef body_def = b2DefaultBodyDef();
 			body_def.type = b2_staticBody;
-			body_def.fixedRotation = true;
-			body_def.position = get_top_left(object);
 			b2BodyId body = emplace_body(entity, body_def);
 
-			const Vec2f half_size = get_size(object) * 0.5f;
-			const Vec2f center = half_size;
+			shape_def.isSensor = true;
 
-			switch (type) {
-				case ObjectType::Rectangle: {
-
-					b2ShapeDef shape_def = b2DefaultShapeDef();
-					shape_def.isSensor = true;
-					shape_def.filter = get_physics_filter_for_tag(tag);
-					b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
-					b2CreatePolygonShape(body, &shape_def, &box);
-
-				} break;
-				case ObjectType::Ellipse: {
-
-					b2ShapeDef shape_def = b2DefaultShapeDef();
-					shape_def.isSensor = true;
-					shape_def.filter = get_physics_filter_for_tag(tag);
-					b2Circle circle{};
-					circle.center = center;
-					circle.radius = half_size.x;
-					b2CreateCircleShape(body, &shape_def, &circle);
-
-				} break;
-			}
+			_create_shapes(body, shape_def, object);
 		}
 	}
 }
