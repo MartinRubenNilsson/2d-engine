@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="player" tilewidth="64" tileheight="64" tilecount="256" columns="16">
+<tileset version="1.10" tiledversion="1.11.2" name="player" tilewidth="64" tileheight="64" tilecount="256" columns="16">
  <image source="../../../../textures/character/01body/fbas_01body_human_00.png" width="1024" height="1024"/>
+ <tile id="0">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="26.125" y="35.75" width="11.125" height="11.125">
+    <ellipse/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="8">
   <animation>
    <frame tileid="8" duration="300"/>

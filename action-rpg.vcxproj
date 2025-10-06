@@ -287,7 +287,6 @@
     <ClInclude Include="ui_clay.h" />
     <ClInclude Include="ui_rmlui_system_interface.h" />
     <ClInclude Include="vec2.h" />
-    <ClInclude Include="vertices.h" />
     <ClInclude Include="window_events.h" />
     <ClInclude Include="shapes.h" />
     <ClInclude Include="ecs_bomb.h" />

@@ -35,6 +35,7 @@ namespace ecs {
 
     void setup_slimes() {
         for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
+            _registry.emplace<Direction>(entity, Direction::S); // TODO: use this for something useful!
             set_damage_handler(entity, _handle_damage_to_slime);
             _do_slime_task(entity);
         }
@@ -50,18 +51,20 @@ namespace ecs {
 
     void update_slimes_graphics(float dt) {
         for (auto [entity, body, tile, anim] : _registry.view<Type<Tag::Slime>, b2BodyId, TileId, TileAnimation>().each()) {
-            Vec2f velocity = b2Body_GetLinearVelocity(body);
-            if (velocity == Vec2f::ZERO) {
+            const Vec2f vel = b2Body_GetLinearVelocity(body);
+            if (vel == Vec2f::ZERO) {
                 anim.set_progress(0.f);
                 continue;
             }
-            switch (to_cardinal(velocity)) {
+            switch (to_cardinal(vel)) {
                 case Direction::S: replace(tile, TILE_ID_SLIME_WALK_S); break;
                 case Direction::E: replace(tile, TILE_ID_SLIME_WALK_E); break;
                 case Direction::N: replace(tile, TILE_ID_SLIME_WALK_N); break;
                 case Direction::W: replace(tile, TILE_ID_SLIME_WALK_W); break;
             }
-            anim.set_speed(length(velocity) / 16.f);
+            const float speed = length(vel);
+            const float anim_speed = speed / 16.f;
+            anim.set_speed(anim_speed);
         }
     }
 }

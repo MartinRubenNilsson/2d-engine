@@ -245,7 +245,9 @@
     <ClCompile Include="ecs_task_flee.cpp">
       <Filter>game\ecs\ai\tasks\implementations</Filter>
     </ClCompile>
-    <ClCompile Include="direction.cpp" />
+    <ClCompile Include="direction.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -418,9 +420,6 @@
     </ClInclude>
     <ClInclude Include="networking.h">
       <Filter>networking</Filter>
-    </ClInclude>
-    <ClInclude Include="vertices.h">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
       <Filter>application\window</Filter>

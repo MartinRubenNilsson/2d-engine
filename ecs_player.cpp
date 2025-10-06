@@ -30,6 +30,7 @@
 #include "ecs_patch.h"
 #include "graphics_globals.h"
 #include "timer.h"
+#include "ecs_states.h"
 
 namespace ecs {
 
@@ -259,6 +260,20 @@ namespace ecs {
 				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
 			}
 		}
+	}
+
+	void _update_idle_player(entt::entity entity) {
+
+	}
+
+	void _emplace_player_state_machine(entt::entity entity) {
+		StateMachine& sm = emplace_state_machine(entity);
+		add_state(sm, {
+			.id = "idle" });
+		add_state(sm, {
+			.id = "dying" });
+		add_state(sm, {
+			.id = "dead" });
 	}
 
 	void setup_players(MapId map) {

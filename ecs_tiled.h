@@ -33,8 +33,8 @@ namespace ecs {
 	/// TILES
 
 	struct TileCoord {
-		uint16_t x = 0;
-		uint16_t y = 0;
+		uint16_t x = 0; // horizontal position in tile grid
+		uint16_t y = 0; // vertical position in tile grid
 		uint16_t layer = 0;
 	};
 
