@@ -48,7 +48,7 @@ namespace text {
             const Vec2f pos1 = current_point + Vec2f((float)glyph.x1, (float)glyph.y1);
             Vec2f tex0 = Vec2f((float)glyph.s0, (float)glyph.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
             Vec2f tex1 = Vec2f((float)glyph.s1, (float)glyph.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
-            std::swap(tex0.y, tex1.y); // Flip y-axis
+            std::swap(tex0.y, tex1.y); // Flip y-axis TODO but dont we flip it below?
             vertices.emplace_back(Vec2f(pos0.x, pos0.y), colors::WHITE, Vec2f(tex0.x, tex0.y));
             vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
             vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
@@ -62,7 +62,7 @@ namespace text {
 
         const float scale_for_pixel_height = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
         for (graphics::Vertex& vertex : vertices) {
-            vertex.position.y = -vertex.position.y; // Flip y-axis
+            vertex.position.y = -vertex.position.y; // Flip y-axis TODO but dont we flip it above?
             vertex.position *= scale_for_pixel_height;
             vertex.position *= text.scale;
             vertex.position += text.position;

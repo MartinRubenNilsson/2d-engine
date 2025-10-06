@@ -134,14 +134,14 @@ namespace ecs {
 				copy.uniform_buffer_size = 0;
 				copy.uniform_buffer_offset = 0;
 			}
-			sprites::add(copy);
+			sprites::add_sprite(copy);
 		}
 
 		graphics::update_buffer(graphics::sprite_uniform_buffer,
 			blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
 
-		sprites::sort();
-		sprites::draw();
+		sprites::sort_all_sprites();
+		sprites::draw_all_sprites();
 
 		_unblink_sprites_after_drawing();
 		_unshake_sprites_after_drawing();

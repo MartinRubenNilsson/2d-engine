@@ -214,7 +214,7 @@ namespace ui {
 						(unsigned char)rectangle.backgroundColor.b,
 						(unsigned char)rectangle.backgroundColor.a
 					};
-					sprites::add(sprite);
+					sprites::add_sprite(sprite);
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.
@@ -243,6 +243,6 @@ namespace ui {
 			}
 		}
 		// No need to sort, since the Clay render commands are already sorted.
-		sprites::draw();
+		sprites::draw_all_sprites();
 	}
 }

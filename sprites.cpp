@@ -56,11 +56,11 @@ namespace sprites {
 	unsigned int _num_sprites_in_largest_batch = 0;
 	unsigned int _num_vertices_in_largest_batch = 0;
 
-	void add(const Sprite& sprite) {
+	void add_sprite(const Sprite& sprite) {
 		_sprites.push_back(sprite);
 	}
 
-	void sort() {
+	void sort_all_sprites() {
 		if (_sprites.empty()) return;
 
 		// Sort sprites by draw order.
@@ -77,7 +77,7 @@ namespace sprites {
 		eastl::tim_sort_buffer(_sprites.begin(), _sprites.end(), _sprites.end());
 	}
 
-	void draw() {
+	void draw_all_sprites() {
 		if (_sprites.empty()) return;
 
 		// Sprites sharing the same state (shader, texture, etc.) are batched together to reduce draw calls.

@@ -72,11 +72,11 @@ namespace background
 			sprite.size = { (float)layer.texture_width, (float)layer.texture_height };
 			for (float x = camera_min.x - layer.offset_x; x < camera_max.x; x += layer.texture_width) {
 				sprite.position = { x, camera_min.y };
-				sprites::add(sprite);
+				sprites::add_sprite(sprite);
 			}
 		}
 
 		// We don't have to sort before drawing, since the sprites were added in draw order.
-		sprites::draw();
+		sprites::draw_all_sprites();
 	}
 }
