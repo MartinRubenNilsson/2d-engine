@@ -100,6 +100,9 @@ namespace sprites {
 			Vec2f tex_tr = { tex_br.x, tex_tl.y }; // top-right
 			Vec2f tex_bl = { tex_tl.x, tex_br.y }; // bottom-left
 
+			if (sprite.flags & SPRITE_FLIP_DIAGONALLY) {
+				std::swap(tex_bl, tex_tr);
+			}
 			if (sprite.flags & SPRITE_FLIP_HORIZONTALLY) {
 				std::swap(tex_tl, tex_tr);
 				std::swap(tex_bl, tex_br);
@@ -107,9 +110,6 @@ namespace sprites {
 			if (sprite.flags & SPRITE_FLIP_VERTICALLY) {
 				std::swap(tex_tl, tex_bl);
 				std::swap(tex_tr, tex_br);
-			}
-			if (sprite.flags & SPRITE_FLIP_DIAGONALLY) {
-				std::swap(tex_bl, tex_tr);
 			}
 
 			if (_batches.empty()) {
