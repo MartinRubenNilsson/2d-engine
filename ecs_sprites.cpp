@@ -122,17 +122,19 @@ namespace ecs {
 			if (sprite.position.y > camera_max.y) continue;
 			if (sprite.position.x + sprite.size.x < camera_min.x) continue;
 			if (sprite.position.y + sprite.size.y < camera_min.y) continue;
+			sprites::Sprite copy = sprite;
+			copy.position = round(copy.position); // snap to pixels
 			if (const UniformBlock* block = _registry.try_get<const UniformBlock>(entity)) {
-				sprite.uniform_buffer = graphics::sprite_uniform_buffer;
-				sprite.uniform_buffer_size = (uint32_t)sizeof(UniformBlock);
-				sprite.uniform_buffer_offset = (uint32_t)(blocks.size() * sizeof(UniformBlock));
+				copy.uniform_buffer = graphics::sprite_uniform_buffer;
+				copy.uniform_buffer_size = (uint32_t)sizeof(UniformBlock);
+				copy.uniform_buffer_offset = (uint32_t)(blocks.size() * sizeof(UniformBlock));
 				blocks.push_back(*block);
 			} else {
-				sprite.uniform_buffer = {};
-				sprite.uniform_buffer_size = 0;
-				sprite.uniform_buffer_offset = 0;
+				copy.uniform_buffer = {};
+				copy.uniform_buffer_size = 0;
+				copy.uniform_buffer_offset = 0;
 			}
-			sprites::add(sprite);
+			sprites::add(copy);
 		}
 
 		graphics::update_buffer(graphics::sprite_uniform_buffer,
