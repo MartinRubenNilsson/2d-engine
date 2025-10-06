@@ -96,8 +96,7 @@ namespace ecs {
 
 			// PITFALL: I tried using the local center of mass here first. However, this didn't work
 			// for sensors because they don't have mass. Using the AABB seems more robust.
-			const b2AABB aabb = b2Body_ComputeAABB(body);
-			const Vec2f aabb_center = (aabb.lowerBound + aabb.upperBound) * 0.5f;
+			const Vec2f aabb_center = b2AABB_Center(b2Body_ComputeAABB(body));
 			sprite.sorting_point = aabb_center - sprite.position;
 
 			const b2BodyType type = b2Body_GetType(body);

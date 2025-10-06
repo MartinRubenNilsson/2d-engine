@@ -8,11 +8,11 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	void _create_shapes(b2BodyId body, const b2ShapeDef& def, ObjectId object) {
+	void _create_shapes(b2BodyId body, const b2ShapeDef& def, ObjectId object, bool object_is_in_local_space) {
 
 		// PITFALL: Calling get_position() for non-tile objects returns the top left, but
 		// for tile objects it returns the bottom left! get_top_left() was made to fix this.
-		const Vec2f top_left = get_top_left(object);
+		const Vec2f top_left = object_is_in_local_space ? get_top_left(object) : Vec2f::ZERO;
 		const Vec2f half_size = get_size(object) * 0.5f;
 		const Vec2f center = top_left + half_size;
 
@@ -132,7 +132,7 @@ namespace ecs {
 				if (get_bool(collider, "sensor")) {
 					shape_def.isSensor = true;
 				}
-				_create_shapes(body, shape_def, collider);
+				_create_shapes(body, shape_def, collider, true);
 			}
 		}
 
@@ -164,7 +164,7 @@ namespace ecs {
 				b2BodyId body = emplace_body(entity, body_def);
 
 				for (const ObjectId collider : colliders) {
-					_create_shapes(body, shape_def, collider);
+					_create_shapes(body, shape_def, collider, true);
 				}
 
 				continue; // move on to next object
@@ -177,7 +177,7 @@ namespace ecs {
 
 			shape_def.isSensor = true;
 
-			_create_shapes(body, shape_def, object);
+			_create_shapes(body, shape_def, object, false);
 		}
 	}
 }

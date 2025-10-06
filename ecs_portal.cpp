@@ -74,9 +74,12 @@ namespace ecs {
 		if (!portal_body) return false;
 		Portal* portal = _registry.try_get<Portal>(portal_entity);
 		if (!portal) return false;
-		Vec2f position = b2Body_GetPosition(*portal_body);
-		position += Vec2f(8.f, 8.f); // center of portal (hopefully)
+		// PITFALL: b2Body_GetWorldCenterOfMass() will not work since portals are sensors
+		// and don't have mass data. Also b2Body_GetPosition() returns the top left corner.
+		// Hence let's use the world AABB center
+		Vec2f position = b2AABB_Center(b2Body_ComputeAABB(*portal_body));
 		position += (Vec2f)portal->direction * 16.f;
+		position = position - b2Body_GetLocalCenterOfMass(*body);
 		b2Body_SetTransform(*body, position, b2Body_GetRotation(*body));
 		return true;
 	}
