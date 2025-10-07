@@ -166,14 +166,14 @@ namespace ecs {
 					.update = _update_idle_blade_trap });
 				add_state(sm, {
 					.id = "extending",
-					.enter = _start_extending_blade_trap,
-					.exit = _stop_extending_blade_trap });
+					.start = _start_extending_blade_trap,
+					.stop = _stop_extending_blade_trap });
 				add_state(sm, {
 					.id = "impacting",
-					.enter = _start_impacting_blade_trap });
+					.start = _start_impacting_blade_trap });
 				add_state(sm, {
 					.id = "retracting",
-					.exit = _stop_retracting_blade_trap,
+					.stop = _stop_retracting_blade_trap,
 					.update = _update_retracting_blade_trap });
 				add_state(sm, {
 					.id = "wait" });

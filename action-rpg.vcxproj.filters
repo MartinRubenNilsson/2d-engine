@@ -263,6 +263,9 @@
     <ClCompile Include="ecs_pushable.cpp">
       <Filter>game\ecs\game\pushables</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_pathfinding.cpp">
+      <Filter>game\ecs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -537,6 +540,9 @@
     </ClInclude>
     <ClInclude Include="ecs_pushable.h">
       <Filter>game\ecs\game\pushables</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_pathfinding.h">
+      <Filter>game\ecs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

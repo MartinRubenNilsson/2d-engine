@@ -2,7 +2,7 @@
 #include "ecs_task_impl.h"
 #include "ecs_physics.h"
 #include "ecs_physics_queries.h"
-#include "map_grid.h" // TODO: put this in ecs instead
+#include "ecs_pathfinding.h"
 #include "random.h"
 #include "shapes.h"
 
@@ -12,7 +12,7 @@ namespace ecs {
 		float speed = 0.f;
 		float acceptance_radius = 0.f;
 		bool pathfind = true;
-		std::vector<Vec2i> path;
+		std::vector<PathTileId> path;
 	};
 
 	extern entt::registry _registry;
@@ -83,21 +83,22 @@ namespace ecs {
 				pursue.path.clear();
 				continue;
 			}
-			const Vec2i tile = map::world_to_tile(pos);
-			const Vec2i target_tile = map::world_to_tile(target_pos);
+			const PathTileId tile = get_path_tile(pos);
+			const PathTileId target_tile = get_path_tile(target_pos);
 			if (tile == target_tile)
 				continue; // already on same tile as target
-			if (!map::pathfind(tile, target_tile, pursue.path)) {
+			if (!pathfind(tile, target_tile, pursue.path)) {
 				task.status = TaskStatus::Failed; // cannot pathfind to target
 				_registry.erase<PursueTask>(entity);
 				continue;
 			}
 			if (pursue.path.size() < 2)
 				continue; // defensive: already on same tile as target
-			const Vec2i next_tile = pursue.path[1];
-			const Vec2f next_pos = map::get_tile_center(next_tile);
+			const PathTileId next_tile = pursue.path[1];
+			const Vec2f center = get_center(tile);
+			const Vec2f next_pos = get_center(next_tile);
 			// the dir we want to be moving in once we're reached the next tile
-			const Vec2f next_dir = normalize(next_tile - tile);
+			const Vec2f next_dir = normalize(next_pos - center);
 			// transport next_dir *backward* along the shortest circular arc to the next pos
 			new_dir = -_parallel_transport_tangent_along_circular_arc(next_pos, pos, -next_dir);
 			b2Body_SetLinearVelocity(body, new_dir * pursue.speed);
@@ -111,8 +112,8 @@ namespace ecs {
 				continue;
 			const Vec2f offset = { paths_drawn * 2.f, paths_drawn * 2.f };
 			for (size_t i = 0; i + 1 < pursue.path.size(); ++i) {
-				const Vec2f p1 = map::get_tile_center(pursue.path[i]) + offset;
-				const Vec2f p2 = map::get_tile_center(pursue.path[i + 1]) + offset;
+				const Vec2f p1 = get_center(pursue.path[i]) + offset;
+				const Vec2f p2 = get_center(pursue.path[i + 1]) + offset;
 				const Color color = random::color((uint32_t)entity * 2);
 				shapes::add_line(p1, p2, color);
 			}

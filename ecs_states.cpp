@@ -41,8 +41,8 @@ namespace ecs {
 		sm.next_state_transition_time = 0.f;
 		// Exit current state if we're in one.
 		if (State* curr = _get_state(sm, sm.current_state)) {
-			if (curr->exit) {
-				curr->exit(entity);
+			if (curr->stop) {
+				curr->stop(entity);
 			}
 			// PITFALL: Reset the time *after* calling exit since
 			// the callback might want to query it.
@@ -50,8 +50,8 @@ namespace ecs {
 		}
 		// Enter next state.
 		next->time_active = 0.f; // DEFENSIVE
-		if (next->enter) {
-			next->enter(entity);
+		if (next->start) {
+			next->start(entity);
 		}
 		sm.current_state = state;
 		return true;
@@ -123,6 +123,12 @@ namespace ecs {
 		if (state == StateHandle())
 			return;
 		transition_later(sm, state, time);
+	}
+
+	void handle(entt::entity entity, const StateEvent& ev) {
+		if (StateMachine* sm = _registry.try_get<StateMachine>(entity)) {
+			handle(*sm, entity, ev);
+		}
 	}
 
 	void update_state_machines(float dt) {

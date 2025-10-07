@@ -86,7 +86,6 @@ namespace ecs {
 		SwingingSword,
 		ShootingBow,
 		Dying,
-		Dead
 	};
 
 	struct Player {
@@ -105,7 +104,20 @@ namespace ecs {
 	unsigned int _input_flags_to_enable = 0;
 	unsigned int _input_flags_to_disable = 0;
 
+	enum PLAYER_STATE_EVENT {
+		PLAYER_STATE_EVENT_WINDOW,
+	};
+
 	void handle_window_event_for_players(const window::Event& ev) {
+
+		StateEvent state_ev{};
+		state_ev.type = PLAYER_STATE_EVENT_WINDOW;
+		state_ev.data = &ev;
+
+		for (auto [entity] : _registry.view<Type<Tag::Player>>().each()) {
+			handle(entity, state_ev);
+		}
+		
 		if (ev.type == window::EventType::KeyPress) {
 			switch (ev.key.code) {
 				case window::Key::Left:
@@ -222,18 +234,46 @@ namespace ecs {
 		}
 	}
 
-	void _update_idle_player(entt::entity entity) {
+	void _update_normal_player(entt::entity entity, float dt) {
 
+	}
+
+	void _handle_window_event_for_normal_player(entt::entity, const window::Event& ev) {
+		return;
+	}
+
+	void _handle_event_for_normal_player(entt::entity entity, const StateEvent& ev) {
+		if (ev.type == PLAYER_STATE_EVENT_WINDOW) {
+			_handle_window_event_for_normal_player(entity, *(const window::Event*)ev.data);
+		}
+	}
+
+	void _update_dying_player(entt::entity entity, float dt) {
+
+	}
+
+	void _start_being_dead_player(entt::entity entity) {
+		detach_camera(entity);
+		audio::stop_all_in_bus();
+		audio::create_event({ .path = "event:/snd_player_die" });
+		audio::create_event({ .path = "event:/mus_coffin_dance" });
+		ui::open_or_enqueue_textbox_presets("player/die");
+		ui::bindings::hud_player_health = 0;
 	}
 
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
+		StateHandle normal = add_state(sm, {
+			.id = "normal",
+			.update = _update_normal_player,
+			.handle = _handle_event_for_normal_player });
 		add_state(sm, {
-			.id = "idle" });
+			.id = "dying",
+			.update = _update_dying_player });
 		add_state(sm, {
-			.id = "dying" });
-		add_state(sm, {
-			.id = "dead" });
+			.id = "dead",
+			.start = _start_being_dead_player });
+		transition(sm, normal, entity);
 	}
 
 	void setup_players(MapId map) {
@@ -259,6 +299,8 @@ namespace ecs {
 			set_audio_listener(entity);
 			set_physics_event_handler(entity, _handle_physics_for_player);
 			set_damage_event_handler(entity, _handle_damage_for_player);
+
+			_emplace_player_state_machine(entity);
 
 			{
 				Camera camera{};
@@ -307,14 +349,6 @@ namespace ecs {
 			const Vec2f position = b2Body_GetWorldCenterOfMass(body);
 			const Vec2f velocity = b2Body_GetLinearVelocity(body);
 			Vec2f new_velocity; // will be modified differently depending on the state
-
-			enum class HeldItemType {
-				None,
-				Sword,
-				Bow,
-			};
-
-			HeldItemType held_item_type = HeldItemType::None;
 
 			// UPDATE AUDIO
 
@@ -470,7 +504,6 @@ namespace ecs {
 
 				} break;
 				case PlayerState::SwingingSword: {
-					held_item_type = HeldItemType::Sword;
 #if 0
 					if (tile_dir != Direction::E) {
 						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
@@ -485,7 +518,6 @@ namespace ecs {
 					}
 				} break;
 				case PlayerState::ShootingBow: {
-					held_item_type = HeldItemType::Bow;
 					if (dir != Direction::E) {
 						tile.flipped_horizontally = false;
 					}
@@ -516,7 +548,6 @@ namespace ecs {
 					anim.set_loop(false);
 
 					if (anim.done()) {
-
 						switch (dir) {
 							case Direction::W: [[fallthrough]];
 							case Direction::E: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
@@ -525,34 +556,30 @@ namespace ecs {
 						}
 
 						kill_player(entity);
-						player.state = PlayerState::Dead;
 					}
 
-				} break;
-				case PlayerState::Dead: {
-					// Do nothing, u r ded
 				} break;
 			}
 
 			b2Body_SetLinearVelocity(body, new_velocity);
+		}
 
-			// UPDATE HUD
-
+		for (auto [entity, player] : _registry.view<Player>().each()) {
 			ui::bindings::hud_player_health = player.health;
 			ui::bindings::hud_arrow_ammo = player.arrows;
 			ui::bindings::hud_bomb_ammo = player.bombs;
 			ui::bindings::hud_rupee_amount = player.rupees;
-
-			// CLEAR ONE-SHOT INPUT FLAGS
-
 			player.input_flags &= ~INPUT_INTERACT;
 			player.input_flags &= ~INPUT_SWING_SWORD;
 			player.input_flags &= ~INPUT_SHOOT_BOW;
 			player.input_flags &= ~INPUT_DROP_BOMB;
 		}
 
-		// Blink while hurt.
-		for (auto [entity, player, sprite] : _registry.view<Player, sprites::Sprite>().each()) {
+		// Update graphics.
+		for (auto [entity, player, body, sprite] : _registry.view<Player, b2BodyId, sprites::Sprite>().each()) {
+
+			const std::string_view state = get_current_state(entity);
+
 			if (player.hurt_timer.running()) {
 				constexpr float BLINK_PERIOD = 0.15f;
 				float fraction = fmod(player.hurt_timer.get_time(), BLINK_PERIOD) / BLINK_PERIOD;
@@ -620,14 +647,7 @@ namespace ecs {
 	}
 
 	bool kill_player(entt::entity entity) {
-		if (!_registry.all_of<Player>(entity))
-			return false;
-		detach_camera(entity);
-		audio::stop_all_in_bus();
-		audio::create_event({ .path = "event:/snd_player_die" });
-		audio::create_event({ .path = "event:/mus_coffin_dance" });
-		ui::open_or_enqueue_textbox_presets("player/die");
-		ui::bindings::hud_player_health = 0;
+		transition_to_state(entity, "dead");
 		return true;
 	}
 }

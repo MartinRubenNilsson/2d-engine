@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "map.h"
-#include "map_grid.h"
 #include "filesystem.h"
 #include "console.h"
 #include "audio.h"
@@ -103,13 +102,11 @@ namespace map {
 
 		if (!next_map) {
 			destroy_entities();
-			destroy_grid();
 			audio::stop_all_in_bus();
 			return;
 		}
 
 		ecs::setup(next_map);
-		create_grid(next_map);
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {

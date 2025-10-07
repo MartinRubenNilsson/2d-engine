@@ -149,6 +149,7 @@
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
+    <ClCompile Include="ecs_pathfinding.cpp" />
     <ClCompile Include="ecs_physics_debugging.cpp" />
     <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_physics_queries.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_cloning.h" />
     <ClInclude Include="ecs_patch.h" />
+    <ClInclude Include="ecs_pathfinding.h" />
     <ClInclude Include="ecs_physics_events.h" />
     <ClInclude Include="ecs_physics_queries.h" />
     <ClInclude Include="ecs_pushable.h" />

@@ -4,6 +4,7 @@
 #include "ecs_tags.h"
 #include "ecs_patch.h"
 #include "ecs_lifetime.h"
+#include "ecs_pathfinding.h"
 #include "ecs_physics.h"
 #include "ecs_sprites.h"
 #include "ecs_player.h"
@@ -43,6 +44,7 @@ namespace ecs {
 		setup_tiled(map);
 		setup_tags();
 		setup_physics(map);
+		setup_pathfinding(map);
 		setup_sprites(map);
 		setup_animations();
 		setup_cameras(map);
@@ -96,6 +98,7 @@ namespace ecs {
 	}
 
 	void _update_essential_logic(float dt) {
+		update_pathfinding(dt);
 		update_state_machines(dt);
 		update_tasks(dt);
 		update_lifetimes(dt);

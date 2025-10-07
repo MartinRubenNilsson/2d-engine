@@ -7,17 +7,18 @@ namespace ecs {
 	};
 
 	struct StateEvent {
+		// "type" is by design not a shared enum - so you can define your own.
 		unsigned int type = UINT_MAX;
 		const void* data = nullptr;
 	};
 
 	struct State {
 		std::string_view id;
-		void (*enter)(entt::entity entity) = nullptr;
-		void (*exit)(entt::entity entity) = nullptr;
+		void (*start)(entt::entity entity) = nullptr;
+		void (*stop)(entt::entity entity) = nullptr;
 		void (*update)(entt::entity entity, float dt) = nullptr;
-		void (*handle)(entt::entity entity, const StateEvent& event) = nullptr;
-		float time_active = 0.f; // since last enter
+		void (*handle)(entt::entity entity, const StateEvent& ev) = nullptr;
+		float time_active = 0.f; // since last start
 	};
 
 	struct StateMachine; // implementation is private
@@ -27,12 +28,13 @@ namespace ecs {
 	bool transition(StateMachine& sm, StateHandle state, entt::entity entity); // immediately
 	void transition_later(StateMachine& sm, StateHandle state, float time);
 	void update(StateMachine& sm, entt::entity entity, float dt);
-	void handle(StateMachine& sm, entt::entity entity, const StateEvent& event);
+	void handle(StateMachine& sm, entt::entity entity, const StateEvent& ev);
 
 	StateMachine& emplace_state_machine(entt::entity entity);
 	std::string_view get_current_state(entt::entity entity);
 	bool transition_to_state(entt::entity entity, std::string_view state_id); // immediately
 	void transition_to_state_later(entt::entity entity, std::string_view state_id, float time);
+	void handle(entt::entity entity, const StateEvent& ev);
 
 	void update_state_machines(float dt);
 	void debug_draw_state_machines();

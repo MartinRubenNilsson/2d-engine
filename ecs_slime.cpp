@@ -14,14 +14,13 @@ namespace ecs {
     extern entt::registry _registry;
 
     bool _handle_damage_for_slime(entt::entity entity, const DamageEvent& ev) {
-        // Die immediately.
         audio::create_event({ .path = "event:/snd_slime_dying" });
         destroy_later(entity);
         return true;
     }
 
     void _handle_physics_for_slime(const PhysicsEvent& ev) {
-        if (ev.type == PhysicsEventType::ContactBeginTouch) {
+        if (ev.type == PhysicsEventType::ContactBeginTouch && get_tag(ev.other_entity) == Tag::Player) {
             deal_damage(ev.other_entity, {
                 .type = DamageType::Touch,
                 .amount = 1,
