@@ -1,37 +1,13 @@
 #include "stdafx.h"
 #include "map_grid.h"
 #include "tiled.h"
-#include "ecs_tags.h"
-#include "ecs_tiled.h"
-
-namespace ecs {
-	extern entt::registry _registry;
-	extern tiled::Context _tiled_context; // TODO: remove
-}
 
 namespace map {
 	struct Tile {
 		TerrainType terrains[tiled::WangTile::COUNT] = {};
 	};
 
-	struct TileGrid {
-		Vec2i size; // in tiles
-		Vec2i tile_size; // in pixels
-		std::vector<Tile> tiles; // tiles.size() == size.x * size.y
-	};
-
-	TileGrid _grid;
-
-	Tile* _get_tile(const Vec2i& position) {
-		if (position.x < 0) return nullptr;
-		if (position.y < 0) return nullptr;
-		if (position.x >= _grid.size.x) return nullptr;
-		if (position.y >= _grid.size.y) return nullptr;
-		return &_grid.tiles[position.x + position.y * _grid.size.x];
-	}
-
-	TerrainType _terrain_name_to_type(std::string name) // Intentional copy of name by value
-	{
+	TerrainType _terrain_name_to_type(std::string name) {
 		name.erase(remove_if(name.begin(), name.end(), isspace), name.end());
 		auto type = magic_enum::enum_cast<TerrainType>(name, magic_enum::case_insensitive);
 		if (type.has_value()) return type.value();
@@ -45,13 +21,6 @@ namespace map {
 
 	void create_grid(ecs::MapId map_id) {
 		if (!map_id) return;
-
-		const tiled::Map& map = ecs::_tiled_context.maps[map_id.id];
-		_grid.size = Vec2i(map.width, map.height);
-		_grid.tile_size = Vec2i(map.tile_width, map.tile_height);
-		_grid.tiles.resize(_grid.size.x * _grid.size.y);
-
-		using namespace ecs;
 
 #if 0
 		for (const tiled::Layer& layer : map.layers) {
@@ -79,7 +48,6 @@ namespace map {
 	}
 
 	void destroy_grid() {
-		_grid = TileGrid();
 	}
 
 	TerrainType get_terrain_type_at(const Vec2f& world_pos) {

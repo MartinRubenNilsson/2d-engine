@@ -244,8 +244,8 @@ namespace ecs {
 				if (neighbor_tile->state == PathTileState::Open)
 					continue;
 
-				neighbor_tile->state = PathTileState::Open;
 				neighbor_tile->h = _euclidean_distance_on_grid(neighbour_coord, end_coord); // heuristic score
+				neighbor_tile->state = PathTileState::Open;
 				_pathfinding_open_tiles.push(neighbor_tile);
 			}
 		}
@@ -256,7 +256,7 @@ namespace ecs {
 			return false;
 
 		path.clear();
-		for (PathTileId tile = start; tile != PathTileId(); tile = _get_tile(tile)->parent)
+		for (PathTileId tile = end; tile != PathTileId(); tile = _get_tile(tile)->parent)
 			path.push_back(tile);
 		std::reverse(path.begin(), path.end());
 
