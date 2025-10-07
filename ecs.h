@@ -12,8 +12,8 @@ namespace ecs {
 	void startup(); // Called on app startup.
 	void shutdown(); // Called on app shutdown.
 
-	void clear();
 	void setup(MapId map);
+	void clear();
 	void update(float dt);
 	void handle_window_event(const window::Event& ev);
 	// TODO: handle ui event

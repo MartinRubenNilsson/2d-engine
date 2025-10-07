@@ -67,6 +67,13 @@ namespace ecs {
 		_pathfinding_open_tiles.clear(); // defensive
 	}
 
+	void clear_pathfinding() {
+		_pathfinding_tile_size = {};
+		_pathfinding_map_size = {};
+		_pathfinding_tiles.clear();
+		_pathfinding_open_tiles.clear();
+	}
+
 	bool _valid_path_tile_coord(const Vec2i& coord) {
 		if (coord.x < 0) return false;
 		if (coord.y < 0) return false;

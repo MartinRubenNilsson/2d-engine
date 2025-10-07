@@ -35,11 +35,6 @@ namespace ecs {
 
 	entt::registry _registry;
 
-	void clear() {
-		clear_entities_to_be_destroyed_later();
-		_registry.clear();
-	}
-
 	void _setup_essentials(MapId map) {
 		setup_tiled(map);
 		setup_tags();
@@ -88,6 +83,12 @@ namespace ecs {
 		if (!map) return;
 		_setup(map);
 		_patch(map);
+	}
+
+	void clear() {
+		clear_entities_to_be_destroyed_later();
+		clear_pathfinding();
+		_registry.clear();
 	}
 
 	void _update_game_logic(float dt) {

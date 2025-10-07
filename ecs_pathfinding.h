@@ -2,6 +2,7 @@
 
 namespace ecs {
 	void setup_pathfinding(MapId map);
+	void clear_pathfinding();
 	void update_pathfinding(float dt);
 
 	struct PathTileId {
