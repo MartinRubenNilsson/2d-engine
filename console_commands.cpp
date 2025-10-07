@@ -152,8 +152,9 @@ namespace console {
 			log_error("Command is missing a callback: " + name);
 			return;
 		}
-		ArgList args{};
-		for (size_t i = 0; i < MAX_PARAMS; ++i) {
+		const size_t num_params = command->params.size();
+		std::vector<Arg> args(num_params);
+		for (size_t i = 0; i < num_params; ++i) {
 			const Param& param = command->params[i];
 			if (param.type == ParamType::None) break; // End of parameters
 			iss.ignore(64, ' '); // Skip any leading spaces

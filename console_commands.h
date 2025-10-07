@@ -34,15 +34,13 @@ namespace console {
 	std::string get_string(const Arg& arg);
 	Vec2f get_vector2f(const Arg& arg);
 
-	constexpr size_t MAX_PARAMS = 8; // Maximum number of parameters for a command
-	using ParamList = std::array<Param, MAX_PARAMS>;
-	using ArgList = std::array<Arg, MAX_PARAMS>;
+	using Args = std::span<const Arg>;
 
 	struct Command {
 		std::string_view name;
 		std::string_view desc;
-		ParamList params{};
-		void (*callback)(const ArgList& args) = nullptr;
+		std::vector<Param> params;
+		void (*callback)(Args args) = nullptr;
 	};
 
 	std::string format_command_help_message(const Command& command);
