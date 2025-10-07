@@ -1,5 +1,5 @@
 // This header should only be included in implementations of specific tasks.
-// Other code should include "ecs_tasks.h" when they want to the task API.
+// Other code should include "ecs_tasks.h" when they want to use the task API.
 
 #pragma once
 #include "ecs_task_status.h"
