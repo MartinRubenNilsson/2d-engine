@@ -53,117 +53,28 @@ namespace ecs {
 	void update_physics(float dt) {
 		constexpr float TIME_STEP = 1.f / 60.f;
 		constexpr int SUB_STEP_COUNT = 4;
-
 		static float time_accumulator = 0.f;
 		time_accumulator += dt;
-
 		for (; time_accumulator >= TIME_STEP; time_accumulator -= TIME_STEP) {
-
-			// STEP PHYSICS WORLD
-
 			b2World_Step(_physics_world, TIME_STEP, SUB_STEP_COUNT);
-
-			// PROCESS SENSOR EVENTS
+			// Dispatch sensor events.
 			{
-				const b2SensorEvents sensor_events = b2World_GetSensorEvents(_physics_world);
-				for (int32_t i = 0; i < sensor_events.beginCount; ++i) {
-					const b2SensorBeginTouchEvent& b2_ev = sensor_events.beginEvents[i];
-					PhysicsEvent ev{};
-					ev.type = PhysicsEventType::SensorBeginTouch;
-					ev.shape = b2_ev.sensorShapeId;
-					ev.other_shape = b2_ev.visitorShapeId;
-					ev.body = b2Shape_GetBody(b2_ev.sensorShapeId);
-					ev.other_body = b2Shape_GetBody(b2_ev.visitorShapeId);
-					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
-					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
-					ev.tag = get_tag(ev.entity);
-					ev.other_tag = get_tag(ev.other_entity);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
-						handler(ev);
-					}
-					std::swap(ev.shape, ev.other_shape);
-					std::swap(ev.body, ev.other_body);
-					std::swap(ev.entity, ev.other_entity);
-					std::swap(ev.tag, ev.other_tag);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
-						handler(ev);
-					}
+				const b2SensorEvents events = b2World_GetSensorEvents(_physics_world);
+				for (int32_t i = 0; i < events.beginCount; ++i) {
+					dispatch_physics_event(events.beginEvents[i]);
 				}
-				for (int32_t i = 0; i < sensor_events.endCount; ++i) {
-					const b2SensorEndTouchEvent& b2_ev = sensor_events.endEvents[i];
-					PhysicsEvent ev{};
-					ev.type = PhysicsEventType::SensorEndTouch;
-					ev.shape = b2_ev.sensorShapeId;
-					ev.other_shape = b2_ev.visitorShapeId;
-					ev.body = b2Shape_GetBody(b2_ev.sensorShapeId);
-					ev.other_body = b2Shape_GetBody(b2_ev.visitorShapeId);
-					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
-					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
-					ev.tag = get_tag(ev.entity);
-					ev.other_tag = get_tag(ev.other_entity);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
-						handler(ev);
-					}
-					std::swap(ev.shape, ev.other_shape);
-					std::swap(ev.body, ev.other_body);
-					std::swap(ev.entity, ev.other_entity);
-					std::swap(ev.tag, ev.other_tag);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
-						handler(ev);
-					}
+				for (int32_t i = 0; i < events.endCount; ++i) {
+					dispatch_physics_event(events.endEvents[i]);
 				}
 			}
-
-			// PROCESS CONTACT EVENTS
+			// Dispatch contact events.
 			{
-				const b2ContactEvents contact_events = b2World_GetContactEvents(_physics_world);
-				for (int32_t i = 0; i < contact_events.beginCount; ++i) {
-					const b2ContactBeginTouchEvent& b2_ev = contact_events.beginEvents[i];
-					PhysicsEvent ev{};
-					ev.type = PhysicsEventType::ContactBeginTouch;
-					ev.shape = b2_ev.shapeIdA;
-					ev.other_shape = b2_ev.shapeIdB;
-					ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
-					ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
-					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
-					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
-					ev.tag = get_tag(ev.entity);
-					ev.other_tag = get_tag(ev.other_entity);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
-						handler(ev);
-					}
-					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
-					std::swap(ev.shape, ev.other_shape);
-					std::swap(ev.body, ev.other_body);
-					std::swap(ev.entity, ev.other_entity);
-					std::swap(ev.tag, ev.other_tag);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
-						handler(ev);
-					}
+				const b2ContactEvents events = b2World_GetContactEvents(_physics_world);
+				for (int32_t i = 0; i < events.beginCount; ++i) {
+					dispatch_physics_event(events.beginEvents[i]);
 				}
-				for (int32_t i = 0; i < contact_events.endCount; ++i) {
-					const b2ContactEndTouchEvent& b2_ev = contact_events.endEvents[i];
-					PhysicsEvent ev{};
-					ev.type = PhysicsEventType::ContactEndTouch;
-					ev.shape = b2_ev.shapeIdA;
-					ev.other_shape = b2_ev.shapeIdB;
-					ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
-					ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
-					ev.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.body);
-					ev.other_entity = (entt::entity)(uintptr_t)b2Body_GetUserData(ev.other_body);
-					ev.tag = get_tag(ev.entity);
-					ev.other_tag = get_tag(ev.other_entity);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
-						handler(ev);
-					}
-					if (B2_ID_EQUALS(b2_ev.shapeIdA, b2_ev.shapeIdB)) continue; // PITFALL: Avoid duplicate calls
-					std::swap(ev.shape, ev.other_shape);
-					std::swap(ev.body, ev.other_body);
-					std::swap(ev.entity, ev.other_entity);
-					std::swap(ev.tag, ev.other_tag);
-					if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity_a since we swapped
-						handler(ev);
-					}
+				for (int32_t i = 0; i < events.endCount; ++i) {
+					dispatch_physics_event(events.endEvents[i]);
 				}
 			}
 		}

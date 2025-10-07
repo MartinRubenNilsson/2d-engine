@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ecs_arrow.h"
+#include "ecs_tags.h"
 #include "ecs_lifetime.h"
 #include "ecs_sprites.h"
 #include "ecs_tiled.h"

@@ -244,18 +244,19 @@ namespace ecs {
 	}
 
 	void _handle_physics_event_for_player(const PhysicsEvent& ev) {
+		const Tag other_tag = get_tag(ev.other_entity);
 		if (ev.type == PhysicsEventType::SensorBeginTouch) {
-			if (ev.other_tag == Tag::Pickup) {
+			if (other_tag == Tag::Pickup) {
 				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
 			}
 		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (ev.other_tag == Tag::PushableBlock) {
+			if (other_tag == Tag::PushableBlock) {
 				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
-			} else if (ev.other_tag == Tag::Slime) {
+			} else if (other_tag == Tag::Slime) {
 				_handle_damage_to_player(ev.entity, { DamageType::Touch, 1 });
 			}
 		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
-			if (ev.other_tag == Tag::PushableBlock) {
+			if (other_tag == Tag::PushableBlock) {
 				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
 			}
 		}

@@ -32,7 +32,7 @@ namespace ecs {
 	void _handle_physics_event_for_portal(const PhysicsEvent& ev) {
 		if (ev.type != PhysicsEventType::SensorBeginTouch)
 			return;
-		if (ev.other_tag != Tag::Player)
+		if (get_tag(ev.other_entity) != Tag::Player)
 			return;
 		_activate_portal(ev.entity);
 	}

@@ -16,4 +16,70 @@ namespace ecs {
 		PhysicsEventHandler* handler_ptr = _registry.try_get<PhysicsEventHandler>(entity);
 		return handler_ptr ? *handler_ptr : nullptr;
 	}
+
+	void dispatch_physics_event(PhysicsEvent&& ev) {
+		if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
+			handler(ev);
+		}
+		if (B2_ID_EQUALS(ev.shape, ev.other_shape))
+			return; // Avoid duplicate calls.
+		std::swap(ev.shape, ev.other_shape);
+		std::swap(ev.body, ev.other_body);
+		std::swap(ev.entity, ev.other_entity);
+		if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) { // SIC: ev.entity since we swapped
+			handler(ev);
+		}
+	}
+
+	entt::entity _get_entity(b2BodyId body) {
+		return (entt::entity)(uintptr_t)b2Body_GetUserData(body);
+	}
+
+	void dispatch_physics_event(const b2SensorBeginTouchEvent& b2ev) {
+		PhysicsEvent ev{};
+		ev.type = PhysicsEventType::SensorBeginTouch;
+		ev.shape = b2ev.sensorShapeId;
+		ev.other_shape = b2ev.visitorShapeId;
+		ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
+		ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
+		ev.entity = _get_entity(ev.body);
+		ev.other_entity = _get_entity(ev.other_body);
+		dispatch_physics_event(std::move(ev));
+	}
+
+	void dispatch_physics_event(const b2SensorEndTouchEvent& b2ev) {
+		PhysicsEvent ev{};
+		ev.type = PhysicsEventType::SensorEndTouch;
+		ev.shape = b2ev.sensorShapeId;
+		ev.other_shape = b2ev.visitorShapeId;
+		ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
+		ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
+		ev.entity = _get_entity(ev.body);
+		ev.other_entity = _get_entity(ev.other_body);
+		dispatch_physics_event(std::move(ev));
+	}
+
+	void dispatch_physics_event(const b2ContactBeginTouchEvent& b2_ev) {
+		PhysicsEvent ev{};
+		ev.type = PhysicsEventType::ContactBeginTouch;
+		ev.shape = b2_ev.shapeIdA;
+		ev.other_shape = b2_ev.shapeIdB;
+		ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
+		ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
+		ev.entity = _get_entity(ev.body);
+		ev.other_entity = _get_entity(ev.other_body);
+		dispatch_physics_event(std::move(ev));
+	}
+
+	void dispatch_physics_event(const b2ContactEndTouchEvent& b2ev) {
+		PhysicsEvent ev{};
+		ev.type = PhysicsEventType::ContactEndTouch;
+		ev.shape = b2ev.shapeIdA;
+		ev.other_shape = b2ev.shapeIdB;
+		ev.body = b2Shape_GetBody(b2ev.shapeIdA);
+		ev.other_body = b2Shape_GetBody(b2ev.shapeIdB);
+		ev.entity = _get_entity(ev.body);
+		ev.other_entity = _get_entity(ev.other_body);
+		dispatch_physics_event(std::move(ev));
+	}
 }
