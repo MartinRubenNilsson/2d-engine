@@ -1,10 +1,8 @@
 #pragma once
-#include "timer.h"
 
-namespace ecs
-{
-	enum class PickupType
-	{
+namespace ecs {
+	enum class PickupType {
+		None,
 		Arrow,
 		Rupee,
 		Bomb,
@@ -12,17 +10,8 @@ namespace ecs
 		Count,
 	};
 
-	struct Pickup
-	{
-		PickupType type = PickupType::Arrow;
-		Timer timer = { 3.f };
-
-	};
+	entt::entity create_pickup(PickupType type, const Vec2f& position);
+	PickupType get_pickup_type(entt::entity entity);
 
 	void update_pickups(float dt);
-
-	entt::entity create_pickup(PickupType type, const Vec2f& position);
-
-	Pickup& emplace_pickup(entt::entity entity);
-	Pickup* get_pickup(entt::entity entity);
 }

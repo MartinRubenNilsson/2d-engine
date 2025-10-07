@@ -6,15 +6,21 @@
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
 #include "tile_ids.h"
+#include "timer.h"
 
 namespace ecs {
+	struct Pickup {
+		PickupType type = PickupType::Arrow;
+		Timer timer = { 3.f };
+	};
+
 	extern entt::registry _registry;
 
 	void update_pickups(float dt) {
 		for (auto [entity, pickup] : _registry.view<Pickup>().each()) {
 			pickup.timer.update(dt);
 			if (pickup.timer.finished()) {
-				destroy_later(entity);
+				destroy_now(entity);
 			}
 		}
 
@@ -51,18 +57,18 @@ namespace ecs {
 		return get_tile(tileset, tile_id);
 	}
 
-	entt::entity create_pickup(PickupType type, const Vec2f& position) {
+	entt::entity create_pickup(PickupType type, const Vec2f& pos) {
 		entt::entity entity = _registry.create();
 		set_tag(entity, Tag::Pickup);
 		{
-			Pickup& pickup = emplace_pickup(entity);
+			Pickup& pickup = _registry.emplace<Pickup>(entity);
 			pickup.type = type;
 			pickup.timer.start();
 		}
 		{
 			b2BodyDef body_def = b2DefaultBodyDef();
 			body_def.type = b2_staticBody;
-			body_def.position = position;
+			body_def.position = pos;
 			b2BodyId body = emplace_body(entity, body_def);
 			b2ShapeDef shape_def = b2DefaultShapeDef();
 			shape_def.isSensor = true;
@@ -75,17 +81,15 @@ namespace ecs {
 			setup_sprite(sprite, tile, true);
 			sprite.sorting_layer = get_object_layer();
 			sprite.sorting_point = { 8.f, 8.f };
-			sprite.position = position - sprite.sorting_point;
+			sprite.position = pos - sprite.sorting_point;
 		}
 		return entity;
 	}
 
-	Pickup& emplace_pickup(entt::entity entity) {
-		return _registry.emplace_or_replace<Pickup>(entity);
-	}
-
-	Pickup* get_pickup(entt::entity entity) {
-		return _registry.try_get<Pickup>(entity);
+	PickupType get_pickup_type(entt::entity entity) {
+		if (!_registry.all_of<Pickup>(entity))
+			return PickupType::None;
+		return _registry.get<Pickup>(entity).type;
 	}
 }
 

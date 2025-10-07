@@ -42,7 +42,7 @@ namespace ecs {
 
 	void _update_pursue_tasks(float dt) {
 		for (auto [entity, task, pursue] : _registry.view<Task, PursueTask>().each()) {
-			if (!_should(task, "pursue")) {
+			if (!_should_do(task, "pursue")) {
 				_registry.erase<PursueTask>(entity);
 				continue;
 			}

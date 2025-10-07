@@ -14,7 +14,7 @@ namespace ecs {
 	};
 
 	bool _done(TaskStatus status);
-	bool _should(const Task& task, std::string_view task_name);
+	bool _should_do(const Task& task, std::string_view task_name);
 
 	void _update_wait_tasks(float dt);
 	void _update_wander_tasks(float dt);

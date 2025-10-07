@@ -172,10 +172,8 @@ namespace ecs {
 	void _on_player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
 		Player* player = _registry.try_get<Player>(player_entity);
 		if (!player) return;
-		Pickup* pickup = get_pickup(pickup_entity);
-		if (!pickup) return;
 
-		switch (pickup->type) {
+		switch (get_pickup_type(pickup_entity)) {
 			case PickupType::Arrow: {
 				player->arrows++;
 				audio::create_event({ .path = "event:/snd_pickup" });

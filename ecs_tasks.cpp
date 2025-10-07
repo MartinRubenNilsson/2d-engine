@@ -31,7 +31,7 @@ namespace ecs {
 		return status == TaskStatus::Succeeded || status == TaskStatus::Failed;
 	}
 
-	bool _should(const Task& task, std::string_view task_name) {
+	bool _should_do(const Task& task, std::string_view task_name) {
 		return !_done(task.status) && task.name == task_name;
 	}
 

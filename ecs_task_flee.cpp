@@ -17,7 +17,7 @@ namespace ecs {
 
 	void _update_flee_tasks(float dt) {
 		for (auto [entity, task, flee] : _registry.view<Task, FleeTask>().each()) {
-			if (!_should(task, "flee")) {
+			if (!_should_do(task, "flee")) {
 				_registry.erase<FleeTask>(entity);
 				continue;
 			}

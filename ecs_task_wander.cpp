@@ -19,7 +19,7 @@ namespace ecs {
 
 	void _update_wander_tasks(float dt) {
 		for (auto [entity, task, wander] : _registry.view<Task, WanderTask>().each()) {
-			if (!_should(task, "wander")) {
+			if (!_should_do(task, "wander")) {
 				_registry.erase<WanderTask>(entity);
 				continue;
 			}

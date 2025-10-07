@@ -15,7 +15,7 @@ namespace ecs {
 
 	void _update_wait_tasks(float dt) {
 		for (auto [entity, task, wait] : _registry.view<Task, WaitTask>().each()) {
-			if (!_should(task, "wait")) {
+			if (!_should_do(task, "wait")) {
 				_registry.erase<WaitTask>(entity);
 				continue;
 			}
