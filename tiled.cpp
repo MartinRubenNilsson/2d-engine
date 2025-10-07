@@ -306,13 +306,13 @@ namespace tiled {
 		return id;
 	}
 
-	unsigned int load_object_from_file(Context& context, std::string_view path) {
+	unsigned int load_template_from_file(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
-		// Check if the object is already loaded
-		for (unsigned int id = 0; id < context.objects.size(); ++id) {
-			if (context.objects[id].path == normalized_path) {
-				return id;
+		// Check if the template is already loaded
+		for (const Template& temp : context.templates) {
+			if (temp.path == normalized_path) {
+				return temp.object_id;
 			}
 		}
 
@@ -366,12 +366,17 @@ namespace tiled {
 		const pugi::xml_node object_node = template_node.child("object");
 
 		Object object{};
-		object.path = std::move(normalized_path);
 		_load_object(object_node, object, std::span(&tileset, 1));
 
-		const unsigned int id = (unsigned int)context.objects.size();
+		const unsigned int object_id = (unsigned int)context.objects.size();
 		context.objects.emplace_back(std::move(object));
-		return id;
+
+		Template temp{};
+		temp.path = std::move(normalized_path);
+		temp.object_id = object_id;
+		context.templates.emplace_back(std::move(temp));
+
+		return object_id;
 	}
 
 	bool _string_to_layer_type(std::string_view str, LayerType& type) {
@@ -542,7 +547,7 @@ namespace tiled {
 					template_path += '/';
 					template_path += template_attribute.as_string();
 					template_path = _get_normalized_path(template_path);
-					const unsigned int object_id = load_object_from_file(context, template_path);
+					const unsigned int object_id = load_template_from_file(context, template_path);
 					if (object_id < context.objects.size()) {
 						object = context.objects[object_id];
 					}

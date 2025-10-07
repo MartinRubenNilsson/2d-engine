@@ -43,7 +43,7 @@ namespace ecs {
 		// ...then templates...
 		for (const filesystem::File& file : files) {
 			if (file.format != filesystem::FileFormat::TiledTemplate) continue;
-			tiled::load_object_from_file(_tiled_context, file.path);
+			tiled::load_template_from_file(_tiled_context, file.path);
 		}
 		// ...and lastly maps.
 		for (const filesystem::File& file : files) {

@@ -75,7 +75,6 @@ namespace tiled {
 		// (and NOT an index into Context::objects[]). Valid UIDs are >= 1.
 		unsigned int uid = 0; 
 		ObjectType type = ObjectType::Rectangle;
-		std::string path; // empty if not a template object
 		std::string name;
 		std::string class_;
 		std::vector<Property> properties;
@@ -85,6 +84,11 @@ namespace tiled {
 		float y = 0.f; // in pixels
 		float width = 0.f; // in pixels
 		float height = 0.f; // in pixels
+	};
+
+	struct Template {
+		std::string path;
+		unsigned int object_id = UINT_MAX;
 	};
 
 	struct Frame {
@@ -195,6 +199,7 @@ namespace tiled {
 		std::vector<Map> maps;
 		std::vector<Tileset> tilesets;
 		std::vector<Object> objects;
+		std::vector<Template> templates;
 	};
 
 	// Returns the tileset ID (an index into Context::tilesets[]), or UINT_MAX if not found.
@@ -202,7 +207,7 @@ namespace tiled {
 
 	// Returns the object ID (an index into Context::objects[]), or UINT_MAX if not found.
 	// May load a tileset as a side effect.
-	unsigned int load_object_from_file(Context &context, std::string_view path);
+	unsigned int load_template_from_file(Context &context, std::string_view path);
 
 	// Returns the map ID (an index into Context::maps[]), or UINT_MAX if not found.
 	// May load one or more tilesets and objects as a side effect.
