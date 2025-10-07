@@ -28,6 +28,7 @@
 #include "graphics_globals.h"
 #include "timer.h"
 #include "ecs_states.h"
+#include "ecs_audio.h"
 
 namespace ecs {
 
@@ -257,6 +258,7 @@ namespace ecs {
 				Player& player = _registry.emplace<Player>(entity);
 			}
 
+			set_audio_listener(entity);
 			set_physics_event_handler(entity, _handle_physics_for_player);
 			set_damage_event_handler(entity, _handle_damage_for_player);
 
@@ -318,7 +320,6 @@ namespace ecs {
 
 			// UPDATE AUDIO
 
-			audio::set_listener_position(position);
 			audio::set_parameter_label("terrain", map::to_string(map::get_terrain_type_at(position)));
 			//if (animation._frame_changed && animation._frame_id % 3 == 0) {
 			//	// Take a step every 3 frames

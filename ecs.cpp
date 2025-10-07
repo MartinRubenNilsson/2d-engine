@@ -46,7 +46,7 @@ namespace ecs {
 		setup_sprites(map);
 		setup_animations();
 		setup_cameras(map);
-		setup_audio_sources();
+		setup_audio();
 	}
 
 	void _setup_game(MapId map) {
@@ -119,6 +119,7 @@ namespace ecs {
 		_update_essential_logic(dt);
 		_update_game_graphics(dt);
 		_update_essential_graphics(dt);
+		update_audio(dt);
 	}
 
 	void handle_window_event(const window::Event& event) {
