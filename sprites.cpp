@@ -56,7 +56,7 @@ namespace sprites {
 	unsigned int _num_sprites_in_largest_batch = 0;
 	unsigned int _num_vertices_in_largest_batch = 0;
 
-	void add_sprite(const Sprite& sprite) {
+	void draw_sprite_later(const Sprite& sprite) {
 		_sprites.push_back(sprite);
 	}
 

@@ -39,6 +39,22 @@ namespace ecs {
 		return _done(status(entity));
 	}
 
+	void succeed(entt::entity entity) {
+		if (Task* task = _registry.try_get<Task>(entity)) {
+			task->status = TaskStatus::Succeeded;
+		}
+	}
+
+	void fail(entt::entity entity) {
+		if (Task* task = _registry.try_get<Task>(entity)) {
+			task->status = TaskStatus::Failed;
+		}
+	}
+
+	void new_task(std::string_view name) {
+		// TODO
+	}
+
 	void then(entt::entity entity, void (*then)(entt::entity entity)) {
 		_registry.get_or_emplace<Task>(entity).then_queue.push_back(then);
 	}

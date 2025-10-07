@@ -3,11 +3,17 @@
 
 namespace ecs {
 	std::string_view current_task(entt::entity entity);
+
 	TaskStatus status(entt::entity entity);
 	bool succeeded(entt::entity entity); // check if status = Succeeded
 	bool failed(entt::entity entity); // check if status = Failed
 	bool done(entt::entity entity); // check if status = Succeeded or Failed
 
+	void succeed(entt::entity entity); // Make the current task succeed immediately.
+	void fail(entt::entity entity); // Make the current task succeed immediately.
+
+	// Indicate the start of a new named task. Calling this is optional.
+	void new_task(std::string_view name);
 	// Set a callback to be called after the task is done.
 	void then(entt::entity entity, void (*then)(entt::entity entity));
 

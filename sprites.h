@@ -57,7 +57,7 @@ namespace sprites {
 	bool operator<(const Sprite& left, const Sprite& right);
 
 	// Adds a sprite to be sorted and drawn later.
-	void add_sprite(const Sprite& sprite);
+	void draw_sprite_later(const Sprite& sprite);
 	// Sorts all added sprites by draw order.
 	void sort_all_sprites();
 	// Draws all added sprites and removes them.

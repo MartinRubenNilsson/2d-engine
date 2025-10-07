@@ -134,7 +134,7 @@ namespace ecs {
 				copy.uniform_buffer_size = 0;
 				copy.uniform_buffer_offset = 0;
 			}
-			sprites::add_sprite(copy);
+			sprites::draw_sprite_later(copy);
 		}
 
 		graphics::update_buffer(graphics::sprite_uniform_buffer,

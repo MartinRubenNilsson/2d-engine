@@ -153,6 +153,7 @@
     <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_physics_queries.cpp" />
     <ClCompile Include="ecs_physics_setup.cpp" />
+    <ClCompile Include="ecs_pushable.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_sprites_setup.cpp" />
     <ClCompile Include="ecs_tasks.cpp" />
@@ -246,6 +247,7 @@
     <ClInclude Include="ecs_patch.h" />
     <ClInclude Include="ecs_physics_events.h" />
     <ClInclude Include="ecs_physics_queries.h" />
+    <ClInclude Include="ecs_pushable.h" />
     <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_states.h" />
     <ClInclude Include="audio.h" />

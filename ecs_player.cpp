@@ -15,13 +15,10 @@
 #include "audio.h"
 #include "window.h"
 #include "window_events.h"
-#include "ui_hud.h"
 #include "ui_textbox.h"
 #include "ui_bindings.h"
-#include "random.h"
 #include "map_grid.h"
 #include "postprocessing.h"
-#include "shapes.h"
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
@@ -101,11 +98,6 @@ namespace ecs {
 		int arrows = 10;
 		int bombs = 5;
 		int rupees = 10;
-		bool touching_pushable_block = false;
-
-		// It really is the pushable block that's making the sound,
-		// but I can't be bothered to make a separate component for it rn.
-		Handle<audio::Event> stone_sliding_sound;
 	};
 
 	extern entt::registry _registry;
@@ -205,27 +197,6 @@ namespace ecs {
 		destroy_later(pickup_entity);
 	}
 
-	void _on_player_begin_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
-		Player* player = _registry.try_get<Player>(player_entity);
-		if (!player) return;
-		player->touching_pushable_block = true;
-		audio::stop_event(player->stone_sliding_sound); // Stop any previously playing sound
-		player->stone_sliding_sound = audio::create_event({ .path = "event:/props/stone_slide" });
-		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
-			b2Body_SetType(body, b2_dynamicBody);
-		}
-	}
-
-	void _on_player_end_touch_pushable_block(entt::entity player_entity, entt::entity pushable_block_entity) {
-		Player* player = _registry.try_get<Player>(player_entity);
-		if (!player) return;
-		player->touching_pushable_block = false;
-		audio::stop_event(player->stone_sliding_sound);
-		if (b2BodyId body = get_body(pushable_block_entity); B2_IS_NON_NULL(body)) {
-			b2Body_SetType(body, b2_staticBody);
-		}
-	}
-
 	bool _handle_damage_to_player(entt::entity entity, const Damage& damage) {
 		if (damage.amount <= 0) return false;
 		Player* player = _registry.try_get<Player>(entity);
@@ -250,14 +221,8 @@ namespace ecs {
 				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
 			}
 		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (other_tag == Tag::PushableBlock) {
-				_on_player_begin_touch_pushable_block(ev.entity, ev.other_entity);
-			} else if (other_tag == Tag::Slime) {
+			if (other_tag == Tag::Slime) {
 				_handle_damage_to_player(ev.entity, { DamageType::Touch, 1 });
-			}
-		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
-			if (other_tag == Tag::PushableBlock) {
-				_on_player_end_touch_pushable_block(ev.entity, ev.other_entity);
 			}
 		}
 	}
@@ -398,8 +363,8 @@ namespace ecs {
 						new_move_dir = normalize(new_move_dir);
 						if (player.input_flags & INPUT_STEALTH) {
 							new_move_speed = _PLAYER_STEALTH_SPEED;
-						} else if (player.touching_pushable_block) {
-							new_move_speed = _PLAYER_WALK_SPEED;
+						//} else if (player.touching_pushable_block) {
+						//	new_move_speed = _PLAYER_WALK_SPEED;
 						} else if (player.input_flags & INPUT_RUN) {
 							new_move_speed = _PLAYER_RUN_SPEED;
 						} else {
@@ -448,6 +413,7 @@ namespace ecs {
 							audio::create_event({ .path = "event:/player/error" });
 						}
 
+#if 0
 					} else if (player.touching_pushable_block && new_velocity != Vec2f::ZERO) {
 
 						switch (dir) {
@@ -461,7 +427,7 @@ namespace ecs {
 						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
-
+#endif
 					} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
 
 						switch (dir) {

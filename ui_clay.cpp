@@ -214,7 +214,7 @@ namespace ui {
 						(unsigned char)rectangle.backgroundColor.b,
 						(unsigned char)rectangle.backgroundColor.a
 					};
-					sprites::add_sprite(sprite);
+					sprites::draw_sprite_later(sprite);
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.

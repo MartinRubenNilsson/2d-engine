@@ -19,6 +19,7 @@
 #include "ecs_audio.h"
 #include "ecs_slime.h"
 #include "ecs_tasks.h"
+#include "ecs_pushable.h"
 
 namespace ecs {
 	void startup() {
@@ -55,6 +56,7 @@ namespace ecs {
 		setup_players(map);
 		setup_slimes();
 		setup_blade_traps();
+		setup_pushables();
 	}
 
 	void _setup(MapId map) {

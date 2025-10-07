@@ -44,10 +44,7 @@
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player.cpp">
-      <Filter>game\ecs\players</Filter>
-    </ClCompile>
-    <ClCompile Include="background.cpp">
-      <Filter>graphics</Filter>
+      <Filter>game\ecs\game\players</Filter>
     </ClCompile>
     <ClCompile Include="map_grid.cpp">
       <Filter>game\map</Filter>
@@ -102,10 +99,10 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_interactions.cpp">
-      <Filter>game\ecs\mechanics</Filter>
+      <Filter>game\ecs\game\mechanics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_damage.cpp">
-      <Filter>game\ecs\mechanics</Filter>
+      <Filter>game\ecs\game\mechanics</Filter>
     </ClCompile>
     <ClCompile Include="random.cpp">
       <Filter>utilities</Filter>
@@ -114,7 +111,7 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_blade_trap.cpp">
-      <Filter>game\ecs\enemies</Filter>
+      <Filter>game\ecs\game\enemies</Filter>
     </ClCompile>
     <ClCompile Include="eastl_allocator.cpp">
       <Filter>utilities</Filter>
@@ -132,13 +129,13 @@
       <Filter>game\player</Filter>
     </ClCompile>
     <ClCompile Include="ecs_grass.cpp">
-      <Filter>game\ecs\environment</Filter>
+      <Filter>game\ecs\game\environment</Filter>
     </ClCompile>
     <ClCompile Include="ecs_arrow.cpp">
-      <Filter>game\ecs\weapons</Filter>
+      <Filter>game\ecs\game\weapons</Filter>
     </ClCompile>
     <ClCompile Include="ecs_bomb.cpp">
-      <Filter>game\ecs\weapons</Filter>
+      <Filter>game\ecs\game\weapons</Filter>
     </ClCompile>
     <ClCompile Include="ecs_vfx.cpp">
       <Filter>game\ecs\graphics</Filter>
@@ -192,7 +189,7 @@
       <Filter>game\ecs\states</Filter>
     </ClCompile>
     <ClCompile Include="ecs_slime.cpp">
-      <Filter>game\ecs\enemies</Filter>
+      <Filter>game\ecs\game\enemies</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tags.cpp">
       <Filter>game\ecs\tags</Filter>
@@ -207,13 +204,13 @@
       <Filter>game\ecs\audio</Filter>
     </ClCompile>
     <ClCompile Include="ecs_chest.cpp">
-      <Filter>game\ecs\chests</Filter>
+      <Filter>game\ecs\game\chests</Filter>
     </ClCompile>
     <ClCompile Include="ecs_pickups.cpp">
-      <Filter>game\ecs\pickups</Filter>
+      <Filter>game\ecs\game\pickups</Filter>
     </ClCompile>
     <ClCompile Include="ecs_portal.cpp">
-      <Filter>game\ecs\portals</Filter>
+      <Filter>game\ecs\game\portals</Filter>
     </ClCompile>
     <ClCompile Include="ecs_patch.cpp">
       <Filter>game\ecs\patching</Filter>
@@ -258,7 +255,13 @@
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_cloning.cpp">
-      <Filter>game\ecs</Filter>
+      <Filter>game\ecs\cloning</Filter>
+    </ClCompile>
+    <ClCompile Include="background.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_pushable.cpp">
+      <Filter>game\ecs\game\pushables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -305,10 +308,7 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player.h">
-      <Filter>game\ecs\players</Filter>
-    </ClInclude>
-    <ClInclude Include="background.h">
-      <Filter>graphics</Filter>
+      <Filter>game\ecs\game\players</Filter>
     </ClInclude>
     <ClInclude Include="map_grid.h">
       <Filter>game\map</Filter>
@@ -368,10 +368,10 @@
       <Filter>utilities</Filter>
     </ClInclude>
     <ClInclude Include="ecs_interactions.h">
-      <Filter>game\ecs\mechanics</Filter>
+      <Filter>game\ecs\game\mechanics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_damage.h">
-      <Filter>game\ecs\mechanics</Filter>
+      <Filter>game\ecs\game\mechanics</Filter>
     </ClInclude>
     <ClInclude Include="random.h">
       <Filter>utilities</Filter>
@@ -380,7 +380,7 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_blade_trap.h">
-      <Filter>game\ecs\enemies</Filter>
+      <Filter>game\ecs\game\enemies</Filter>
     </ClInclude>
     <ClInclude Include="ecs_sprites.h">
       <Filter>game\ecs\graphics</Filter>
@@ -413,13 +413,13 @@
       <Filter>game\player</Filter>
     </ClInclude>
     <ClInclude Include="ecs_grass.h">
-      <Filter>game\ecs\environment</Filter>
+      <Filter>game\ecs\game\environment</Filter>
     </ClInclude>
     <ClInclude Include="ecs_arrow.h">
-      <Filter>game\ecs\weapons</Filter>
+      <Filter>game\ecs\game\weapons</Filter>
     </ClInclude>
     <ClInclude Include="ecs_bomb.h">
-      <Filter>game\ecs\weapons</Filter>
+      <Filter>game\ecs\game\weapons</Filter>
     </ClInclude>
     <ClInclude Include="ecs_vfx.h">
       <Filter>game\ecs\graphics</Filter>
@@ -476,7 +476,7 @@
       <Filter>game\ecs\states</Filter>
     </ClInclude>
     <ClInclude Include="ecs_slime.h">
-      <Filter>game\ecs\enemies</Filter>
+      <Filter>game\ecs\game\enemies</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tags.h">
       <Filter>game\ecs\tags</Filter>
@@ -491,13 +491,13 @@
       <Filter>game\ecs\audio</Filter>
     </ClInclude>
     <ClInclude Include="ecs_chest.h">
-      <Filter>game\ecs\chests</Filter>
+      <Filter>game\ecs\game\chests</Filter>
     </ClInclude>
     <ClInclude Include="ecs_pickups.h">
-      <Filter>game\ecs\pickups</Filter>
+      <Filter>game\ecs\game\pickups</Filter>
     </ClInclude>
     <ClInclude Include="ecs_portal.h">
-      <Filter>game\ecs\portals</Filter>
+      <Filter>game\ecs\game\portals</Filter>
     </ClInclude>
     <ClInclude Include="ecs_patch.h">
       <Filter>game\ecs\patching</Filter>
@@ -530,7 +530,13 @@
       <Filter>game\ecs\physics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_cloning.h">
-      <Filter>game\ecs</Filter>
+      <Filter>game\ecs\cloning</Filter>
+    </ClInclude>
+    <ClInclude Include="background.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_pushable.h">
+      <Filter>game\ecs\game\pushables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -576,23 +582,11 @@
     <Filter Include="game\ecs\physics\box2d">
       <UniqueIdentifier>{ffe6cfc6-66be-46cd-a885-5762aed4b6bf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\mechanics">
-      <UniqueIdentifier>{bda05a2e-3455-426f-87f2-f5bcb303a363}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\enemies">
-      <UniqueIdentifier>{c8484bdc-09b7-4b8c-ac87-16b2f0ccfaac}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ecs\graphics">
       <UniqueIdentifier>{a81c1375-587d-4f63-8d82-144aa9a48fe8}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\player">
       <UniqueIdentifier>{03b5b10a-d728-4b19-a8d7-517a4b0f078d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\environment">
-      <UniqueIdentifier>{c33fa15c-3f56-47b1-95d9-eb50f33b01ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\weapons">
-      <UniqueIdentifier>{f5a887d6-c31f-4e53-9866-298d276906b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="networking">
       <UniqueIdentifier>{23c79627-6974-476a-9bf9-3a2b86f11791}</UniqueIdentifier>
@@ -633,18 +627,6 @@
     <Filter Include="game\ecs\states">
       <UniqueIdentifier>{7f6f1dba-1e00-4cc0-b3b5-9aafc805ff9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\chests">
-      <UniqueIdentifier>{56ba1ffe-bcd3-4ab3-ab39-375a42ef707b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\pickups">
-      <UniqueIdentifier>{00dbe252-53ab-48da-a99d-73fd007bf388}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\portals">
-      <UniqueIdentifier>{529cdad0-dd89-4b72-b232-eefaadbc77a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\players">
-      <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ecs\patching">
       <UniqueIdentifier>{f6824319-f523-4bf5-b752-928b21ec152f}</UniqueIdentifier>
     </Filter>
@@ -656,6 +638,39 @@
     </Filter>
     <Filter Include="game\ecs\ai\tasks\implementations">
       <UniqueIdentifier>{65478eb0-56d4-4d87-8c8c-7dae91063ec9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game">
+      <UniqueIdentifier>{b3018b68-0712-48fe-8c28-617aa90d08cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\weapons">
+      <UniqueIdentifier>{f5a887d6-c31f-4e53-9866-298d276906b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\mechanics">
+      <UniqueIdentifier>{bda05a2e-3455-426f-87f2-f5bcb303a363}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\environment">
+      <UniqueIdentifier>{c33fa15c-3f56-47b1-95d9-eb50f33b01ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\enemies">
+      <UniqueIdentifier>{c8484bdc-09b7-4b8c-ac87-16b2f0ccfaac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\chests">
+      <UniqueIdentifier>{56ba1ffe-bcd3-4ab3-ab39-375a42ef707b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\portals">
+      <UniqueIdentifier>{529cdad0-dd89-4b72-b232-eefaadbc77a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\pickups">
+      <UniqueIdentifier>{00dbe252-53ab-48da-a99d-73fd007bf388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\players">
+      <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\cloning">
+      <UniqueIdentifier>{f8593501-69ce-46de-bc17-03d47d691323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\pushables">
+      <UniqueIdentifier>{1a8c93ab-e3cb-4f2f-b3b7-1fe5a2020216}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

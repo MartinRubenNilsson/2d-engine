@@ -20,6 +20,7 @@ namespace ecs {
     }
 
     void _do_slime_task(entt::entity e) {
+        //new_task("slime_task");
         wander(e, 20.f, 50.f, random::range_f(1.f, 3.f));
         then(e, [](entt::entity e) {
             wait(e, random::range_f(0.5f, 1.5f));
@@ -30,6 +31,9 @@ namespace ecs {
                     then(e, _do_slime_task);
                 });
             });
+        });
+        then(e, [](entt::entity e) {
+            wait(e, 100.f);
         });
     }
 
