@@ -21,7 +21,7 @@ namespace ecs {
 		if (PhysicsEventHandler handler = get_physics_event_handler(ev.entity)) {
 			handler(ev);
 		}
-		if (B2_ID_EQUALS(ev.shape, ev.other_shape))
+		if (ev.entity == ev.other_entity)
 			return; // Avoid duplicate calls.
 		std::swap(ev.shape, ev.other_shape);
 		std::swap(ev.body, ev.other_body);
