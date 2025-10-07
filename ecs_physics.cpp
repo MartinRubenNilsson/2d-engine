@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ecs_physics.h"
 #include "ecs_physics_events.h"
+#include "ecs_cloning.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "box2d-d.lib")
@@ -8,30 +9,39 @@
 #pragma comment(lib, "box2d.lib")
 #endif
 
-#ifdef _DEBUG_PHYSICS
-#include "shapes.h"
-#endif
-
 namespace ecs {
-	constexpr float _PHYSICS_LENGTH_UNITS_PER_METER = 16.f; // 16 pixels per meter
-	constexpr float _PHYSICS_TIME_STEP = 1.f / 60.f;
-	constexpr int _PHYSICS_SUB_STEP_COUNT = 4;
-
-	b2WorldId _physics_world = b2_nullWorldId;
-	float _physics_time_accumulator = 0.f;
-
-	extern entt::registry _registry;
-
 	void _on_destroy_b2BodyId(entt::registry& registry, entt::entity entity) {
 		b2DestroyBody(registry.get<b2BodyId>(entity));
 	}
 
+	extern entt::registry _registry;
+
+	void _clone_b2BodyId(entt::entity clone, const void* component) {
+		b2BodyId body = *(b2BodyId*)component;
+		b2BodyDef body_def = get_body_def(body);
+		b2BodyId body_clone = emplace_body(clone, body_def);
+#if 0
+		for (const b2Fixture* fixture = b2Body_GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+			b2FixtureDef fixture_def = get_shape_def(fixture);
+			new_body->CreateFixture(&fixture_def);
+		}
+#endif
+		//HACK: so they don't spawn inside each other
+		b2Vec2 pos = b2Body_GetPosition(body);
+		pos.x += 16.f; //one tile
+		b2Body_SetTransform(body_clone, pos, { 0.f, 0.f });
+	}
+	
+	b2WorldId _physics_world = b2_nullWorldId;
+
 	void startup_physics() {
-		b2SetLengthUnitsPerMeter(_PHYSICS_LENGTH_UNITS_PER_METER);
+		constexpr float LENGTH_UNITS_PER_METER = 16.f; // 16 pixels per meter
+		b2SetLengthUnitsPerMeter(LENGTH_UNITS_PER_METER);
 		b2WorldDef world_def = b2DefaultWorldDef();
 		world_def.gravity = { 0.f, 0.f }; // no gravity
 		_physics_world = b2CreateWorld(&world_def);
 		_registry.on_destroy<b2BodyId>().connect<_on_destroy_b2BodyId>();
+		set_cloning_handler(entt::type_id<b2BodyId>(), _clone_b2BodyId);
 	}
 
 	void shutdown_physics() {
@@ -41,12 +51,17 @@ namespace ecs {
 	}
 
 	void update_physics(float dt) {
-		_physics_time_accumulator += dt;
-		for (; _physics_time_accumulator >= _PHYSICS_TIME_STEP; _physics_time_accumulator -= _PHYSICS_TIME_STEP) {
+		constexpr float TIME_STEP = 1.f / 60.f;
+		constexpr int SUB_STEP_COUNT = 4;
+
+		static float time_accumulator = 0.f;
+		time_accumulator += dt;
+
+		for (; time_accumulator >= TIME_STEP; time_accumulator -= TIME_STEP) {
 
 			// STEP PHYSICS WORLD
 
-			b2World_Step(_physics_world, _PHYSICS_TIME_STEP, _PHYSICS_SUB_STEP_COUNT);
+			b2World_Step(_physics_world, TIME_STEP, SUB_STEP_COUNT);
 
 			// PROCESS SENSOR EVENTS
 			{
@@ -214,23 +229,6 @@ namespace ecs {
 		b2BodyId body = b2CreateBody(_physics_world, &body_def_copy);
 		_registry.emplace_or_replace<b2BodyId>(entity, body);
 		return body;
-	}
-
-
-	b2BodyId deep_copy_and_emplace_body(entt::entity entity, b2BodyId body) {
-		b2BodyDef body_def = get_body_def(body);
-		b2BodyId new_body = b2CreateBody(_physics_world, &body_def);
-#if 0
-		for (const b2Fixture* fixture = b2Body_GetFixtureList(); fixture; fixture = fixture->GetNext()) {
-			b2FixtureDef fixture_def = get_shape_def(fixture);
-			new_body->CreateFixture(&fixture_def);
-		}
-#endif
-		//HACK: so they don't spawn inside each other
-		b2Vec2 pos = b2Body_GetPosition(body);
-		pos.x += 16.f; //one tile
-		b2Body_SetTransform(new_body, pos, { 0.f, 0.f });
-		return _registry.emplace_or_replace<b2BodyId>(entity, new_body);
 	}
 
 	b2BodyId get_body(entt::entity entity) {

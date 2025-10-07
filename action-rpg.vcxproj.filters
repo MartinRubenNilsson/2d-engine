@@ -257,6 +257,9 @@
     <ClCompile Include="ecs_physics_queries.cpp">
       <Filter>game\ecs\physics</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_cloning.cpp">
+      <Filter>game\ecs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -525,6 +528,9 @@
     </ClInclude>
     <ClInclude Include="ecs_physics_queries.h">
       <Filter>game\ecs\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_cloning.h">
+      <Filter>game\ecs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -33,22 +33,6 @@ namespace ecs {
 
 	entt::registry _registry;
 
-	// TODO: move somewhere else
-#if 0
-	entt::entity deep_copy(entt::entity entity) {
-		entt::entity copied_entity = _registry.create();
-		for (auto [name, storage] : _registry.storage()) {
-			if (!storage.contains(entity)) continue;
-			if (storage.type() == entt::type_id<b2BodyId>()) {
-				deep_copy_and_emplace_body(copied_entity, *(b2BodyId*)storage.value(entity));
-			} else {
-				storage.push(copied_entity, storage.value(entity));
-			}
-		}
-		return copied_entity;
-	}
-#endif
-
 	void clear() {
 		clear_entities_to_be_destroyed_later();
 		_registry.clear();
