@@ -6,17 +6,27 @@
 #include "ecs_tiled.h"
 #include "ecs_animations.h"
 #include "ecs_tasks.h"
+#include "ecs_physics_events.h"
 #include "audio.h"
 #include "random.h"
 
 namespace ecs {
     extern entt::registry _registry;
 
-    bool _handle_damage_to_slime(entt::entity entity, const Damage& damage) {
+    bool _handle_damage_for_slime(entt::entity entity, const DamageEvent& ev) {
         // Die immediately.
         audio::create_event({ .path = "event:/snd_slime_dying" });
         destroy_later(entity);
         return true;
+    }
+
+    void _handle_physics_for_slime(const PhysicsEvent& ev) {
+        if (ev.type == PhysicsEventType::ContactBeginTouch) {
+            deal_damage(ev.other_entity, {
+                .type = DamageType::Touch,
+                .amount = 1,
+                .source = ev.entity });
+        }
     }
 
     void _do_slime_task(entt::entity e) {
@@ -40,7 +50,8 @@ namespace ecs {
     void setup_slimes() {
         for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
             _registry.emplace<Direction>(entity, Direction::S); // TODO: use this for something useful!
-            set_damage_handler(entity, _handle_damage_to_slime);
+            set_physics_event_handler(entity, _handle_physics_for_slime);
+            set_damage_event_handler(entity, _handle_damage_for_slime);
             _do_slime_task(entity);
         }
     }

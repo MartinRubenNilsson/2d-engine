@@ -6,36 +6,36 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void set_damage_handler(entt::entity entity, DamageHandler handler) {
+	void set_damage_event_handler(entt::entity entity, DamageEventHandler handler) {
 		if (handler) {
-			_registry.emplace_or_replace<DamageHandler>(entity, handler);
+			_registry.emplace_or_replace<DamageEventHandler>(entity, handler);
 		} else {
-			_registry.remove<DamageHandler>(entity);
+			_registry.remove<DamageEventHandler>(entity);
 		}
 	}
 
-	DamageHandler get_damage_handler(entt::entity entity) {
-		DamageHandler* handler_ptr = _registry.try_get<DamageHandler>(entity);
+	DamageEventHandler get_damage_event_handler(entt::entity entity) {
+		DamageEventHandler* handler_ptr = _registry.try_get<DamageEventHandler>(entity);
 		return handler_ptr ? *handler_ptr : nullptr;
 	}
 
-	bool apply_damage(entt::entity entity, const Damage& damage) {
+	bool deal_damage(entt::entity entity, const DamageEvent& ev) {
 		if (entity == entt::null) return false;
-		if (entity == damage.source) return false; // For now, entities can't damage themselves
-		DamageHandler callback = get_damage_handler(entity);
+		if (entity == ev.source) return false; // For now, entities can't damage themselves
+		DamageEventHandler callback = get_damage_event_handler(entity);
 		if (!callback) return false;
-		return callback(entity, damage);
+		return callback(entity, ev);
 	}
 
 	// This is used for record-keeping so we don't apply the same damage to the same entity multiple times.
 	std::unordered_set<entt::entity> _entities_that_took_damage;
 
-	bool apply_damage_in_box(const Damage& damage, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
+	bool deal_damage_in_box(const DamageEvent& ev, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
 		//debug::draw_box(box_min, box_max, Color::Red, 0.2f);
 		for (const OverlapHit& hit : overlap_box(box_min, box_max, mask_bits)) {
-			if (hit.entity == damage.source) continue; // For now, entities can't damage themselves
+			if (hit.entity == ev.source) continue; // For now, entities can't damage themselves
 			if (_entities_that_took_damage.contains(hit.entity)) continue;
-			if (!apply_damage(hit.entity, damage)) continue;
+			if (!deal_damage(hit.entity, ev)) continue;
 			_entities_that_took_damage.insert(hit.entity);
 		}
 		const bool any_entity_took_damage = !_entities_that_took_damage.empty();
@@ -43,12 +43,12 @@ namespace ecs {
 		return any_entity_took_damage;
 	}
 
-	bool apply_damage_in_circle(const Damage& damage, const Vec2f& center, float radius, uint32_t mask_bits) {
+	bool deal_damage_in_circle(const DamageEvent& ev, const Vec2f& center, float radius, uint32_t mask_bits) {
 		//debug::draw_circle(center, radius, Color::Red, 0.2f);
 		for (const OverlapHit& hit : overlap_circle(center, radius, mask_bits)) {
-			if (hit.entity == damage.source) continue; // For now, entities can't damage themselves
+			if (hit.entity == ev.source) continue; // For now, entities can't damage themselves
 			if (_entities_that_took_damage.contains(hit.entity)) continue;
-			if (!apply_damage(hit.entity, damage)) continue;
+			if (!deal_damage(hit.entity, ev)) continue;
 			_entities_that_took_damage.insert(hit.entity);
 		}
 		const bool any_entity_took_damage = !_entities_that_took_damage.empty();

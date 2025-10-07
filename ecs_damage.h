@@ -8,7 +8,7 @@ namespace ecs {
 		Explosion,
 	};
 
-	struct Damage {
+	struct DamageEvent {
 		DamageType type = DamageType::Default;
 		int amount = 0;
 		// The entity that dealt the damage (e.g. the bomb that exploded).
@@ -17,16 +17,16 @@ namespace ecs {
 	};
 
 	// Called when the entity is meant to take damage. Should return true if any damage was applied.
-	using DamageHandler = bool(*)(entt::entity entity, const Damage& damage);
+	using DamageEventHandler = bool(*)(entt::entity entity, const DamageEvent& ev);
 
-	void set_damage_handler(entt::entity entity, DamageHandler handler);
-	DamageHandler get_damage_handler(entt::entity entity); // Returns nullptr if handler isn't set
+	void set_damage_event_handler(entt::entity entity, DamageEventHandler handler);
+	DamageEventHandler get_damage_event_handler(entt::entity entity); // Returns nullptr if handler isn't set
 
-	// Appplies damage to a single entity by calling the entity's DamageHandler.
-	bool apply_damage(entt::entity entity, const Damage& damage);
+	// Deals damage to a single entity by calling the entity's DamageHandler.
+	bool deal_damage(entt::entity entity, const DamageEvent& ev);
 
-	// Applies damage to all entities that intersect the given box. Returns true if any entity was damaged.
-	bool apply_damage_in_box(const Damage& damage, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
-	// Applies damage to all entities that intersect the given circle. Returns true if any entity was damaged.
-	bool apply_damage_in_circle(const Damage& damage, const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
+	// Deals damage to all entities that intersect the given box. Returns true if any entity was damaged.
+	bool deal_damage_in_box(const DamageEvent& ev, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
+	// Deals damage to all entities that intersect the given circle. Returns true if any entity was damaged.
+	bool deal_damage_in_circle(const DamageEvent& ev, const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
 }

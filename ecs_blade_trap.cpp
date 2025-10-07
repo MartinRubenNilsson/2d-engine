@@ -121,12 +121,12 @@ namespace ecs {
 			.position = b2Body_GetPosition(body) });
 	}
 
-	void _handle_physics_event_for_blade_trap(const PhysicsEvent& ev) {
+	void _handle_physics_for_blade_trap(const PhysicsEvent& ev) {
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
 			if (get_current_state(ev.entity) == "extending") {
 				transition_to_state(ev.entity, "impacting");
 			}
-			apply_damage(ev.other_entity, { .type = DamageType::Touch, .amount = 1 });
+			deal_damage(ev.other_entity, { .type = DamageType::Touch, .amount = 1 });
 		}
 	}
 
@@ -155,7 +155,7 @@ namespace ecs {
 				circle.radius = 6.f;
 				b2CreateCircleShape(body, &shape_def, &circle);
 			}
-			set_physics_event_handler(entity, _handle_physics_event_for_blade_trap);
+			set_physics_event_handler(entity, _handle_physics_for_blade_trap);
 			make_sprite_follow_body(entity, -center);
 
 			// Setup state machine.

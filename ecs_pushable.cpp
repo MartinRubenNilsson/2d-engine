@@ -11,7 +11,7 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void _handle_physics_event_for_pushable_block(const PhysicsEvent& ev) {
+	void _handle_physics_for_pushable_block(const PhysicsEvent& ev) {
 		const Tag other_tag = get_tag(ev.other_entity);
 		if (other_tag != Tag::Player)
 			return;
@@ -29,7 +29,7 @@ namespace ecs {
 	void setup_pushables() {
 		for (auto [entity] : _registry.view<Type<Tag::PushableBlock>>().each()) {
 			_registry.emplace<PushableBlock>(entity);
-			set_physics_event_handler(entity, _handle_physics_event_for_pushable_block);
+			set_physics_event_handler(entity, _handle_physics_for_pushable_block);
 		}
 	}
 }

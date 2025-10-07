@@ -14,7 +14,7 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	bool _handle_damage_to_grass(entt::entity entity, const Damage& damage) {
+	bool _handle_damage_for_grass(entt::entity entity, const DamageEvent& ev) {
 		b2BodyId body = get_body(entity);
 		if (B2_IS_NULL(body)) return false;
 		const Vec2f position = b2Body_GetWorldCenterOfMass(body);
@@ -43,7 +43,7 @@ namespace ecs {
 				block.tex_max = sprite.tex_position + sprite.tex_size;
 				emplace_uniform_block(entity, &block, sizeof(GrassUniformBlock));
 			}
-			set_damage_handler(entity, _handle_damage_to_grass);
+			set_damage_event_handler(entity, _handle_damage_for_grass);
 		}
 	}
 }

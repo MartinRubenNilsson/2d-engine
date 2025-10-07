@@ -38,7 +38,7 @@ namespace ecs {
             if (!bomb.explosion_timer.finished()) continue;
 
             // Explode the bomb
-            apply_damage_in_circle({ DamageType::Explosion, 2, entity }, center, bomb.explosion_radius);
+            deal_damage_in_circle({ DamageType::Explosion, 2, entity }, center, bomb.explosion_radius);
             add_trauma_to_active_camera(0.8f);
             create_vfx(VfxType::Explosion, center);
             destroy_later(entity);
@@ -97,10 +97,10 @@ namespace ecs {
         bomb->fuse_sound = audio::create_event({ .path = "event:/snd_bomb_fuse" });
     }
 
-    bool apply_damage_to_bomb(entt::entity entity, const Damage& damage) {
+    bool apply_damage_to_bomb(entt::entity entity, const DamageEvent& ev) {
         // DON'T call _explode_bomb() directly here, I got a stack overflow
         // when two bombs kept on exploding each other in an infinite loop!
-        if (damage.amount <= 0) return false;
+        if (ev.amount <= 0) return false;
         Bomb* bomb = get_bomb(entity);
         if (!bomb) return false;
         bomb->explosion_timer.finish();

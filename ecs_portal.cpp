@@ -29,7 +29,7 @@ namespace ecs {
 		audio::create_event({ .path = "event:/snd_map_transition" });
 	}
 
-	void _handle_physics_event_for_portal(const PhysicsEvent& ev) {
+	void _handle_physics_for_portal(const PhysicsEvent& ev) {
 		if (ev.type != PhysicsEventType::SensorBeginTouch)
 			return;
 		if (get_tag(ev.other_entity) != Tag::Player)
@@ -54,7 +54,7 @@ namespace ecs {
 					portal.direction.y = 1;
 				}
 			}
-			set_physics_event_handler(entity, _handle_physics_event_for_portal);
+			set_physics_event_handler(entity, _handle_physics_for_portal);
 		}
 	}
 

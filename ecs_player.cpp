@@ -165,7 +165,7 @@ namespace ecs {
 	void _player_attack(entt::entity entity, const Vec2f& position) {
 		Vec2f box_min = position - Vec2f(6.f, 6.f);
 		Vec2f box_max = position + Vec2f(6.f, 6.f);
-		apply_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
+		deal_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
 	}
 
 	void _on_player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
@@ -197,13 +197,13 @@ namespace ecs {
 		destroy_later(pickup_entity);
 	}
 
-	bool _handle_damage_to_player(entt::entity entity, const Damage& damage) {
-		if (damage.amount <= 0) return false;
+	bool _handle_damage_for_player(entt::entity entity, const DamageEvent& ev) {
+		if (ev.amount <= 0) return false;
 		Player* player = _registry.try_get<Player>(entity);
 		if (!player) return false;
 		if (player->health <= 0) return false; // Player is already dead
 		if (player->hurt_timer.running()) return false; // Player is invulnerable
-		player->health = std::max(0, player->health - damage.amount);
+		player->health = std::max(0, player->health - ev.amount);
 		add_trauma_to_active_camera(0.8f);
 		if (player->health > 0) { // Player survived
 			audio::create_event({ .path = "event:/snd_player_hurt" });
@@ -214,15 +214,11 @@ namespace ecs {
 		return true;
 	}
 
-	void _handle_physics_event_for_player(const PhysicsEvent& ev) {
+	void _handle_physics_for_player(const PhysicsEvent& ev) {
 		const Tag other_tag = get_tag(ev.other_entity);
 		if (ev.type == PhysicsEventType::SensorBeginTouch) {
 			if (other_tag == Tag::Pickup) {
 				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
-			}
-		} else if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			if (other_tag == Tag::Slime) {
-				_handle_damage_to_player(ev.entity, { DamageType::Touch, 1 });
 			}
 		}
 	}
@@ -245,9 +241,6 @@ namespace ecs {
 		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
-			const Vec2f top_left = get_top_left(object);
-			const Vec2f pivot = { 32.f, 42.f };
-
 			{
 				player::Outfit outfit{};
 				player::randomize_outfit(outfit);
@@ -256,7 +249,6 @@ namespace ecs {
 
 			if (sprites::Sprite* sprite = get_sprite(entity)) {
 				sprite->texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
-				sprite->sorting_point = pivot;
 			}
 
 			emplace_tile_animation(entity);
@@ -265,8 +257,8 @@ namespace ecs {
 				Player& player = _registry.emplace<Player>(entity);
 			}
 
-			set_physics_event_handler(entity, _handle_physics_event_for_player);
-			set_damage_handler(entity, _handle_damage_to_player);
+			set_physics_event_handler(entity, _handle_physics_for_player);
+			set_damage_event_handler(entity, _handle_damage_for_player);
 
 			{
 				Camera camera{};
@@ -596,10 +588,10 @@ namespace ecs {
 			ImGui::Text("Rupees: %d", player.rupees);
 
 			if (ImGui::Button("Apply 1 Damage")) {
-				_handle_damage_to_player(entity, { DamageType::Default, 1 });
+				_handle_damage_for_player(entity, { DamageType::Default, 1 });
 			}
 			if (ImGui::Button("Kill")) {
-				_handle_damage_to_player(entity, { DamageType::Default, 999 });
+				_handle_damage_for_player(entity, { DamageType::Default, 999 });
 			}
 
 			if (ImGui::Button("Give 5 Arrows")) {
