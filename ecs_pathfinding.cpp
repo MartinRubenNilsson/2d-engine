@@ -111,10 +111,6 @@ namespace ecs {
 		}
 	}
 
-	bool valid(PathTileId tile) {
-		return 0 <= tile.id && tile.id < _pathfinding_tiles.size();
-	}
-
 	Vec2i _get_path_tile_coord(const Vec2f& position) {
 		if (_pathfinding_tile_size.x <= 0 || _pathfinding_tile_size.y <= 0) {
 			return { -1, -1 };
@@ -128,6 +124,10 @@ namespace ecs {
 		if (!_valid_path_tile_coord(coord))
 			return {};
 		return _get_path_tile_id(coord);
+	}
+
+	bool valid(PathTileId tile) {
+		return 0 <= tile.id && tile.id < _pathfinding_tiles.size();
 	}
 
 	Vec2i _get_coord(PathTileId tile) {
@@ -186,12 +186,18 @@ namespace ecs {
 	};
 
 	bool valid(std::span<const PathTileId> path) {
-		for (size_t i = 0; i + 1 < path.size(); ++i) {
+		for (size_t i = 0; i < path.size(); ++i) {
 			if (!valid(path[i]))
 				return false;
-			// TODO
+			if (i == 0)
+				continue;
+			const Vec2i prev = _get_coord(path[i - 1]);
+			const Vec2i curr = _get_coord(path[i]);
+			const int dist = _manhattan_distance(prev, curr);
+			if (dist != 1)
+				return false; // prev and curr are not neighbors
 		}
-		return false;
+		return true;
 	}
 
 	PathTileId _get_id(const PathTile* tile) {

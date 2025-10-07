@@ -24,6 +24,7 @@ namespace audio
 
 	bool set_parameter(const std::string& name, float value);
 	bool get_parameter(const std::string& name, float& value);
+	// TODO: this doesn't work?
 	bool set_parameter_label(const std::string& name, const std::string& label);
 	bool get_parameter_label(const std::string& name, std::string& label);
 

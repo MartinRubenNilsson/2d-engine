@@ -10,8 +10,8 @@ namespace ecs {
 		auto operator<=>(const PathTileId&) const = default;
 	};
 
-	bool valid(PathTileId tile);
 	PathTileId get_path_tile(const Vec2f& position);
+	bool valid(PathTileId tile);
 	Vec2i get_coord(PathTileId tile);
 	Vec2f get_center(PathTileId tile);
 

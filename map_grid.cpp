@@ -15,14 +15,14 @@ namespace map {
 		return TerrainType::None;
 	}
 
-	std::string to_string(TerrainType type) {
-		return std::string(magic_enum::enum_name(type));
+	std::string_view to_string(TerrainType type) {
+		return magic_enum::enum_name(type);
 	}
 
+#if 0
 	void create_grid(ecs::MapId map_id) {
 		if (!map_id) return;
 
-#if 0
 		for (const tiled::Layer& layer : map.layers) {
 			if (layer.tiles.size() != _grid.tiles.size())
 				continue;
@@ -44,11 +44,8 @@ namespace map {
 				}
 			}
 		}
+	}
 #endif
-	}
-
-	void destroy_grid() {
-	}
 
 	TerrainType get_terrain_type_at(const Vec2f& world_pos) {
 #if 0

@@ -1,5 +1,4 @@
 #pragma once
-#include "ecs_tiled_ids.h"
 
 namespace map {
 	enum class TerrainType {
@@ -12,10 +11,6 @@ namespace map {
 		DeepWater,
 	};
 
-	std::string to_string(TerrainType type);
-
-	void create_grid(ecs::MapId map);
-	void destroy_grid();
-
+	std::string_view to_string(TerrainType type);
 	TerrainType get_terrain_type_at(const Vec2f& world_pos);
 }

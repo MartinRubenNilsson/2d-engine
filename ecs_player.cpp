@@ -17,7 +17,6 @@
 #include "window_events.h"
 #include "ui_textbox.h"
 #include "ui_bindings.h"
-#include "map_grid.h"
 #include "postprocessing.h"
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
@@ -352,7 +351,7 @@ namespace ecs {
 
 			// UPDATE AUDIO
 
-			audio::set_parameter_label("terrain", map::to_string(map::get_terrain_type_at(position)));
+			//audio::set_parameter_label("terrain", map::to_string(map::get_terrain_type_at(position)));
 			//if (animation._frame_changed && animation._frame_id % 3 == 0) {
 			//	// Take a step every 3 frames
 			//	audio::create_event({ .path = "event:/snd_footstep" });
@@ -607,7 +606,7 @@ namespace ecs {
 
 			Vec2f position = b2Body_GetWorldCenterOfMass(body);
 			ImGui::Text("Position: %.1f, %.1f", position.x, position.y);
-			ImGui::Text("Terrain: %s", map::to_string(map::get_terrain_type_at(position)).c_str());
+			//ImGui::Text("Terrain: %s", map::get_terrain_type_at(position).data());
 			ImGui::Text("State: %s", magic_enum::enum_name(player.state).data());
 			ImGui::Text("Health: %d", player.health);
 			ImGui::Text("Arrows: %d", player.arrows);
