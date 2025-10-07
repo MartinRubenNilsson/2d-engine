@@ -6,9 +6,11 @@
 
 namespace ecs {
 	struct Task {
+		using Then = void (*)(entt::entity entity);
+
 		std::string_view name;
 		TaskStatus status = TaskStatus::Preparing;
-		void (*then)(entt::entity entity) = nullptr;
+		std::vector<Then> then_queue;
 	};
 
 	bool _done(TaskStatus status);

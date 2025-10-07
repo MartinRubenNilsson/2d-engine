@@ -7,7 +7,7 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	std::string_view get_current_task(entt::entity entity) {
+	std::string_view current_task(entt::entity entity) {
 		const Task* task = _registry.try_get<Task>(entity);
 		if (!task) return {};
 		return task->name;
@@ -40,20 +40,34 @@ namespace ecs {
 	}
 
 	void then(entt::entity entity, void (*then)(entt::entity entity)) {
-		_registry.get_or_emplace<Task>(entity).then = then;
+		_registry.get_or_emplace<Task>(entity).then_queue.push_back(then);
 	}
 
-	void _update_tasks_that_are_done(float dt) {
+	void _do_then(entt::entity entity, Task& task) {
+		if (task.then_queue.empty())
+			return;
+
+		// PITFALL: A "then" callback may want to add more callbacks. This is by design -
+		// for example, when the callback starts up a new task. These new callbacks must
+		// be added to the FRONT of the queue. This is due to the hierarchical nature of
+		// tasks: Chained tasks (and thus their callbacks) happen first; outer tasks and
+		// callbacks happen when all the inner tasks are completed.
+
+		// Move queue over to a local variable so it is empty before invoking the callback.
+		std::vector<Task::Then> then_queue = std::move(task.then_queue);
+		// Invoke the first callback in the queue.
+		then_queue.front()(entity);
+		// At this point the queue may have grown. Append the remaining callbacks to the end.
+		for (size_t i = 1; i < then_queue.size(); ++i) {
+			task.then_queue.push_back(then_queue[i]);
+		}
+	}
+
+	void _update_done_tasks(float dt) {
 		for (auto [entity, task] : _registry.view<Task>().each()) {
 			if (!_done(task.status))
-				continue;
-			if (task.then) {
-				auto then = task.then;
-				task.then = nullptr;
-				// PITFALL: Calling task.then may lead to it being replaced,
-				// which is why we set it to nullptr *before* calling it.
-				then(entity);
-			}
+				continue; // Keep doing task.
+			_do_then(entity, task);
 		}
 	}
 
@@ -62,7 +76,7 @@ namespace ecs {
 		_update_wander_tasks(dt);
 		_update_pursue_tasks(dt);
 		_update_flee_tasks(dt);
-		_update_tasks_that_are_done(dt); // must be done last!
+		_update_done_tasks(dt); // must be done last!
 	}
 
 	void _debug_draw_task_names() {
