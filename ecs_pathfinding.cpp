@@ -86,6 +86,17 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void update_pathfinding(float dt) {
+		constexpr float TIME_STEP = 0.25; // update every quarter second
+
+		static float time_accumulator = 0.f;
+		time_accumulator += dt;
+		if (time_accumulator < TIME_STEP)
+			return;
+		time_accumulator = fmod(time_accumulator, TIME_STEP);
+
+		for (PathTile& tile : _pathfinding_tiles)
+			tile.passable = true;
+
 		// Mark tiles with colliders as non-passable.
 		for (auto [entity, coord] : _registry.view<Type<Tag::Collider>, TileCoord>().each()) {
 			PathTile* tile = _get_tile(_get_path_tile_id({ coord.x, coord.y }));
