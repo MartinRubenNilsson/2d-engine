@@ -72,6 +72,7 @@ namespace ecs {
 			b2BodyId body = emplace_body(entity, body_def);
 			b2ShapeDef shape_def = b2DefaultShapeDef();
 			shape_def.isSensor = true;
+			shape_def.enableSensorEvents = true;
 			b2Circle circle{};
 			circle.radius = 4.f;
 			b2CreateCircleShape(body, &shape_def, &circle);

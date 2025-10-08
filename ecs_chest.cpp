@@ -77,6 +77,7 @@ namespace ecs {
                 body_def.fixedRotation = true;
                 b2BodyId body = emplace_body(entity, body_def);
                 b2ShapeDef shape_def = b2DefaultShapeDef();
+                shape_def.enableContactEvents = true;
                 b2Polygon box = b2MakeBox(10.f, 6.f);
                 b2CreatePolygonShape(body, &shape_def, &box);
             }

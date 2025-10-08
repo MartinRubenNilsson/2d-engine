@@ -51,6 +51,7 @@ namespace ecs {
 			body_def.linearVelocity = velocity;
 			b2BodyId body = emplace_body(entity, body_def);
 			b2ShapeDef shape_def = b2DefaultShapeDef();
+			shape_def.enableContactEvents = true;
 			shape_def.filter = get_physics_filter(Tag::Arrow);
 			b2Circle circle{};
 			circle.center = tile_center;

@@ -131,6 +131,7 @@ namespace ecs {
 				b2ShapeDef shape_def = b2DefaultShapeDef();
 				if (get_bool(collider, "sensor")) {
 					shape_def.isSensor = true;
+					shape_def.enableSensorEvents = true;
 				}
 				_create_shapes(body, shape_def, collider, true);
 			}
@@ -163,6 +164,8 @@ namespace ecs {
 				body_def.type = b2_dynamicBody;
 				b2BodyId body = emplace_body(entity, body_def);
 
+				shape_def.enableContactEvents = true;
+
 				for (const ObjectId collider : colliders) {
 					_create_shapes(body, shape_def, collider, true);
 				}
@@ -176,6 +179,7 @@ namespace ecs {
 			b2BodyId body = emplace_body(entity, body_def);
 
 			shape_def.isSensor = true;
+			shape_def.enableSensorEvents = true;
 
 			_create_shapes(body, shape_def, object, false);
 		}

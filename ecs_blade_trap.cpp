@@ -27,7 +27,7 @@ namespace ecs {
 	struct BladeTrap {
 		unsigned int update_count = 0;
 		Vec2f direction;
-		Vec2f start_position;
+		Vec2f start_position; // PITFALL: position of top left corner
 		Handle<audio::Event> audio_event;
 	};
 
@@ -118,7 +118,7 @@ namespace ecs {
 		// Play reset sound.
 		audio::create_event({
 			.path = "event:/blade_trap/reset",
-			.position = b2Body_GetPosition(body) });
+			.position = b2Body_GetWorldCenterOfMass(body) });
 	}
 
 	void _handle_physics_for_blade_trap(const PhysicsEvent& ev) {
@@ -138,7 +138,7 @@ namespace ecs {
 			// Setup blade trap.
 			{
 				BladeTrap& blade_trap = _registry.emplace<BladeTrap>(entity);
-				blade_trap.start_position = sprite.position + tile_center;
+				blade_trap.start_position = sprite.position;
 			}
 
 			sprite.sorting_point = tile_center;
@@ -151,6 +151,7 @@ namespace ecs {
 				body_def.fixedRotation = true;
 				b2BodyId body = emplace_body(entity, body_def);
 				b2ShapeDef shape_def = b2DefaultShapeDef();
+				shape_def.enableContactEvents = true;
 				b2Circle circle{};
 				circle.center = tile_center;
 				circle.radius = 6.f;
