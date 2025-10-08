@@ -20,10 +20,6 @@ namespace ecs {
 		return sprite;
 	}
 
-	sprites::Sprite* get_sprite(entt::entity entity) {
-		return _registry.try_get<sprites::Sprite>(entity);
-	}
-
 	void make_sprite_blink(entt::entity entity, SpriteBlink&& blink) {
 		_registry.emplace_or_replace<SpriteBlink>(entity, std::move(blink));
 	}

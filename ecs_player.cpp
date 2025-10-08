@@ -278,16 +278,14 @@ namespace ecs {
 	void setup_players(MapId map) {
 		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
 
-		for (auto [entity, object] : _registry.view<Type<Tag::Player>, ObjectId>().each()) {
+		for (auto [entity, object, sprite] : _registry.view<Type<Tag::Player>, ObjectId, sprites::Sprite>().each()) {
 			{
 				player::Outfit outfit{};
 				player::randomize_outfit(outfit);
 				player::create_outfit_texture(outfit);
 			}
 
-			if (sprites::Sprite* sprite = get_sprite(entity)) {
-				sprite->texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
-			}
+			sprite.texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
 
 			emplace_tile_animation(entity);
 

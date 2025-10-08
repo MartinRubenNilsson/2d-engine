@@ -37,9 +37,9 @@ namespace ecs {
 	void startup_physics() {
 		constexpr float LENGTH_UNITS_PER_METER = 16.f; // 16 pixels per meter
 		b2SetLengthUnitsPerMeter(LENGTH_UNITS_PER_METER);
-		b2WorldDef world_def = b2DefaultWorldDef();
-		world_def.gravity = { 0.f, 0.f }; // no gravity
-		_physics_world = b2CreateWorld(&world_def);
+		b2WorldDef def = b2DefaultWorldDef();
+		def.gravity = Vec2f::ZERO; // no gravity
+		_physics_world = b2CreateWorld(&def);
 		_registry.on_destroy<b2BodyId>().connect<_on_destroy_b2BodyId>();
 		set_cloning_handler(entt::type_id<b2BodyId>(), _clone_b2BodyId);
 	}
@@ -50,7 +50,14 @@ namespace ecs {
 		_physics_world = b2_nullWorldId;
 	}
 
+	void clear_physics() {
+		// Do a zero-time update to force a refresh of the physics world.
+		// Internally this just clears all the physics event buffers.
+		b2World_Step(_physics_world, 0.f, 1);
+	}
+
 	void update_physics(float dt) {
+		clear_physics_events();
 		constexpr float TIME_STEP = 1.f / 60.f;
 		constexpr int SUB_STEP_COUNT = 4;
 		static float time_accumulator = 0.f;

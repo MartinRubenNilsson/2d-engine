@@ -86,9 +86,10 @@ namespace ecs {
 	}
 
 	void clear() {
-		clear_entities_to_be_destroyed_later();
-		clear_pathfinding();
 		_registry.clear();
+		clear_physics();
+		clear_pathfinding();
+		clear_entities_to_be_destroyed_later();
 	}
 
 	void _update_game_logic(float dt) {

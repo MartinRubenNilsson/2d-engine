@@ -4,12 +4,12 @@
 namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity);
 	sprites::Sprite& emplace_sprite(entt::entity entity, TileId tile);
-	sprites::Sprite* get_sprite(entt::entity entity);
 
 	struct SpriteBlink {
 		float duration = 0.f; // in seconds
 		float interval = 0.f; // in seconds
 		Color color = colors::WHITE;
+
 		Color _original_color; // for internal use only!
 	};
 
@@ -28,6 +28,7 @@ namespace ecs {
 		float duration = 0.f; // in seconds
 		float magnitude = 0.f; // in pixels
 		float exponent = 0.f;
+
 		unsigned int _random_seed = 0; // auto-generated at emplace time
 		Vec2f _original_position; // for internal use only!
 	};

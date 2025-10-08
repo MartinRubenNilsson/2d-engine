@@ -123,8 +123,11 @@ namespace ecs {
 	
 	std::vector<BodyMoveEvent> _body_move_events;
 
+	std::span<const BodyMoveEvent> get_body_move_events() {
+		return _body_move_events;
+	}
+
 	void _dispatch_body_move_events() {
-		_body_move_events.clear();
 		const b2BodyEvents events = b2World_GetBodyEvents(_physics_world);
 		for (int i = 0; i < events.moveCount; ++i) {
 			const b2BodyMoveEvent& ev = events.moveEvents[i];
@@ -132,13 +135,13 @@ namespace ecs {
 		}
 	}
 
-	std::span<const BodyMoveEvent> get_body_move_events() {
-		return _body_move_events;
-	}
-
 	void dispatch_physics_events() {
 		_dispatch_body_move_events();
 		_dispatch_sensor_events();
 		_dispatch_contact_events();
+	}
+
+	void clear_physics_events() {
+		_body_move_events.clear();
 	}
 }

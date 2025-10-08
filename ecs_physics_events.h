@@ -31,5 +31,6 @@ namespace ecs {
 
 	std::span<const BodyMoveEvent> get_body_move_events();
 
+	void clear_physics_events();
 	void dispatch_physics_events();
 }

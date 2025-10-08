@@ -5,6 +5,7 @@ namespace ecs {
 	void shutdown_physics();
 
 	void setup_physics(MapId map);
+	void clear_physics();
 	void update_physics(float dt);
 	void debug_draw_physics();
 	
