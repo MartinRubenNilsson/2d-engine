@@ -14,9 +14,9 @@ namespace text {
 	};
 
 	//TODO
-	//add_text(const Test& test);
-	//sort_all_text();
-	//draw_all_text();
+	//draw_text_later(const Test& test);
+	//sort_all();
+	//draw_all();
 
 	void draw(const Text& text);
 }

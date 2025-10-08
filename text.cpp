@@ -21,7 +21,7 @@ namespace text {
         const float line_spacing = fonts::get_line_spacing(*font) * text.line_spacing_factor;
         Vec2f current_point; // In unscaled coordinates
 
-        std::vector<graphics::Vertex> vertices;
+        graphics::temp_vertices.clear();
 
         char32_t previous_codepoint = 0;
         for (char32_t codepoint : text.string) {
@@ -49,19 +49,19 @@ namespace text {
             Vec2f tex0 = Vec2f((float)glyph.s0, (float)glyph.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
             Vec2f tex1 = Vec2f((float)glyph.s1, (float)glyph.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
             std::swap(tex0.y, tex1.y); // Flip y-axis TODO but dont we flip it below?
-            vertices.emplace_back(Vec2f(pos0.x, pos0.y), colors::WHITE, Vec2f(tex0.x, tex0.y));
-            vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
-            vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
-            vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
-            vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
-            vertices.emplace_back(Vec2f(pos1.x, pos1.y), colors::WHITE, Vec2f(tex1.x, tex1.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos0.y), colors::WHITE, Vec2f(tex0.x, tex0.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
+            graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos1.y), colors::WHITE, Vec2f(tex1.x, tex1.y));
 
             current_point.x += glyph.advance_width + letter_spacing;
             previous_codepoint = codepoint;
         }
 
         const float scale_for_pixel_height = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
-        for (graphics::Vertex& vertex : vertices) {
+        for (graphics::Vertex& vertex : graphics::temp_vertices) {
             vertex.position.y = -vertex.position.y; // Flip y-axis TODO but dont we flip it above?
             vertex.position *= scale_for_pixel_height;
             vertex.position *= text.scale;
@@ -72,8 +72,10 @@ namespace text {
         graphics::bind_fragment_shader(graphics::text_frag);
         graphics::bind_texture(0, fonts::get_atlas_texture(*font));
         graphics::update_buffer(graphics::dynamic_vertex_buffer,
-            vertices.data(), (unsigned int)vertices.size() * sizeof(graphics::Vertex));
+            graphics::temp_vertices.data(), (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
         graphics::set_primitives(graphics::Primitives::TriangleList);
-        graphics::draw((unsigned int)vertices.size());
+        graphics::draw((unsigned int)graphics::temp_vertices.size());
+
+        graphics::temp_vertices.clear();
     }
 }
