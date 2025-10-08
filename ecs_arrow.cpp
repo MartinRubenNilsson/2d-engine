@@ -34,14 +34,14 @@ namespace ecs {
 			arrow.damage = 1;
 			arrow.lifetime = 0.f; // unused right now
 		}
-		const Vec2f pivot = { 8.f, 8.f };
+		const Vec2f tile_center = { 8.f, 8.f };
 		if (const TilesetId tileset = get_tileset("items1")) {
 			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
 				sprites::Sprite& sprite = emplace_sprite(entity);
 				setup_sprite(sprite, tile, true);
+				sprite.position = position - tile_center;
 				sprite.sorting_layer = get_object_layer();
-				sprite.sorting_point = pivot;
-				sprite.position = position - pivot;
+				sprite.sorting_point = tile_center;
 			}
 		}
 		{
@@ -53,11 +53,11 @@ namespace ecs {
 			b2ShapeDef shape_def = b2DefaultShapeDef();
 			shape_def.filter = get_physics_filter(Tag::Arrow);
 			b2Circle circle{};
+			circle.center = tile_center;
 			circle.radius = 6.f;
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
 		set_physics_event_handler(entity, _handle_physics_for_arrow);
-		make_sprite_follow_body(entity, -pivot);
 		audio::create_event({ .path = "event:/snd_fire_arrow" });
 		return entity;
 	}

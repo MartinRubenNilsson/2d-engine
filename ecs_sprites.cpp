@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "ecs_sprites.h"
+#include "ecs_physics_events.h"
 #include "ecs_uniform_block.h"
-#include "sprites.h"
 #include "graphics.h"
 #include "graphics_globals.h"
+#include "sprites.h"
 #include "random.h"
 
 namespace ecs {
@@ -23,15 +24,6 @@ namespace ecs {
 		return _registry.try_get<sprites::Sprite>(entity);
 	}
 
-	// Makes the Sprite follow along a b2BodyId as the latter moves.
-	struct SpriteFollowBody {
-		Vec2f offset; // the sprite's position relative to the body's position
-	};
-
-	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset) {
-		_registry.emplace_or_replace<SpriteFollowBody>(entity, offset);
-	}
-
 	void make_sprite_blink(entt::entity entity, SpriteBlink&& blink) {
 		_registry.emplace_or_replace<SpriteBlink>(entity, std::move(blink));
 	}
@@ -41,9 +33,14 @@ namespace ecs {
 		_registry.emplace_or_replace<SpriteShake>(entity, std::move(shake));
 	}
 
-	void _update_sprites_following_bodies() {
-		for (auto [entity, sprite, body, follow] : _registry.view<sprites::Sprite, b2BodyId, SpriteFollowBody>().each()) {
-			sprite.position = b2Body_GetPosition(body) + follow.offset;
+	void _update_sprites_with_bodies_that_moved() {
+		for (const BodyMoveEvent& ev : get_body_move_events()) {
+			if (!_registry.valid(ev.entity))
+				continue;
+			if (!_registry.all_of<sprites::Sprite>(ev.entity))
+				continue;
+			sprites::Sprite& sprite = _registry.get<sprites::Sprite>(ev.entity);
+			sprite.position = ev.position;
 		}
 	}
 
@@ -74,7 +71,7 @@ namespace ecs {
 	}
 
 	void update_sprites(float dt) {
-		_update_sprites_following_bodies();
+		_update_sprites_with_bodies_that_moved();
 		_update_sprite_blinks(dt);
 		_update_sprite_shakes(dt);
 	}
@@ -108,8 +105,8 @@ namespace ecs {
 		}
 	}
 
-	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max) {
-		graphics::ScopedDebugGroup debug_group("ecs::draw_sprites()");
+	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
+		graphics::ScopedDebugGroup debug_group("ecs::draw_sprites_now()");
 
 		_blink_sprites_before_drawing();
 		_shake_sprites_before_drawing();
@@ -134,14 +131,14 @@ namespace ecs {
 				copy.uniform_buffer_size = 0;
 				copy.uniform_buffer_offset = 0;
 			}
-			sprites::draw_sprite_later(copy);
+			sprites::draw_later(copy);
 		}
 
 		graphics::update_buffer(graphics::sprite_uniform_buffer,
 			blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
 
-		sprites::sort_all_sprites();
-		sprites::draw_all_sprites();
+		sprites::sort_all();
+		sprites::draw_all_now();
 
 		_unblink_sprites_after_drawing();
 		_unshake_sprites_after_drawing();

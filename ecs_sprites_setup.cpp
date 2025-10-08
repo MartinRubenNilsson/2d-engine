@@ -90,22 +90,13 @@ namespace ecs {
 			sprite.sorting_point = get_size(object) * 0.5f;
 		}
 
-		// For sprites on entities with physics bodies, set the sprite sorting point to the body's
-		// AABB center. Moreover, if the body is dynamic, make the sprite follow the body.
-		for (auto [entity, sprite, body, tile] : _registry.view<sprites::Sprite, b2BodyId, TileId>().each()) {
+		// For sprites on entities with physics bodies, set the sprite sorting point to the body's AABB center.
+		for (auto [entity, sprite, body] : _registry.view<sprites::Sprite, b2BodyId>().each()) {
 
 			// PITFALL: I tried using the local center of mass here first. However, this didn't work
 			// for sensors because they don't have mass. Using the AABB seems more robust.
 			const Vec2f aabb_center = b2AABB_Center(b2Body_ComputeAABB(body));
 			sprite.sorting_point = aabb_center - sprite.position;
-
-			const b2BodyType type = b2Body_GetType(body);
-			if (type == b2_dynamicBody) {
-				make_sprite_follow_body(entity);
-			}
-			if (get_name(get_tileset(tile)) == "summer 16x32") {
-				continue;
-			}
 		}
 	}
 }

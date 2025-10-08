@@ -11,7 +11,7 @@ namespace ecs {
 	// TODO: handle ui event
 
 	void get_camera_bounds(Vec2f& min, Vec2f& max);
-	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max);
+	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max);
 
 
 	// TODO: make into bools instead!

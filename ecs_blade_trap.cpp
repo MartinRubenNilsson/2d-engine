@@ -133,30 +133,30 @@ namespace ecs {
 	void setup_blade_traps() {
 		for (auto [entity, sprite] : _registry.view<Type<Tag::BladeTrap>, sprites::Sprite>().each()) {
 
-			const Vec2f center = { 8.f, 8.f };
+			const Vec2f tile_center = { 8.f, 8.f };
 
 			// Setup blade trap.
 			{
 				BladeTrap& blade_trap = _registry.emplace<BladeTrap>(entity);
-				blade_trap.start_position = sprite.position + center;
+				blade_trap.start_position = sprite.position + tile_center;
 			}
 
-			sprite.sorting_point = center;
+			sprite.sorting_point = tile_center;
 
 			// Setup body.
 			{
 				b2BodyDef body_def = b2DefaultBodyDef();
 				body_def.type = b2_staticBody;
-				body_def.position = sprite.position + center;
+				body_def.position = sprite.position;
 				body_def.fixedRotation = true;
 				b2BodyId body = emplace_body(entity, body_def);
 				b2ShapeDef shape_def = b2DefaultShapeDef();
 				b2Circle circle{};
+				circle.center = tile_center;
 				circle.radius = 6.f;
 				b2CreateCircleShape(body, &shape_def, &circle);
 			}
 			set_physics_event_handler(entity, _handle_physics_for_blade_trap);
-			make_sprite_follow_body(entity, -center);
 
 			// Setup state machine.
 			{

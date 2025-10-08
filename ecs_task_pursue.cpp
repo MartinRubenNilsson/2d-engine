@@ -115,7 +115,7 @@ namespace ecs {
 				const Vec2f p1 = get_center(pursue.path[i]) + offset;
 				const Vec2f p2 = get_center(pursue.path[i + 1]) + offset;
 				const Color color = random::color((uint32_t)entity * 2);
-				shapes::add_line(p1, p2, color);
+				shapes::draw_line_later(p1, p2, color);
 			}
 			++paths_drawn;
 		}

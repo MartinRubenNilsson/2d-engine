@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
 		// RENDER SPRITES TO GAME FRAMEBUFFER
 
         background::draw_sprites(camera_min, camera_max);
-        ecs::draw_sprites(camera_min, camera_max);
+        ecs::draw_sprites_now(camera_min, camera_max);
 
 		// POSTPROCESS GAME FRAMEBUFFER
 

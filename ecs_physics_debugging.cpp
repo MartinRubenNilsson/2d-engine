@@ -13,7 +13,7 @@ namespace ecs {
 	}
 
 	void _b2_debug_draw_polygon(const b2Vec2* vertices, int vertexCount, b2HexColor color, void* context) {
-		shapes::add_polygon((const Vec2f*)vertices, vertexCount, _to_color(color));
+		shapes::draw_polygon_later((const Vec2f*)vertices, vertexCount, _to_color(color));
 	}
 
 	void _b2_debug_draw_solid_polygon(b2Transform transform, const b2Vec2* vertices, int vertexCount, float radius, b2HexColor color, void* context) {
@@ -21,15 +21,15 @@ namespace ecs {
 		for (int i = 0; i < vertexCount; ++i) {
 			transformed_vertices[i] = b2TransformPoint(transform, vertices[i]);
 		}
-		shapes::add_polygon((const Vec2f*)transformed_vertices, vertexCount, _to_color(color));
+		shapes::draw_polygon_later((const Vec2f*)transformed_vertices, vertexCount, _to_color(color));
 	}
 
 	void _b2_debug_draw_circle(b2Vec2 center, float radius, b2HexColor color, void* context) {
-		shapes::add_circle(center, radius, _to_color(color));
+		shapes::draw_circle_later(center, radius, _to_color(color));
 	}
 
 	void _b2_debug_draw_solid_circle(b2Transform transform, float radius, b2HexColor color, void* context) {
-		shapes::add_circle(transform.p, radius, _to_color(color));
+		shapes::draw_circle_later(transform.p, radius, _to_color(color));
 	}
 
 	void _b2_debug_draw_solid_capsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context) {
@@ -37,7 +37,7 @@ namespace ecs {
 	}
 
 	void _b2_debug_draw_segment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context) {
-		shapes::add_line(p1, p2, _to_color(color));
+		shapes::draw_line_later(p1, p2, _to_color(color));
 	}
 
 	void _b2_debug_draw_transform(b2Transform transform, void* context) {

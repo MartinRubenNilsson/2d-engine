@@ -6,8 +6,6 @@ namespace ecs {
 	sprites::Sprite& emplace_sprite(entt::entity entity, TileId tile);
 	sprites::Sprite* get_sprite(entt::entity entity);
 
-	void make_sprite_follow_body(entt::entity entity, const Vec2f& offset = Vec2f::ZERO);
-
 	struct SpriteBlink {
 		float duration = 0.f; // in seconds
 		float interval = 0.f; // in seconds
@@ -41,5 +39,5 @@ namespace ecs {
 	void setup_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
 	void setup_sprites(MapId map);
 	void update_sprites(float dt);
-	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max);
+	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max);
 }

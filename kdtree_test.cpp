@@ -56,10 +56,10 @@ namespace kdtree_test {
 			}
 		}
 		for (size_t index = 0; index < _kdtree.size(); ++index) {
-			shapes::add_point(_kdtree[index], colors::WHITE);
+			shapes::draw_point_later(_kdtree[index], colors::WHITE);
 			if (index != nearest_index) continue;
-			shapes::add_circle(_kdtree[index], 2.f, colors::GREEN);
-			shapes::add_circle(cursor_position, sqrt(nearest_distance_sq), colors::GREEN);
+			shapes::draw_circle_later(_kdtree[index], 2.f, colors::GREEN);
+			shapes::draw_circle_later(cursor_position, sqrt(nearest_distance_sq), colors::GREEN);
 		}
 	}
 }

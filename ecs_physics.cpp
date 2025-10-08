@@ -57,27 +57,12 @@ namespace ecs {
 		time_accumulator += dt;
 		for (; time_accumulator >= TIME_STEP; time_accumulator -= TIME_STEP) {
 			b2World_Step(_physics_world, TIME_STEP, SUB_STEP_COUNT);
-			// Dispatch sensor events.
-			{
-				const b2SensorEvents events = b2World_GetSensorEvents(_physics_world);
-				for (int32_t i = 0; i < events.beginCount; ++i) {
-					dispatch_physics_event(events.beginEvents[i]);
-				}
-				for (int32_t i = 0; i < events.endCount; ++i) {
-					dispatch_physics_event(events.endEvents[i]);
-				}
-			}
-			// Dispatch contact events.
-			{
-				const b2ContactEvents events = b2World_GetContactEvents(_physics_world);
-				for (int32_t i = 0; i < events.beginCount; ++i) {
-					dispatch_physics_event(events.beginEvents[i]);
-				}
-				for (int32_t i = 0; i < events.endCount; ++i) {
-					dispatch_physics_event(events.endEvents[i]);
-				}
-			}
+			dispatch_physics_events();
 		}
+	}
+
+	void _set_entity(b2BodyId body, entt::entity entity) {
+		b2Body_SetUserData(body, (void*)(uintptr_t)entity);
 	}
 
 	entt::entity get_entity(b2BodyId body) {
@@ -140,20 +125,15 @@ namespace ecs {
 		return category_bits;
 	}
 
-	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& body_def) {
-		b2BodyDef body_def_copy = body_def;
-		body_def_copy.userData = (void*)(uintptr_t)entity;
-		b2BodyId body = b2CreateBody(_physics_world, &body_def_copy);
+	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& def) {
+		b2BodyId body = b2CreateBody(_physics_world, &def);
 		_registry.emplace_or_replace<b2BodyId>(entity, body);
+		_set_entity(body, entity);
 		return body;
 	}
 
 	b2BodyId get_body(entt::entity entity) {
 		b2BodyId* body_ptr = _registry.try_get<b2BodyId>(entity);
 		return body_ptr ? *body_ptr : b2_nullBodyId;
-	}
-
-	bool remove_body(entt::entity entity) {
-		return _registry.remove<b2BodyId>(entity);
 	}
 }

@@ -108,6 +108,37 @@ namespace shapes {
 		return false;
 	}
 
+	void draw_point_later(const Vec2f& point, const Color& color, float lifetime) {
+		if (lifetime <= 0.f && _cull_point(_last_calculated_view_bounds, point)) return;
+		_points.emplace_back(point, color, lifetime);
+	}
+
+	void draw_line_later(const Vec2f& p1, const Vec2f& p2, const Color& color, float lifetime) {
+		if (lifetime <= 0.f && _cull_line(_last_calculated_view_bounds, p1, p2)) return;
+		_lines.emplace_back(p1, p2, color, lifetime);
+	}
+
+	void draw_box_later(const Vec2f& min, const Vec2f& max, const Color& color, float lifetime) {
+		if (lifetime <= 0.f && _cull_box(_last_calculated_view_bounds, min, max)) return;
+		_boxes.emplace_back(min, max, color, lifetime);
+	}
+
+	void draw_polygon_later(const Vec2f* points, unsigned int count, const Color& color, float lifetime) {
+		count = std::min(count, MAX_POLYGON_VERTICES);
+		if (count < 3) return;
+		if (lifetime <= 0.f && _cull_polygon(_last_calculated_view_bounds, points, count)) return;
+		Polygon& polygon = _polygons.emplace_back();
+		memcpy(polygon.points, points, count * sizeof(Vec2f));
+		polygon.count = count;
+		polygon.color = color;
+		polygon.lifetime = lifetime;
+	}
+
+	void draw_circle_later(const Vec2f& center, float radius, const Color& color, float lifetime) {
+		if (lifetime <= 0.f && _cull_circle(_last_calculated_view_bounds, center, radius)) return;
+		_circles.emplace_back(center, radius, color, lifetime);
+	}
+
 	template <typename T>
 	void _update_lifetimes(eastl::vector<T>& vec, float dt) {
 		size_t size = vec.size();
@@ -133,47 +164,34 @@ namespace shapes {
 		_update_lifetimes(_circles, dt);
 	}
 
-	void draw_all(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
-
-		// SETUP
-
-		_last_calculated_view_bounds.min_x = camera_min.x;
-		_last_calculated_view_bounds.min_y = camera_min.y;
-		_last_calculated_view_bounds.max_x = camera_max.x;
-		_last_calculated_view_bounds.max_y = camera_max.y;
-
-		_batches.clear();
-		graphics::temp_vertices.clear();
-
-		// CREATE POINT BATCH
-
-		if (!_points.empty()) {
-			Batch& batch = _batches.emplace_back();
-			batch.primitive = graphics::Primitives::PointList;
-			batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
-			for (const Point& point : _points) {
-				if (_cull_point(_last_calculated_view_bounds, point.position)) continue;
-				graphics::temp_vertices.emplace_back(point.position, point.color);
-				batch.vertex_count += 1;
-			}
+	void _create_point_batch() {
+		if (_points.empty()) return;
+		Batch& batch = _batches.emplace_back();
+		batch.primitive = graphics::Primitives::PointList;
+		batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
+		for (const Point& point : _points) {
+			if (_cull_point(_last_calculated_view_bounds, point.position))
+				continue;
+			graphics::temp_vertices.emplace_back(point.position, point.color);
+			batch.vertex_count += 1;
 		}
+	}
 
-		// CREATE LINE BATCH
-
-		if (!_lines.empty()) {
-			Batch& batch = _batches.emplace_back();
-			batch.primitive = graphics::Primitives::LineList;
-			batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
-			for (const Line& line : _lines) {
-				if (_cull_line(_last_calculated_view_bounds, line.p1, line.p2)) continue;
-				graphics::temp_vertices.emplace_back(line.p1, line.color);
-				graphics::temp_vertices.emplace_back(line.p2, line.color);
-				batch.vertex_count += 2;
-			}
+	void _create_line_batch() {
+		if (_lines.empty()) return;
+		Batch& batch = _batches.emplace_back();
+		batch.primitive = graphics::Primitives::LineList;
+		batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
+		for (const Line& line : _lines) {
+			if (_cull_line(_last_calculated_view_bounds, line.p1, line.p2))
+				continue;
+			graphics::temp_vertices.emplace_back(line.p1, line.color);
+			graphics::temp_vertices.emplace_back(line.p2, line.color);
+			batch.vertex_count += 2;
 		}
+	}
 
-		// CREATE BOX BATCHES
-
+	void _create_box_batches() {
 		for (const Box& box : _boxes) {
 			if (_cull_box(_last_calculated_view_bounds, box.min, box.max)) continue;
 			Batch& draw = _batches.emplace_back();
@@ -186,9 +204,9 @@ namespace shapes {
 			graphics::temp_vertices.emplace_back(Vec2f{ box.min.x, box.max.y }, box.color);
 			graphics::temp_vertices.emplace_back(graphics::temp_vertices[draw.vertex_offset]);
 		}
+	}
 
-		// CREATE POLYGON BATCHES
-
+	void _create_polygon_batches() {
 		for (const Polygon& polygon : _polygons) {
 			if (_cull_polygon(_last_calculated_view_bounds, polygon.points, polygon.count)) continue;
 			Batch& draw = _batches.emplace_back();
@@ -200,9 +218,9 @@ namespace shapes {
 			}
 			graphics::temp_vertices.emplace_back(graphics::temp_vertices[draw.vertex_offset]);
 		}
+	}
 
-		// CREATE CIRCLE BATCHES
-
+	void _create_circle_batches() {
 		for (const Circle& circle : _circles) {
 			constexpr unsigned int SUBDIVISIONS = 32;
 			constexpr float ANGLE_STEP = 6.283185307f / SUBDIVISIONS;
@@ -218,65 +236,51 @@ namespace shapes {
 			}
 			graphics::temp_vertices.emplace_back(graphics::temp_vertices[draw.vertex_offset]);
 		}
+	}
 
-		if (_batches.empty()) return; // nothing to draw
+	void _draw_all_batches(std::string_view debug_group_name) {
+		graphics::ScopedDebugGroup debug_group(debug_group_name);
 
-		// DRAW BATCHES
-		{
-			graphics::ScopedDebugGroup debug_group(debug_group_name);
-
-			const unsigned int vertices_byte_size = (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex);
-			if (vertices_byte_size <= graphics::get_buffer_size(graphics::dynamic_vertex_buffer)) {
-				graphics::update_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(), vertices_byte_size);
-			} else {
-				graphics::recreate_buffer(graphics::dynamic_vertex_buffer, vertices_byte_size, graphics::temp_vertices.data());
-			}
-
-			graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
-			graphics::bind_vertex_shader(graphics::shape_vert);
-			graphics::bind_fragment_shader(graphics::shape_frag);
-
-			for (const Batch& draw : _batches) {
-				graphics::set_primitives(draw.primitive);
-				graphics::draw(draw.vertex_count, draw.vertex_offset);
-			}
+		const unsigned int vertices_byte_size = (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex);
+		if (vertices_byte_size <= graphics::get_buffer_size(graphics::dynamic_vertex_buffer)) {
+			graphics::update_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(), vertices_byte_size);
+		} else {
+			graphics::recreate_buffer(graphics::dynamic_vertex_buffer, vertices_byte_size, graphics::temp_vertices.data());
 		}
 
-		// CLEANUP
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+		graphics::bind_vertex_shader(graphics::shape_vert);
+		graphics::bind_fragment_shader(graphics::shape_frag);
+
+		for (const Batch& draw : _batches) {
+			graphics::set_primitives(draw.primitive);
+			graphics::draw(draw.vertex_count, draw.vertex_offset);
+		}
+	}
+
+	void draw_all(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
+
+		_last_calculated_view_bounds.min_x = camera_min.x;
+		_last_calculated_view_bounds.min_y = camera_min.y;
+		_last_calculated_view_bounds.max_x = camera_max.x;
+		_last_calculated_view_bounds.max_y = camera_max.y;
 
 		_batches.clear();
 		graphics::temp_vertices.clear();
-	}
 
-	void add_point(const Vec2f& point, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_point(_last_calculated_view_bounds, point)) return;
-		_points.emplace_back(point, color, lifetime);
-	}
+		_create_point_batch();
+		_create_line_batch();
+		_create_box_batches();
+		_create_polygon_batches();
+		_create_circle_batches();
 
-	void add_line(const Vec2f& p1, const Vec2f& p2, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_line(_last_calculated_view_bounds, p1, p2)) return;
-		_lines.emplace_back(p1, p2, color, lifetime);
-	}
+		if (_batches.empty())
+			return; // nothing to draw
 
-	void add_box(const Vec2f& min, const Vec2f& max, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_box(_last_calculated_view_bounds, min, max)) return;
-		_boxes.emplace_back(min, max, color, lifetime);
-	}
+		_draw_all_batches(debug_group_name);
 
-	void add_polygon(const Vec2f* points, unsigned int count, const Color& color, float lifetime) {
-		count = std::min(count, MAX_POLYGON_VERTICES);
-		if (count < 3) return;
-		if (lifetime <= 0.f && _cull_polygon(_last_calculated_view_bounds, points, count)) return;
-		Polygon& polygon = _polygons.emplace_back();
-		memcpy(polygon.points, points, count * sizeof(Vec2f));
-		polygon.count = count;
-		polygon.color = color;
-		polygon.lifetime = lifetime;
-	}
-
-	void add_circle(const Vec2f& center, float radius, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_circle(_last_calculated_view_bounds, center, radius)) return;
-		_circles.emplace_back(center, radius, color, lifetime);
+		_batches.clear();
+		graphics::temp_vertices.clear();
 	}
 }
 

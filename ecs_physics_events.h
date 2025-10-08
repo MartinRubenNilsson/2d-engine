@@ -21,11 +21,15 @@ namespace ecs {
 	using PhysicsEventHandler = void(*)(const PhysicsEvent& ev);
 
 	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler);
-	PhysicsEventHandler get_physics_event_handler(entt::entity entity); // Returns nullptr if entity has no handler.
+	PhysicsEventHandler get_physics_event_handler(entt::entity entity);
 
-	void dispatch_physics_event(PhysicsEvent&& ev);
-	void dispatch_physics_event(const b2SensorBeginTouchEvent& b2ev);
-	void dispatch_physics_event(const b2SensorEndTouchEvent& b2ev);
-	void dispatch_physics_event(const b2ContactBeginTouchEvent& b2ev);
-	void dispatch_physics_event(const b2ContactEndTouchEvent& b2ev);
+	struct BodyMoveEvent {
+		b2BodyId body = b2_nullBodyId;
+		entt::entity entity = entt::null;
+		Vec2f position; // the new position
+	};
+
+	std::span<const BodyMoveEvent> get_body_move_events();
+
+	void dispatch_physics_events();
 }
