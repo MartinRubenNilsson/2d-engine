@@ -19,7 +19,7 @@ namespace ecs {
 		switch (get_type(object)) {
 			case ObjectType::Rectangle: {
 
-				b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, 0.f);
+				b2Polygon box = b2MakeOffsetBox(half_size.x, half_size.y, center, b2Rot_identity);
 				b2CreatePolygonShape(body, &def, &box);
 
 			} break;
@@ -47,9 +47,9 @@ namespace ecs {
 
 				// Box2D supports convex polygons with a small maximum number of points.
 
-				if (num_points <= b2_maxPolygonVertices && convex(points)) {
+				if (num_points <= B2_MAX_POLYGON_VERTICES && convex(points)) {
 
-					b2Vec2 polygon_points[b2_maxPolygonVertices];
+					b2Vec2 polygon_points[B2_MAX_POLYGON_VERTICES];
 					for (int32_t i = 0; i < num_points; ++i) {
 						polygon_points[i] = top_left + points[i];
 					}

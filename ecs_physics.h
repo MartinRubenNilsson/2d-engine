@@ -7,7 +7,8 @@ namespace ecs {
 	void setup_physics(MapId map);
 	void update_physics(float dt);
 	void debug_draw_physics();
-
+	
+	entt::entity get_entity(b2BodyId body);
 	b2ShapeDef get_shape_def(b2ShapeId shape);
 	b2BodyDef get_body_def(b2BodyId body);
 	// Returns the bitwise OR of all category bits of all shapes attached to the body.

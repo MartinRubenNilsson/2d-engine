@@ -38,17 +38,17 @@ namespace ecs {
 		// Load tilesets first...
 		for (const filesystem::File& file : files) {
 			if (file.format != filesystem::FileFormat::TiledTileset) continue;
-			tiled::load_tileset_from_file(_tiled_context, file.path);
+			tiled::load_tileset(_tiled_context, file.path);
 		}
 		// ...then templates...
 		for (const filesystem::File& file : files) {
 			if (file.format != filesystem::FileFormat::TiledTemplate) continue;
-			tiled::load_template_from_file(_tiled_context, file.path);
+			tiled::load_template(_tiled_context, file.path);
 		}
 		// ...and lastly maps.
 		for (const filesystem::File& file : files) {
 			if (file.format != filesystem::FileFormat::TiledMap) continue;
-			tiled::load_map_from_file(_tiled_context, file.path);
+			tiled::load_map(_tiled_context, file.path);
 		}
 	}
 

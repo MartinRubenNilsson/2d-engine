@@ -79,7 +79,7 @@ namespace tiled {
 		std::string class_;
 		std::vector<Property> properties;
 		std::vector<Point> points; // in pixels; relative to position; only relevant if type = Polygon/Polyline
-		TileId tile; // only relevant if type = Tile
+		TileId tile{}; // only relevant if type = Tile
 		float x = 0.f; // in pixels
 		float y = 0.f; // in pixels
 		float width = 0.f; // in pixels
@@ -198,18 +198,18 @@ namespace tiled {
 		void (*debug_message_callback)(std::string_view message) = nullptr;
 		std::vector<Map> maps;
 		std::vector<Tileset> tilesets;
-		std::vector<Object> objects;
+		std::vector<Object> objects; // stores objects from maps, tiles and templates together
 		std::vector<Template> templates;
 	};
 
-	// Returns the tileset ID (an index into Context::tilesets[]), or UINT_MAX if not found.
-	unsigned int load_tileset_from_file(Context &context, std::string_view path);
+	// Returns the tileset ID (an index into Context::tilesets[]), or UINT_MAX on failure.
+	unsigned int load_tileset(Context &context, std::string_view path);
 
-	// Returns the object ID (an index into Context::objects[]), or UINT_MAX if not found.
+	// Returns the object ID (an index into Context::objects[]), or UINT_MAX on failure.
 	// May load a tileset as a side effect.
-	unsigned int load_template_from_file(Context &context, std::string_view path);
+	unsigned int load_template(Context &context, std::string_view path);
 
-	// Returns the map ID (an index into Context::maps[]), or UINT_MAX if not found.
-	// May load one or more tilesets and objects as a side effect.
-	unsigned int load_map_from_file(Context &context, std::string_view path);
+	// Returns the map ID (an index into Context::maps[]), or UINT_MAX on failure.
+	// May load one or more tilesets and templates as a side effect.
+	unsigned int load_map(Context &context, std::string_view path);
 }

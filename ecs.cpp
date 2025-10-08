@@ -35,7 +35,7 @@ namespace ecs {
 
 	entt::registry _registry;
 
-	void _setup_essentials(MapId map) {
+	void _setup_engine(MapId map) {
 		setup_tiled(map);
 		setup_tags();
 		setup_physics(map);
@@ -57,11 +57,11 @@ namespace ecs {
 	}
 
 	void _setup(MapId map) {
-		_setup_essentials(map);
+		_setup_engine(map);
 		_setup_game(map);
 	}
 
-	void _patch_essentials(const Patch& patch) {
+	void _patch_engine(const Patch& patch) {
 		patch_entities_to_destroy(patch);
 	}
 
@@ -74,7 +74,7 @@ namespace ecs {
 		map_to_patch = map;
 		if (!has_patch()) return;
 		Patch& patch = get_patch();
-		_patch_essentials(patch);
+		_patch_engine(patch);
 		_patch_game(patch);
 	}
 
@@ -98,7 +98,7 @@ namespace ecs {
 		update_blade_traps(dt);
 	}
 
-	void _update_essential_logic(float dt) {
+	void _update_engine_logic(float dt) {
 		update_pathfinding(dt);
 		update_state_machines(dt);
 		update_tasks(dt);
@@ -110,7 +110,7 @@ namespace ecs {
 		update_slimes_graphics(dt);
 	}
 
-	void _update_essential_graphics(float dt) {
+	void _update_engine_graphics(float dt) {
 		update_animations(dt);
 		update_animated_sprites(dt);
 		update_sprites(dt);
@@ -120,9 +120,9 @@ namespace ecs {
 	void update(float dt) {
 		update_physics(dt);
 		_update_game_logic(dt);
-		_update_essential_logic(dt);
+		_update_engine_logic(dt);
 		_update_game_graphics(dt);
-		_update_essential_graphics(dt);
+		_update_engine_graphics(dt);
 		update_audio(dt);
 	}
 
@@ -141,15 +141,15 @@ namespace ecs {
 
 	int debug_flags = 0;
 
-	void add_debug_shapes_to_render_queue() {
-		if (debug_flags & DEBUG_PHYSICS) {
+	void debug_draw() {
+		if (debug_flags & DEBUG_DRAW_PHYSICS) {
 			debug_draw_physics();
 		}
-		if (debug_flags & DEBUG_AI) {
+		if (debug_flags & DEBUG_DRAW_AI) {
 			debug_draw_tasks();
 			debug_draw_state_machines();
 		}
-		if (debug_flags & DEBUG_PLAYER) {
+		if (debug_flags & DEBUG_DRAW_PLAYER) {
 			show_player_debug_window();
 		}
 	}

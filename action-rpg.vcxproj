@@ -148,6 +148,7 @@
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />
+    <ClCompile Include="ecs_game.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
     <ClCompile Include="ecs_pathfinding.cpp" />
     <ClCompile Include="ecs_physics_debugging.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="ecs_sprites.cpp" />
     <ClCompile Include="ecs_tiled_setup.cpp" />
     <ClCompile Include="ecs_uniform_block.cpp" />
+    <ClCompile Include="esc_terrain.cpp" />
     <ClCompile Include="filesystem.cpp" />
     <ClCompile Include="fonts.cpp" />
     <ClCompile Include="graphics_globals.cpp" />
@@ -201,7 +203,6 @@
     <ClCompile Include="player_outfit.cpp" />
     <ClCompile Include="ecs_portal.cpp" />
     <ClCompile Include="ecs_vfx.cpp" />
-    <ClCompile Include="map_grid.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="postprocessing.cpp" />
     <ClCompile Include="random.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="direction.h" />
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_cloning.h" />
+    <ClInclude Include="ecs_game.h" />
     <ClInclude Include="ecs_patch.h" />
     <ClInclude Include="ecs_pathfinding.h" />
     <ClInclude Include="ecs_physics_events.h" />
@@ -259,12 +261,6 @@
     <ClInclude Include="console.h" />
     <ClInclude Include="console_commands.h" />
     <ClInclude Include="delaunay.h" />
-    <ClInclude Include="dependencies\box2d\base.h" />
-    <ClInclude Include="dependencies\box2d\box2d.h" />
-    <ClInclude Include="dependencies\box2d\collision.h" />
-    <ClInclude Include="dependencies\box2d\id.h" />
-    <ClInclude Include="dependencies\box2d\math_functions.h" />
-    <ClInclude Include="dependencies\box2d\types.h" />
     <ClInclude Include="ecs_blade_trap.h" />
     <ClInclude Include="ecs_chest.h" />
     <ClInclude Include="ecs_grass.h" />
@@ -275,6 +271,7 @@
     <ClInclude Include="ecs_tasks.h" />
     <ClInclude Include="ecs_task_impl.h" />
     <ClInclude Include="ecs_task_status.h" />
+    <ClInclude Include="ecs_terrain.h" />
     <ClInclude Include="ecs_tiled.h" />
     <ClInclude Include="ecs_tiled_ids.h" />
     <ClInclude Include="ecs_uniform_block.h" />
@@ -308,7 +305,6 @@
     <ClInclude Include="player_outfit.h" />
     <ClInclude Include="ecs_portal.h" />
     <ClInclude Include="ecs_vfx.h" />
-    <ClInclude Include="map_grid.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="postprocessing.h" />
     <ClInclude Include="random.h" />

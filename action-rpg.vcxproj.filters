@@ -32,10 +32,10 @@
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics_filters.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="postprocessing.cpp">
       <Filter>graphics</Filter>
@@ -45,9 +45,6 @@
     </ClCompile>
     <ClCompile Include="ecs_player.cpp">
       <Filter>game\ecs\game\players</Filter>
-    </ClCompile>
-    <ClCompile Include="map_grid.cpp">
-      <Filter>game\map</Filter>
     </ClCompile>
     <ClCompile Include="steam.cpp">
       <Filter>steam</Filter>
@@ -117,19 +114,16 @@
       <Filter>utilities</Filter>
     </ClCompile>
     <ClCompile Include="ecs_sprites.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_animations.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_uniform_block.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="player_outfit.cpp">
       <Filter>game\player</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs_grass.cpp">
-      <Filter>game\ecs\game\environment</Filter>
     </ClCompile>
     <ClCompile Include="ecs_arrow.cpp">
       <Filter>game\ecs\game\weapons</Filter>
@@ -138,10 +132,10 @@
       <Filter>game\ecs\game\weapons</Filter>
     </ClCompile>
     <ClCompile Include="ecs_vfx.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_lighting.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="images.cpp">
       <Filter>graphics</Filter>
@@ -186,22 +180,22 @@
       <Filter>math\geometry</Filter>
     </ClCompile>
     <ClCompile Include="ecs_states.cpp">
-      <Filter>game\ecs\states</Filter>
+      <Filter>game\ecs\engine\states</Filter>
     </ClCompile>
     <ClCompile Include="ecs_slime.cpp">
       <Filter>game\ecs\game\enemies</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tags.cpp">
-      <Filter>game\ecs\tags</Filter>
+      <Filter>game\ecs\engine\tags</Filter>
     </ClCompile>
     <ClCompile Include="ecs_camera.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tiled.cpp">
-      <Filter>game\ecs\tiled</Filter>
+      <Filter>game\ecs\engine\tiled</Filter>
     </ClCompile>
     <ClCompile Include="ecs_audio.cpp">
-      <Filter>game\ecs\audio</Filter>
+      <Filter>game\ecs\engine\audio</Filter>
     </ClCompile>
     <ClCompile Include="ecs_chest.cpp">
       <Filter>game\ecs\game\chests</Filter>
@@ -216,46 +210,46 @@
       <Filter>game\ecs\patching</Filter>
     </ClCompile>
     <ClCompile Include="ecs_lifetime.cpp">
-      <Filter>game\ecs\lifetime</Filter>
+      <Filter>game\ecs\engine\lifetime</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tiled_setup.cpp">
-      <Filter>game\ecs\tiled</Filter>
+      <Filter>game\ecs\engine\tiled</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics_events.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics_setup.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_tasks.cpp">
-      <Filter>game\ecs\ai\tasks</Filter>
+      <Filter>game\ecs\engine\ai\tasks</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_wander.cpp">
-      <Filter>game\ecs\ai\tasks\implementations</Filter>
+      <Filter>game\ecs\engine\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_pursue.cpp">
-      <Filter>game\ecs\ai\tasks\implementations</Filter>
+      <Filter>game\ecs\engine\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_wait.cpp">
-      <Filter>game\ecs\ai\tasks\implementations</Filter>
+      <Filter>game\ecs\engine\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_task_flee.cpp">
-      <Filter>game\ecs\ai\tasks\implementations</Filter>
+      <Filter>game\ecs\engine\ai\tasks\implementations</Filter>
     </ClCompile>
     <ClCompile Include="direction.cpp">
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics_debugging.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_sprites_setup.cpp">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics_queries.cpp">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_cloning.cpp">
-      <Filter>game\ecs\cloning</Filter>
+      <Filter>game\ecs\engine\cloning</Filter>
     </ClCompile>
     <ClCompile Include="background.cpp">
       <Filter>game</Filter>
@@ -263,8 +257,17 @@
     <ClCompile Include="ecs_pushable.cpp">
       <Filter>game\ecs\game\pushables</Filter>
     </ClCompile>
+    <ClCompile Include="esc_terrain.cpp">
+      <Filter>game\ecs\game\environment\terrain</Filter>
+    </ClCompile>
     <ClCompile Include="ecs_pathfinding.cpp">
-      <Filter>game\ecs</Filter>
+      <Filter>game\ecs\engine\pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_grass.cpp">
+      <Filter>game\ecs\game\environment\grass</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_game.cpp">
+      <Filter>game\ecs\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -299,10 +302,10 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics.h">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics_filters.h">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="postprocessing.h">
       <Filter>graphics</Filter>
@@ -312,9 +315,6 @@
     </ClInclude>
     <ClInclude Include="ecs_player.h">
       <Filter>game\ecs\game\players</Filter>
-    </ClInclude>
-    <ClInclude Include="map_grid.h">
-      <Filter>game\map</Filter>
     </ClInclude>
     <ClInclude Include="steam.h">
       <Filter>steam</Filter>
@@ -386,37 +386,16 @@
       <Filter>game\ecs\game\enemies</Filter>
     </ClInclude>
     <ClInclude Include="ecs_sprites.h">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_animations.h">
-      <Filter>game\ecs\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\base.h">
-      <Filter>game\ecs\physics\box2d</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\box2d.h">
-      <Filter>game\ecs\physics\box2d</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\collision.h">
-      <Filter>game\ecs\physics\box2d</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\id.h">
-      <Filter>game\ecs\physics\box2d</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\math_functions.h">
-      <Filter>game\ecs\physics\box2d</Filter>
-    </ClInclude>
-    <ClInclude Include="dependencies\box2d\types.h">
-      <Filter>game\ecs\physics\box2d</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_uniform_block.h">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="player_outfit.h">
       <Filter>game\player</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_grass.h">
-      <Filter>game\ecs\game\environment</Filter>
     </ClInclude>
     <ClInclude Include="ecs_arrow.h">
       <Filter>game\ecs\game\weapons</Filter>
@@ -425,10 +404,10 @@
       <Filter>game\ecs\game\weapons</Filter>
     </ClInclude>
     <ClInclude Include="ecs_vfx.h">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_lighting.h">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="images.h">
       <Filter>graphics</Filter>
@@ -476,22 +455,22 @@
       <Filter>math\geometry</Filter>
     </ClInclude>
     <ClInclude Include="ecs_states.h">
-      <Filter>game\ecs\states</Filter>
+      <Filter>game\ecs\engine\states</Filter>
     </ClInclude>
     <ClInclude Include="ecs_slime.h">
       <Filter>game\ecs\game\enemies</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tags.h">
-      <Filter>game\ecs\tags</Filter>
+      <Filter>game\ecs\engine\tags</Filter>
     </ClInclude>
     <ClInclude Include="ecs_camera.h">
-      <Filter>game\ecs\graphics</Filter>
+      <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tiled.h">
-      <Filter>game\ecs\tiled</Filter>
+      <Filter>game\ecs\engine\tiled</Filter>
     </ClInclude>
     <ClInclude Include="ecs_audio.h">
-      <Filter>game\ecs\audio</Filter>
+      <Filter>game\ecs\engine\audio</Filter>
     </ClInclude>
     <ClInclude Include="ecs_chest.h">
       <Filter>game\ecs\game\chests</Filter>
@@ -506,22 +485,22 @@
       <Filter>game\ecs\patching</Filter>
     </ClInclude>
     <ClInclude Include="ecs_lifetime.h">
-      <Filter>game\ecs\lifetime</Filter>
+      <Filter>game\ecs\engine\lifetime</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tiled_ids.h">
-      <Filter>game\ecs\tiled</Filter>
+      <Filter>game\ecs\engine\tiled</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics_events.h">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_tasks.h">
-      <Filter>game\ecs\ai\tasks</Filter>
+      <Filter>game\ecs\engine\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="ecs_task_status.h">
-      <Filter>game\ecs\ai\tasks</Filter>
+      <Filter>game\ecs\engine\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="ecs_task_impl.h">
-      <Filter>game\ecs\ai\tasks</Filter>
+      <Filter>game\ecs\engine\ai\tasks</Filter>
     </ClInclude>
     <ClInclude Include="vec2.h">
       <Filter>math</Filter>
@@ -530,10 +509,10 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics_queries.h">
-      <Filter>game\ecs\physics</Filter>
+      <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_cloning.h">
-      <Filter>game\ecs\cloning</Filter>
+      <Filter>game\ecs\engine\cloning</Filter>
     </ClInclude>
     <ClInclude Include="background.h">
       <Filter>game</Filter>
@@ -541,8 +520,17 @@
     <ClInclude Include="ecs_pushable.h">
       <Filter>game\ecs\game\pushables</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_terrain.h">
+      <Filter>game\ecs\game\environment\terrain</Filter>
+    </ClInclude>
     <ClInclude Include="ecs_pathfinding.h">
-      <Filter>game\ecs</Filter>
+      <Filter>game\ecs\engine\pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_grass.h">
+      <Filter>game\ecs\game\environment\grass</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_game.h">
+      <Filter>game\ecs\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -579,18 +567,6 @@
     <Filter Include="game\ecs">
       <UniqueIdentifier>{f1d0e233-c8b6-45ea-9899-c05d6aa201d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\ai">
-      <UniqueIdentifier>{8d84feb1-0644-4d63-9c27-8bb43625fab1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\physics">
-      <UniqueIdentifier>{bb288391-6986-45d7-944a-5e3ef8ad4dd0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\physics\box2d">
-      <UniqueIdentifier>{ffe6cfc6-66be-46cd-a885-5762aed4b6bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\graphics">
-      <UniqueIdentifier>{a81c1375-587d-4f63-8d82-144aa9a48fe8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\player">
       <UniqueIdentifier>{03b5b10a-d728-4b19-a8d7-517a4b0f078d}</UniqueIdentifier>
     </Filter>
@@ -621,29 +597,8 @@
     <Filter Include="math\geometry">
       <UniqueIdentifier>{ab000c27-cdf7-472a-bf6e-87da02d252a5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\tags">
-      <UniqueIdentifier>{629c10a7-6918-4b36-9b46-38c4ca86a6c0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\tiled">
-      <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\audio">
-      <UniqueIdentifier>{7dee26dd-6bc2-4c4b-aaee-ab7d44f7dede}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\states">
-      <UniqueIdentifier>{7f6f1dba-1e00-4cc0-b3b5-9aafc805ff9a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ecs\patching">
       <UniqueIdentifier>{f6824319-f523-4bf5-b752-928b21ec152f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\lifetime">
-      <UniqueIdentifier>{0cc4bc17-e65d-41dd-9af6-8de480f78e9b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\ai\tasks">
-      <UniqueIdentifier>{4be998a3-1cb4-4993-8984-957586847102}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\ai\tasks\implementations">
-      <UniqueIdentifier>{65478eb0-56d4-4d87-8c8c-7dae91063ec9}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\ecs\game">
       <UniqueIdentifier>{b3018b68-0712-48fe-8c28-617aa90d08cb}</UniqueIdentifier>
@@ -672,11 +627,53 @@
     <Filter Include="game\ecs\game\players">
       <UniqueIdentifier>{db0d950d-591f-470a-935b-0082a4e1b134}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\ecs\cloning">
-      <UniqueIdentifier>{f8593501-69ce-46de-bc17-03d47d691323}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ecs\game\pushables">
       <UniqueIdentifier>{1a8c93ab-e3cb-4f2f-b3b7-1fe5a2020216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\environment\terrain">
+      <UniqueIdentifier>{8464144b-1075-48bd-8265-9020ade1955a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\environment\grass">
+      <UniqueIdentifier>{8634739a-6143-4b42-ad9a-14c2441683d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine">
+      <UniqueIdentifier>{bf3f8ba7-6ed2-4d57-be6f-a32c2628d2e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\physics">
+      <UniqueIdentifier>{bb288391-6986-45d7-944a-5e3ef8ad4dd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\states">
+      <UniqueIdentifier>{7f6f1dba-1e00-4cc0-b3b5-9aafc805ff9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\lifetime">
+      <UniqueIdentifier>{0cc4bc17-e65d-41dd-9af6-8de480f78e9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\graphics">
+      <UniqueIdentifier>{a81c1375-587d-4f63-8d82-144aa9a48fe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\cloning">
+      <UniqueIdentifier>{f8593501-69ce-46de-bc17-03d47d691323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\audio">
+      <UniqueIdentifier>{7dee26dd-6bc2-4c4b-aaee-ab7d44f7dede}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\ai">
+      <UniqueIdentifier>{8d84feb1-0644-4d63-9c27-8bb43625fab1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\ai\tasks">
+      <UniqueIdentifier>{4be998a3-1cb4-4993-8984-957586847102}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\ai\tasks\implementations">
+      <UniqueIdentifier>{65478eb0-56d4-4d87-8c8c-7dae91063ec9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\pathfinding">
+      <UniqueIdentifier>{dd5e9f0f-bd3a-4c84-880f-fe9551b017cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\tags">
+      <UniqueIdentifier>{629c10a7-6918-4b36-9b46-38c4ca86a6c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\engine\tiled">
+      <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

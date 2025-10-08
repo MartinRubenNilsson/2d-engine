@@ -132,11 +132,11 @@ int main(int argc, char* argv[]) {
                     } else if (ev.key.code == window::Key::F2) {
                         debug_textboxes = !debug_textboxes;
                     } else if (ev.key.code == window::Key::F3) {
-                        ecs::debug_flags ^= ecs::DEBUG_PHYSICS;
+                        ecs::debug_flags ^= ecs::DEBUG_DRAW_PHYSICS;
                     } else if (ev.key.code == window::Key::F4) {
-                        ecs::debug_flags ^= ecs::DEBUG_AI;
+                        ecs::debug_flags ^= ecs::DEBUG_DRAW_AI;
                     } else if (ev.key.code == window::Key::F5) {
-                        ecs::debug_flags ^= ecs::DEBUG_PLAYER;
+                        ecs::debug_flags ^= ecs::DEBUG_DRAW_PLAYER;
                     } else if (ev.key.code == window::Key::F6) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {
@@ -291,7 +291,7 @@ int main(int argc, char* argv[]) {
         }
 
 #ifdef _DEBUG
-        ecs::add_debug_shapes_to_render_queue();
+        ecs::debug_draw();
 
 		// RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 

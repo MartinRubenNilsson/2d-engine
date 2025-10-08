@@ -1,6 +1,6 @@
 #pragma once
 
-namespace map {
+namespace ecs {
 	enum class TerrainType {
 		None,
 		Dirt,
@@ -12,5 +12,7 @@ namespace map {
 	};
 
 	std::string_view to_string(TerrainType type);
-	TerrainType get_terrain_type_at(const Vec2f& world_pos);
+	TerrainType to_terrain_type(std::string_view string);
+
+	void setup_terrain(MapId map);
 }

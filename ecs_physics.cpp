@@ -80,6 +80,12 @@ namespace ecs {
 		}
 	}
 
+	entt::entity get_entity(b2BodyId body) {
+		void* user_data = b2Body_GetUserData(body);
+		if (!user_data) return entt::null;
+		return (entt::entity)(uintptr_t)user_data;
+	}
+
 	b2ShapeDef get_shape_def(b2ShapeId shape) {
 		b2ShapeDef def = b2DefaultShapeDef();
 #if 0

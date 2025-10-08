@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "ecs_physics.h"
 #include "ecs_physics_queries.h"
 
 namespace ecs {
@@ -44,20 +45,17 @@ namespace ecs {
 	}
 
 	std::vector<OverlapHit> overlap_box(const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
-		const Vec2f box_half_size = 0.5 * (box_max - box_min);
-		const Vec2f box_center = 0.5 * (box_min + box_max);
-		b2Polygon box = b2MakeOffsetBox(box_half_size.x, box_half_size.y, box_center, 0.f);
+		const b2AABB box = { box_min, box_max };
 
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
 		query_filter.maskBits = mask_bits;
 
 		std::vector<OverlapHit> hits;
-		b2World_OverlapPolygon(_physics_world, &box, b2Transform_identity, query_filter,
-			[](b2ShapeId shape_id, void* context) {
+		b2World_OverlapAABB(_physics_world, box, query_filter, [](b2ShapeId shape, void* context) {
 			OverlapHit hit{};
-			hit.shape = shape_id;
-			hit.body = b2Shape_GetBody(shape_id);
-			hit.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(hit.body);
+			hit.shape = shape;
+			hit.body = b2Shape_GetBody(shape);
+			hit.entity = get_entity(hit.body);
 			((std::vector<OverlapHit>*)context)->push_back(hit);
 			return true;
 		}, &hits);
@@ -66,20 +64,19 @@ namespace ecs {
 	}
 
 	std::vector<OverlapHit> overlap_circle(const Vec2f& center, float radius, uint32_t mask_bits) {
-		b2Circle circle{};
-		circle.center = center;
-		circle.radius = radius;
+		const b2Circle circle = { center, radius };
+		const b2ShapeProxy proxy = b2MakeProxy(&circle.center, 1, circle.radius);
 
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
 		query_filter.maskBits = mask_bits;
 
 		std::vector<OverlapHit> hits;
-		b2World_OverlapCircle(_physics_world, &circle, b2Transform_identity, query_filter,
+		b2World_OverlapShape(_physics_world, &proxy, query_filter,
 			[](b2ShapeId shape_id, void* context) {
 			OverlapHit hit{};
 			hit.shape = shape_id;
 			hit.body = b2Shape_GetBody(shape_id);
-			hit.entity = (entt::entity)(uintptr_t)b2Body_GetUserData(hit.body);
+			hit.entity = get_entity(hit.body);
 			((std::vector<OverlapHit>*)context)->push_back(hit);
 			return true;
 		}, &hits);

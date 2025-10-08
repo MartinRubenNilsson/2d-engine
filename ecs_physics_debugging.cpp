@@ -17,7 +17,7 @@ namespace ecs {
 	}
 
 	void _b2_debug_draw_solid_polygon(b2Transform transform, const b2Vec2* vertices, int vertexCount, float radius, b2HexColor color, void* context) {
-		b2Vec2 transformed_vertices[b2_maxPolygonVertices];
+		b2Vec2 transformed_vertices[B2_MAX_POLYGON_VERTICES];
 		for (int i = 0; i < vertexCount; ++i) {
 			transformed_vertices[i] = b2TransformPoint(transform, vertices[i]);
 		}
@@ -32,7 +32,7 @@ namespace ecs {
 		shapes::add_circle(transform.p, radius, _to_color(color));
 	}
 
-	void _b2_debug_draw_capsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context) {
+	void _b2_debug_draw_solid_capsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context) {
 		//TODO
 	}
 
@@ -48,7 +48,7 @@ namespace ecs {
 		//TODO
 	}
 
-	void _b2_debug_draw_string(b2Vec2 p, const char* s, void* context) {
+	void _b2_debug_draw_string(b2Vec2 p, const char* s, b2HexColor color, void* context) {
 		//TODO
 	}
 
@@ -56,15 +56,15 @@ namespace ecs {
 
 	void debug_draw_physics() {
 		b2DebugDraw debug_draw{};
-		debug_draw.DrawPolygon = _b2_debug_draw_polygon;
-		debug_draw.DrawSolidPolygon = _b2_debug_draw_solid_polygon;
-		debug_draw.DrawCircle = _b2_debug_draw_circle;
-		debug_draw.DrawSolidCircle = _b2_debug_draw_solid_circle;
-		debug_draw.DrawCapsule = _b2_debug_draw_capsule;
-		debug_draw.DrawSegment = _b2_debug_draw_segment;
-		debug_draw.DrawTransform = _b2_debug_draw_transform;
-		debug_draw.DrawPoint = _b2_debug_draw_point;
-		debug_draw.DrawString = _b2_debug_draw_string;
+		debug_draw.DrawPolygonFcn = _b2_debug_draw_polygon;
+		debug_draw.DrawSolidPolygonFcn = _b2_debug_draw_solid_polygon;
+		debug_draw.DrawCircleFcn = _b2_debug_draw_circle;
+		debug_draw.DrawSolidCircleFcn = _b2_debug_draw_solid_circle;
+		debug_draw.DrawSolidCapsuleFcn = _b2_debug_draw_solid_capsule;
+		debug_draw.DrawSegmentFcn = _b2_debug_draw_segment;
+		debug_draw.DrawTransformFcn = _b2_debug_draw_transform;
+		debug_draw.DrawPointFcn = _b2_debug_draw_point;
+		debug_draw.DrawStringFcn = _b2_debug_draw_string;
 		debug_draw.drawShapes = true;
 		debug_draw.drawContacts = true;
 		debug_draw.drawContactNormals = true;

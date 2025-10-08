@@ -22,8 +22,8 @@ namespace ecs {
 	struct Type {};
 
 	// Returns Tag::None if the string isn't a valid tag.
-	Tag string_to_tag(std::string_view string);
-	std::string_view tag_to_string(Tag tag);
+	Tag to_tag(std::string_view string);
+	std::string_view to_string(Tag tag);
 
 	// Emplaces or replaces the Tag component while also emplacing the corresponding
 	// Type<new_tag> component (and possibly removing a Type<old_tag> component).

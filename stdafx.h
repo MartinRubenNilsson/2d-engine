@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 
+#include <algorithm>
 #include <format>
 #include <ranges>
 #include <span>

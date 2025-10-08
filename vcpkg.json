@@ -18,6 +18,7 @@
     "rmlui",
     "entt",
     "magic-enum",
-    "pugixml"
+    "pugixml",
+    "box2d"
   ]
 }

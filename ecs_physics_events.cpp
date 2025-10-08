@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "ecs_physics.h"
 #include "ecs_physics_events.h"
 
 namespace ecs {
@@ -31,10 +32,6 @@ namespace ecs {
 		}
 	}
 
-	entt::entity _get_entity(b2BodyId body) {
-		return (entt::entity)(uintptr_t)b2Body_GetUserData(body);
-	}
-
 	void dispatch_physics_event(const b2SensorBeginTouchEvent& b2ev) {
 		PhysicsEvent ev{};
 		ev.type = PhysicsEventType::SensorBeginTouch;
@@ -42,8 +39,8 @@ namespace ecs {
 		ev.other_shape = b2ev.visitorShapeId;
 		ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
 		ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		ev.entity = get_entity(ev.body);
+		ev.other_entity = get_entity(ev.other_body);
 		dispatch_physics_event(std::move(ev));
 	}
 
@@ -54,8 +51,8 @@ namespace ecs {
 		ev.other_shape = b2ev.visitorShapeId;
 		ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
 		ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		ev.entity = get_entity(ev.body);
+		ev.other_entity = get_entity(ev.other_body);
 		dispatch_physics_event(std::move(ev));
 	}
 
@@ -66,8 +63,8 @@ namespace ecs {
 		ev.other_shape = b2_ev.shapeIdB;
 		ev.body = b2Shape_GetBody(b2_ev.shapeIdA);
 		ev.other_body = b2Shape_GetBody(b2_ev.shapeIdB);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		ev.entity = get_entity(ev.body);
+		ev.other_entity = get_entity(ev.other_body);
 		dispatch_physics_event(std::move(ev));
 	}
 
@@ -78,8 +75,8 @@ namespace ecs {
 		ev.other_shape = b2ev.shapeIdB;
 		ev.body = b2Shape_GetBody(b2ev.shapeIdA);
 		ev.other_body = b2Shape_GetBody(b2ev.shapeIdB);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		ev.entity = get_entity(ev.body);
+		ev.other_entity = get_entity(ev.other_body);
 		dispatch_physics_event(std::move(ev));
 	}
 }

@@ -4,19 +4,16 @@
 #include <magic_enum/magic_enum_switch.hpp>
 
 namespace ecs {
-	Tag string_to_tag(std::string_view string) {
-		char sanitized_string[64] = {}; // lowercase alphabetic characters only
-		for (size_t i = 0, j = 0; i < string.size() && j < std::size(sanitized_string); ++i) {
-			if (!isalpha(string[i])) continue;
-			sanitized_string[j++] = tolower(string[i]);
-		}
-		auto value = magic_enum::enum_cast<Tag>(sanitized_string, magic_enum::case_insensitive);
+	Tag to_tag(std::string_view string) {
+		std::string copy{ string };
+		copy.erase(std::remove_if(copy.begin(), copy.end(), std::not_fn(isalpha)), copy.end());
+		auto value = magic_enum::enum_cast<Tag>(copy, magic_enum::case_insensitive);
 		if (!value.has_value())
 			return Tag::None;
 		return value.value();
 	}
 
-	std::string_view tag_to_string(Tag tag) {
+	std::string_view to_string(Tag tag) {
 		return magic_enum::enum_name(tag);
 	}
 
@@ -72,14 +69,14 @@ namespace ecs {
 					class_ = class_;
 			}
 			if (class_.empty()) continue;
-			set_tag(entity, string_to_tag(class_));
+			set_tag(entity, to_tag(class_));
 		}
 
 		for (auto [entity, object] : _registry.view<ObjectId>().each()) {
 			std::string_view class_ = get_class(object); // 1.
 			if (class_.empty()) continue;
 			// This may (intentionally) override the tag if it has been set by the previous loop.
-			set_tag(entity, string_to_tag(class_));
+			set_tag(entity, to_tag(class_));
 		}
 	}
 }

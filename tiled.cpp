@@ -182,7 +182,7 @@ namespace tiled {
 		return std::filesystem::path(path).stem().string();
 	}
 
-	unsigned int load_tileset_from_file(Context& context, std::string_view path) {
+	unsigned int load_tileset(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the tileset is already loaded
@@ -306,7 +306,7 @@ namespace tiled {
 		return id;
 	}
 
-	unsigned int load_template_from_file(Context& context, std::string_view path) {
+	unsigned int load_template(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the template is already loaded
@@ -354,7 +354,7 @@ namespace tiled {
 				tileset_path += '/';
 				tileset_path += source_attribute.as_string();
 				tileset_path = _get_normalized_path(tileset_path);
-				tileset.id = load_tileset_from_file(context, tileset_path);
+				tileset.id = load_tileset(context, tileset_path);
 				if (tileset.id < context.tilesets.size()) {
 					// NOTE: first_gid should always be 1 for template objects.
 					tileset.first_gid = tileset_node.attribute("firstgid").as_uint();;
@@ -547,7 +547,7 @@ namespace tiled {
 					template_path += '/';
 					template_path += template_attribute.as_string();
 					template_path = _get_normalized_path(template_path);
-					const unsigned int object_id = load_template_from_file(context, template_path);
+					const unsigned int object_id = load_template(context, template_path);
 					if (object_id < context.objects.size()) {
 						object = context.objects[object_id];
 					}
@@ -567,7 +567,7 @@ namespace tiled {
 		}
 	}
 
-	unsigned int load_map_from_file(Context& context, std::string_view path) {
+	unsigned int load_map(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
 		// Check if the map is already loaded
@@ -626,7 +626,7 @@ namespace tiled {
 			tileset_path += '/';
 			tileset_path += source_attribute.as_string();
 			tileset_path = _get_normalized_path(tileset_path);
-			const unsigned int tileset_id = load_tileset_from_file(context, tileset_path);
+			const unsigned int tileset_id = load_tileset(context, tileset_path);
 			if (tileset_id >= context.tilesets.size())
 				continue;
 			map.tilesets.push_back(tileset_id);

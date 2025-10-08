@@ -55,8 +55,8 @@ namespace ecs {
 		}
 	};
 
-	Vec2i _pathfinding_tile_size;
-	Vec2i _pathfinding_map_size;
+	Vec2i _pathfinding_tile_size; // in pixels
+	Vec2i _pathfinding_map_size; // in tiles
 	std::vector<PathTile> _pathfinding_tiles; // size = _pathfinding_map_size.x * _pathfinding_map_size.y
 	PathTilePriorityQueue _pathfinding_open_tiles;
 
@@ -93,7 +93,7 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void update_pathfinding(float dt) {
-		constexpr float TIME_STEP = 0.25; // update every quarter second
+		constexpr float TIME_STEP = 1 / 4.f; // update 4 times per second
 
 		static float time_accumulator = 0.f;
 		time_accumulator += dt;
@@ -108,6 +108,7 @@ namespace ecs {
 		for (auto [entity, coord] : _registry.view<Type<Tag::Collider>, TileCoord>().each()) {
 			PathTile* tile = _get_tile(_get_path_tile_id({ coord.x, coord.y }));
 			tile->passable = false;
+			//TODO: loop over static bodies instead, no need for tags!
 		}
 	}
 
