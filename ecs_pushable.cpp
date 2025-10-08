@@ -17,11 +17,11 @@ namespace ecs {
 			return;
 		PushableBlock& pushable = _registry.get<PushableBlock>(ev.entity);
 		if (ev.type == PhysicsEventType::ContactBeginTouch) {
-			b2Body_SetType(ev.body, b2_dynamicBody);
 			audio::stop_event(pushable.stone_sliding_sound); // defensive
 			pushable.stone_sliding_sound = audio::create_event({ .path = "event:/props/stone_slide" });
-		} else if (ev.type == PhysicsEventType::ContactEndTouch) {
-			b2Body_SetType(ev.body, b2_staticBody);
+		}
+		if (ev.type == PhysicsEventType::ContactEndTouch) {
+			b2Body_SetLinearVelocity(ev.body, Vec2f::ZERO);
 			audio::stop_event(pushable.stone_sliding_sound);
 		}
 	}

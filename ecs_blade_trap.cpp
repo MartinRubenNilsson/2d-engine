@@ -118,7 +118,7 @@ namespace ecs {
 		// Play reset sound.
 		audio::create_event({
 			.path = "event:/blade_trap/reset",
-			.position = b2Body_GetWorldCenterOfMass(body) });
+			.position = trap.start_position });
 	}
 
 	void _handle_physics_for_blade_trap(const PhysicsEvent& ev) {
