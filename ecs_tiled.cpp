@@ -226,7 +226,7 @@ namespace ecs {
 	}
 
 	void replace_step(TileId& tile, int step_x, int step_y) {
-		const tiled::Tileset& ts = _tiled_context.tilesets[tile.tileset_id];
+		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
 		const unsigned int old_x = tile.id % ts.width;
 		const unsigned int new_x = (int)old_x + step_x;
 		if (new_x >= ts.width)
@@ -236,6 +236,26 @@ namespace ecs {
 		if (new_y >= ts.height)
 			return;
 		tile.id = (uint16_t)(new_x + new_y * ts.width);
+	}
+
+	void get_terrain_names(TileId tile, std::span<std::string_view, MAX_TERRAINS_PER_TILE> terrain_names) {
+		static_assert(MAX_TERRAINS_PER_TILE == tiled::WangTile::COUNT);
+		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
+		if (ts.wangsets.empty())
+			return;
+		// For now, just look at the first wangset.
+		const tiled::WangSet& wangset = ts.wangsets[0]; // aka "Terrain Set"
+		for (const tiled::WangTile& wangtile : wangset.tiles) {
+			if (wangtile.tile_id != tile.id)
+				continue;
+			for (size_t i = 0; i < MAX_TERRAINS_PER_TILE; ++i) {
+				const unsigned int wang_id = wangtile.wang_ids[i];
+				if (wang_id == UINT_MAX) continue;
+				const tiled::WangColor& wangcolor = wangset.colors[wang_id];
+				terrain_names[i] = wangcolor.name;
+			}
+			break;
+		}
 	}
 
 	template <tiled::PropertyType type>

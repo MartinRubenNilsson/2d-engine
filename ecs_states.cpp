@@ -154,7 +154,7 @@ namespace ecs {
 			if (string.empty()) continue;
 			text.string = text::to_u32(string);
 			text.position = b2Body_GetPosition(body) + Vec2f(-8.f, -10.f);
-			text::render(text);
+			text::draw(text);
 		}
 	}
 }

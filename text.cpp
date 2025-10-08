@@ -10,7 +10,7 @@ namespace text {
         return { string.begin(), string.end() };
     }
 
-    void render(const Text& text) {
+    void draw(const Text& text) {
         if (text.string.empty()) return;
         fonts::Font* font = fonts::get_font(text.font);
         if (!font) return;

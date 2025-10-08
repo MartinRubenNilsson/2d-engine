@@ -21,6 +21,7 @@
 #include "ecs_slime.h"
 #include "ecs_tasks.h"
 #include "ecs_pushable.h"
+#include "ecs_terrain.h"
 
 namespace ecs {
 	void startup() {
@@ -40,6 +41,7 @@ namespace ecs {
 		setup_tags();
 		setup_physics(map);
 		setup_pathfinding(map);
+		setup_terrain(map);
 		setup_sprites(map);
 		setup_animations();
 		setup_cameras(map);
@@ -153,5 +155,6 @@ namespace ecs {
 		if (debug_flags & DEBUG_DRAW_PLAYER) {
 			show_player_debug_window();
 		}
+		debug_draw_terrain();
 	}
 }

@@ -15,4 +15,5 @@ namespace ecs {
 	TerrainType to_terrain_type(std::string_view string);
 
 	void setup_terrain(MapId map);
+	void debug_draw_terrain();
 }

@@ -103,7 +103,7 @@ namespace tiled {
 		std::vector<Frame> animation;
 	};
 
-	struct WangColor {
+	struct WangColor { // aka "Terrain"
 		std::string name;
 		std::string class_;
 		std::vector<Property> properties;
@@ -129,19 +129,19 @@ namespace tiled {
 
 		// index into Tileset::tiles[].
 		unsigned int tile_id = 0;
-		// Indices into Tileset::wangsets[], or UNINT_MAX when the edge/corner is not assigned.
+		// Indices into WangSet::colors[], or UNINT_MAX when the edge/corner is not assigned.
 		unsigned int wang_ids[COUNT] = {};
 	};
 
-	struct WangSet {
+	struct WangSet { // aka "Terrain Set"
 		std::string name;
 		std::string class_;
 		std::vector<Property> properties;
 		// Index into Tileset::tiles[] of the tile representing this wangset,
 		// or UINT_MAX if no such tile has been chosen.
 		unsigned int tile_id = 0;
-		std::vector<WangColor> colors;
-		std::vector<WangTile> tiles;
+		std::vector<WangColor> colors; // aka "Terrains"
+		std::vector<WangTile> tiles; // only stores the tiles with assigned wangcolors
 	};
 
 	struct Tileset {
@@ -151,7 +151,7 @@ namespace tiled {
 		std::string class_;
 		std::vector<Property> properties;
 		std::vector<Tile> tiles; // size = tile_count
-		std::vector<WangSet> wangsets;
+		std::vector<WangSet> wangsets; // aka "Terrain Sets"
 		unsigned int tile_count = 0;
 		unsigned int width = 0; // in tiles
 		unsigned int height = 0; // in tiles

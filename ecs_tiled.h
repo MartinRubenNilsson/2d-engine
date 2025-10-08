@@ -45,6 +45,8 @@ namespace ecs {
 		unsigned int h = 0; // in pixels
 	};
 
+	constexpr size_t MAX_TERRAINS_PER_TILE = 8;
+
 	TilesetId get_tileset(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
@@ -56,6 +58,17 @@ namespace ecs {
 	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
 	void replace(TileId& tile, unsigned int id); // preserves flip flags
 	void replace_step(TileId& tile, int step_x, int step_y); // preserves flip flags
+	// Returns the names of the terrains in the different parts of tile. (Only looks at the first terrain set.)
+	// The returned order of parts is:
+	//   1. top edge
+	//   2. top-right corner
+	//   3. right edge
+	//   4. bottom-right corner
+	//   5. bottom edge
+	//   6. bottom-left corner
+	//   7. left edge
+	//   8. top-left corner
+	void get_terrain_names(TileId tile, std::span<std::string_view, MAX_TERRAINS_PER_TILE> terrain_names);
 
 	/// OBJECTS
 

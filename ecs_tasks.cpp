@@ -107,7 +107,7 @@ namespace ecs {
 			text.string.assign(task.name.begin(), task.name.end());
 			text.position = b2Body_GetWorldCenterOfMass(body) + Vec2f(-8.f, -10.f);
 			// TODO: text color!!!
-			text::render(text);
+			text::draw(text);
 		}
 	}
 
