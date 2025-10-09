@@ -58,65 +58,64 @@ namespace text {
 
             Batch& batch = _get_new_or_current_batch(texture);
 
-            float whitespace_width = fonts::get_whitespace_width(*font);
-            const float letter_spacing = whitespace_width * (text.letter_spacing_factor - 1.f);
-            whitespace_width += letter_spacing;
-            const float line_spacing = fonts::get_line_spacing(*font) * text.line_spacing_factor;
-            const float scale_for_pixel_height = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
+            const float whitespace_width = fonts::get_whitespace_width(*font);
+            const float line_spacing = fonts::get_line_spacing(*font);
+            const float scale = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
 
             graphics::temp_vertices.reserve(graphics::temp_vertices.size() + text.string.size());
 
-            Vec2f glyph_pos; // Current glyph position in unscaled coordinates
-            char32_t prev_c = 0; // previous codepoint
-            for (char32_t c : text.string) { // codepoint
-                if (c == U'\r')
+            Vec2f pos; // Aka "pen" - current position to draw the glyph at.
+            fonts::GlyphId prev_glyph{};
+            for (char32_t codepoint : text.string) { // codepoint
+                if (codepoint == U'\r')
                     continue; // Skip carriage returns to avoid graphical issues
 
-                glyph_pos.x += fonts::get_kerning_advance(*font, prev_c, c);
+                const fonts::GlyphId glyph = fonts::get_glyph_id(*font, codepoint);
 
-                switch (c) {
+                pos.x += fonts::get_kerning_advance(*font, prev_glyph, glyph);
+
+                switch (codepoint) {
                     case U' ': {
-                        glyph_pos.x += whitespace_width;
-                    } continue; // Don't need to create a quad for whitespaces
+                        pos.x += whitespace_width;
+                    } continue;
                     case U'\t': {
-                        glyph_pos.x += whitespace_width * 4.f; // 1 tab = 4 whitespaces
-                    } continue; // Don't need to create a quad for whitespaces
+                        pos.x += whitespace_width * 4.f; // 1 tab = 4 whitespaces
+                    } continue;
                     case U'\n': {
-                        glyph_pos.x = 0.f;
-                        glyph_pos.y -= line_spacing; // TODO: is this correct?
-                    } continue; // Don't need to create a quad for whitespaces
+                        pos.x = 0.f;
+                        pos.y -= line_spacing;
+                    } continue;
                 }
 
-                const fonts::Glyph glyph = fonts::get_glyph(*font, c);
+                const fonts::GlyphInfo info = fonts::get_glyph_info(*font, glyph, text.pixel_height, codepoint);
 
-                const Vec2f pos0 = glyph_pos + Vec2f((float)glyph.x0, (float)glyph.y0);
-                const Vec2f pos1 = glyph_pos + Vec2f((float)glyph.x1, (float)glyph.y1);
-                Vec2f tex0 = Vec2f((float)glyph.s0, (float)glyph.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
-                Vec2f tex1 = Vec2f((float)glyph.s1, (float)glyph.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
-                std::swap(tex0.y, tex1.y); // Flip y-axis TODO but dont we flip it below?
+                const Vec2f min = pos + Vec2f((float)info.x0, (float)info.y0);
+                const Vec2f max = pos + Vec2f((float)info.x1, (float)info.y1);
+                // PITFALL: We need to flip the texture v-coordinate (t0 and t1) here
+                // because we flip the vertex y-coordinate futher below.
+                const Vec2f tex_min = Vec2f((float)info.s0, (float)info.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
+                const Vec2f tex_max = Vec2f((float)info.s1, (float)info.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
 
-                graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos0.y), colors::WHITE, Vec2f(tex0.x, tex0.y));
-                graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
-                graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
-                graphics::temp_vertices.emplace_back(Vec2f(pos0.x, pos1.y), colors::WHITE, Vec2f(tex0.x, tex1.y));
-                graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos0.y), colors::WHITE, Vec2f(tex1.x, tex0.y));
-                graphics::temp_vertices.emplace_back(Vec2f(pos1.x, pos1.y), colors::WHITE, Vec2f(tex1.x, tex1.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), colors::WHITE, Vec2f(tex_min.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), colors::WHITE, Vec2f(tex_min.x, tex_max.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), colors::WHITE, Vec2f(tex_min.x, tex_max.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), colors::WHITE, Vec2f(tex_max.x, tex_max.y));
 
                 for (unsigned int gv = 0; gv < 6; ++gv) { // gv = glyph vertex
                     const unsigned int v = batch.vertex_offset + batch.vertex_count + gv;
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
-                    // Flip y-axis TODO but dont we flip it above?
+                     // The glyphs use a coordinate system with y up, so we must flip.
                     vertex.position.y = -vertex.position.y;
-                    // TODO: scaling is probably wrong??
-                    // TODO: no, we have hardcoded the font size!!!
-                    vertex.position *= scale_for_pixel_height;
+                    vertex.position *= scale;
                     vertex.position *= text.scale;
                     vertex.position += text.position;
                 }
 
                 batch.vertex_count += 6;
-                glyph_pos.x += glyph.advance_width + letter_spacing;
-                prev_c = c;
+                pos.x += info.advance_width;
+                prev_glyph = glyph;
             }
         }
 

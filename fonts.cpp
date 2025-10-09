@@ -30,7 +30,7 @@ namespace fonts {
 
 		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
 		stbtt_pack_context pack_context{};
-		std::unordered_map<char32_t, stbtt_packedchar> packed_chars;
+		std::unordered_map<int, stbtt_packedchar> packed_chars;
 		Handle<graphics::Texture> atlas_texture;
 		bool atlas_texture_needs_updating = true;
 		std::vector<CodepointGlyphPair> codepoint_glyph_pairs; // sorted by codepoint
@@ -68,7 +68,7 @@ namespace fonts {
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
 
-		font.whitespace_width = get_glyph(font, U' ').advance_width;
+		font.whitespace_width = get_glyph_info(font, get_glyph_id(font, U' '), 30.f, U' ').advance_width;
 #if 0
 		graphics::set_texture_filter(font.atlas_texture, graphics::Filter::Linear);
 #endif
@@ -94,6 +94,18 @@ namespace fonts {
 		return font.atlas_texture;
 	}
 
+	int get_ascent(const Font& font) {
+		return font.ascent;
+	}
+
+	int get_descent(const Font& font) {
+		return font.descent;
+	}
+
+	int get_line_gap(const Font& font) {
+		return font.line_gap;
+	}
+
 	int get_line_spacing(const Font& font) {
 		return font.ascent - font.descent + font.line_gap;
 	}
@@ -106,7 +118,7 @@ namespace fonts {
 		return stbtt_ScaleForPixelHeight(&font.info, pixel_height);
 	}
 
-	int get_glyph_index(Font& font, char32_t codepoint) {
+	GlyphId get_glyph_id(Font& font, char32_t codepoint) {
 		// First do a binary search of the lookup table to see if it contains the glyph,
 		// otherwise find it the slow way using the stbtt API and then save the result.
 		std::vector<CodepointGlyphPair>& pairs = font.codepoint_glyph_pairs;
@@ -124,36 +136,37 @@ namespace fonts {
 			}
 		}
 		if (first < pairs.size() && pairs[first].codepoint == codepoint) {
-			return pairs[first].glyph_index;
+			return { pairs[first].glyph_index };
 		}
 		const int glyph_index = stbtt_FindGlyphIndex(&font.info, codepoint);
 		pairs.emplace(pairs.begin() + first, codepoint, glyph_index);
-		return glyph_index;
+		return { glyph_index };
 	}
 
-	Glyph get_glyph(Font& font, char32_t codepoint) {
-		const int glyph_index = get_glyph_index(font, codepoint);
-		Glyph glyph{};
-		stbtt_GetGlyphHMetrics(&font.info, glyph_index, &glyph.advance_width, &glyph.left_side_bearing);
-		stbtt_GetGlyphBox(&font.info, glyph_index, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
+	bool is_glyph_empty(const Font& font, GlyphId glyph) {
+		return stbtt_IsGlyphEmpty(&font.info, glyph.index);
+	}
+
+	GlyphInfo get_glyph_info(Font& font, GlyphId glyph, float pixel_height, char32_t codepoint) {
+		GlyphInfo info{};
+		stbtt_GetGlyphHMetrics(&font.info, glyph.index, &info.advance_width, &info.left_side_bearing);
+		stbtt_GetGlyphBox(&font.info, glyph.index, &info.x0, &info.y0, &info.x1, &info.y1);
 		auto it = font.packed_chars.find(codepoint);
 		if (it == font.packed_chars.end()) {
-			const float font_size = 30.f; //Hardcoded for now
+			const float font_scale = stbtt_ScaleForPixelHeight(&font.info, pixel_height);
 			stbtt_packedchar packed_char{};
-			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, font_size, codepoint, 1, &packed_char);
+			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 16.f, codepoint, 1, &packed_char);
 			it = font.packed_chars.emplace(codepoint, packed_char).first;
 			font.atlas_texture_needs_updating = true;
 		}
-		glyph.s0 = it->second.x0;
-		glyph.t0 = it->second.y0;
-		glyph.s1 = it->second.x1;
-		glyph.t1 = it->second.y1;
-		return glyph;
+		info.s0 = it->second.x0;
+		info.t0 = it->second.y0;
+		info.s1 = it->second.x1;
+		info.t1 = it->second.y1;
+		return info;
 	}
 
-	int get_kerning_advance(Font& font, char32_t codepoint1, char32_t codepoint2) {
-		const int glyph_index1 = get_glyph_index(font, codepoint1);
-		const int glyph_index2 = get_glyph_index(font, codepoint2);
-		return stbtt_GetGlyphKernAdvance(&font.info, glyph_index1, glyph_index2);
+	int get_kerning_advance(Font& font, GlyphId glyph1, GlyphId glyph2) {
+		return stbtt_GetGlyphKernAdvance(&font.info, glyph1.index, glyph2.index);
 	}
 }
