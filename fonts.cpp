@@ -11,6 +11,15 @@
 namespace fonts {
 	const int ATLAS_TEXTURE_SIZE = 1024;
 
+	struct CodepointGlyphPair {
+		char32_t codepoint = 0;
+		int glyph_index = -1;
+	};
+
+	bool _compare_codepoints(const CodepointGlyphPair& a, const CodepointGlyphPair& b) {
+		return a.codepoint < b.codepoint;
+	}
+
 	struct Font {
 		std::vector<unsigned char> data;
 		stbtt_fontinfo info{};
@@ -23,14 +32,15 @@ namespace fonts {
 		std::unordered_map<char32_t, stbtt_packedchar> packed_chars;
 		Handle<graphics::Texture> atlas_texture;
 		bool atlas_texture_needs_updating = true;
+		std::vector<CodepointGlyphPair> codepoint_glyph_pairs; // sorted by codepoint
 	};
 
 	Pool<Font> _font_pool;
-	std::unordered_map<std::string, Handle<Font>> _font_path_to_handle;
+	std::unordered_map<std::string, Handle<Font>> _font_cache; // path to handle
 
 	Handle<Font> load_font(const std::string& path) {
 		const std::string normalized_path = filesystem::get_normalized_path(path);
-		if (auto it = _font_path_to_handle.find(normalized_path);  it != _font_path_to_handle.end()) {
+		if (auto it = _font_cache.find(normalized_path);  it != _font_cache.end()) {
 			return it->second;
 		}
 
@@ -38,13 +48,13 @@ namespace fonts {
 		font.data;
 		if (!filesystem::read_binary_file(path, font.data)) {
 			console::log_error("Failed to open font file: " + normalized_path);
-			return Handle<Font>();
+			return {};
 		}
 
 		stbtt_fontinfo info{};
 		if (!stbtt_InitFont(&font.info, font.data.data(), 0)) {
 			console::log_error("Failed to load font: " + normalized_path);
-			return Handle<Font>();
+			return {};
 		}
 
 		stbtt_GetFontVMetrics(&font.info, &font.ascent, &font.descent, &font.line_gap);
@@ -65,7 +75,7 @@ namespace fonts {
 		// font.data/font.atlas_pixels are reallocated and
 		// font.info/font.pack_context are invalidated.
 		const Handle<Font> handle = _font_pool.emplace(std::move(font));
-		_font_path_to_handle[normalized_path] = handle;
+		_font_cache[normalized_path] = handle;
 
 		return handle;
 	}
@@ -90,10 +100,36 @@ namespace fonts {
 		return stbtt_ScaleForPixelHeight(&font.info, pixel_height);
 	}
 
+	int get_glyph_index(Font& font, char32_t codepoint) {
+		// First do a binary search of the lookup table to see if it contains the glyph,
+		// otherwise find it the slow way using the stbtt API and then save the result.
+		std::vector<CodepointGlyphPair>& pairs = font.codepoint_glyph_pairs;
+		size_t first = 0;
+		size_t count = pairs.size();
+		while (count > 0) {
+			size_t curr = first;
+			size_t step = count / 2;
+			curr += step;
+			if (pairs[curr].codepoint < codepoint) {
+				first = ++curr;
+				count -= step + 1;
+			} else {
+				count = step;
+			}
+		}
+		if (first < pairs.size() && pairs[first].codepoint == codepoint) {
+			return pairs[first].glyph_index;
+		}
+		const int glyph_index = stbtt_FindGlyphIndex(&font.info, codepoint);
+		pairs.emplace(pairs.begin() + first, codepoint, glyph_index);
+		return glyph_index;
+	}
+
 	Glyph get_glyph(Font& font, char32_t codepoint) {
+		const int glyph_index = get_glyph_index(font, codepoint);
 		Glyph glyph{};
-		stbtt_GetCodepointHMetrics(&font.info, codepoint, &glyph.advance_width, &glyph.left_side_bearing);
-		stbtt_GetCodepointBox(&font.info, codepoint, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
+		stbtt_GetGlyphHMetrics(&font.info, glyph_index, &glyph.advance_width, &glyph.left_side_bearing);
+		stbtt_GetGlyphBox(&font.info, glyph_index, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
 		auto it = font.packed_chars.find(codepoint);
 		if (it == font.packed_chars.end()) {
 			const float font_size = 30.f; //Hardcoded for now
@@ -109,7 +145,9 @@ namespace fonts {
 		return glyph;
 	}
 
-	int get_kerning_advance(const Font& font, char32_t codepoint1, char32_t codepoint2) {
-		return stbtt_GetCodepointKernAdvance(&font.info, codepoint1, codepoint2);
+	int get_kerning_advance(Font& font, char32_t codepoint1, char32_t codepoint2) {
+		const int glyph_index1 = get_glyph_index(font, codepoint1);
+		const int glyph_index2 = get_glyph_index(font, codepoint2);
+		return stbtt_GetGlyphKernAdvance(&font.info, glyph_index1, glyph_index2);
 	}
 }

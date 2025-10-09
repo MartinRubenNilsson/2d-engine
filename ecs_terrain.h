@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ecs {
-	enum class TerrainType {
+	enum class TerrainType : uint8_t {
 		None,
 		Dirt,
 		LightGrass,

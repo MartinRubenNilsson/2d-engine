@@ -27,6 +27,7 @@ namespace fonts {
 	Handle<graphics::Texture> get_atlas_texture(Font& font); // updates the atlas if it is dirty
 	int get_line_spacing(const Font& font); // in unscaled coordinates
 	float get_scale_for_pixel_height(const Font& font, float pixel_height);
+	int get_glyph_index(Font& font, char32_t codepoint);
 	Glyph get_glyph(Font& font, char32_t codepoint);
-	int get_kerning_advance(const Font& font, char32_t codepoint1, char32_t codepoint2); // in unscaled coordinates
+	int get_kerning_advance(Font& font, char32_t codepoint1, char32_t codepoint2); // in unscaled coordinates
 }
