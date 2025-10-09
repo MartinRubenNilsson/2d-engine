@@ -58,7 +58,7 @@ namespace text {
 
             Batch& batch = _get_new_or_current_batch(texture);
 
-            float whitespace_width = (float)fonts::get_glyph(*font, U' ').advance_width;
+            float whitespace_width = fonts::get_whitespace_width(*font);
             const float letter_spacing = whitespace_width * (text.letter_spacing_factor - 1.f);
             whitespace_width += letter_spacing;
             const float line_spacing = fonts::get_line_spacing(*font) * text.line_spacing_factor;

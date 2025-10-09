@@ -26,6 +26,7 @@ namespace fonts {
 		int ascent = 0; // The (unscaled) coordinate above the baseline the font extends.
 		int descent = 0; // The (unscaled) coordinate below the baseline the font extends; typically negative.
 		int line_gap = 0; // The (unscaled) spacing between one row's descent and the next row's ascent.
+		int whitespace_width = 0;
 
 		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
 		stbtt_pack_context pack_context{};
@@ -67,6 +68,7 @@ namespace fonts {
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
 
+		font.whitespace_width = get_glyph(font, U' ').advance_width;
 #if 0
 		graphics::set_texture_filter(font.atlas_texture, graphics::Filter::Linear);
 #endif
@@ -94,6 +96,10 @@ namespace fonts {
 
 	int get_line_spacing(const Font& font) {
 		return font.ascent - font.descent + font.line_gap;
+	}
+
+	int get_whitespace_width(const Font& font) {
+		return font.whitespace_width;
 	}
 
 	float get_scale_for_pixel_height(const Font& font, float pixel_height) {
