@@ -142,6 +142,7 @@ namespace ecs {
 		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
 		text.pixel_height = 48.f;
 		text.scale = { 0.1f, 0.1f };
+
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
 			std::string string;
 			if (State* current_state = _get_state(sm, sm.current_state)) {
@@ -154,7 +155,9 @@ namespace ecs {
 			if (string.empty()) continue;
 			text.string = text::to_u32(string);
 			text.position = b2Body_GetPosition(body) + Vec2f(-8.f, -10.f);
-			text::draw(text);
+			text::draw_later(text);
 		}
+
+		text::draw_all_now("ecs::debug_draw_state_machines()");
 	}
 }

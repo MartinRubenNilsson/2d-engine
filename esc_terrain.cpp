@@ -77,8 +77,10 @@ namespace ecs {
 				text.position = coord * _terrain_tile_size;
 				text.position.x += 2.5f;
 				text.position.y += 5.5f;
-				text::draw(text);
+				text::draw_later(text);
 			}
 		}
+
+		text::draw_all_now("ecs::debug_draw_terrain()");
 	}
 }

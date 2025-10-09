@@ -94,18 +94,18 @@ namespace fonts {
 		Glyph glyph{};
 		stbtt_GetCodepointHMetrics(&font.info, codepoint, &glyph.advance_width, &glyph.left_side_bearing);
 		stbtt_GetCodepointBox(&font.info, codepoint, &glyph.x0, &glyph.y0, &glyph.x1, &glyph.y1);
-		auto packed_char_it = font.packed_chars.find(codepoint);
-		if (packed_char_it == font.packed_chars.end()) {
+		auto it = font.packed_chars.find(codepoint);
+		if (it == font.packed_chars.end()) {
 			const float font_size = 30.f; //Hardcoded for now
 			stbtt_packedchar packed_char{};
 			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, font_size, codepoint, 1, &packed_char);
-			packed_char_it = font.packed_chars.emplace(codepoint, packed_char).first;
+			it = font.packed_chars.emplace(codepoint, packed_char).first;
 			font.atlas_texture_needs_updating = true;
 		}
-		glyph.s0 = packed_char_it->second.x0;
-		glyph.t0 = packed_char_it->second.y0;
-		glyph.s1 = packed_char_it->second.x1;
-		glyph.t1 = packed_char_it->second.y1;
+		glyph.s0 = it->second.x0;
+		glyph.t0 = it->second.y0;
+		glyph.s1 = it->second.x1;
+		glyph.t1 = it->second.y1;
 		return glyph;
 	}
 

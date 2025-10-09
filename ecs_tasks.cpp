@@ -107,8 +107,10 @@ namespace ecs {
 			text.string.assign(task.name.begin(), task.name.end());
 			text.position = b2Body_GetWorldCenterOfMass(body) + Vec2f(-8.f, -10.f);
 			// TODO: text color!!!
-			text::draw(text);
+			text::draw_later(text);
 		}
+
+		text::draw_all_now("ecs::_debug_draw_task_names()");
 	}
 
 	void debug_draw_tasks() {

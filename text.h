@@ -13,10 +13,9 @@ namespace text {
 		Vec2f scale = { 1.f, 1.f };
 	};
 
-	//TODO
-	//draw_text_later(const Test& test);
-	//sort_all();
-	//draw_all();
+	// Sorts by draw order.
+	bool operator<(const Text& a, const Text& b);
 
-	void draw(const Text& text);
+	void draw_later(const Text& text);
+	void draw_all_now(std::string_view debug_group_name);
 }
