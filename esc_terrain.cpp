@@ -64,7 +64,7 @@ namespace ecs {
 	void debug_draw_terrain() {
 		text::Text text{};
 		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
-		text.pixel_height = 8.f;
+		text.height = 8.f;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {
 			for (unsigned int x = 0; x < _terrain_size.x; ++x) {
@@ -74,8 +74,8 @@ namespace ecs {
 				if (type == TerrainType::None) continue;
 				text.string = text::to_u32(std::to_string((int)type));
 				text.position = coord * _terrain_tile_size;
-				text.position.x += 2.5f;
-				text.position.y += 5.5f;
+				//text.position.x += 2.5f;
+				//text.position.y += 5.5f;
 				text::draw_later(text);
 			}
 		}

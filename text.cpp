@@ -40,12 +40,20 @@ namespace text {
         if (_texts.empty())
             return;
 
+        const graphics::ScopedDebugGroup debug_group(debug_group_name);
+
         std::sort(_texts.begin(), _texts.end());
 
         graphics::temp_vertices.clear();
         _batches.clear();
 
-        const graphics::ScopedDebugGroup debug_group(debug_group_name);
+        // Get final framebuffer size. This should be the same as the window client area size.
+        unsigned int framebuffer_width = 0;
+        unsigned int framebuffer_height = 0;
+        graphics::get_texture_size(graphics::get_framebuffer_texture(graphics::final_framebuffer),
+            framebuffer_width, framebuffer_height);
+
+        const float screen_pixels_per_world_pixel = (float)framebuffer_height / GAME_FRAMEBUFFER_HEIGHT;
 
         for (const Text& text : _texts) {
             fonts::Font* font = fonts::get_font(text.font);
@@ -58,9 +66,12 @@ namespace text {
 
             Batch& batch = _get_new_or_current_batch(texture);
 
-            const float whitespace_advance = fonts::get_whitespace_advance(*font);
-            const float line_spacing = fonts::get_line_spacing(*font);
-            const float scale = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
+            // How many pixels high *on screen* the text should be.
+            const float pixel_height_on_screen = text.height * screen_pixels_per_world_pixel;
+
+            const int whitespace_advance = fonts::get_whitespace_advance(*font);
+            const int line_spacing = fonts::get_line_spacing(*font);
+            const float scale = fonts::get_scale_for_pixel_height(*font, pixel_height_on_screen);
 
             graphics::temp_vertices.reserve(graphics::temp_vertices.size() + text.string.size());
 
@@ -89,7 +100,7 @@ namespace text {
                 }
 
                 const fonts::GlyphBoundingBox box = fonts::get_bounding_box(*font, glyph);
-                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, text.pixel_height * 40.f);
+                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, pixel_height_on_screen);
 
                 const Vec2f min = pos + box.min;
                 const Vec2f max = pos + box.max;
@@ -108,9 +119,11 @@ namespace text {
                     const unsigned int v = batch.vertex_offset + batch.vertex_count + gv;
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
                      // The glyphs use a coordinate system with y up, so we must flip.
+                    // TODO: this flipping is not correct!!!!
                     vertex.position.y = -vertex.position.y;
                     vertex.position *= scale;
-                    vertex.position *= text.scale;
+                    vertex.position /= screen_pixels_per_world_pixel;
+                    //vertex.position *= text.scale;
                     vertex.position += text.position;
                 }
 

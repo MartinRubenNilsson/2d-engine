@@ -98,7 +98,7 @@ namespace ecs {
 	void _debug_draw_task_names() {
 		text::Text text{};
 		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
-		text.pixel_height = 48.f;
+		text.height = 48.f;
 		text.scale = { 0.1f, 0.1f };
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
