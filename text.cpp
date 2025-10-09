@@ -58,28 +58,29 @@ namespace text {
 
             Batch& batch = _get_new_or_current_batch(texture);
 
-            const float whitespace_width = fonts::get_whitespace_width(*font);
+            const float whitespace_advance = fonts::get_whitespace_advance(*font);
             const float line_spacing = fonts::get_line_spacing(*font);
             const float scale = fonts::get_scale_for_pixel_height(*font, text.pixel_height);
 
             graphics::temp_vertices.reserve(graphics::temp_vertices.size() + text.string.size());
 
-            Vec2f pos; // Aka "pen" - current position to draw the glyph at.
+            Vec2f pos; // Aka "pen" or "glyph origin" - current position to draw the glyph at.
             fonts::GlyphId prev_glyph{};
-            for (char32_t codepoint : text.string) { // codepoint
+
+            for (char32_t codepoint : text.string) {
                 if (codepoint == U'\r')
                     continue; // Skip carriage returns to avoid graphical issues
 
-                const fonts::GlyphId glyph = fonts::get_glyph_id(*font, codepoint);
+                const fonts::GlyphId glyph = fonts::get_glyph(*font, codepoint);
 
                 pos.x += fonts::get_kerning_advance(*font, prev_glyph, glyph);
 
                 switch (codepoint) {
                     case U' ': {
-                        pos.x += whitespace_width;
+                        pos.x += whitespace_advance;
                     } continue;
                     case U'\t': {
-                        pos.x += whitespace_width * 4.f; // 1 tab = 4 whitespaces
+                        pos.x += whitespace_advance * 4.f; // 1 tab = 4 whitespaces
                     } continue;
                     case U'\n': {
                         pos.x = 0.f;
@@ -87,14 +88,14 @@ namespace text {
                     } continue;
                 }
 
-                const fonts::GlyphInfo info = fonts::get_glyph_info(*font, glyph, text.pixel_height, codepoint);
+                const fonts::GlyphBoundingBox box = fonts::get_bounding_box(*font, glyph);
+                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, text.pixel_height * 40.f);
 
-                const Vec2f min = pos + Vec2f((float)info.x0, (float)info.y0);
-                const Vec2f max = pos + Vec2f((float)info.x1, (float)info.y1);
-                // PITFALL: We need to flip the texture v-coordinate (t0 and t1) here
-                // because we flip the vertex y-coordinate futher below.
-                const Vec2f tex_min = Vec2f((float)info.s0, (float)info.t1) / (float)fonts::ATLAS_TEXTURE_SIZE;
-                const Vec2f tex_max = Vec2f((float)info.s1, (float)info.t0) / (float)fonts::ATLAS_TEXTURE_SIZE;
+                const Vec2f min = pos + box.min;
+                const Vec2f max = pos + box.max;
+                // PITFALL: We need to flip the texture y-coordinate here because we flip the vertex y-coordinate futher below.
+                const Vec2f tex_min = { (float)rect.min.x, (float)box.max.y }; // SIC: max.y
+                const Vec2f tex_max = { (float)rect.max.x, (float)box.min.y }; // SIC: min.y
 
                 graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), colors::WHITE, Vec2f(tex_min.x, tex_min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
@@ -114,9 +115,12 @@ namespace text {
                 }
 
                 batch.vertex_count += 6;
-                pos.x += info.advance_width;
+                pos.x += fonts::get_advance(*font, glyph);
                 prev_glyph = glyph;
             }
+
+            if (fonts::atlas_texture_needs_updating(*font))
+                fonts::update_atlas_texture(*font);
         }
 
         graphics::set_primitives(graphics::Primitives::TriangleList);

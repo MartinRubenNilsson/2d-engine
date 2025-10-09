@@ -26,14 +26,15 @@ namespace fonts {
 		int ascent = 0; // The (unscaled) coordinate above the baseline the font extends.
 		int descent = 0; // The (unscaled) coordinate below the baseline the font extends; typically negative.
 		int line_gap = 0; // The (unscaled) spacing between one row's descent and the next row's ascent.
-		int whitespace_width = 0;
+		int whitespace_advance = 0;
+
+		std::vector<CodepointGlyphPair> codepoint_glyph_pairs; // sorted by codepoint
+		std::unordered_map<int, GlyphTextureRect> packed_chars;
 
 		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
-		stbtt_pack_context pack_context{};
-		std::unordered_map<int, stbtt_packedchar> packed_chars;
 		Handle<graphics::Texture> atlas_texture;
 		bool atlas_texture_needs_updating = true;
-		std::vector<CodepointGlyphPair> codepoint_glyph_pairs; // sorted by codepoint
+		stbtt_pack_context pack_context{};
 	};
 
 	Pool<Font> _font_pool;
@@ -68,7 +69,8 @@ namespace fonts {
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
 
-		font.whitespace_width = get_glyph_info(font, get_glyph_id(font, U' '), 30.f, U' ').advance_width;
+		// Precompute because we need it often.
+		font.whitespace_advance = get_advance(font, get_glyph(font, U' '));
 #if 0
 		graphics::set_texture_filter(font.atlas_texture, graphics::Filter::Linear);
 #endif
@@ -86,12 +88,8 @@ namespace fonts {
 		return _font_pool.get(handle);
 	}
 
-	Handle<graphics::Texture> get_atlas_texture(Font& font) {
-		if (font.atlas_texture_needs_updating) {
-			graphics::update_texture(font.atlas_texture, font.atlas_pixels.data());
-			font.atlas_texture_needs_updating = false;
-		}
-		return font.atlas_texture;
+	float get_scale_for_pixel_height(const Font& font, float pixel_height) {
+		return stbtt_ScaleForPixelHeight(&font.info, pixel_height);
 	}
 
 	int get_ascent(const Font& font) {
@@ -110,15 +108,11 @@ namespace fonts {
 		return font.ascent - font.descent + font.line_gap;
 	}
 
-	int get_whitespace_width(const Font& font) {
-		return font.whitespace_width;
+	int get_whitespace_advance(const Font& font) {
+		return font.whitespace_advance;
 	}
 
-	float get_scale_for_pixel_height(const Font& font, float pixel_height) {
-		return stbtt_ScaleForPixelHeight(&font.info, pixel_height);
-	}
-
-	GlyphId get_glyph_id(Font& font, char32_t codepoint) {
+	GlyphId get_glyph(Font& font, char32_t codepoint) {
 		// First do a binary search of the lookup table to see if it contains the glyph,
 		// otherwise find it the slow way using the stbtt API and then save the result.
 		std::vector<CodepointGlyphPair>& pairs = font.codepoint_glyph_pairs;
@@ -143,30 +137,54 @@ namespace fonts {
 		return { glyph_index };
 	}
 
-	bool is_glyph_empty(const Font& font, GlyphId glyph) {
+	bool is_empty(const Font& font, GlyphId glyph) {
 		return stbtt_IsGlyphEmpty(&font.info, glyph.index);
 	}
 
-	GlyphInfo get_glyph_info(Font& font, GlyphId glyph, float pixel_height, char32_t codepoint) {
-		GlyphInfo info{};
-		stbtt_GetGlyphHMetrics(&font.info, glyph.index, &info.advance_width, &info.left_side_bearing);
-		stbtt_GetGlyphBox(&font.info, glyph.index, &info.x0, &info.y0, &info.x1, &info.y1);
-		auto it = font.packed_chars.find(codepoint);
-		if (it == font.packed_chars.end()) {
-			const float font_scale = stbtt_ScaleForPixelHeight(&font.info, pixel_height);
-			stbtt_packedchar packed_char{};
-			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 16.f, codepoint, 1, &packed_char);
-			it = font.packed_chars.emplace(codepoint, packed_char).first;
-			font.atlas_texture_needs_updating = true;
-		}
-		info.s0 = it->second.x0;
-		info.t0 = it->second.y0;
-		info.s1 = it->second.x1;
-		info.t1 = it->second.y1;
-		return info;
+	int get_advance(const Font& font, GlyphId glyph) {
+		int advance_width = 0;
+		int left_side_bearing_dummy = 0;
+		stbtt_GetGlyphHMetrics(&font.info, glyph.index, &advance_width, &left_side_bearing_dummy);
+		return advance_width;
 	}
 
-	int get_kerning_advance(Font& font, GlyphId glyph1, GlyphId glyph2) {
+	int get_kerning_advance(const Font& font, GlyphId glyph1, GlyphId glyph2) {
 		return stbtt_GetGlyphKernAdvance(&font.info, glyph1.index, glyph2.index);
+	}
+
+	GlyphBoundingBox get_bounding_box(const Font& font, GlyphId glyph) {
+		GlyphBoundingBox box{};
+		stbtt_GetGlyphBox(&font.info, glyph.index, &box.min.x, &box.min.y, &box.max.x, &box.max.y);
+		return box;
+	}
+
+	GlyphTextureRect get_texture_rect(Font& font, char32_t codepoint, float pixel_height) {
+		auto it = font.packed_chars.find(codepoint);
+		if (it == font.packed_chars.end()) {
+			stbtt_packedchar packed_char{};
+			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 30.f, codepoint, 1, &packed_char);
+			GlyphTextureRect rect{};
+			rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;
+			rect.min.y = packed_char.y0 / (float)ATLAS_TEXTURE_SIZE;
+			rect.max.x = packed_char.x1 / (float)ATLAS_TEXTURE_SIZE;
+			rect.max.y = packed_char.y1 / (float)ATLAS_TEXTURE_SIZE;
+			it = font.packed_chars.emplace(codepoint, rect).first;
+			font.atlas_texture_needs_updating = true;
+		}
+		return it->second;
+	}
+
+	bool atlas_texture_needs_updating(const Font& font) {
+		return font.atlas_texture_needs_updating;
+	}
+
+	void update_atlas_texture(Font& font) {
+		if (!font.atlas_texture_needs_updating) return;
+		graphics::update_texture(font.atlas_texture, font.atlas_pixels.data());
+		font.atlas_texture_needs_updating = false;
+	}
+
+	Handle<graphics::Texture> get_atlas_texture(const Font& font) {
+		return font.atlas_texture;
 	}
 }
