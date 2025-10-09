@@ -94,8 +94,8 @@ namespace text {
                 const Vec2f min = pos + box.min;
                 const Vec2f max = pos + box.max;
                 // PITFALL: We need to flip the texture y-coordinate here because we flip the vertex y-coordinate futher below.
-                const Vec2f tex_min = { (float)rect.min.x, (float)box.max.y }; // SIC: max.y
-                const Vec2f tex_max = { (float)rect.max.x, (float)box.min.y }; // SIC: min.y
+                const Vec2f tex_min = { (float)rect.min.x, (float)rect.max.y }; // SIC: max.y
+                const Vec2f tex_max = { (float)rect.max.x, (float)rect.min.y }; // SIC: min.y
 
                 graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), colors::WHITE, Vec2f(tex_min.x, tex_min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
