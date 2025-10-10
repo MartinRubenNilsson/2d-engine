@@ -53,8 +53,20 @@ namespace text {
         graphics::get_texture_size(graphics::get_framebuffer_texture(graphics::final_framebuffer),
             framebuffer_width, framebuffer_height);
 
-        const float screen_pixels_per_world_pixel = (float)framebuffer_height / GAME_FRAMEBUFFER_HEIGHT;
+        const float screen_pixels_per_world_unit = (float)framebuffer_height / GAME_FRAMEBUFFER_HEIGHT;
 
+        // Preallocate the temp_vertices vector.
+        {
+            size_t vertex_count = 0;
+            for (const Text& text : _texts) {
+                // In general we will have 4 vertices per non-whitespace glyph.
+                // TODO: Handle whitespaces for a more conservative preallocation.
+                vertex_count += 4 * text.string.size();
+            }
+            graphics::temp_vertices.reserve(vertex_count);
+        }
+
+        // Create batches.
         for (const Text& text : _texts) {
             fonts::Font* font = fonts::get_font(text.font);
             if (!font)
@@ -64,16 +76,17 @@ namespace text {
             if (texture == Handle<graphics::Texture>())
                 continue;
 
-            Batch& batch = _get_new_or_current_batch(texture);
-
-            // How many pixels high *on screen* the text should be.
-            const float pixel_height_on_screen = text.height * screen_pixels_per_world_pixel;
+            // How many pixels high *on screen* the text should appear.
+            const float height_on_screen = text.height * screen_pixels_per_world_unit;
+            // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
+            const float scale_for_screen = fonts::get_scale_for_pixel_height(*font, height_on_screen);
+            // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
+            const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 
             const int whitespace_advance = fonts::get_whitespace_advance(*font);
             const int line_spacing = fonts::get_line_spacing(*font);
-            const float scale = fonts::get_scale_for_pixel_height(*font, pixel_height_on_screen);
 
-            graphics::temp_vertices.reserve(graphics::temp_vertices.size() + text.string.size());
+            Batch& batch = _get_new_or_current_batch(texture);
 
             Vec2f pos; // Aka "pen" or "glyph origin" - current position to draw the glyph at.
             fonts::GlyphId prev_glyph{};
@@ -100,13 +113,16 @@ namespace text {
                 }
 
                 const fonts::GlyphBoundingBox box = fonts::get_bounding_box(*font, glyph);
-                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, pixel_height_on_screen);
+                // PITFALL: It's important to use height_on_screen here!
+                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, height_on_screen);
 
                 const Vec2f min = pos + box.min;
                 const Vec2f max = pos + box.max;
                 // PITFALL: We need to flip the texture y-coordinate here because we flip the vertex y-coordinate futher below.
                 const Vec2f tex_min = { (float)rect.min.x, (float)rect.max.y }; // SIC: max.y
                 const Vec2f tex_max = { (float)rect.max.x, (float)rect.min.y }; // SIC: min.y
+
+                // TODO: triangle strip!!!
 
                 graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), colors::WHITE, Vec2f(tex_min.x, tex_min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
@@ -120,11 +136,9 @@ namespace text {
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
                      // The glyphs use a coordinate system with y up, so we must flip.
                     // TODO: this flipping is not correct in the sense that
-                    // new lines will be incorrect!!
+                    // new lines will be incorrect!! Or is it?
                     vertex.position.y = -vertex.position.y;
-                    vertex.position *= scale;
-                    vertex.position /= screen_pixels_per_world_pixel;
-                    //vertex.position *= text.scale;
+                    vertex.position *= scale_for_world;
                     vertex.position += text.position;
                 }
 
