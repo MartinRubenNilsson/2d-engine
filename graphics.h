@@ -46,10 +46,15 @@ namespace graphics {
 	void bind_vertex_input(Handle<VertexInput> handle);
 
 	Handle<Buffer> create_buffer(BufferDesc&& desc);
+	// Recreates the buffer with a new size and initial data while not invalidating the handle.
 	void recreate_buffer(Handle<Buffer> handle, unsigned int size, const void* initial_data = nullptr);
+	// Destroys the buffer. This will invalidate the handle.
 	void destroy_buffer(Handle<Buffer> handle);
 	// Fails if the buffer is not dynamic, or if offset + size exceeds the buffer size.
 	void update_buffer(Handle<Buffer> handle, const void* data, unsigned int size, unsigned int offset = 0);
+	// Updates the buffer if the data size does not exceed the buffer size, otherwise recreates it.
+	void update_or_recreate_buffer(Handle<Buffer> handle, const void* data, unsigned int size);
+	// Get the size of the buffer in bytes.
 	size_t get_buffer_size(Handle<Buffer> handle);
 	// Pass an empty handle to unbind any currently bound buffer.
 	void bind_vertex_buffer(unsigned int binding, Handle<Buffer> handle, unsigned int stride, unsigned int offset = 0);

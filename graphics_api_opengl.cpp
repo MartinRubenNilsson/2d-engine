@@ -154,6 +154,11 @@ namespace api {
 			}
 		}
 
+		// SETUP PRIMITIVE INDEX RESTART
+
+		glEnable(GL_PRIMITIVE_RESTART);
+		glPrimitiveRestartIndex(UINT32_MAX);
+
 		// SETUP PROGRAM PIPELINE OBJECT
 
 		glCreateProgramPipelines(1, &_program_pipeline_object);

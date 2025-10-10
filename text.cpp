@@ -155,13 +155,8 @@ namespace text {
         graphics::bind_vertex_shader(graphics::sprite_vert);
         graphics::bind_fragment_shader(graphics::text_frag);
 
-        //TODO: hide this logic in wrapper functions
-        const unsigned int vertices_byte_size = (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex);
-        if (vertices_byte_size <= graphics::get_buffer_size(graphics::dynamic_vertex_buffer)) {
-            graphics::update_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(), vertices_byte_size);
-        } else {
-            graphics::recreate_buffer(graphics::dynamic_vertex_buffer, vertices_byte_size, graphics::temp_vertices.data());
-        }
+        graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
+            (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
 
         graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
 

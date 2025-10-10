@@ -360,6 +360,22 @@ namespace graphics {
 		api::update_buffer(buffer->api_handle, data, size, offset);
 	}
 
+	void update_or_recreate_buffer(Handle<Buffer> handle, const void* data, unsigned int size) {
+		if (!data || !size) return;
+		Buffer* buffer = _buffer_pool.get(handle);
+		if (!buffer) return;
+		if (!buffer->desc.dynamic) return;
+		if (size <= buffer->desc.size) {
+			api::update_buffer(buffer->api_handle, data, size, 0);
+			return;
+		}
+		api::destroy_buffer(buffer->api_handle);
+		buffer->desc.size = size;
+		buffer->desc.initial_data = data;
+		buffer->api_handle = api::create_buffer(buffer->desc);
+		buffer->desc.initial_data = nullptr;
+	}
+
 	size_t get_buffer_size(Handle<Buffer> handle) {
 		if (const Buffer* buffer = _buffer_pool.get(handle)) {
 			return buffer->desc.size;
