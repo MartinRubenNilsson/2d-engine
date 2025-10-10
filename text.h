@@ -12,6 +12,7 @@ namespace text {
 		std::u32string string; // String of unicode codepoints; can be created using the U"..." string literal.
 		float height = 8.f; // In world units (NOT screen pixels!)
 		Vec2f position; // In world units
+		Color color = colors::WHITE;
 	};
 
 	// Sorts by draw order.

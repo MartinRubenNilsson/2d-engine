@@ -124,19 +124,17 @@ namespace text {
 
                 // TODO: triangle strip!!!
 
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), colors::WHITE, Vec2f(tex_min.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), colors::WHITE, Vec2f(tex_min.x, tex_max.y));
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), colors::WHITE, Vec2f(tex_min.x, tex_max.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), colors::WHITE, Vec2f(tex_max.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), colors::WHITE, Vec2f(tex_max.x, tex_max.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(tex_min.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(tex_max.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(tex_min.x, tex_max.y));
+                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(tex_min.x, tex_max.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(tex_max.x, tex_min.y));
+                graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(tex_max.x, tex_max.y));
 
                 for (unsigned int gv = 0; gv < 6; ++gv) { // gv = glyph vertex
                     const unsigned int v = batch.vertex_offset + batch.vertex_count + gv;
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
                      // The glyphs use a coordinate system with y up, so we must flip.
-                    // TODO: this flipping is not correct in the sense that
-                    // new lines will be incorrect!! Or is it?
                     vertex.position.y = -vertex.position.y;
                     vertex.position *= scale_for_world;
                     vertex.position += text.position;
@@ -147,8 +145,9 @@ namespace text {
                 prev_glyph = glyph;
             }
 
-            if (fonts::atlas_texture_needs_updating(*font))
+            if (fonts::atlas_texture_needs_updating(*font)) {
                 fonts::update_atlas_texture(*font);
+            }
         }
 
         graphics::set_primitives(graphics::Primitives::TriangleList);
