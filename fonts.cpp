@@ -189,7 +189,7 @@ namespace fonts {
 		entry.glyph_texture_rect_index = (int)font.glyph_texture_rects.size();
 		table.insert(table.begin() + first, entry);
 		stbtt_packedchar packed_char{};
-		stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 30.f, codepoint, 1, &packed_char);
+		stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, pixel_height, codepoint, 1, &packed_char);
 		font.atlas_texture_needs_updating = true;
 		GlyphTextureRect& rect = font.glyph_texture_rects.emplace_back();
 		rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;

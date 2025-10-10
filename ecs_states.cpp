@@ -140,8 +140,7 @@ namespace ecs {
 	void debug_draw_state_machines() {
 		text::Text text{};
 		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
-		text.height = 48.f;
-		text.scale = { 0.1f, 0.1f };
+		text.height = 8.f;
 
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
 			std::string string;

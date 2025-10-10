@@ -98,14 +98,14 @@ namespace ecs {
 	void _debug_draw_task_names() {
 		text::Text text{};
 		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
-		text.height = 48.f;
-		text.scale = { 0.1f, 0.1f };
+		text.height = 8.f;
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
 			if (task.name.empty())
 				continue;
 			text.string.assign(task.name.begin(), task.name.end());
-			text.position = b2Body_GetWorldCenterOfMass(body) + Vec2f(-8.f, -10.f);
+			text.position = b2Body_GetWorldCenterOfMass(body);
+			text.position.y -= 16.f;
 			// TODO: text color!!!
 			text::draw_later(text);
 		}
