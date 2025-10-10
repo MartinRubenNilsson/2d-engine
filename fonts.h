@@ -36,6 +36,7 @@ namespace fonts {
 
 	GlyphId get_glyph(Font& font, char32_t codepoint);
 
+	// True if there's nothing to draw for this glyph.
 	bool is_empty(const Font& font, GlyphId glyph);
 	// The horizontal distance to move the pen after drawing this glyph.
 	int get_advance(const Font& font, GlyphId glyph);

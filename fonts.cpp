@@ -11,30 +11,40 @@
 namespace fonts {
 	const int ATLAS_TEXTURE_SIZE = 1024;
 
-	struct CodepointGlyphPair {
+	// Used to lookup a glyph from a codepoint.
+	struct GlyphTableEntry {
 		char32_t codepoint = 0;
 		int glyph_index = -1;
+
+		auto operator<=>(const GlyphTableEntry&) const = default;
 	};
 
-	bool _compare_codepoints(const CodepointGlyphPair& a, const CodepointGlyphPair& b) {
-		return a.codepoint < b.codepoint;
-	}
+	// Used to lookup a glyph texture rect from a codepoint and a pixel height.
+	struct GlyphTextureRectTableEntry {
+		char32_t codepoint = 0;
+		float pixel_height = 0.f;
+		int glyph_texture_rect_index = -1; // index into Font::glyph_texture_rects[]
+
+		auto operator<=>(const GlyphTextureRectTableEntry&) const = default;
+	};
 
 	struct Font {
 		std::vector<unsigned char> data;
 		stbtt_fontinfo info{};
-		int ascent = 0; // The (unscaled) coordinate above the baseline the font extends.
-		int descent = 0; // The (unscaled) coordinate below the baseline the font extends; typically negative.
-		int line_gap = 0; // The (unscaled) spacing between one row's descent and the next row's ascent.
-		int whitespace_advance = 0;
 
-		std::vector<CodepointGlyphPair> codepoint_glyph_pairs; // sorted by codepoint
-		std::unordered_map<int, GlyphTextureRect> packed_chars;
+		int ascent = 0; // How much above the baseline the font extends.
+		int descent = 0; // How much below the baseline the font extends; typically negative.
+		int line_gap = 0; // The spacing between one row's descent and the next row's ascent.
+		int whitespace_advance = 0; // How much to horizontally advance the pen for a whitespace.
 
+		std::vector<GlyphTableEntry> glyph_table; // sorted by codepoint
+		std::vector<GlyphTextureRectTableEntry> glyph_texture_rect_table; // sorted by codepoint first, pixel_height second
+		std::vector<GlyphTextureRect> glyph_texture_rects;
+
+		stbtt_pack_context pack_context{};
 		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
 		Handle<graphics::Texture> atlas_texture;
 		bool atlas_texture_needs_updating = true;
-		stbtt_pack_context pack_context{};
 	};
 
 	Pool<Font> _font_pool;
@@ -112,29 +122,34 @@ namespace fonts {
 		return font.whitespace_advance;
 	}
 
-	GlyphId get_glyph(Font& font, char32_t codepoint) {
-		// First do a binary search of the lookup table to see if it contains the glyph,
-		// otherwise find it the slow way using the stbtt API and then save the result.
-		std::vector<CodepointGlyphPair>& pairs = font.codepoint_glyph_pairs;
+	template <typename T>
+	size_t _lower_bound(const T* array, size_t size, const T& value) {
 		size_t first = 0;
-		size_t count = pairs.size();
-		while (count > 0) {
-			size_t curr = first;
-			size_t step = count / 2;
-			curr += step;
-			if (pairs[curr].codepoint < codepoint) {
-				first = ++curr;
-				count -= step + 1;
+		while (size > 0) {
+			const size_t step = size / 2;
+			const size_t middle = first + step;
+			if (array[middle] < value) {
+				first = middle + 1;
+				size -= step + 1;
 			} else {
-				count = step;
+				size = step;
 			}
 		}
-		if (first < pairs.size() && pairs[first].codepoint == codepoint) {
-			return { pairs[first].glyph_index };
+		return first;
+	}
+
+	GlyphId get_glyph(Font& font, char32_t codepoint) {
+		// First do a binary search of the table to see if it contains the glyph,
+		// otherwise find it the slow way using the stbtt API and then save the result.
+		std::vector<GlyphTableEntry>& table = font.glyph_table;
+		GlyphTableEntry entry{ codepoint };
+		const size_t first = _lower_bound(table.data(), table.size(), entry);
+		if (first < table.size() && table[first].codepoint == entry.codepoint) {
+			return { table[first].glyph_index };
 		}
-		const int glyph_index = stbtt_FindGlyphIndex(&font.info, codepoint);
-		pairs.emplace(pairs.begin() + first, codepoint, glyph_index);
-		return { glyph_index };
+		entry.glyph_index = stbtt_FindGlyphIndex(&font.info, codepoint);
+		table.insert(table.begin() + first, entry);
+		return { entry.glyph_index };
 	}
 
 	bool is_empty(const Font& font, GlyphId glyph) {
@@ -159,19 +174,29 @@ namespace fonts {
 	}
 
 	GlyphTextureRect get_texture_rect(Font& font, char32_t codepoint, float pixel_height) {
-		auto it = font.packed_chars.find(codepoint);
-		if (it == font.packed_chars.end()) {
-			stbtt_packedchar packed_char{};
-			stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 30.f, codepoint, 1, &packed_char);
-			GlyphTextureRect rect{};
-			rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;
-			rect.min.y = packed_char.y0 / (float)ATLAS_TEXTURE_SIZE;
-			rect.max.x = packed_char.x1 / (float)ATLAS_TEXTURE_SIZE;
-			rect.max.y = packed_char.y1 / (float)ATLAS_TEXTURE_SIZE;
-			it = font.packed_chars.emplace(codepoint, rect).first;
-			font.atlas_texture_needs_updating = true;
+		// First do a binary search of the texture rect table to see if it already has the rect
+		// for this combination of codepoint and pixel height, and if so return it.
+		std::vector<GlyphTextureRectTableEntry>& table = font.glyph_texture_rect_table;
+		GlyphTextureRectTableEntry entry{ codepoint, pixel_height };
+		const size_t first = _lower_bound(table.data(), table.size(), entry);
+		if (first < table.size() && // if we found it in the table
+			table[first].codepoint == entry.codepoint && 
+			table[first].pixel_height == entry.pixel_height) {
+			return font.glyph_texture_rects[table[first].glyph_texture_rect_index];
 		}
-		return it->second;
+		// We didn't find it in the table, so we need to call the stbtt API to pack the glyph in the
+		// texture atlas. Then we record the result in the table so we can look it up in the future.
+		entry.glyph_texture_rect_index = (int)font.glyph_texture_rects.size();
+		table.insert(table.begin() + first, entry);
+		stbtt_packedchar packed_char{};
+		stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, 30.f, codepoint, 1, &packed_char);
+		font.atlas_texture_needs_updating = true;
+		GlyphTextureRect& rect = font.glyph_texture_rects.emplace_back();
+		rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;
+		rect.min.y = packed_char.y0 / (float)ATLAS_TEXTURE_SIZE;
+		rect.max.x = packed_char.x1 / (float)ATLAS_TEXTURE_SIZE;
+		rect.max.y = packed_char.y1 / (float)ATLAS_TEXTURE_SIZE;
+		return rect;
 	}
 
 	bool atlas_texture_needs_updating(const Font& font) {

@@ -119,7 +119,8 @@ namespace text {
                     const unsigned int v = batch.vertex_offset + batch.vertex_count + gv;
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
                      // The glyphs use a coordinate system with y up, so we must flip.
-                    // TODO: this flipping is not correct!!!!
+                    // TODO: this flipping is not correct in the sense that
+                    // new lines will be incorrect!!
                     vertex.position.y = -vertex.position.y;
                     vertex.position *= scale;
                     vertex.position /= screen_pixels_per_world_pixel;
