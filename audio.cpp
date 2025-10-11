@@ -2,7 +2,6 @@
 #include "audio.h"
 #include "pool.h"
 #include "console.h"
-
 #include <fmod/fmod_studio.h>
 
 #ifdef _DEBUG
@@ -45,7 +44,7 @@ namespace audio {
 		return *(Handle<Event>*) & uint;
 	}
 
-	FMOD_RESULT F_CALLBACK _fmod_callback_on_event_destroyed(
+	FMOD_RESULT F_CALL _fmod_callback_on_event_destroyed(
 		FMOD_STUDIO_EVENT_CALLBACK_TYPE type,
 		FMOD_STUDIO_EVENTINSTANCE* instance,
 		void* parameters) {
@@ -99,7 +98,7 @@ namespace audio {
 	void initialize() {
 		FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
 		assert(result == FMOD_OK);
-		FMOD_STUDIO_INITFLAGS flags = FMOD_STUDIO_INIT_LIVEUPDATE;
+		FMOD_STUDIO_INITFLAGS flags = 0;
 #ifdef _DEBUG
 		flags |= FMOD_STUDIO_INIT_LIVEUPDATE;
 #endif
