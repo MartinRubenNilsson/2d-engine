@@ -244,6 +244,8 @@
     <ClCompile Include="window_events.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="output\assets\scripts\camtest.script" />
+    <None Include="output\assets\scripts\martin_debug.script" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>

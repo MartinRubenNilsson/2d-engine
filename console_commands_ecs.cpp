@@ -8,7 +8,9 @@ namespace console {
 			.name = "debug_terrain",
 			.desc = "Debug draw the terrain.",
 			.params = { { ParamType::Bool, "on", "Is debug drawing on?" } },
-			.callback = [](Args args) { ecs::debug_terrain = get_bool(args[0]); }
+			.callback = [](Args args) {
+			ecs::debug_terrain = get_bool(args[0]);
+		}
 			});
 	}
 }

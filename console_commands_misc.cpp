@@ -14,6 +14,36 @@
 #include "ecs_tags.h"
 
 namespace console {
+	void _execute_help_command(Args args) {
+		if (const Command* command = find_command_with_name(get_string(args[0]))) {
+			log(get_command_help_message(*command));
+		}
+	}
+
+#if 0
+	void _execute_toggle_command(Args args) {
+		const std::string command_name = get_string(args[0]);
+		const Command* command = find_command_with_name(command_name);
+		if (!command) {
+			log_error("\"" + command_name + "\" is not a command");
+			return;
+		}
+		if (command->params.size() == 0) {
+			log_error(command_name + " does not take any parameters");
+			return;
+		}
+		if (command->params.size() > 1) {
+			log_error(command_name + " takes more than one parameter");
+			return;
+		}
+		if (command->params[0].type != ParamType::Bool) {
+			log_error(command_name + " does not take a bool parameter");
+			return;
+		}
+		static std::unordered_map<std::string, bool> value; //HACK
+	}
+#endif
+
 	void _register_misc_commands() {
 
 		// CONSOLE
@@ -21,93 +51,67 @@ namespace console {
 		register_command({
 			.name = "help",
 			.desc = "Shows help for a command",
-			.params = {
-				{ ParamType::String, "command", "The command to show help for" },
-			},
-			.callback = [](Args args) {
-				if (const Command* command = find_command_with_name(get_string(args[0]))) {
-					log(get_command_help_message(*command));
-				}
-			}
-		});
+			.params = { { ParamType::String, "command", "The command to show help for" } },
+			.callback = _execute_help_command,
+			});
 		register_command({
 			.name = "clear",
 			.desc = "Clears the console",
-			.callback = [](Args args) {
-				clear();
-			}
-		});
+			.callback = [](Args args) { clear(); }
+			});
 		register_command({
 			.name = "sleep",
 			.desc = "Defers incoming commands, executing them later",
-			.params = {
-				{ ParamType::Float, "seconds", "The number of seconds to sleep" },
-			},
-			.callback = [](Args args) {
-				sleep(get_float(args[0]));
-			}
-		});
+			.params = { { ParamType::Float, "seconds", "The number of seconds to sleep" } },
+			.callback = [](Args args) { sleep(get_float(args[0])); }
+			});
 		register_command({
 			.name = "log",
 			.desc = "Logs a message to the console",
-			.params = {
-				{ ParamType::String, "message", "The message to log" },
-			},
-			.callback = [](Args args) {
-				log(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "message", "The message to log" } },
+			.callback = [](Args args) { log(get_string(args[0])); }
+			});
 		register_command({
 			.name = "log_error",
 			.desc = "Logs an error message to the console",
-			.params = {
-				{ ParamType::String, "message", "The message to log" },
-			},
-			.callback = [](Args args) {
-				log_error(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "message", "The message to log" } },
+			.callback = [](Args args) { log_error(get_string(args[0])); }
+			});
 		register_command({
 			.name = "execute",
 			.desc = "Executes a console command",
-			.params = {
-				{ ParamType::String, "command_line", "The command to execute" },
-			},
-			.callback = [](Args args) {
-				execute(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "command_line", "The command to execute" } },
+			.callback = [](Args args) { execute(get_string(args[0])); }
+			});
 		register_command({
 			.name = "execute_script",
 			.desc = "Executes a console script",
-			.params = {
-				{ ParamType::String, "script_name", "The name of the script" },
-			},
-			.callback = [](Args args) {
-				execute_script_from_file(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "script_name", "The name of the script" } },
+			.callback = [](Args args) { execute_script_from_file(get_string(args[0])); }
+			});
 		register_command({
 			.name = "bind",
 			.desc = "Binds a console command to a key",
 			.params = {
 				{ ParamType::String, "key", "The key to bind" },
-				{ ParamType::String, "command_line", "The command to execute" },
-			},
-			.callback = [](Args args) {
-				console::bind(get_string(args[0]), get_string(args[1]));
-			}
-		});
+				{ ParamType::String, "command_line", "The command to execute" }
+				},
+			.callback = [](Args args) { console::bind(get_string(args[0]), get_string(args[1])); }
+			});
 		register_command({
 			.name = "unbind",
 			.desc = "Unbinds a key",
-			.params = {
-				{ ParamType::String, "key", "The key to unbind" },
-			},
-			.callback = [](Args args) {
-				console::unbind(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "key", "The key to unbind" } },
+			.callback = [](Args args) { unbind(get_string(args[0])); }
+			});
+#if 0
+		register_command({
+			.name = "toggle",
+			.desc = "Toggles any command that takes a single BOOL parameter.",
+			.params = { { ParamType::String, "command", "The command to toggle" } },
+			.callback = _execute_toggle_command
+			});
+#endif
 
 		// SHADERS
 
@@ -118,7 +122,7 @@ namespace console {
 			.callback = [](Args args) {
 				shaders::reload_assets();
 			}
-		});
+			});
 #endif
 
 		// AUDIO
@@ -126,53 +130,39 @@ namespace console {
 		register_command({
 			.name = "audio_play",
 			.desc = "Plays an audio event",
-			.params = {
-				{ ParamType::String, "event_path", "The full path of the event" },
-			},
+			.params = { { ParamType::String, "event_path", "The full path of the event" } },
 			.callback = [](Args args) {
 				audio::create_event({ .path = get_string(args[0]) });
 			}
-		});
+			});
 
 		// MAP
 
 		register_command({
 			.name = "map_open",
 			.desc = "Opens a map",
-			.params = {
-				{ ParamType::String, "name", "The name of the map" },
-			},
-			.callback = [](Args args) {
-				map::open(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "name", "The name of the map" } },
+			.callback = [](Args args) { map::open(get_string(args[0])); }
+			});
 		register_command({
 			.name = "map_close",
 			.desc = "Closes the current map",
-			.callback = [](Args args) {
-				map::close();
-			}
-		});
+			.callback = [](Args) { map::close(); }
+			});
 		register_command({
 			.name = "map_reset",
 			.desc = "Resets the current map",
-			.callback = [](Args args) {
-				map::reset();
-			}
-		});
+			.callback = [](Args) { map::reset(); }
+			});
 
 		// UI
 
 		register_command({
 			.name = "ui_show",
 			.desc = "Shows an RML document",
-			.params = {
-				{ ParamType::String, "name", "The name of the document" },
-			},
-			.callback = [](Args args) {
-				ui::show_document(get_string(args[0]));
-			}
-		});
+			.params = { { ParamType::String, "name", "The name of the document" } },
+			.callback = [](Args args) { ui::show_document(get_string(args[0])); }
+			});
 
 		// GAME
 
@@ -185,7 +175,7 @@ namespace console {
 			.callback = [](Args args) {
 				ecs::destroy_later((entt::entity)get_int(args[0]));
 			}
-		});
+			});
 #if 0
 		add_command({
 			.name = "clone",
@@ -196,15 +186,14 @@ namespace console {
 			.callback = [](Args args) {
 				ecs::deep_copy((entt::entity)get_int(args[0]));
 			}
-		});
-#endif
+			});
 		register_command({
 			.name = "kill_player",
 			.desc = "Kills the player",
 			.callback = [](Args args) {
 				ecs::kill_player(ecs::find_entity_with_tag(ecs::Tag::Player));
 			}
-		});
+			});
 		register_command({
 			.name = "add_camera_shake",
 			.desc = "Adds trauma to the active camera to make it shake",
@@ -214,7 +203,7 @@ namespace console {
 			.callback = [](Args args) {
 				ecs::add_trauma_to_active_camera(get_float(args[0]));
 			}
-		});
+			});
 		register_command({
 			.name = "create_vfx",
 			.desc = "Spawns a VFX in the game world",
@@ -232,6 +221,7 @@ namespace console {
 					log_error("Unknown VFX type: " + type_str);
 				}
 			}
-		});
+			});
+#endif
 	}
 }

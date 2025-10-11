@@ -284,6 +284,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
+    <None Include="output\assets\scripts\camtest.script">
+      <Filter>application\console\scripts</Filter>
+    </None>
+    <None Include="output\assets\scripts\martin_debug.script">
+      <Filter>application\console\scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui.h">
@@ -698,6 +704,9 @@
     </Filter>
     <Filter Include="application\console\commands\implementations">
       <UniqueIdentifier>{0ecb7be7-4e89-4c9d-952d-36b29e6f9b35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\console\scripts">
+      <UniqueIdentifier>{bcf4b00e-9a56-41ff-b5fb-8acdcb63fae8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

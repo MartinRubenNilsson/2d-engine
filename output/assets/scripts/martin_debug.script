@@ -1,5 +1,7 @@
 bind o "map_open summer_forest_00"
 bind p map_close
 bind r reload_shaders
+bind t "debug_terrain true"
+bind y "debug_terrain false"
 ui_show hud
 map_open summer_forest_00
