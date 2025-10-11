@@ -146,12 +146,6 @@
     <ClCompile Include="filesystem.cpp">
       <Filter>application\filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="console_commands_misc.cpp">
-      <Filter>application\console\commands</Filter>
-    </ClCompile>
-    <ClCompile Include="console_commands_steam.cpp">
-      <Filter>application\console\commands</Filter>
-    </ClCompile>
     <ClCompile Include="console_commands.cpp">
       <Filter>application\console\commands</Filter>
     </ClCompile>
@@ -274,6 +268,18 @@
     </ClCompile>
     <ClCompile Include="text_stb_truetype.cpp">
       <Filter>graphics\text</Filter>
+    </ClCompile>
+    <ClCompile Include="console_commands_registration.cpp">
+      <Filter>application\console\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="console_commands_steam.cpp">
+      <Filter>application\console\commands\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="console_commands_misc.cpp">
+      <Filter>application\console\commands\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="console_commands_ecs.cpp">
+      <Filter>application\console\commands\implementations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -689,6 +695,9 @@
     </Filter>
     <Filter Include="graphics\text">
       <UniqueIdentifier>{a0f6f43e-e5a9-491e-8c52-e15daed680ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\console\commands\implementations">
+      <UniqueIdentifier>{0ecb7be7-4e89-4c9d-952d-36b29e6f9b35}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

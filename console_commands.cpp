@@ -5,56 +5,61 @@
 namespace console {
 
 	bool get_bool(const Arg& arg) {
-		if (std::holds_alternative<bool>(arg)) return std::get<bool>(arg);
+		if (std::holds_alternative<bool>(arg))
+			return std::get<bool>(arg);
 		log_error("Invalid argument type: expected bool");
 		return false;
 	}
 
 	bool get_int(const Arg& arg) {
-		if (std::holds_alternative<int>(arg)) return std::get<int>(arg);
+		if (std::holds_alternative<int>(arg))
+			return std::get<int>(arg);
 		log_error("Invalid argument type: expected int");
 		return 0;
 	}
 
 	bool get_float(const Arg& arg) {
-		if (std::holds_alternative<float>(arg)) return std::get<float>(arg);
+		if (std::holds_alternative<float>(arg))
+			return std::get<float>(arg);
 		log_error("Invalid argument type: expected float");
 		return 0.f;
 	}
 
 	std::string get_string(const Arg& arg) {
-		if (std::holds_alternative<std::string>(arg)) return std::get<std::string>(arg);
+		if (std::holds_alternative<std::string>(arg))
+			return std::get<std::string>(arg);
 		log_error("Invalid argument type: expected string");
 		return "";
 	}
 
-	Vec2f get_vector2f(const Arg& arg) {
-		if (std::holds_alternative<Vec2f>(arg)) return std::get<Vec2f>(arg);
+	Vec2f get_vec2f(const Arg& arg) {
+		if (std::holds_alternative<Vec2f>(arg))
+			return std::get<Vec2f>(arg);
 		log_error("Invalid argument type: expected Vec2f");
-		return Vec2f{};
+		return {};
 	}
 
-	std::string_view _command_param_type_to_string(ParamType type) {
+	std::string_view _to_string(ParamType type) {
 		switch (type) {
-		case ParamType::None:     return "NONE";
-		case ParamType::Bool:     return "BOOL";
-		case ParamType::Int:      return "INT";
-		case ParamType::Float:    return "FLOAT";
-		case ParamType::String:   return "STRING";
-		case ParamType::Vec2f: return "VEC2F";
-		default:                  return "UNKNOWN";
+		case ParamType::None:   return "NONE";
+		case ParamType::Bool:   return "BOOL";
+		case ParamType::Int:    return "INT";
+		case ParamType::Float:  return "FLOAT";
+		case ParamType::String: return "STRING";
+		case ParamType::Vec2f:  return "VEC2F";
+		default:                return "UNKNOWN";
 		}
 	}
 
 	std::string _format_command_param(const Param& param) {
 		std::string ret;
-		ret += _command_param_type_to_string(param.type);
+		ret += _to_string(param.type);
 		ret += " ";
 		ret += param.name;
 		return ret;
 	}
 
-	std::string format_command_help_message(const Command& command) {
+	std::string get_command_help_message(const Command& command) {
 		std::string ret;
 		ret += command.name;
 		for (const Param& param : command.params) {
@@ -75,20 +80,13 @@ namespace console {
 
 	std::vector<Command> _commands; // Sorted by name
 
-	bool operator<(const Command& left, const Command& right) {
-		return left.name < right.name; // Order by name
-	}
-
-	void clear_commands() {
-		_commands.clear();
-	}
-
-	void add_command(const Command&& command) {
+	void register_command(const Command&& command) {
 		_commands.emplace_back(command);
 	}
 
-	void sort_commands_by_name() {
-		std::sort(_commands.begin(), _commands.end()); // Sort commands by name
+	// Orders two commands by their names.
+	bool operator<(const Command& left, const Command& right) {
+		return left.name < right.name;
 	}
 
 	const Command* find_command_with_name(std::string_view name) {
@@ -173,10 +171,11 @@ namespace console {
 		command->callback(args); // Execute the command
 	}
 
+	void _register_commands(); // console_commands_registration.cpp
+
 	void register_commands() {
-		clear_commands();
-		_add_misc_commands();
-		_add_steam_commands();
-		sort_commands_by_name();
+		_commands.clear();
+		_register_commands();
+		std::sort(_commands.begin(), _commands.end()); // Sort by name
 	}
 }

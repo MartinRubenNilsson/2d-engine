@@ -23,6 +23,8 @@ namespace ecs {
 
 	extern int debug_flags;
 
+	extern bool debug_terrain;
+
 	void debug_draw();
 }
 

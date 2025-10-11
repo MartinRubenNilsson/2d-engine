@@ -6,15 +6,15 @@
 #include "steam_client.h"
 
 namespace console {
-	void _add_steam_commands() {
-		add_command({
+	void _register_steam_commands() {
+		register_command({
 			.name = "steam_id",
 			.desc = "Prints the Steam ID of the current user",
 			.callback = [](Args) {
 				log(steam::get_steam_id());
 			}
 		});
-		add_command({
+		register_command({
 			.name = "steam_friends",
 			.desc = "Prints the names of the friends of the current user",
 			.callback = [](Args) {
@@ -23,21 +23,21 @@ namespace console {
 					log(name);
 			}
 		});
-		add_command({
+		register_command({
 			.name = "server_init",
 			.desc = "Initializes the server",
 			.callback = [](Args) {
 				steam::server_initialize();
 			}
 		});
-		add_command({
+		register_command({
 			.name = "server_shutdown",
 			.desc = "Shuts down the server",
 			.callback = [](Args) {
 				steam::server_shutdown();
 			}
 		});
-		add_command({
+		register_command({
 			.name = "server_ip",
 			.desc = "Prints the public IP of the server",
 			.callback = [](Args) {
@@ -67,7 +67,7 @@ namespace console {
 			}
 		});
 #endif
-		add_command({
+		register_command({
 			.name = "client_connect",
 			.desc = "Connects the client to a server",
 			.params = {

@@ -145,6 +145,8 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="console_commands_ecs.cpp" />
+    <ClCompile Include="console_commands_registration.cpp" />
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />

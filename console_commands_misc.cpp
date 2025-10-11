@@ -14,11 +14,11 @@
 #include "ecs_tags.h"
 
 namespace console {
-	void _add_misc_commands() {
+	void _register_misc_commands() {
 
 		// CONSOLE
 
-		add_command({
+		register_command({
 			.name = "help",
 			.desc = "Shows help for a command",
 			.params = {
@@ -26,18 +26,18 @@ namespace console {
 			},
 			.callback = [](Args args) {
 				if (const Command* command = find_command_with_name(get_string(args[0]))) {
-					log(format_command_help_message(*command));
+					log(get_command_help_message(*command));
 				}
 			}
 		});
-		add_command({
+		register_command({
 			.name = "clear",
 			.desc = "Clears the console",
 			.callback = [](Args args) {
 				clear();
 			}
 		});
-		add_command({
+		register_command({
 			.name = "sleep",
 			.desc = "Defers incoming commands, executing them later",
 			.params = {
@@ -47,7 +47,7 @@ namespace console {
 				sleep(get_float(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "log",
 			.desc = "Logs a message to the console",
 			.params = {
@@ -57,7 +57,7 @@ namespace console {
 				log(get_string(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "log_error",
 			.desc = "Logs an error message to the console",
 			.params = {
@@ -67,7 +67,7 @@ namespace console {
 				log_error(get_string(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "execute",
 			.desc = "Executes a console command",
 			.params = {
@@ -77,7 +77,7 @@ namespace console {
 				execute(get_string(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "execute_script",
 			.desc = "Executes a console script",
 			.params = {
@@ -87,7 +87,7 @@ namespace console {
 				execute_script_from_file(get_string(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "bind",
 			.desc = "Binds a console command to a key",
 			.params = {
@@ -98,7 +98,7 @@ namespace console {
 				console::bind(get_string(args[0]), get_string(args[1]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "unbind",
 			.desc = "Unbinds a key",
 			.params = {
@@ -123,7 +123,7 @@ namespace console {
 
 		// AUDIO
 
-		add_command({
+		register_command({
 			.name = "audio_play",
 			.desc = "Plays an audio event",
 			.params = {
@@ -136,7 +136,7 @@ namespace console {
 
 		// MAP
 
-		add_command({
+		register_command({
 			.name = "map_open",
 			.desc = "Opens a map",
 			.params = {
@@ -146,14 +146,14 @@ namespace console {
 				map::open(get_string(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "map_close",
 			.desc = "Closes the current map",
 			.callback = [](Args args) {
 				map::close();
 			}
 		});
-		add_command({
+		register_command({
 			.name = "map_reset",
 			.desc = "Resets the current map",
 			.callback = [](Args args) {
@@ -163,7 +163,7 @@ namespace console {
 
 		// UI
 
-		add_command({
+		register_command({
 			.name = "ui_show",
 			.desc = "Shows an RML document",
 			.params = {
@@ -176,7 +176,7 @@ namespace console {
 
 		// GAME
 
-		add_command({
+		register_command({
 			.name = "destroy",
 			.desc = "Destroy an entity",
 			.params = {
@@ -198,14 +198,14 @@ namespace console {
 			}
 		});
 #endif
-		add_command({
+		register_command({
 			.name = "kill_player",
 			.desc = "Kills the player",
 			.callback = [](Args args) {
 				ecs::kill_player(ecs::find_entity_with_tag(ecs::Tag::Player));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "add_camera_shake",
 			.desc = "Adds trauma to the active camera to make it shake",
 			.params = {
@@ -215,7 +215,7 @@ namespace console {
 				ecs::add_trauma_to_active_camera(get_float(args[0]));
 			}
 		});
-		add_command({
+		register_command({
 			.name = "create_vfx",
 			.desc = "Spawns a VFX in the game world",
 			.params = {
@@ -224,7 +224,7 @@ namespace console {
 			},
 			.callback = [](Args args) {
 				std::string type_str = get_string(args[0]);
-				Vec2f position = get_vector2f(args[1]);
+				Vec2f position = get_vec2f(args[1]);
 				auto type = magic_enum::enum_cast<ecs::VfxType>(type_str, magic_enum::case_insensitive);
 				if (type.has_value()) {
 					create_vfx(type.value(), position);
