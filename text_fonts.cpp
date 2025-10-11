@@ -37,27 +37,27 @@ namespace text {
 		int line_gap = 0; // The spacing between one row's descent and the next row's ascent.
 		int whitespace_advance = 0; // How much to horizontally advance the pen for a whitespace.
 
-		std::vector<GlyphTableEntry> glyph_table; // sorted by codepoint
-		std::vector<GlyphTextureRectTableEntry> glyph_texture_rect_table; // sorted by codepoint first, pixel_height second
-		std::vector<GlyphTextureRect> glyph_texture_rects;
-
-		stbtt_pack_context pack_context{};
 		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
 		Handle<graphics::Texture> atlas_texture;
-		bool atlas_texture_needs_updating = true;
+		bool atlas_texture_needs_updating = false;
+
+		stbtt_pack_context pack_context{};
+
+		std::vector<GlyphTableEntry> glyph_table; // sorted by codepoint
+		std::vector<GlyphTextureRectTableEntry> glyph_texture_rect_table; // sorted by codepoint first, then pixel_height
+		std::vector<GlyphTextureRect> glyph_texture_rects;
 	};
 
 	Pool<Font> _font_pool;
 	std::unordered_map<std::string, Handle<Font>> _font_cache; // path to handle
 
-	Handle<Font> load_font(const std::string& path) {
+	Handle<Font> load_font(std::string_view path) {
 		const std::string normalized_path = filesystem::get_normalized_path(path);
 		if (auto it = _font_cache.find(normalized_path);  it != _font_cache.end()) {
 			return it->second;
 		}
 
 		Font font{};
-		font.data;
 		if (!filesystem::read_binary_file(path, font.data)) {
 			console::log_error("Failed to open font file: " + normalized_path);
 			return {};
@@ -65,25 +65,23 @@ namespace text {
 
 		stbtt_fontinfo info{};
 		if (!stbtt_InitFont(&font.info, font.data.data(), 0)) {
-			console::log_error("Failed to load font: " + normalized_path);
+			console::log_error("Failed to initialize font: " + normalized_path);
 			return {};
 		}
 
 		stbtt_GetFontVMetrics(&font.info, &font.ascent, &font.descent, &font.line_gap);
+		// Precompute the whitespace advance because we look it up often.
+		font.whitespace_advance = get_advance(font, get_glyph(font, U' '));
 
 		font.atlas_pixels.resize(ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE);
-		stbtt_PackBegin(&font.pack_context, font.atlas_pixels.data(), ATLAS_TEXTURE_SIZE, ATLAS_TEXTURE_SIZE, 0, 1, nullptr);
 		font.atlas_texture = graphics::create_texture({
 			.debug_name = normalized_path,
 			.width = ATLAS_TEXTURE_SIZE,
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
 
-		// Precompute because we need it often.
-		font.whitespace_advance = get_advance(font, get_glyph(font, U' '));
-#if 0
-		graphics::set_texture_filter(font.atlas_texture, graphics::Filter::Linear);
-#endif
+		stbtt_PackBegin(&font.pack_context, font.atlas_pixels.data(),
+			ATLAS_TEXTURE_SIZE, ATLAS_TEXTURE_SIZE, 0, 1, nullptr);
 
 		// IMPORTANT: We must move construct the font, otherwise
 		// font.data/font.atlas_pixels are reallocated and
@@ -140,7 +138,7 @@ namespace text {
 
 	GlyphId get_glyph(Font& font, char32_t codepoint) {
 		// First do a binary search of the table to see if it contains the glyph,
-		// otherwise find it the slow way using the stbtt API and then save the result.
+		// otherwise find it the potentially slow way using the stbtt API.
 		std::vector<GlyphTableEntry>& table = font.glyph_table;
 		GlyphTableEntry entry{ codepoint };
 		const size_t first = _lower_bound(table.data(), table.size(), entry);
@@ -148,7 +146,7 @@ namespace text {
 			return { table[first].glyph_index };
 		}
 		entry.glyph_index = stbtt_FindGlyphIndex(&font.info, codepoint);
-		table.insert(table.begin() + first, entry);
+		table.insert(table.begin() + first, entry); // Save the result for later.
 		return { entry.glyph_index };
 	}
 
@@ -158,8 +156,8 @@ namespace text {
 
 	int get_advance(const Font& font, GlyphId glyph) {
 		int advance_width = 0;
-		int left_side_bearing_dummy = 0;
-		stbtt_GetGlyphHMetrics(&font.info, glyph.index, &advance_width, &left_side_bearing_dummy);
+		int left_side_bearing = 0;
+		stbtt_GetGlyphHMetrics(&font.info, glyph.index, &advance_width, &left_side_bearing);
 		return advance_width;
 	}
 
@@ -179,10 +177,12 @@ namespace text {
 		std::vector<GlyphTextureRectTableEntry>& table = font.glyph_texture_rect_table;
 		GlyphTextureRectTableEntry entry{ codepoint, pixel_height };
 		const size_t first = _lower_bound(table.data(), table.size(), entry);
-		if (first < table.size() && // if we found it in the table
+		if (first < table.size() &&
 			table[first].codepoint == entry.codepoint && 
-			table[first].pixel_height == entry.pixel_height) {
-			return font.glyph_texture_rects[table[first].glyph_texture_rect_index];
+			table[first].pixel_height == entry.pixel_height
+		) { // if we found it in the table
+			const int texture_rect_index = table[first].glyph_texture_rect_index;
+			return font.glyph_texture_rects[texture_rect_index];
 		}
 		// We didn't find it in the table, so we need to call the stbtt API to pack the glyph in the
 		// texture atlas. Then we record the result in the table so we can look it up in the future.
