@@ -354,7 +354,8 @@ namespace ecs {
 				//audio::set_parameter_label("terrain", terrain);
 				if (anim.looped()) {
 					// Take a step every 3 loop
-					audio::create_event({ .path = "event:/snd_footstep" });
+					Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
+					audio::set_event_parameter_label(ev, "terrain", terrain);
 				}
 			}
 

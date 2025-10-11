@@ -34,12 +34,12 @@ namespace audio {
 	Pool<Event> _event_pool;
 	std::unordered_set<std::string> _events_played_this_frame;
 
-	void* _event_handle_to_userdata(Handle<Event> handle) {
+	void* _to_userdata(Handle<Event> handle) {
 		uint32_t uint = *(uint32_t*)&handle;
 		return (void*)(uintptr_t)uint;
 	}
 
-	Handle<Event> _userdata_to_event_handle(void* userdata) {
+	Handle<Event> _to_event_handle(void* userdata) {
 		uint32_t uint = (uint32_t)(uintptr_t)userdata;
 		return *(Handle<Event>*) & uint;
 	}
@@ -51,7 +51,7 @@ namespace audio {
 		void* userdata = nullptr;
 		FMOD_Studio_EventInstance_GetUserData(instance, &userdata);
 		if (!userdata) return FMOD_OK;
-		_event_pool.free(_userdata_to_event_handle(userdata));
+		_event_pool.free(_to_event_handle(userdata));
 		return FMOD_OK;
 	}
 
@@ -223,7 +223,7 @@ namespace audio {
 		Handle<Event> handle = _event_pool.emplace(Event{ .instance = instance });
 		_events_played_this_frame.insert(desc.path);
 		FMOD_Studio_EventInstance_SetCallback(instance, _fmod_callback_on_event_destroyed, FMOD_STUDIO_EVENT_CALLBACK_DESTROYED);
-		FMOD_Studio_EventInstance_SetUserData(instance, _event_handle_to_userdata(handle));
+		FMOD_Studio_EventInstance_SetUserData(instance, _to_userdata(handle));
 		FMOD_Studio_EventInstance_SetVolume(instance, desc.volume);
 		FMOD_3D_ATTRIBUTES attributes = _pos_to_3d_attributes(desc.position);
 		FMOD_Studio_EventInstance_Set3DAttributes(instance, &attributes);
@@ -236,42 +236,45 @@ namespace audio {
 		return handle;
 	}
 
-	bool stop_event(Handle<Event> handle) {
+	void stop_event(Handle<Event> handle) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
-		if (!instance) return false;
+		if (!instance) return;
 		FMOD_Studio_EventInstance_Stop(instance, FMOD_STUDIO_STOP_IMMEDIATE);
-		return true;
 	}
 
-	bool set_event_volume(Handle<Event> handle, float volume) {
+	void set_event_volume(Handle<Event> handle, float volume) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
-		if (!instance) return false;
+		if (!instance) return;
 		FMOD_Studio_EventInstance_SetVolume(instance, volume);
-		return true;
 	}
 
-	bool get_event_volume(Handle<Event> handle, float& volume) {
+	float get_event_volume(Handle<Event> handle) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
-		if (!instance) return false;
+		if (!instance) return 0.f;
+		float volume = 0.f;
 		FMOD_Studio_EventInstance_GetVolume(instance, &volume, nullptr);
-		return true;
+		return volume;
 	}
 
-	bool set_event_position(Handle<Event> handle, const Vec2f& position) {
+	void set_event_position(Handle<Event> handle, const Vec2f& position) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
-		if (!instance) return false;
+		if (!instance) return;
 		FMOD_3D_ATTRIBUTES attributes = _pos_to_3d_attributes(position);
 		FMOD_Studio_EventInstance_Set3DAttributes(instance, &attributes);
-		return true;
 	}
 
-	bool get_event_position(Handle<Event> handle, Vec2f& position) {
+	Vec2f get_event_position(Handle<Event> handle) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
-		if (!instance) return false;
+		if (!instance) return Vec2f::ZERO;
 		FMOD_3D_ATTRIBUTES attributes{};
 		FMOD_Studio_EventInstance_Get3DAttributes(instance, &attributes);
-		position = _3d_attributes_to_pos(attributes);
-		return true;
+		return _3d_attributes_to_pos(attributes);
+	}
+
+	void set_event_parameter_label(Handle<Event> handle, const std::string& name, const std::string& label) {
+		FMOD_STUDIO_EVENTINSTANCE* instance = _get_event_instance(handle);
+		if (!instance) return;
+		FMOD_Studio_EventInstance_SetParameterByNameWithLabel(instance, name.c_str(), label.c_str(), false);
 	}
 
 	bool set_bus_volume(const std::string& bus_path, float volume) {

@@ -41,11 +41,12 @@ namespace audio
 	};
 
 	Handle<Event> create_event(const EventDesc&& desc);
-	bool stop_event(Handle<Event> handle);
-	bool set_event_volume(Handle<Event> handle, float volume);
-	bool get_event_volume(Handle<Event> handle, float& volume);
-	bool set_event_position(Handle<Event> handle, const Vec2f& position);
-	bool get_event_position(Handle<Event> handle, Vec2f& position);
+	void stop_event(Handle<Event> handle);
+	void set_event_volume(Handle<Event> handle, float volume);
+	float get_event_volume(Handle<Event> handle);
+	void set_event_position(Handle<Event> handle, const Vec2f& position);
+	Vec2f get_event_position(Handle<Event> handle);
+	void set_event_parameter_label(Handle<Event> handle, const std::string& name, const std::string& label);
 
 	// BUSES
 
