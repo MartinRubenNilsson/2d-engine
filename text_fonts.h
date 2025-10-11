@@ -22,7 +22,7 @@ namespace text {
 	int get_whitespace_advance(const Font& font);
 
 	struct GlyphId {
-		int index = -1;
+		int index = 0;
 		auto operator<=>(const GlyphId&) const = default;
 	};
 

@@ -14,7 +14,7 @@ namespace text {
 	// Used to lookup a glyph from a codepoint.
 	struct GlyphTableEntry {
 		char32_t codepoint = 0;
-		int glyph_index = -1;
+		int glyph_index = 0;
 
 		auto operator<=>(const GlyphTableEntry&) const = default;
 	};
@@ -30,22 +30,22 @@ namespace text {
 
 	struct Font {
 		std::vector<unsigned char> data;
+
 		stbtt_fontinfo info{};
+		stbtt_pack_context pack_context{};
 
 		int ascent = 0; // How much above the baseline the font extends.
 		int descent = 0; // How much below the baseline the font extends; typically negative.
 		int line_gap = 0; // The spacing between one row's descent and the next row's ascent.
 		int whitespace_advance = 0; // How much to horizontally advance the pen for a whitespace.
 
-		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
-		Handle<graphics::Texture> atlas_texture;
-		bool atlas_texture_needs_updating = false;
-
-		stbtt_pack_context pack_context{};
-
 		std::vector<GlyphTableEntry> glyph_table; // sorted by codepoint
 		std::vector<GlyphTextureRectTableEntry> glyph_texture_rect_table; // sorted by codepoint first, then pixel_height
 		std::vector<GlyphTextureRect> glyph_texture_rects;
+
+		std::vector<unsigned char> atlas_pixels; // size = ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE
+		Handle<graphics::Texture> atlas_texture;
+		bool atlas_texture_needs_updating = false;
 	};
 
 	Pool<Font> _font_pool;
@@ -171,6 +171,26 @@ namespace text {
 		return box;
 	}
 
+	GlyphTextureRect _pack_codepoint(Font& font, char32_t codepoint, float pixel_height) {
+		stbtt_packedchar packed_char{};
+		stbtt_pack_range range{};
+		range.first_unicode_codepoint_in_range = codepoint;
+		range.chardata_for_range = &packed_char;
+		range.num_chars = 1; // num packed chars, not codepoints!
+		range.font_size = pixel_height;
+		stbrp_rect rect{};
+		stbtt_PackFontRangesGatherRects(&font.pack_context, &font.info, &range, 1, &rect);
+		stbtt_PackFontRangesPackRects(&font.pack_context, &rect, 1);
+		stbtt_PackFontRangesRenderIntoRects(&font.pack_context, &font.info, &range, 1, &rect); // may fail!
+		font.atlas_texture_needs_updating = true;
+		GlyphTextureRect tex_rect{};
+		tex_rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;
+		tex_rect.min.y = packed_char.y0 / (float)ATLAS_TEXTURE_SIZE;
+		tex_rect.max.x = packed_char.x1 / (float)ATLAS_TEXTURE_SIZE;
+		tex_rect.max.y = packed_char.y1 / (float)ATLAS_TEXTURE_SIZE;
+		return tex_rect;
+	}
+
 	GlyphTextureRect get_texture_rect(Font& font, char32_t codepoint, float pixel_height) {
 		// First do a binary search of the texture rect table to see if it already has the rect
 		// for this combination of codepoint and pixel height, and if so return it.
@@ -188,14 +208,8 @@ namespace text {
 		// texture atlas. Then we record the result in the table so we can look it up in the future.
 		entry.glyph_texture_rect_index = (int)font.glyph_texture_rects.size();
 		table.insert(table.begin() + first, entry);
-		stbtt_packedchar packed_char{};
-		stbtt_PackFontRange(&font.pack_context, font.data.data(), 0, pixel_height, codepoint, 1, &packed_char);
-		font.atlas_texture_needs_updating = true;
-		GlyphTextureRect& rect = font.glyph_texture_rects.emplace_back();
-		rect.min.x = packed_char.x0 / (float)ATLAS_TEXTURE_SIZE;
-		rect.min.y = packed_char.y0 / (float)ATLAS_TEXTURE_SIZE;
-		rect.max.x = packed_char.x1 / (float)ATLAS_TEXTURE_SIZE;
-		rect.max.y = packed_char.y1 / (float)ATLAS_TEXTURE_SIZE;
+		GlyphTextureRect rect = _pack_codepoint(font, codepoint, pixel_height);
+		font.glyph_texture_rects.push_back(rect);
 		return rect;
 	}
 
