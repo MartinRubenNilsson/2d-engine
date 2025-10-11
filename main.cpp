@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 #ifdef _DEBUG_RENDERDOC
     renderdoc::initialize();
 #endif
-    window::initialize();
+    window::startup();
 #if 0
 #ifdef _DEBUG_GRAPHICS
     // HACK: We should be using a post-build event to copy the shaders,
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
         app_time = new_app_time;
 
         steam::run_message_loop();
-        window::poll_events();
+        window::update_events();
 
 #ifdef _DEBUG_IMGUI
         // TODO: should this be moved to after the window event loop?
@@ -113,8 +113,7 @@ int main(int argc, char* argv[]) {
 
         // PROCESS WINDOW EVENTS
         {
-            window::Event ev{};
-            while (window::pop_event(ev)) {
+            for (const window::Event& ev : window::get_events()) {
                 if (ev.type == window::EventType::WindowClose) {
                     window::set_should_close(true);
                 } else if (ev.type == window::EventType::FramebufferSize) {
@@ -155,9 +154,6 @@ int main(int argc, char* argv[]) {
 #endif
                 console::process_window_event(ev);
                 ui::process_window_event(ev);
-                if (!ui::is_menu_or_textbox_visible()) {
-                    ecs::handle_window_event(ev);
-                }
             }
         }
 

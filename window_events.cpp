@@ -2,17 +2,17 @@
 #include "window_events.h"
 
 namespace window {
-	std::queue<Event> _event_queue;
+	std::vector<Event> _events;
 
-	void push_event(const Event& ev) {
-		_event_queue.push(ev);
+	std::span<const Event> get_events() {
+		return _events;
 	}
 
-	bool pop_event(Event& ev) {
-		if (_event_queue.empty())
-			return false;
-		ev = _event_queue.front();
-		_event_queue.pop();
-		return true;
+	void clear_events() {
+		_events.clear();
+	}
+
+	void add_event(const Event& ev) {
+		_events.push_back(ev);
 	}
 }

@@ -22,21 +22,21 @@ bool is_ordinal(Direction d) {
 }
 
 Vec2f to_unit(Direction d) {
-	constexpr float leg = 0.7071067811865475; // = 1/sqrt(2)
+	constexpr float DIV_SQRT2 = 0.7071067811865475; // = 1/sqrt(2)
 	switch (d) {
 		case Direction::N:  return { 0.f, -1.f };
-		case Direction::NE: return { leg, -leg };
+		case Direction::NE: return { DIV_SQRT2, -DIV_SQRT2 };
 		case Direction::E:  return { 1.f, 0.f };
-		case Direction::SE: return { leg, leg };
+		case Direction::SE: return { DIV_SQRT2, DIV_SQRT2 };
 		case Direction::S:  return { 0.f, 1.f };
-		case Direction::SW: return { -leg, leg };
+		case Direction::SW: return { -DIV_SQRT2, DIV_SQRT2 };
 		case Direction::W:  return { -1.f, 0.f };
-		case Direction::NW: return { -leg, -leg };
+		case Direction::NW: return { -DIV_SQRT2, -DIV_SQRT2 };
 		default: return { 0.f, -1.f }; // This should never happen.
 	}
 }
 
-Direction to_cardinal(Vec2f v) {
+Direction to_cardinal(const Vec2f& v) {
 	if (v.x >= +abs(v.y)) return Direction::E;
 	if (v.x <= -abs(v.y)) return Direction::W;
 	if (v.y >= +abs(v.x)) return Direction::S;

@@ -8,8 +8,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h> // For glfwGetWin32Window()
 
-namespace window
-{
+namespace window {
 	GLFWwindow* _window = nullptr;
 	GLFWcursor* _cursors[(int)CursorShape::Count] = { nullptr };
 
@@ -22,7 +21,7 @@ namespace window
 		// GLFW sets the close flag before invoking this callback,
 		// so we need to unset it so the window doesn't immediately close.
 		glfwSetWindowShouldClose(window, GLFW_FALSE);
-		push_event({ .type = EventType::WindowClose });
+		add_event({ .type = EventType::WindowClose });
 	}
 
 	void _window_size_callback(GLFWwindow* window, int width, int height) {
@@ -30,7 +29,7 @@ namespace window
 		ev.type = EventType::WindowSize;
 		ev.size.width = width;
 		ev.size.height = height;
-		push_event(ev);
+		add_event(ev);
 	}
 
 	void _framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -38,7 +37,7 @@ namespace window
 		ev.type = EventType::FramebufferSize;
 		ev.size.width = width;
 		ev.size.height = height;
-		push_event(ev);
+		add_event(ev);
 	}
 
 	int _translate_modifier_key_flags_from_glfw(int glfw_modifier_key_flags) {
@@ -66,7 +65,7 @@ namespace window
 		ev.key.code = (Key)key;
 		ev.key.scancode = scancode;
 		ev.key.modifier_key_flags = _translate_modifier_key_flags_from_glfw(mods);
-		push_event(ev);
+		add_event(ev);
 	}
 
 	void _mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -80,7 +79,7 @@ namespace window
 		}
 		ev.mouse_button.button = (MouseButton)button;
 		ev.mouse_button.modifier_key_flags = _translate_modifier_key_flags_from_glfw(mods);
-		push_event(ev);
+		add_event(ev);
 	}
 
 	void _cursor_pos_callback(GLFWwindow* window, double x, double y) {
@@ -88,10 +87,10 @@ namespace window
 		ev.type = EventType::MouseMove;
 		ev.mouse_move.x = x;
 		ev.mouse_move.y = y;
-		push_event(ev);
+		add_event(ev);
 	}
 
-	bool initialize() {
+	bool startup() {
 		glfwSetErrorCallback(_error_callback);
 		if (!glfwInit()) return false;
 
@@ -201,7 +200,8 @@ namespace window
 		glfwSetWindowShouldClose(_window, should_close);
 	}
 
-	void poll_events() {
+	void update_events() {
+		clear_events();
 		glfwPollEvents();
 	}
 

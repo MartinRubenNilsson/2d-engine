@@ -29,6 +29,7 @@
 #include "ecs_states.h"
 #include "ecs_audio.h"
 #include "ecs_terrain.h"
+#include "ui.h"
 
 namespace ecs {
 
@@ -63,35 +64,7 @@ namespace ecs {
 	constexpr float _PLAYER_STEALTH_SPEED = 36.f;
 	constexpr float _PLAYER_ARROW_SPEED = 160.f;
 
-	enum INPUT_FLAGS : unsigned int {
-		// Continuous actions
-
-		INPUT_W = (1 << 0),
-		INPUT_E = (1 << 1),
-		INPUT_N = (1 << 2),
-		INPUT_S = (1 << 3),
-		INPUT_RUN = (1 << 4),
-		INPUT_STEALTH = (1 << 5),
-
-		// One-shot actions
-
-		INPUT_INTERACT = (1 << 6),
-		INPUT_SWING_SWORD = (1 << 7),
-		INPUT_SHOOT_BOW = (1 << 8),
-		INPUT_DROP_BOMB = (1 << 9),
-	};
-
-	enum class PlayerState {
-		Normal,
-		SwingingSword,
-		ShootingBow,
-		Dying,
-	};
-
 	struct Player {
-		Direction dir = Direction::S;
-		unsigned int input_flags = 0;
-		PlayerState state = PlayerState::Normal;
 		Timer hurt_timer = { 1.f };
 		int max_health = 3;
 		int health = 3;
@@ -101,23 +74,285 @@ namespace ecs {
 	};
 
 	extern entt::registry _registry;
-	unsigned int _input_flags_to_enable = 0;
-	unsigned int _input_flags_to_disable = 0;
+
+	void _player_attack(entt::entity entity, const Vec2f& position) {
+		Vec2f box_min = position - Vec2f(6.f, 6.f);
+		Vec2f box_max = position + Vec2f(6.f, 6.f);
+		deal_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
+	}
+
+	void _player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
+		Player* player = _registry.try_get<Player>(player_entity);
+		if (!player) return;
+
+		const PickupType type = get_pickup_type(pickup_entity);
+		switch (type) {
+			case PickupType::Arrow: {
+				player->arrows++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Rupee: {
+				player->rupees++;
+				audio::create_event({ .path = "event:/snd_pickup_rupee" });
+			} break;
+			case PickupType::Bomb: {
+				player->bombs++;
+				audio::create_event({ .path = "event:/snd_pickup" });
+			} break;
+			case PickupType::Heart: {
+				player->health = std::min(player->health + 1, player->max_health);
+				//TODO
+				//audio::play("event:/snd_pickup_heart");
+			} break;
+		}
+
+		destroy_later(pickup_entity);
+	}
+
+	bool _handle_damage_for_player(entt::entity entity, const DamageEvent& ev) {
+		if (ev.amount <= 0) return false;
+		Player* player = _registry.try_get<Player>(entity);
+		if (!player) return false;
+		if (player->health <= 0) return false; // Player is already dead
+		if (player->hurt_timer.running()) return false; // Player is invulnerable
+		player->health = std::max(0, player->health - ev.amount);
+		add_trauma_to_active_camera(0.8f);
+		if (player->health > 0) { // Player survived
+			audio::create_event({ .path = "event:/snd_player_hurt" });
+			player->hurt_timer.start();
+		} else { // Player died
+			transition_to_state(entity, "dying");
+		}
+		return true;
+	}
+
+	void _handle_physics_for_player(const PhysicsEvent& ev) {
+		const Tag other_tag = get_tag(ev.other_entity);
+		if (ev.type == PhysicsEventType::SensorBeginTouch) {
+			if (other_tag == Tag::Pickup) {
+				_player_begin_touch_pickup(ev.entity, ev.other_entity);
+			}
+		}
+	}
 
 	enum PLAYER_STATE_EVENT {
-		PLAYER_STATE_EVENT_WINDOW,
+		PLAYER_STATE_EVENT_KEY // data = window::Event
 	};
 
-	void handle_window_event_for_players(const window::Event& ev) {
+	void _player_start_normal(entt::entity entity) {
+		TileId& tile = _registry.get<TileId>(entity);
+		tile.flipped_horizontally = false;
+		TileAnimation& anim = _registry.get<TileAnimation>(entity);
+		anim.set_progress(0.f); // Reset animation
+		anim.set_loop(true);
+	}
 
-		StateEvent state_ev{};
-		state_ev.type = PLAYER_STATE_EVENT_WINDOW;
-		state_ev.data = &ev;
+	void _player_update_normal(entt::entity entity, float dt) {
+		TileId& tile = _registry.get<TileId>(entity);
+		const b2BodyId body = _registry.get<b2BodyId>(entity);
+		const Direction dir = _registry.get<Direction>(entity);
 
-		for (auto [entity] : _registry.view<Type<Tag::Player>>().each()) {
-			handle(entity, state_ev);
+		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
+		const Vec2f vel = b2Body_GetLinearVelocity(body);
+		const float speed = length(vel);
+
+		// The tileset only has right-facing tiles, so we need to flip if we're facing left.
+		switch (dir) {
+			case Direction::E: tile.flipped_horizontally = false; break;
+			case Direction::W: tile.flipped_horizontally = true; break;
+		}
+
+		if (speed >= _PLAYER_RUN_SPEED) {
+			switch (dir) {
+				case Direction::W: [[fallthrough]];
+				case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
+				case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
+				case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
+			}
+		} else if (speed >= _PLAYER_WALK_SPEED) {
+			switch (dir) {
+				case Direction::W: [[fallthrough]];
+				case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
+				case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
+				case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
+			}
+		} else {
+			switch (dir) {
+				case Direction::W: [[fallthrough]];
+				case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
+				case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
+				case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
+			}
 		}
 		
+		// Flip tile when facing up or down and animation loops to get a proper walk cycle.
+		TileAnimation& anim = _registry.get<TileAnimation>(entity);
+		if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
+			tile.flipped_horizontally = !tile.flipped_horizontally;
+		}
+	}
+
+	void _player_handle_normal(entt::entity entity, const StateEvent& ev) {
+		if (ev.type != PLAYER_STATE_EVENT_KEY)
+			return;
+		const window::Event& window_ev = *(const window::Event*)ev.data;
+		const b2BodyId body = _registry.get<b2BodyId>(entity);
+		Direction& dir = _registry.get<Direction>(entity);
+
+
+#if 0
+		if (player.input_flags & INPUT_W)
+			new_move_dir.x--;
+		if (player.input_flags & INPUT_E)
+			new_move_dir.x++;
+		if (player.input_flags & INPUT_N)
+			new_move_dir.y--;
+		if (player.input_flags & INPUT_S)
+			new_move_dir.y++;
+
+		if (new_move_dir != Vec2f::ZERO) {
+			player.dir = to_cardinal(new_move_dir);
+			new_move_dir = normalize(new_move_dir);
+			if (player.input_flags & INPUT_STEALTH) {
+				new_move_speed = _PLAYER_STEALTH_SPEED;
+				//} else if (player.touching_pushable_block) {
+				//	new_move_speed = _PLAYER_WALK_SPEED;
+			} else if (player.input_flags & INPUT_RUN) {
+				new_move_speed = _PLAYER_RUN_SPEED;
+			} else {
+				new_move_speed = _PLAYER_WALK_SPEED;
+			}
+		}
+#endif
+	}
+
+	void _player_start_dying(entt::entity entity) {
+		remove_body(entity);
+		TileId& tile = _registry.get<TileId>(entity);
+		const Direction dir = _registry.get<Direction>(entity);
+		switch (dir) {
+			case Direction::W: [[fallthrough]];
+			case Direction::E: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
+			case Direction::N: replace(tile, TILE_ID_PLAYER_DYING_NE); break;
+			case Direction::S: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
+		}
+		TileAnimation& anim = _registry.get<TileAnimation>(entity);
+		anim.set_progress(0.f);
+		anim.set_loop(false);
+		const float anim_duration = get_animation_duration(tile);
+		transition_to_state_later(entity, "dead", anim_duration);
+	}
+
+	void _player_start_dead(entt::entity entity) {
+		TileId& tile = _registry.get<TileId>(entity);
+		const Direction dir = _registry.get<Direction>(entity);
+		switch (dir) {
+			case Direction::W: [[fallthrough]];
+			case Direction::E: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
+			case Direction::N: replace(tile, TILE_ID_PLAYER_DEAD_NE); break;
+			case Direction::S: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
+		}
+		detach_camera(entity);
+		audio::stop_all_in_bus();
+		audio::create_event({ .path = "event:/snd_player_die" });
+		audio::create_event({ .path = "event:/mus_coffin_dance" });
+		ui::open_or_enqueue_textbox_presets("player/die");
+	}
+
+	void _emplace_player_state_machine(entt::entity entity) {
+		StateMachine& sm = emplace_state_machine(entity);
+		StateId normal = add_state(sm, {
+			.name = "normal",
+			.update = _player_update_normal,
+			.handle = _player_handle_normal });
+		add_state(sm, {
+			.name = "dying",
+			.start = _player_start_dying });
+		add_state(sm, {
+			.name = "dead",
+			.start = _player_start_dead });
+		transition(sm, normal, entity);
+	}
+
+	void setup_players(MapId map) {
+		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
+
+		for (auto [entity, object, sprite] : _registry.view<Type<Tag::Player>, ObjectId, sprites::Sprite>().each()) {
+			_registry.emplace<Player>(entity);
+			_registry.emplace<Direction>(entity, Direction::S);
+			
+			{
+				player::Outfit outfit{};
+				player::randomize_outfit(outfit);
+				player::create_outfit_texture(outfit);
+			}
+
+			sprite.texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
+
+			emplace_tile_animation(entity);
+
+			set_audio_listener(entity);
+			set_physics_event_handler(entity, _handle_physics_for_player);
+			set_damage_event_handler(entity, _handle_damage_for_player);
+
+			_emplace_player_state_machine(entity);
+
+			{
+				Camera camera{};
+				camera.confines_min = { 0.f, 0.f };
+				camera.confines_max = map_size_in_pixels;
+				camera.entity_to_follow = entity;
+				emplace_camera(entity, camera);
+				activate_camera(entity, true);
+			}
+		}
+	}
+
+	void _teleport_players_to_portal(std::string_view portal_name) {
+		entt::entity portal_entity = get_portal_with_name(portal_name);
+		if (portal_entity == entt::null) return;
+		for (auto [player_entity] : _registry.view<Type<Tag::Player>>().each()) {
+			teleport_entity_to_portal(player_entity, portal_entity);
+		}
+	}
+
+	void patch_players(const Patch& patch) {
+		if (!patch.portal_to_exit.empty()) {
+			_teleport_players_to_portal(patch.portal_to_exit);
+		}
+	}
+
+	void _dispatch_window_events_to_players() {
+		if (!window::has_focus())
+			return;
+		if (console::has_focus())
+			return;
+		if (ui::is_menu_or_textbox_visible())
+			return;
+
+		const std::span<const window::Event> events = window::get_events();
+
+		for (auto [entity] : _registry.view<Type<Tag::Player>>().each()) {
+			for (const window::Event& ev : events) {
+				if (ev.type != window::EventType::KeyPress &&
+					ev.type != window::EventType::KeyRelease) {
+					continue;
+				}
+				// Dispatch the window event to the player state machine.
+				StateEvent state_ev{};
+				state_ev.type = PLAYER_STATE_EVENT_KEY;
+				state_ev.data = &ev;
+				handle(entity, state_ev);
+			}
+		}
+	}
+
+	void update_players(float dt) {
+		if (dt > 0.f) {
+			_dispatch_window_events_to_players();
+		}
+
+#if 0
 		if (ev.type == window::EventType::KeyPress) {
 			switch (ev.key.code) {
 				case window::Key::Left:
@@ -173,181 +408,12 @@ namespace ecs {
 					break;
 			}
 		}
-	}
+#endif
 
-	void _player_attack(entt::entity entity, const Vec2f& position) {
-		Vec2f box_min = position - Vec2f(6.f, 6.f);
-		Vec2f box_max = position + Vec2f(6.f, 6.f);
-		deal_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
-	}
-
-	void _on_player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
-		Player* player = _registry.try_get<Player>(player_entity);
-		if (!player) return;
-
-		switch (get_pickup_type(pickup_entity)) {
-			case PickupType::Arrow: {
-				player->arrows++;
-				audio::create_event({ .path = "event:/snd_pickup" });
-			} break;
-			case PickupType::Rupee: {
-				player->rupees++;
-				audio::create_event({ .path = "event:/snd_pickup_rupee" });
-			} break;
-			case PickupType::Bomb: {
-				player->bombs++;
-				audio::create_event({ .path = "event:/snd_pickup" });
-			} break;
-			case PickupType::Heart: {
-				player->health = std::min(player->health + 1, player->max_health);
-				//TODO
-				//audio::play("event:/snd_pickup_heart");
-			} break;
-		}
-
-		destroy_later(pickup_entity);
-	}
-
-	bool _handle_damage_for_player(entt::entity entity, const DamageEvent& ev) {
-		if (ev.amount <= 0) return false;
-		Player* player = _registry.try_get<Player>(entity);
-		if (!player) return false;
-		if (player->health <= 0) return false; // Player is already dead
-		if (player->hurt_timer.running()) return false; // Player is invulnerable
-		player->health = std::max(0, player->health - ev.amount);
-		add_trauma_to_active_camera(0.8f);
-		if (player->health > 0) { // Player survived
-			audio::create_event({ .path = "event:/snd_player_hurt" });
-			player->hurt_timer.start();
-		} else { // Player died
-			player->state = PlayerState::Dying;
-		}
-		return true;
-	}
-
-	void _handle_physics_for_player(const PhysicsEvent& ev) {
-		const Tag other_tag = get_tag(ev.other_entity);
-		if (ev.type == PhysicsEventType::SensorBeginTouch) {
-			if (other_tag == Tag::Pickup) {
-				_on_player_begin_touch_pickup(ev.entity, ev.other_entity);
-			}
-		}
-	}
-
-	void _update_normal_player(entt::entity entity, float dt) {
-
-	}
-
-	void _handle_window_event_for_normal_player(entt::entity, const window::Event& ev) {
-		return;
-	}
-
-	void _handle_event_for_normal_player(entt::entity entity, const StateEvent& ev) {
-		if (ev.type == PLAYER_STATE_EVENT_WINDOW) {
-			_handle_window_event_for_normal_player(entity, *(const window::Event*)ev.data);
-		}
-	}
-
-	void _update_dying_player(entt::entity entity, float dt) {
-
-	}
-
-	void _start_being_dead_player(entt::entity entity) {
-		detach_camera(entity);
-		audio::stop_all_in_bus();
-		audio::create_event({ .path = "event:/snd_player_die" });
-		audio::create_event({ .path = "event:/mus_coffin_dance" });
-		ui::open_or_enqueue_textbox_presets("player/die");
-		ui::bindings::hud_player_health = 0;
-	}
-
-	void _emplace_player_state_machine(entt::entity entity) {
-		StateMachine& sm = emplace_state_machine(entity);
-		StateHandle normal = add_state(sm, {
-			.id = "normal",
-			.update = _update_normal_player,
-			.handle = _handle_event_for_normal_player });
-		add_state(sm, {
-			.id = "dying",
-			.update = _update_dying_player });
-		add_state(sm, {
-			.id = "dead",
-			.start = _start_being_dead_player });
-		transition(sm, normal, entity);
-	}
-
-	void setup_players(MapId map) {
-		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
-
-		for (auto [entity, object, sprite] : _registry.view<Type<Tag::Player>, ObjectId, sprites::Sprite>().each()) {
-			{
-				player::Outfit outfit{};
-				player::randomize_outfit(outfit);
-				player::create_outfit_texture(outfit);
-			}
-
-			sprite.texture = graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
-
-			emplace_tile_animation(entity);
-
-			{
-				Player& player = _registry.emplace<Player>(entity);
-			}
-
-			set_audio_listener(entity);
-			set_physics_event_handler(entity, _handle_physics_for_player);
-			set_damage_event_handler(entity, _handle_damage_for_player);
-
-			_emplace_player_state_machine(entity);
-
-			{
-				Camera camera{};
-				camera.confines_min = { 0.f, 0.f };
-				camera.confines_max = map_size_in_pixels;
-				camera.entity_to_follow = entity;
-				emplace_camera(entity, camera);
-				activate_camera(entity, true);
-			}
-		}
-	}
-
-	void _teleport_players_to_portal(std::string_view portal_name) {
-		entt::entity portal_entity = get_portal_with_name(portal_name);
-		if (portal_entity == entt::null) return;
-		for (auto [player_entity] : _registry.view<Type<Tag::Player>>().each()) {
-			teleport_entity_to_portal(player_entity, portal_entity);
-		}
-	}
-
-	void patch_players(const Patch& patch) {
-		if (!patch.portal_to_exit.empty()) {
-			_teleport_players_to_portal(patch.portal_to_exit);
-		}
-	}
-
-	void update_players(float dt) {
-		const bool player_accepts_input = (dt > 0.f && window::has_focus() && !console::has_focus());
-
-		for (auto [entity, player, body, tile, anim] :
-			_registry.view<Player, b2BodyId, TileId, TileAnimation>().each()) {
-
-			if (player_accepts_input) {
-				player.input_flags |= _input_flags_to_enable;
-				player.input_flags &= ~_input_flags_to_disable;
-			} else {
-				player.input_flags = 0;
-			}
-
-			// UPDATE TIMERS
-
+		for (auto [entity, player] : _registry.view<Player>().each()) {
 			player.hurt_timer.update(dt);
 
-			// GET PHYSICS STATE
-
-			const Vec2f position = b2Body_GetWorldCenterOfMass(body);
-			const Vec2f velocity = b2Body_GetLinearVelocity(body);
-			Vec2f new_velocity; // will be modified differently depending on the state
-
+#if 0
 			// UPDATE AUDIO
 			{
 				std::string terrain(to_string(get_terrain_at(position)));
@@ -364,41 +430,8 @@ namespace ecs {
 
 			const Direction dir = player.dir;
 
-			switch (dir) {
-				case Direction::E: tile.flipped_horizontally = false; break;
-				case Direction::W: tile.flipped_horizontally = true; break;
-			}
-
 			switch (player.state) {
 				case PlayerState::Normal: {
-
-					Vec2f new_move_dir;
-					float new_move_speed = 0.f;
-
-					if (player.input_flags & INPUT_W)
-						new_move_dir.x--;
-					if (player.input_flags & INPUT_E)
-						new_move_dir.x++;
-					if (player.input_flags & INPUT_N)
-						new_move_dir.y--;
-					if (player.input_flags & INPUT_S)
-						new_move_dir.y++;
-
-					if (new_move_dir != Vec2f::ZERO) {
-						player.dir = to_cardinal(new_move_dir);
-						new_move_dir = normalize(new_move_dir);
-						if (player.input_flags & INPUT_STEALTH) {
-							new_move_speed = _PLAYER_STEALTH_SPEED;
-						//} else if (player.touching_pushable_block) {
-						//	new_move_speed = _PLAYER_WALK_SPEED;
-						} else if (player.input_flags & INPUT_RUN) {
-							new_move_speed = _PLAYER_RUN_SPEED;
-						} else {
-							new_move_speed = _PLAYER_WALK_SPEED;
-						}
-					}
-
-					new_velocity = new_move_dir * new_move_speed;
 
 					if (player.input_flags & INPUT_SWING_SWORD) {
 
@@ -454,48 +487,7 @@ namespace ecs {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
 #endif
-					} else if (new_move_speed >= _PLAYER_RUN_SPEED) {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
-						}
-
-						anim.set_loop(true);
-						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
-							tile.flipped_horizontally = !tile.flipped_horizontally;
-						}
-
-					} else if (new_move_speed >= _PLAYER_WALK_SPEED) {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
-						}
-
-						anim.set_loop(true);
-						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
-							tile.flipped_horizontally = !tile.flipped_horizontally;
-						}
-
-					} else {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
-						}
-
-						anim.set_progress(0.f);
-						anim.set_loop(false);
-						//sprite.flags &= ~sprites::SPRITE_FLIP_VERTICALLY;
-					}
-
+					} else
 					if (player.input_flags & INPUT_INTERACT) {
 						const Vec2f box_center = position + to_unit(player.dir) * 16.f;
 						const Vec2f box_min = box_center - Vec2f(6.f, 6.f);
@@ -505,11 +497,9 @@ namespace ecs {
 
 				} break;
 				case PlayerState::SwingingSword: {
-#if 0
 					if (tile_dir != Direction::E) {
 						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
 					}
-#endif
 					// TODO
 					//if (animation._frame_changed && animation._frame_id == 1) {
 					//	_player_attack(player_entity, position + player.look_dir * 16.f);
@@ -522,62 +512,28 @@ namespace ecs {
 					if (dir != Direction::E) {
 						tile.flipped_horizontally = false;
 					}
-#if 0
 					if (player.arrows > 0 && anim.get_progress() > ???) {
 						player.arrows--;
 						create_arrow(position + to_unit(player.dir) * 16.f, to_unit(player.dir)* _PLAYER_ARROW_SPEED);
 					}
-#endif
 					if (anim.done()) {
 						player.state = PlayerState::Normal;
 					}
 				} break;
-				case PlayerState::Dying: {
-
-					const TileId original_tile = tile;
-
-					switch (dir) {
-						case Direction::W: [[fallthrough]];
-						case Direction::E: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
-						case Direction::N: replace(tile, TILE_ID_PLAYER_DYING_NE); break;
-						case Direction::S: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
-					}
-
-					if (tile != original_tile) { // HACK
-						anim.set_progress(0.f);
-					}
-					anim.set_loop(false);
-
-					if (anim.done()) {
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_DEAD_NE); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
-						}
-
-						kill_player(entity);
-					}
-
-				} break;
 			}
-
-			b2Body_SetLinearVelocity(body, new_velocity);
+#endif
 		}
 
+		// Update hud. TODO: put in ecs_ui_hud.h or something
 		for (auto [entity, player] : _registry.view<Player>().each()) {
 			ui::bindings::hud_player_health = player.health;
 			ui::bindings::hud_arrow_ammo = player.arrows;
 			ui::bindings::hud_bomb_ammo = player.bombs;
 			ui::bindings::hud_rupee_amount = player.rupees;
-			player.input_flags &= ~INPUT_INTERACT;
-			player.input_flags &= ~INPUT_SWING_SWORD;
-			player.input_flags &= ~INPUT_SHOOT_BOW;
-			player.input_flags &= ~INPUT_DROP_BOMB;
 		}
 
 		// Update graphics.
-		for (auto [entity, player, body, sprite] : _registry.view<Player, b2BodyId, sprites::Sprite>().each()) {
+		for (auto [entity, player, tile, sprite] : _registry.view<Player, TileId, sprites::Sprite>().each()) {
 
 			const std::string_view state = get_current_state(entity);
 
@@ -589,9 +545,6 @@ namespace ecs {
 				sprite.color.a = 255;
 			}
 		}
-
-		_input_flags_to_enable = 0;
-		_input_flags_to_disable = 0;
 	}
 
 	void show_player_debug_window() {
@@ -608,8 +561,7 @@ namespace ecs {
 
 			Vec2f position = b2Body_GetWorldCenterOfMass(body);
 			ImGui::Text("Position: %.1f, %.1f", position.x, position.y);
-			//ImGui::Text("Terrain: %s", map::get_terrain_type_at(position).data());
-			ImGui::Text("State: %s", magic_enum::enum_name(player.state).data());
+			ImGui::Text("Terrain: %s", to_string(get_terrain_at(position)).data());
 			ImGui::Text("Health: %d", player.health);
 			ImGui::Text("Arrows: %d", player.arrows);
 			ImGui::Text("Rupees: %d", player.rupees);
@@ -645,10 +597,5 @@ namespace ecs {
 
 		ImGui::End();
 #endif // _DEBUG_IMGUI
-	}
-
-	bool kill_player(entt::entity entity) {
-		transition_to_state(entity, "dead");
-		return true;
 	}
 }

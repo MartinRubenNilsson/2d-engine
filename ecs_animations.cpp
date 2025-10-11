@@ -20,8 +20,16 @@ namespace ecs {
 		_speed = std::max(speed, 0.f);
 	}
 
+	float TileAnimation::get_speed() const {
+		return _speed;
+	}
+
 	void TileAnimation::set_loop(bool loop) {
 		_loop = loop;
+	}
+
+	bool TileAnimation::get_loop() const {
+		return _loop;
 	}
 
 	bool TileAnimation::done() const {

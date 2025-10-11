@@ -72,6 +72,18 @@ namespace ecs {
 		b2Body_SetUserData(body, (void*)(uintptr_t)entity);
 	}
 
+	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& def) {
+		b2BodyId body = b2CreateBody(_physics_world, &def);
+		_registry.emplace_or_replace<b2BodyId>(entity, body);
+		_set_entity(body, entity);
+		return body;
+	}
+
+	b2BodyId get_body(entt::entity entity) {
+		b2BodyId* body_ptr = _registry.try_get<b2BodyId>(entity);
+		return body_ptr ? *body_ptr : b2_nullBodyId;
+	}
+
 	entt::entity get_entity(b2BodyId body) {
 		void* user_data = b2Body_GetUserData(body);
 		if (!user_data) return entt::null;
@@ -132,15 +144,13 @@ namespace ecs {
 		return category_bits;
 	}
 
-	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& def) {
-		b2BodyId body = b2CreateBody(_physics_world, &def);
-		_registry.emplace_or_replace<b2BodyId>(entity, body);
-		_set_entity(body, entity);
-		return body;
+	void remove_body(entt::entity entity) {
+		_registry.remove<b2BodyId>(entity);
 	}
 
-	b2BodyId get_body(entt::entity entity) {
-		b2BodyId* body_ptr = _registry.try_get<b2BodyId>(entity);
-		return body_ptr ? *body_ptr : b2_nullBodyId;
+	void stop_moving(entt::entity entity) {
+		b2BodyId* body = _registry.try_get<b2BodyId>(entity);
+		if (!body) return;
+		b2Body_SetLinearVelocity(*body, Vec2f::ZERO);
 	}
 }

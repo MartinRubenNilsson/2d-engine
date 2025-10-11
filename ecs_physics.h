@@ -9,12 +9,15 @@ namespace ecs {
 	void update_physics(float dt);
 	void debug_draw_physics();
 	
+	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& def);
+	b2BodyId get_body(entt::entity entity); // Returns b2_nullBodyId if entity has no body.
+
 	entt::entity get_entity(b2BodyId body);
 	b2ShapeDef get_shape_def(b2ShapeId shape);
 	b2BodyDef get_body_def(b2BodyId body);
 	// Returns the bitwise OR of all category bits of all shapes attached to the body.
 	uint32_t get_category_bits(b2BodyId body);
 
-	b2BodyId emplace_body(entt::entity entity, const b2BodyDef& def);
-	b2BodyId get_body(entt::entity entity); // Returns b2_nullBodyId if entity has no body.
+	void remove_body(entt::entity entity);
+	void stop_moving(entt::entity entity); // Sets the velocity to zero.
 }

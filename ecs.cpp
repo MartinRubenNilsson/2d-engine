@@ -130,10 +130,6 @@ namespace ecs {
 		update_audio(dt);
 	}
 
-	void handle_window_event(const window::Event& event) {
-		handle_window_event_for_players(event);
-	}
-
 	void get_camera_bounds(Vec2f& min, Vec2f& max) {
 		Vec2f center, size;
 		ecs::get_blended_camera_view(center, size);

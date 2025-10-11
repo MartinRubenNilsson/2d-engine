@@ -14,4 +14,4 @@ enum class Direction {
 bool is_cardinal(Direction d); // N, E, S, W
 bool is_ordinal(Direction d); // NE, SE, SW, NW
 Vec2f to_unit(Direction d);
-Direction to_cardinal(Vec2f v);
+Direction to_cardinal(const Vec2f& v);

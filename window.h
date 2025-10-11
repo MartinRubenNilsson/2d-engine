@@ -1,8 +1,7 @@
 #pragma once
 
 namespace window {
-
-	bool initialize();
+	bool startup();
 	void shutdown();
 
 	void* get_glfw_window(); // Get the GLFW window handle (GLFWwindow).
@@ -12,7 +11,7 @@ namespace window {
 	bool should_close();
 	void set_should_close(bool should_close);
 	// Processes all pending events and populates the event queue. Call at the start of each frame.
-	void poll_events();
+	void update_events();
 	bool has_focus();
 	void set_visible(bool visible);
 	bool get_visible();

@@ -161,22 +161,22 @@ namespace ecs {
 			// Setup state machine.
 			{
 				StateMachine& sm = emplace_state_machine(entity);
-				StateHandle idle_state = add_state(sm, {
-					.id = "idle",
+				StateId idle_state = add_state(sm, {
+					.name = "idle",
 					.update = _update_idle_blade_trap });
 				add_state(sm, {
-					.id = "extending",
+					.name = "extending",
 					.start = _start_extending_blade_trap,
 					.stop = _stop_extending_blade_trap });
 				add_state(sm, {
-					.id = "impacting",
+					.name = "impacting",
 					.start = _start_impacting_blade_trap });
 				add_state(sm, {
-					.id = "retracting",
+					.name = "retracting",
 					.stop = _stop_retracting_blade_trap,
 					.update = _update_retracting_blade_trap });
 				add_state(sm, {
-					.id = "wait" });
+					.name = "wait" });
 				transition(sm, idle_state, entity);
 			}
 		}

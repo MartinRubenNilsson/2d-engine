@@ -6,38 +6,38 @@
 namespace ecs {
 	struct StateMachine {
 		std::vector<State> states;
-		StateHandle current_state;
-		StateHandle next_state;
+		StateId current_state;
+		StateId next_state;
 		float next_state_transition_time = 0.f;
 	};
 
-	StateHandle add_state(StateMachine& sm, State&& state) {
-		StateHandle handle{ .index = (unsigned int)sm.states.size() };
+	StateId add_state(StateMachine& sm, State&& state) {
+		StateId handle{ .index = (unsigned int)sm.states.size() };
 		sm.states.emplace_back(std::move(state));
 		return handle;
 	}
 
-	StateHandle find_state(const StateMachine& sm, std::string_view id) {
+	StateId find_state(const StateMachine& sm, std::string_view name) {
 		for (unsigned int index = 0; index < sm.states.size(); index++) {
-			if (sm.states[index].id == id) {
-				return StateHandle{ index };
+			if (sm.states[index].name == name) {
+				return StateId{ index };
 			}
 		}
-		return StateHandle();
+		return StateId();
 	}
 
-	State* _get_state(StateMachine& sm, StateHandle handle) {
+	State* _get_state(StateMachine& sm, StateId handle) {
 		if (handle.index >= sm.states.size())
 			return nullptr;
 		return &sm.states[handle.index];
 	}
 
-	bool transition(StateMachine& sm, StateHandle state, entt::entity entity) {
+	bool transition(StateMachine& sm, StateId state, entt::entity entity) {
 		State* next = _get_state(sm, state);
 		if (!next) return false;
 		// PITFALL: The enter/exit callbacks might want to set a delayed transition,
 		// so it's important that we reset these BEFORE calling the callbacks.
-		sm.next_state = StateHandle();
+		sm.next_state = StateId();
 		sm.next_state_transition_time = 0.f;
 		// Exit current state if we're in one.
 		if (State* curr = _get_state(sm, sm.current_state)) {
@@ -78,7 +78,7 @@ namespace ecs {
 		s->handle(entity, event);
 	}
 
-	void transition_later(StateMachine& sm, StateHandle state, float time) {
+	void transition_later(StateMachine& sm, StateId state, float time) {
 		if (state.index >= sm.states.size())
 			return; // invalid state handle
 		if (time <= 0.f)
@@ -102,25 +102,25 @@ namespace ecs {
 		State* state = _get_state(sm, sm.current_state);
 		if (!state)
 			return {};
-		return state->id;
+		return state->name;
 	}
 
-	bool transition_to_state(entt::entity entity, std::string_view state_id) {
+	bool transition_to_state(entt::entity entity, std::string_view name) {
 		if (!_registry.all_of<StateMachine>(entity))
 			return false;
 		StateMachine& sm = _registry.get<StateMachine>(entity);
-		StateHandle state = find_state(sm, state_id);
-		if (state == StateHandle())
+		StateId state = find_state(sm, name);
+		if (state == StateId())
 			return false;
 		return transition(sm, state, entity);
 	}
 
-	void transition_to_state_later(entt::entity entity, std::string_view state_id, float time) {
+	void transition_to_state_later(entt::entity entity, std::string_view name, float time) {
 		if (!_registry.all_of<StateMachine>(entity))
 			return;
 		StateMachine& sm = _registry.get<StateMachine>(entity);
-		StateHandle state = find_state(sm, state_id);
-		if (state == StateHandle())
+		StateId state = find_state(sm, name);
+		if (state == StateId())
 			return;
 		transition_later(sm, state, time);
 	}
@@ -146,11 +146,11 @@ namespace ecs {
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
 			std::string string;
 			if (State* current_state = _get_state(sm, sm.current_state)) {
-				string += current_state->id;
+				string += current_state->name;
 			}
 			if (State* next_state = _get_state(sm, sm.next_state)) {
 				string += " -> ";
-				string += next_state->id;
+				string += next_state->name;
 			}
 			if (string.empty()) continue;
 			text.string.assign(string.begin(), string.end());

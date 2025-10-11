@@ -193,6 +193,8 @@ namespace window {
 		};
 	};
 
-	void push_event(const Event& ev);
-	bool pop_event(Event& ev);
+	std::span<const Event> get_events();
+
+	void clear_events();
+	void add_event(const Event& ev);
 }

@@ -7,7 +7,6 @@ namespace ecs {
 	void setup(MapId map);
 	void clear();
 	void update(float dt);
-	void handle_window_event(const window::Event& ev);
 	// TODO: handle ui event
 
 	void get_camera_bounds(Vec2f& min, Vec2f& max);
