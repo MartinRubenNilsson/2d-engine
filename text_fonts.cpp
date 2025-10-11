@@ -18,6 +18,14 @@ namespace text {
 		auto operator<=>(const GlyphTableEntry&) const = default;
 	};
 
+	struct GlyphKerningTableEntry {
+		int glyph1_index = 0;
+		int glyph2_index = 0;
+		int advance = 0;
+
+		auto operator<=>(const GlyphKerningTableEntry&) const = default;
+	};
+
 	// Used to lookup a glyph texture rect from a codepoint and a pixel height.
 	struct GlyphTextureRectTableEntry {
 		int glyph_index = 0;
@@ -39,6 +47,7 @@ namespace text {
 		int whitespace_advance = 0; // How much to horizontally advance the pen for a whitespace.
 
 		std::vector<GlyphTableEntry> glyph_table; // sorted by codepoint
+		std::vector<GlyphKerningTableEntry> glyph_kerning_table; // sorted by glyph1_index first, glyph2_index second
 		std::vector<GlyphTextureRectTableEntry> glyph_texture_rect_table; // sorted by codepoint first, then pixel_height
 		std::vector<GlyphTextureRect> glyph_texture_rects;
 
@@ -72,6 +81,14 @@ namespace text {
 		// Precompute the whitespace advance because we look it up often.
 		font.whitespace_advance = get_advance(font, get_glyph(font, U' '));
 
+		// Setup kerning table.
+		{
+			const int table_length = stbtt_GetKerningTableLength(&font.info);
+			font.glyph_kerning_table.resize(table_length);
+			stbtt_GetKerningTable(&font.info, (stbtt_kerningentry*)(font.glyph_kerning_table.data()), table_length);
+		}
+
+		// Setup texture atlas.
 		font.atlas_pixels.resize(ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE);
 		font.atlas_texture = graphics::create_texture({
 			.debug_name = normalized_path,
@@ -79,6 +96,7 @@ namespace text {
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
 
+		// Setup pack.
 		stbtt_PackBegin(&font.pack_context, font.atlas_pixels.data(),
 			ATLAS_TEXTURE_SIZE, ATLAS_TEXTURE_SIZE, 0, 1, nullptr);
 
@@ -138,7 +156,7 @@ namespace text {
 	GlyphId get_glyph(Font& font, char32_t codepoint) {
 		// First do a binary search of the table to see if it contains the glyph,
 		// otherwise find it the potentially slow way using the stbtt API.
-		std::vector<GlyphTableEntry>& table = font.glyph_table;
+		auto& table = font.glyph_table;
 		GlyphTableEntry entry{ codepoint };
 		const size_t first = _lower_bound(table.data(), table.size(), entry);
 		if (first < table.size() && table[first].codepoint == entry.codepoint) {
@@ -161,7 +179,16 @@ namespace text {
 	}
 
 	int get_kerning_advance(const Font& font, GlyphId glyph1, GlyphId glyph2) {
-		return stbtt_GetGlyphKernAdvance(&font.info, glyph1.index, glyph2.index);
+		const auto& table = font.glyph_kerning_table;
+		GlyphKerningTableEntry entry{ glyph1.index, glyph2.index };
+		const size_t first = _lower_bound(table.data(), table.size(), entry);
+		if (first >= table.size())
+			return 0;
+		if (table[first].glyph1_index != entry.glyph1_index)
+			return 0;
+		if (table[first].glyph2_index != entry.glyph2_index)
+			return 0;
+		return table[first].advance;
 	}
 
 	GlyphBoundingBox get_bounding_box(const Font& font, GlyphId glyph) {
@@ -193,7 +220,7 @@ namespace text {
 	GlyphTextureRect get_texture_rect(Font& font, GlyphId glyph, float pixel_height) {
 		// First do a binary search of the texture rect table to see if it already has the rect
 		// for this combination of codepoint and pixel height, and if so return it.
-		std::vector<GlyphTextureRectTableEntry>& table = font.glyph_texture_rect_table;
+		auto& table = font.glyph_texture_rect_table;
 		GlyphTextureRectTableEntry entry{ glyph.index, pixel_height };
 		const size_t first = _lower_bound(table.data(), table.size(), entry);
 		if (first < table.size() &&

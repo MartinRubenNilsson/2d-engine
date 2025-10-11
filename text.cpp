@@ -62,7 +62,7 @@ namespace text {
             for (const Text& text : _texts) {
                 // In general we will have 4 vertices per non-whitespace glyph.
                 // TODO: Handle whitespaces for a more conservative preallocation.
-                vertex_count += 4 * text.string.size();
+                vertex_count += 4 * length(text.string);
             }
             graphics::temp_vertices.reserve(vertex_count);
         }
@@ -126,8 +126,6 @@ namespace text {
                 const Vec2f tex_min = { (float)rect.min.x, (float)rect.max.y }; // SIC: max.y
                 const Vec2f tex_max = { (float)rect.max.x, (float)rect.min.y }; // SIC: min.y
 
-                // TODO: triangle strip!!!
-
                 graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(tex_min.x, tex_min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(tex_max.x, tex_min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(tex_min.x, tex_max.y));
@@ -138,7 +136,7 @@ namespace text {
                 for (unsigned int gv = 0; gv < 6; ++gv) { // gv = glyph vertex
                     const unsigned int v = batch.vertex_offset + batch.vertex_count + gv;
                     graphics::Vertex& vertex = graphics::temp_vertices[v];
-                     // The glyphs use a coordinate system with y up, so we must flip.
+                     // PITFALL: The glyphs use a coordinate system with y up, so we must flip.
                     vertex.position.y = -vertex.position.y;
                     vertex.position *= scale_for_world;
                     vertex.position += text.position;
@@ -163,8 +161,7 @@ namespace text {
 
         graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
 
-        //TODO: different samplers?
-
+        // Do the drawing.
         {
             Handle<graphics::Texture> prev_texture{};
             Handle<graphics::Sampler> prev_sampler{};
