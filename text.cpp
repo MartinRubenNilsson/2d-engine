@@ -1,17 +1,20 @@
 ﻿#include "stdafx.h"
 #include "text.h"
+#include "text_fonts.h"
 #include "text_unicode.h"
-#include "fonts.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
 
 namespace text {
-    std::vector<Text> _texts;
-
+    // Sorts by draw order.
     bool operator<(const Text& a, const Text& b) {
-        return a.font < b.font;
+        if (a.font != b.font)
+            return a.font < b.font;
+        return a.linear_sampling < b.linear_sampling; // is this correct?
     }
+
+    std::vector<Text> _texts;
 
     void draw_later(const Text& text) {
         _texts.push_back(text);
@@ -19,16 +22,17 @@ namespace text {
 
     struct Batch {
         Handle<graphics::Texture> texture{};
+        Handle<graphics::Sampler> sampler{};
         unsigned int vertex_offset = 0;
         unsigned int vertex_count = 0;
     };
 
     std::vector<Batch> _batches;
 
-    Batch& _get_new_or_current_batch(Handle<graphics::Texture> texture) {
+    Batch& _get_new_or_current_batch(Handle<graphics::Texture> texture, Handle<graphics::Sampler> sampler) {
         // Do we need to create a new batch?
-        if (_batches.empty() || _batches.back().texture != texture)
-            return _batches.emplace_back(texture, (unsigned int)graphics::temp_vertices.size());
+        if (_batches.empty() || _batches.back().texture != texture || _batches.back().sampler != sampler)
+            return _batches.emplace_back(texture, sampler, (unsigned int)graphics::temp_vertices.size());
         // We can continue the current batch.
         return _batches.back();
     }
@@ -65,37 +69,39 @@ namespace text {
 
         // Create batches.
         for (const Text& text : _texts) {
-            fonts::Font* font = fonts::get_font(text.font);
+            Font* font = get_font(text.font);
             if (!font)
                 continue;
 
-            const Handle<graphics::Texture> texture = fonts::get_atlas_texture(*font);
+            const Handle<graphics::Texture> texture = get_atlas_texture(*font);
             if (texture == Handle<graphics::Texture>())
                 continue;
+            const Handle<graphics::Sampler> sampler = text.linear_sampling ?
+                graphics::linear_sampler : graphics::nearest_sampler;
 
             // How many pixels high *on screen* the text should appear.
             const float height_on_screen = text.height * screen_pixels_per_world_unit;
             // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
-            const float scale_for_screen = fonts::get_scale_for_pixel_height(*font, height_on_screen);
+            const float scale_for_screen = get_scale_for_pixel_height(*font, height_on_screen);
             // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
             const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 
-            const int whitespace_advance = fonts::get_whitespace_advance(*font);
-            const int line_spacing = fonts::get_line_spacing(*font);
+            const int whitespace_advance = get_whitespace_advance(*font);
+            const int line_spacing = get_line_spacing(*font);
 
-            Batch& batch = _get_new_or_current_batch(texture);
+            Batch& batch = _get_new_or_current_batch(texture, sampler);
 
             Vec2f pos; // Aka "pen" or "glyph origin" - current position to draw the glyph at.
-            fonts::GlyphId prev_glyph{};
+            GlyphId prev_glyph{};
 
             std::u8string_view string = text.string;
             while (char32_t codepoint = to_c32(string)) {
                 if (codepoint == U'\r')
                     continue; // Skip carriage returns to avoid graphical issues
 
-                const fonts::GlyphId glyph = fonts::get_glyph(*font, codepoint);
+                const GlyphId glyph = get_glyph(*font, codepoint);
 
-                pos.x += fonts::get_kerning_advance(*font, prev_glyph, glyph);
+                pos.x += get_kerning_advance(*font, prev_glyph, glyph);
 
                 switch (codepoint) {
                     case U' ': {
@@ -110,9 +116,9 @@ namespace text {
                     } continue;
                 }
 
-                const fonts::GlyphBoundingBox box = fonts::get_bounding_box(*font, glyph);
+                const GlyphBoundingBox box = get_bounding_box(*font, glyph);
                 // PITFALL: It's important to use height_on_screen here!
-                const fonts::GlyphTextureRect rect = fonts::get_texture_rect(*font, codepoint, height_on_screen);
+                const GlyphTextureRect rect = get_texture_rect(*font, codepoint, height_on_screen);
 
                 const Vec2f min = pos + box.min;
                 const Vec2f max = pos + box.max;
@@ -139,12 +145,12 @@ namespace text {
                 }
 
                 batch.vertex_count += 6;
-                pos.x += fonts::get_advance(*font, glyph);
+                pos.x += get_advance(*font, glyph);
                 prev_glyph = glyph;
             }
 
-            if (fonts::atlas_texture_needs_updating(*font)) {
-                fonts::update_atlas_texture(*font);
+            if (atlas_texture_needs_updating(*font)) {
+                update_atlas_texture(*font);
             }
         }
 
@@ -159,9 +165,20 @@ namespace text {
 
         //TODO: different samplers?
 
-        for (const Batch& batch : _batches) {
-            graphics::bind_texture(0, batch.texture);
-            graphics::draw(batch.vertex_count, batch.vertex_offset);
+        {
+            Handle<graphics::Texture> prev_texture{};
+            Handle<graphics::Sampler> prev_sampler{};
+            for (const Batch& batch : _batches) {
+                if (batch.texture != prev_texture) {
+                    graphics::bind_texture(0, batch.texture);
+                    prev_texture = batch.texture;
+                }
+                if (batch.sampler != prev_sampler) {
+                    graphics::bind_sampler(0, batch.sampler);
+                    prev_sampler = batch.sampler;
+                }
+                graphics::draw(batch.vertex_count, batch.vertex_offset);
+            }
         }
 
         graphics::temp_vertices.clear();

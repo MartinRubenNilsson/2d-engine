@@ -21,13 +21,3 @@ namespace graphics {
 	struct Sampler;
 	struct Framebuffer;
 }
-
-namespace fonts {
-	struct Font;
-}
-
-namespace tiled {
-	struct Map;
-	struct Tileset;
-	struct Object;
-}

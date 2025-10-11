@@ -2,7 +2,7 @@
 #include "ecs_terrain.h"
 #include "ecs_tiled.h"
 #include "text.h"
-#include "fonts.h"
+#include "text_fonts.h"
 
 namespace ecs {
 	std::string_view to_string(TerrainType type) {
@@ -63,7 +63,7 @@ namespace ecs {
 
 	void debug_draw_terrain() {
 		text::Text text{};
-		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
+		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.height = 8.f;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {

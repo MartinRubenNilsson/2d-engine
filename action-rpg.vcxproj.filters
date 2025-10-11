@@ -89,9 +89,6 @@
     <ClCompile Include="renderdoc.cpp">
       <Filter>application\renderdoc</Filter>
     </ClCompile>
-    <ClCompile Include="fonts.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_interactions.cpp">
       <Filter>game\ecs\game\mechanics</Filter>
     </ClCompile>
@@ -272,6 +269,9 @@
     <ClCompile Include="text_unicode.cpp">
       <Filter>graphics\text</Filter>
     </ClCompile>
+    <ClCompile Include="text_fonts.cpp">
+      <Filter>graphics\text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -360,9 +360,6 @@
     <ClInclude Include="fwd.h" />
     <ClInclude Include="renderdoc.h">
       <Filter>application\renderdoc</Filter>
-    </ClInclude>
-    <ClInclude Include="fonts.h">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="pool.h">
       <Filter>utilities</Filter>
@@ -536,6 +533,9 @@
       <Filter>graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="text_unicode.h">
+      <Filter>graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="text_fonts.h">
       <Filter>graphics\text</Filter>
     </ClInclude>
   </ItemGroup>

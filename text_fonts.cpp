@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "fonts.h"
+#include "text_fonts.h"
 #include "pool.h"
 #include "console.h"
 #include "graphics.h"
@@ -8,7 +8,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 
-namespace fonts {
+namespace text {
 	const int ATLAS_TEXTURE_SIZE = 1024;
 
 	// Used to lookup a glyph from a codepoint.

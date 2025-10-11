@@ -1,6 +1,6 @@
 #pragma once
 
-namespace fonts {
+namespace text {
 	struct Font;
 
 	Handle<Font> load_font(const std::string& path);

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ecs_states.h"
-#include "fonts.h"
+#include "text_fonts.h"
 #include "text.h"
 
 namespace ecs {
@@ -139,7 +139,7 @@ namespace ecs {
 
 	void debug_draw_state_machines() {
 		text::Text text{};
-		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
+		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.height = 8.f;
 
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {

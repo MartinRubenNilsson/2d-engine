@@ -2,7 +2,7 @@
 #include "ecs_task_impl.h"
 #include "ecs_tasks.h"
 #include "text.h"
-#include "fonts.h"
+#include "text_fonts.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -97,7 +97,7 @@ namespace ecs {
 
 	void _debug_draw_task_names() {
 		text::Text text{};
-		text.font = fonts::load_font("assets/fonts/Helvetica.ttf");;
+		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.height = 8.f;
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
