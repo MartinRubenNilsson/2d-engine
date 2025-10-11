@@ -272,6 +272,9 @@
     <ClCompile Include="text_fonts.cpp">
       <Filter>graphics\text</Filter>
     </ClCompile>
+    <ClCompile Include="text_stb_truetype.cpp">
+      <Filter>graphics\text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -536,6 +539,9 @@
       <Filter>graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="text_fonts.h">
+      <Filter>graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="text_stb_truetype.h">
       <Filter>graphics\text</Filter>
     </ClInclude>
   </ItemGroup>

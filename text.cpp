@@ -118,7 +118,7 @@ namespace text {
 
                 const GlyphBoundingBox box = get_bounding_box(*font, glyph);
                 // PITFALL: It's important to use height_on_screen here!
-                const GlyphTextureRect rect = get_texture_rect(*font, codepoint, height_on_screen);
+                const GlyphTextureRect rect = get_texture_rect(*font, glyph, height_on_screen);
 
                 const Vec2f min = pos + box.min;
                 const Vec2f max = pos + box.max;

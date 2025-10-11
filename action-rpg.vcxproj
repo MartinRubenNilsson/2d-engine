@@ -217,6 +217,7 @@
     <ClCompile Include="steam_client.cpp" />
     <ClCompile Include="steam_server.cpp" />
     <ClCompile Include="text.cpp" />
+    <ClCompile Include="text_stb_truetype.cpp" />
     <ClCompile Include="text_unicode.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="easings.cpp" />
@@ -291,6 +292,7 @@
     <ClInclude Include="pool.h" />
     <ClInclude Include="renderdoc.h" />
     <ClInclude Include="text.h" />
+    <ClInclude Include="text_stb_truetype.h" />
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />
     <ClInclude Include="ui_clay.h" />

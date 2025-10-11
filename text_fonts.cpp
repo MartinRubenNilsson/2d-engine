@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "text_fonts.h"
+#include "text_stb_truetype.h"
 #include "pool.h"
 #include "console.h"
 #include "graphics.h"
 #include "filesystem.h"
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb_truetype.h>
+#include <stb_rect_pack.h>
 
 namespace text {
 	const int ATLAS_TEXTURE_SIZE = 1024;
@@ -21,7 +20,7 @@ namespace text {
 
 	// Used to lookup a glyph texture rect from a codepoint and a pixel height.
 	struct GlyphTextureRectTableEntry {
-		char32_t codepoint = 0;
+		int glyph_index = 0;
 		float pixel_height = 0.f;
 		int glyph_texture_rect_index = -1; // index into Font::glyph_texture_rects[]
 
@@ -171,10 +170,10 @@ namespace text {
 		return box;
 	}
 
-	GlyphTextureRect _pack_codepoint(Font& font, char32_t codepoint, float pixel_height) {
+	GlyphTextureRect _pack_codepoint(Font& font, int glyph_index, float pixel_height) {
 		stbtt_packedchar packed_char{};
 		stbtt_pack_range range{};
-		range.first_unicode_codepoint_in_range = codepoint;
+		range.first_glyph_index_in_range = glyph_index;
 		range.chardata_for_range = &packed_char;
 		range.num_chars = 1; // num packed chars, not codepoints!
 		range.font_size = pixel_height;
@@ -191,14 +190,14 @@ namespace text {
 		return tex_rect;
 	}
 
-	GlyphTextureRect get_texture_rect(Font& font, char32_t codepoint, float pixel_height) {
+	GlyphTextureRect get_texture_rect(Font& font, GlyphId glyph, float pixel_height) {
 		// First do a binary search of the texture rect table to see if it already has the rect
 		// for this combination of codepoint and pixel height, and if so return it.
 		std::vector<GlyphTextureRectTableEntry>& table = font.glyph_texture_rect_table;
-		GlyphTextureRectTableEntry entry{ codepoint, pixel_height };
+		GlyphTextureRectTableEntry entry{ glyph.index, pixel_height };
 		const size_t first = _lower_bound(table.data(), table.size(), entry);
 		if (first < table.size() &&
-			table[first].codepoint == entry.codepoint && 
+			table[first].glyph_index == entry.glyph_index &&
 			table[first].pixel_height == entry.pixel_height
 		) { // if we found it in the table
 			const int texture_rect_index = table[first].glyph_texture_rect_index;
@@ -208,7 +207,7 @@ namespace text {
 		// texture atlas. Then we record the result in the table so we can look it up in the future.
 		entry.glyph_texture_rect_index = (int)font.glyph_texture_rects.size();
 		table.insert(table.begin() + first, entry);
-		GlyphTextureRect rect = _pack_codepoint(font, codepoint, pixel_height);
+		GlyphTextureRect rect = _pack_codepoint(font, glyph.index, pixel_height);
 		font.glyph_texture_rects.push_back(rect);
 		return rect;
 	}

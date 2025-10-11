@@ -52,7 +52,7 @@ namespace text {
 	// Get the texture rect of the glyph in the font texture atlas. If the glyph isn't already
 	// in the atlas it will be written to it. The same glyph can have different texture rects
 	// for different pixel heights.
-	GlyphTextureRect get_texture_rect(Font& font, char32_t codepoint, float pixel_height);
+	GlyphTextureRect get_texture_rect(Font& font, GlyphId glyph, float pixel_height);
 
 	bool atlas_texture_needs_updating(const Font& font);
 	void update_atlas_texture(Font& font);
