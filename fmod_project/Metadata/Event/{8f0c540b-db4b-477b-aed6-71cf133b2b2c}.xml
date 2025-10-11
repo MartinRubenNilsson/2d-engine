@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{8f0c540b-db4b-477b-aed6-71cf133b2b2c}">
 		<property name="name">
 			<value>snd_item_fanfare</value>

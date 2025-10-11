@@ -38,6 +38,8 @@ bool clockwise(const Vec2f& a, const Vec2f& b); // True if b is clockwise of a
 Vec2f rotate(const Vec2f& v, float angle);
 Vec2f min(const Vec2f& a, const Vec2f& b);
 Vec2f max(const Vec2f& a, const Vec2f& b);
+Vec2f floor(const Vec2f& v);
+Vec2f ceil(const Vec2f& v);
 Vec2f round(const Vec2f& v);
 Vec2f lerp(const Vec2f& a, const Vec2f& b, float t);
 Vec2f lerp_polar(const Vec2f& a, const Vec2f& b, float t);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{bfd01d14-d22a-46ae-af67-2c4174547e7e}">
 		<property name="assetPath">
 			<value>snd_pickup1.wav</value>

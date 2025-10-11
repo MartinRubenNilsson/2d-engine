@@ -28,6 +28,7 @@
 #include "timer.h"
 #include "ecs_states.h"
 #include "ecs_audio.h"
+#include "ecs_terrain.h"
 
 namespace ecs {
 
@@ -348,12 +349,14 @@ namespace ecs {
 			Vec2f new_velocity; // will be modified differently depending on the state
 
 			// UPDATE AUDIO
-
-			//audio::set_parameter_label("terrain", map::to_string(map::get_terrain_type_at(position)));
-			//if (animation._frame_changed && animation._frame_id % 3 == 0) {
-			//	// Take a step every 3 frames
-			//	audio::create_event({ .path = "event:/snd_footstep" });
-			//}
+			{
+				std::string terrain(to_string(get_terrain_at(position)));
+				//audio::set_parameter_label("terrain", terrain);
+				if (anim.looped()) {
+					// Take a step every 3 loop
+					audio::create_event({ .path = "event:/snd_footstep" });
+				}
+			}
 
 			// UPDATE POST-PROCESSING
 			postprocessing::set_darkness_center(position);

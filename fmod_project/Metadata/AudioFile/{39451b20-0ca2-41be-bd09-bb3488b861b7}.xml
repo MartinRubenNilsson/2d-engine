@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{39451b20-0ca2-41be-bd09-bb3488b861b7}">
 		<property name="assetPath">
 			<value>snd_step_water1.wav</value>

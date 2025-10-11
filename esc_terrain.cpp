@@ -28,6 +28,16 @@ namespace ecs {
 		return coord.x + coord.y * _terrain_size.x;
 	}
 
+	TerrainType get_terrain_at(const Vec2f& position) {
+		if (_terrain_tile_size.x == 0 || _terrain_tile_size.y == 0)
+			return TerrainType::None;
+		const Vec2 coord = floor(position / (Vec2f)_terrain_tile_size);
+		const const unsigned int id = _terrain_tile_coord_to_id(coord);
+		if (id >= _terrain.size())
+			return TerrainType::None;
+		return _terrain[id];
+	}
+
 	extern entt::registry _registry;
 
 	void setup_terrain(MapId map) {

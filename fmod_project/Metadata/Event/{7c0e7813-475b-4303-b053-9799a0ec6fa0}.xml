@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{7c0e7813-475b-4303-b053-9799a0ec6fa0}">
 		<property name="name">
 			<value>snd_cut_grass</value>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{65299b08-36ee-4e4e-aafb-d554114ff8f2}">
 		<property name="assetPath">
 			<value>snd_screenshake.wav</value>

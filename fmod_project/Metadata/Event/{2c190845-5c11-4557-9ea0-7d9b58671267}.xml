@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{2c190845-5c11-4557-9ea0-7d9b58671267}">
 		<property name="name">
 			<value>snd_button_click</value>

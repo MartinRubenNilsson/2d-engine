@@ -95,6 +95,14 @@ Vec2f max(const Vec2f& a, const Vec2f& b) {
 	return { std::max(a.x, b.x), std::max(a.y, b.y) };
 }
 
+Vec2f floor(const Vec2f& v) {
+	return { floor(v.x), floor(v.y) };
+}
+
+Vec2f ceil(const Vec2f& v) {
+	return { ceil(v.x), ceil(v.y) };
+}
+
 Vec2f round(const Vec2f& v) {
 	return { round(v.x), round(v.y) };
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{66d67373-1f5d-4cd4-a121-e682bba0a4a7}">
 		<property name="assetPath">
 			<value>snd_step_grass3.wav</value>

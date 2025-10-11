@@ -173,7 +173,7 @@ namespace audio {
 	}
 
 	bool set_parameter_label(const std::string& name, const std::string& label) {
-		FMOD_RESULT result = FMOD_Studio_System_SetParameterByName(_system, name.c_str(), 0.f, false);
+		FMOD_RESULT result = FMOD_Studio_System_SetParameterByNameWithLabel(_system, name.c_str(), label.c_str(), false);
 		if (result == FMOD_OK) return true;
 		if (log_errors) {
 			console::log_error("Could not find audio parameter label: " + name + "=" + label);

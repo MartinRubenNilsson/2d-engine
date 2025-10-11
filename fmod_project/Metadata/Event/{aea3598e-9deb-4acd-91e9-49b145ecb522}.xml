@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{aea3598e-9deb-4acd-91e9-49b145ecb522}">
 		<property name="name">
 			<value>retract</value>

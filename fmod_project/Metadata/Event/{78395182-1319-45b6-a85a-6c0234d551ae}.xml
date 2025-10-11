@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.02.00">
+<objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{78395182-1319-45b6-a85a-6c0234d551ae}">
 		<property name="name">
 			<value>snd_footstep</value>
@@ -75,9 +75,9 @@
 	</object>
 	<object class="ParameterProxy" id="{cb21c32d-bc69-420e-98da-3f59ee821cd2}">
 		<relationship name="modules">
+			<destination>{c0ad1e7f-6bf8-49db-b144-6b0cc3175d66}</destination>
 			<destination>{8fb24d97-cb77-4148-897f-63954de60e2f}</destination>
 			<destination>{eab06c00-dd6d-4709-9248-8aceeebc4fb8}</destination>
-			<destination>{c0ad1e7f-6bf8-49db-b144-6b0cc3175d66}</destination>
 			<destination>{122122dd-bfdb-4657-81d8-8f042c538e57}</destination>
 			<destination>{53d29c7c-51cd-4eac-aeab-f1566945a732}</destination>
 			<destination>{4147ae48-2637-4bf2-940c-70db9c1dea11}</destination>
@@ -106,7 +106,6 @@
 		<property name="start">
 			<value>1</value>
 		</property>
-		<property name="name" />
 		<property name="playlistMode">
 			<value>1</value>
 		</property>
@@ -176,7 +175,6 @@
 		<property name="start">
 			<value>5</value>
 		</property>
-		<property name="name" />
 		<property name="volume">
 			<value>-10</value>
 		</property>
@@ -192,7 +190,6 @@
 		<property name="start">
 			<value>6</value>
 		</property>
-		<property name="name" />
 		<property name="volume">
 			<value>-10</value>
 		</property>
