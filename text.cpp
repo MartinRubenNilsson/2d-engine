@@ -30,11 +30,27 @@ namespace text {
     std::vector<Batch> _batches;
 
     Batch& _get_new_or_current_batch(Handle<graphics::Texture> texture, Handle<graphics::Sampler> sampler) {
-        // Do we need to create a new batch?
-        if (_batches.empty() || _batches.back().texture != texture || _batches.back().sampler != sampler)
-            return _batches.emplace_back(texture, sampler, (unsigned int)graphics::temp_vertices.size());
-        // We can continue the current batch.
-        return _batches.back();
+        if (_batches.empty())
+            return _batches.emplace_back(texture, sampler); // Create the first batch
+        if (_batches.back().texture == texture || _batches.back().sampler == sampler)
+            return _batches.back(); // Continue the current batch
+        return _batches.emplace_back(texture, sampler, _batches.back().vertex_offset + _batches.back().vertex_count);
+    }
+
+    Vec2f _get_origin(const Vec2f& min, const Vec2f& max, TextOrigin origin) {
+        const Vec2f cen = (min + max) * 0.5f; // center
+        switch (origin) {
+            default: return Vec2f::ZERO;
+            case TextOrigin::UpperLeft:    return { min.x, max.y };
+            case TextOrigin::UpperCenter:  return { cen.x, max.y };
+            case TextOrigin::UpperRight:   return { max.y, max.y };
+            case TextOrigin::MiddleLeft:   return { min.x, cen.y };
+            case TextOrigin::MiddleCenter: return { cen.x, cen.y };
+            case TextOrigin::MiddleRight:  return { max.y, cen.y };
+            case TextOrigin::LowerLeft:    return { min.x, min.y };
+            case TextOrigin::LowerCenter:  return { cen.x, min.y };
+            case TextOrigin::LowerRight:   return { max.y, min.y };
+        }
     }
 
     void draw_all_now(std::string_view debug_group_name) {
@@ -70,6 +86,8 @@ namespace text {
         for (const Text& text : _texts) {
             Font* font = get_font(text.font);
             if (!font) continue;
+            if (text.string.empty())
+                continue; // Nothing to draw.
 
             const Handle<graphics::Texture> texture = get_atlas_texture(*font);
             if (texture == Handle<graphics::Texture>())
@@ -77,78 +95,90 @@ namespace text {
 
             // How many pixels high *on screen* the text should appear.
             const float height_on_screen = text.letter_height * screen_pixels_per_world_unit;
-            // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
-            const float scale_for_screen = get_scale_for_pixel_height(*font, height_on_screen);
-            // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
-            const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 
-            const int whitespace_advance = get_whitespace_advance(*font);
-            const int line_spacing = get_line_spacing(*font);
-
+            Vec2f text_min = { FLT_MAX, FLT_MAX }; // Bounding box min for the entire text (in text local-space).
+            Vec2f text_max = { -FLT_MAX, -FLT_MAX }; // Bounding box max for the entire text (in text local-space).
             const unsigned int vertex_offset = (unsigned int)graphics::temp_vertices.size(); // The first vertex for this text.
             unsigned int vertex_count = 0; // How many vertices this text has added.
+            {
+                const int whitespace_advance = get_whitespace_advance(*font);
+                const int line_spacing = get_line_spacing(*font);
 
-            Vec2f glyph_origin; // Aka "current position" or "pen". This will move as glyphs are being drawn.
-            GlyphId prev_glyph{};
+                Vec2f glyph_origin; // Aka "current position" or "pen". This will move as glyphs are being drawn.
+                GlyphId prev_glyph{};
+                std::u8string_view string = text.string; // This will shrink as the codepoints are being decoded.
 
-            std::u8string_view string = text.string;
-            while (char32_t codepoint = to_c32(string)) {
-                if (codepoint == U'\r')
-                    continue; // Skip carriage returns
+                while (char32_t codepoint = to_c32(string)) {
+                    if (codepoint == U'\r')
+                        continue; // Skip carriage returns
 
-                const GlyphId glyph = get_glyph(*font, codepoint);
+                    const GlyphId glyph = get_glyph(*font, codepoint);
 
-                glyph_origin.x += get_kerning_advance(*font, prev_glyph, glyph);
+                    glyph_origin.x += get_kerning_advance(*font, prev_glyph, glyph);
 
-                switch (codepoint) {
-                    case U' ': {
-                        glyph_origin.x += whitespace_advance;
-                    } continue;
-                    case U'\t': {
-                        glyph_origin.x += whitespace_advance * 4.f; // 1 tab = 4 whitespaces
-                    } continue;
-                    case U'\n': {
-                        glyph_origin.x = 0.f;
-                        glyph_origin.y -= line_spacing;
-                    } continue;
+                    switch (codepoint) {
+                        case U' ': {
+                            glyph_origin.x += whitespace_advance;
+                        } continue;
+                        case U'\t': {
+                            glyph_origin.x += whitespace_advance * 4.f; // 1 tab = 4 whitespaces
+                        } continue;
+                        case U'\n': {
+                            glyph_origin.x = 0.f;
+                            glyph_origin.y += line_spacing; // Move the origin *down* a line.
+                        } continue;
+                    }
+
+                    GlyphBoundingBox box = get_bounding_box(*font, glyph);
+                    // PITFALL: The glyphs use a local coordinate system with positive y up, while our game world use a
+                    // coordinate system with positive y down, so we need to flip the sign here.
+                    box.min.y = -box.min.y;
+                    box.max.y = -box.max.y;
+                    const Vec2f min = glyph_origin + box.min;
+                    const Vec2f max = glyph_origin + box.max;
+
+                    // Update text bounding box limits.
+                    text_min = ::min(text_min, min);
+                    text_max = ::max(text_max, max);
+
+                    // PITFALL: It's important to use height_on_screen here!
+                    GlyphTextureRect rect = get_texture_rect(*font, glyph, height_on_screen);
+                    // PITFALL: I'm not sure why we need to do this to be honest...
+                    std::swap(rect.min.y, rect.max.y);
+
+                    graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(rect.min.x, rect.min.y));
+                    graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
+                    graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
+                    graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
+                    graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
+                    graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(rect.max.x, rect.max.y));
+
+                    vertex_count += 6;
+                    glyph_origin.x += get_advance(*font, glyph); // Advance the origin to the next glyph.
+                    prev_glyph = glyph;
                 }
 
-                const GlyphBoundingBox box = get_bounding_box(*font, glyph);
-                const Vec2f min = glyph_origin + box.min;
-                const Vec2f max = glyph_origin + box.max;
+                // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
+                const float scale_for_screen = get_scale_for_pixel_height(*font, height_on_screen);
+                // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
+                const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 
-                // PITFALL: It's important to use height_on_screen here!
-                const GlyphTextureRect rect = get_texture_rect(*font, glyph, height_on_screen);
-                // PITFALL: We need to flip the texture y-coordinate here because we flip the vertex y-coordinate futher below.
-                const Vec2f tex_min = { (float)rect.min.x, (float)rect.max.y }; // SIC: max.y
-                const Vec2f tex_max = { (float)rect.max.x, (float)rect.min.y }; // SIC: min.y
+                // Determine the world-space position of the origin.
+                const Vec2f origin = _get_origin(text_min, text_max, text.origin) * scale_for_world;
+                const Vec2f position = text.position - origin;
 
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(tex_min.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(tex_max.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(tex_min.x, tex_max.y));
-                graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(tex_min.x, tex_max.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(tex_max.x, tex_min.y));
-                graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(tex_max.x, tex_max.y));
+                // Transform the vertices in the text.
+                for (unsigned int v = 0; v < vertex_count; ++v) {
+                    graphics::Vertex& vertex = graphics::temp_vertices[vertex_offset + v];
+                    vertex.position *= scale_for_world;
+                    vertex.position += position;
+                }
 
-                vertex_count += 6;
-                glyph_origin.x += get_advance(*font, glyph);
-                prev_glyph = glyph;
+                // Update the batch.
+                const Handle<graphics::Sampler> sampler = text.linear_sampling ?
+                    graphics::linear_sampler : graphics::nearest_sampler;
+                _get_new_or_current_batch(texture, sampler).vertex_count += vertex_count;
             }
-
-            // Transform the vertices in the text.
-            for (unsigned int v = 0; v < vertex_count; ++v) {
-                graphics::Vertex& vertex = graphics::temp_vertices[vertex_offset + v];
-                // PITFALL: The glyphs use a coordinate system with y up, so we must flip.
-                vertex.position.y = -vertex.position.y;
-                vertex.position *= scale_for_world;
-                vertex.position += text.position;
-            }
-
-            // Update the batch.
-            const Handle<graphics::Sampler> sampler = text.linear_sampling ?
-                graphics::linear_sampler : graphics::nearest_sampler;
-            Batch& batch = _get_new_or_current_batch(texture, sampler);
-            batch.vertex_count += vertex_count;
         }
 
         // Update font texture atlases.

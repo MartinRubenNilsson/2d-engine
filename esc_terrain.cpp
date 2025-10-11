@@ -61,10 +61,17 @@ namespace ecs {
 		}
 	}
 
+	void clear_terrain() {
+		_terrain_tile_size = {};
+		_terrain_size = {};
+		_terrain.clear();
+	}
+
 	void debug_draw_terrain() {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.letter_height = 8.f;
+		text.origin = text::TextOrigin::MiddleCenter;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {
 			for (unsigned int x = 0; x < _terrain_size.x; ++x) {
@@ -74,9 +81,9 @@ namespace ecs {
 				if (type == TerrainType::None) continue;
 				std::string string = std::to_string((int)type);
 				text.string.assign(string.begin(), string.end());
-				text.position = coord * _terrain_tile_size;
-				//text.position.x += 2.5f;
-				//text.position.y += 5.5f;
+				text.position = coord;
+				text.position += Vec2f(0.5f, 0.5f);
+				text.position *= Vec2f(_terrain_tile_size);
 				text::draw_later(text);
 			}
 		}

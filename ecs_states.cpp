@@ -140,7 +140,8 @@ namespace ecs {
 	void debug_draw_state_machines() {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
-		text.letter_height = 8.f;
+		text.letter_height = 6.f;
+		text.origin = text::TextOrigin::UpperCenter;
 
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
 			std::string string;
@@ -153,7 +154,8 @@ namespace ecs {
 			}
 			if (string.empty()) continue;
 			text.string.assign(string.begin(), string.end());
-			text.position = b2Body_GetPosition(body) + Vec2f(-8.f, -10.f);
+			text.position = b2Body_GetWorldCenterOfMass(body);
+			text.position.y += 8.f;
 			text::draw_later(text);
 		}
 

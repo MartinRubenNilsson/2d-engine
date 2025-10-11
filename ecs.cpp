@@ -91,6 +91,7 @@ namespace ecs {
 		_registry.clear();
 		clear_physics();
 		clear_pathfinding();
+		clear_terrain();
 		clear_entities_to_be_destroyed_later();
 	}
 

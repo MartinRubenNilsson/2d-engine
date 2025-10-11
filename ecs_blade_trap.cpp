@@ -53,7 +53,6 @@ namespace ecs {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
 		// Start moving in direction.
-		b2Body_SetType(body, b2_dynamicBody);
 		b2Body_SetLinearVelocity(body, trap.direction * _BLADE_TRAP_EXTEND_SPEED);
 		// Start playing extension sound.
 		trap.audio_event = audio::create_event({ .path = "event:/blade_trap/extend" });
@@ -75,7 +74,7 @@ namespace ecs {
 		// Play impact sound.
 		audio::create_event({
 			.path = "event:/blade_trap/impact",
-			.position = b2Body_GetPosition(body) });
+			.position = b2Body_GetWorldCenterOfMass(body) });
 		// Start retracting in 0.4 seconds.
 		transition_to_state_later(entity, "retracting", 0.4f);
 	}
@@ -106,7 +105,7 @@ namespace ecs {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
 		// Stop moving.
-		b2Body_SetType(body, b2_staticBody);
+		b2Body_SetLinearVelocity(body, Vec2f::ZERO);
 		b2Body_SetTransform(body, trap.start_position, b2Rot_identity);
 		// Shake a little.
 		make_sprite_shake(entity, {
@@ -146,7 +145,7 @@ namespace ecs {
 			// Setup body.
 			{
 				b2BodyDef body_def = b2DefaultBodyDef();
-				body_def.type = b2_staticBody;
+				body_def.type = b2_dynamicBody;
 				body_def.position = sprite.position;
 				body_def.fixedRotation = true;
 				b2BodyId body = emplace_body(entity, body_def);
@@ -188,7 +187,7 @@ namespace ecs {
 			blade_trap.update_count++;
 			// Update audio position.
 			if (blade_trap.audio_event != Handle<audio::Event>()) {
-				audio::set_event_position(blade_trap.audio_event, b2Body_GetPosition(body));
+				audio::set_event_position(blade_trap.audio_event, b2Body_GetWorldCenterOfMass(body));
 			}
 		}
 	}

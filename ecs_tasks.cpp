@@ -98,15 +98,15 @@ namespace ecs {
 	void _debug_draw_task_names() {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
-		text.letter_height = 8.f;
+		text.letter_height = 6.f;
+		text.origin = text::TextOrigin::UpperCenter;
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
 			if (task.name.empty())
 				continue;
 			text.string.assign(task.name.begin(), task.name.end());
 			text.position = b2Body_GetWorldCenterOfMass(body);
-			text.position.y -= 16.f;
-			// TODO: text color!!!
+			text.position.y += 8.f;
 			text::draw_later(text);
 		}
 
