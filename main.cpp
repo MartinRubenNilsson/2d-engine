@@ -24,6 +24,7 @@
 #include "imgui_impl.h"
 
 int main(int argc, char* argv[]) {
+    setlocale(LC_ALL, "en_US.utf8");
     if (steam::restart_app_if_necessary()) {
         return EXIT_FAILURE;
     }

@@ -92,9 +92,6 @@
     <ClCompile Include="fonts.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="text.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_interactions.cpp">
       <Filter>game\ecs\game\mechanics</Filter>
     </ClCompile>
@@ -269,6 +266,12 @@
     <ClCompile Include="ecs_game.cpp">
       <Filter>game\ecs\game</Filter>
     </ClCompile>
+    <ClCompile Include="text.cpp">
+      <Filter>graphics\text</Filter>
+    </ClCompile>
+    <ClCompile Include="text_unicode.cpp">
+      <Filter>graphics\text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -359,9 +362,6 @@
       <Filter>application\renderdoc</Filter>
     </ClInclude>
     <ClInclude Include="fonts.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="text.h">
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="pool.h">
@@ -532,6 +532,12 @@
     <ClInclude Include="ecs_game.h">
       <Filter>game\ecs\game</Filter>
     </ClInclude>
+    <ClInclude Include="text.h">
+      <Filter>graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="text_unicode.h">
+      <Filter>graphics\text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -674,6 +680,9 @@
     </Filter>
     <Filter Include="game\ecs\engine\tiled">
       <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\text">
+      <UniqueIdentifier>{a0f6f43e-e5a9-491e-8c52-e15daed680ba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

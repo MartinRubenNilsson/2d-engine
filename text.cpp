@@ -1,15 +1,12 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "text.h"
+#include "text_unicode.h"
 #include "fonts.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
 
 namespace text {
-    std::u32string to_u32(std::string_view string) {
-        return { string.begin(), string.end() };
-    }
-
     std::vector<Text> _texts;
 
     bool operator<(const Text& a, const Text& b) {
@@ -91,7 +88,8 @@ namespace text {
             Vec2f pos; // Aka "pen" or "glyph origin" - current position to draw the glyph at.
             fonts::GlyphId prev_glyph{};
 
-            for (char32_t codepoint : text.string) {
+            std::u8string_view string = text.string;
+            while (char32_t codepoint = to_c32(string)) {
                 if (codepoint == U'\r')
                     continue; // Skip carriage returns to avoid graphical issues
 

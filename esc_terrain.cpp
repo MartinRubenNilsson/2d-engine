@@ -72,7 +72,8 @@ namespace ecs {
 				const unsigned int id = _terrain_tile_coord_to_id(coord);
 				const TerrainType type = _terrain[id];
 				if (type == TerrainType::None) continue;
-				text.string = text::to_u32(std::to_string((int)type));
+				std::string string = std::to_string((int)type);
+				text.string.assign(string.begin(), string.end());
 				text.position = coord * _terrain_tile_size;
 				//text.position.x += 2.5f;
 				//text.position.y += 5.5f;
