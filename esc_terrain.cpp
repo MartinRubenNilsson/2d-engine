@@ -37,7 +37,13 @@ namespace ecs {
 		_terrain_size = get_size_in_tiles(map) * 2u;
 		_terrain.resize(_terrain_size.x * _terrain_size.y);
 
+		const uint8_t object_layer = get_object_layer();
+
 		for (auto [entity, tile, coord] : _registry.view<TileId, TileCoord>().each()) {
+			// PITFALL: We don't want tiles on layers *above* where entities can walk to override
+			// those on lower layers. Hence, let's skip all layers above the object layer.
+			if (coord.layer > object_layer)
+				continue;
 			// This will be the terrain coord of the top left corner.
 			const Vec2u top_left_corner_coord = { 2u * coord.x, 2u * coord.y };
 			const unsigned int top_left_corner_id = _terrain_tile_coord_to_id(top_left_corner_coord);
