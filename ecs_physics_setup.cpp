@@ -150,6 +150,9 @@ namespace ecs {
 
 			b2ShapeDef shape_def = b2DefaultShapeDef();
 			shape_def.filter = get_physics_filter(tag);
+			// PITFALL: Both the sensor and the other shape need to enableSensorEvents
+			// in order for either of them to recieve the event.
+			shape_def.enableSensorEvents = true; 
 
 			if (type == ObjectType::Tile) {
 
@@ -179,7 +182,6 @@ namespace ecs {
 			b2BodyId body = emplace_body(entity, body_def);
 
 			shape_def.isSensor = true;
-			shape_def.enableSensorEvents = true;
 
 			_create_shapes(body, shape_def, object, false);
 		}

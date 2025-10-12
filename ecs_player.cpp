@@ -286,6 +286,9 @@ namespace ecs {
 			Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
 			audio::set_event_parameter_label(ev, "terrain", terrain);
 		}
+
+		// Update postprocessing. TODO: this should be in another place
+		postprocessing::set_darkness_center(pos);
 	}
 
 	void _player_handle_normal_window_event(entt::entity entity, const window::Event& ev) {
@@ -491,9 +494,6 @@ namespace ecs {
 			player.hurt_timer.update(dt);
 
 #if 0
-
-			// UPDATE POST-PROCESSING
-			postprocessing::set_darkness_center(position);
 
 			const Direction dir = player.dir;
 
