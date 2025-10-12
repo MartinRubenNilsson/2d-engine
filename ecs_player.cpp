@@ -59,12 +59,39 @@ namespace ecs {
 		TILE_ID_PLAYER_DEAD_NE = 183,
 	};
 
-	constexpr float _PLAYER_WALK_SPEED = 60.f;
-	constexpr float _PLAYER_RUN_SPEED = 136.f;
-	constexpr float _PLAYER_STEALTH_SPEED = 36.f;
 	constexpr float _PLAYER_ARROW_SPEED = 160.f;
 
+	enum class PlayerMotion {
+		Motionless,
+		Walking,
+		Running,
+		Sneaking,
+		//Pushing //TODO
+	};
+
+	float get_desired_speed(PlayerMotion motion) {
+		switch (motion) {
+			default: return 0.f;
+			case PlayerMotion::Walking: return 60.f;
+			case PlayerMotion::Running: return 136.f;
+			case PlayerMotion::Sneaking: return 36.f;
+		}
+	}
+
 	struct Player {
+		bool holding_up_key = false;
+		bool holding_down_key = false;
+		bool holding_left_key = false;
+		bool holding_right_key = false;
+		bool holding_shift_key = false;
+		bool holding_control_key = false;
+
+		float input_x = 0.f; // one of -1, 0, 1
+		float input_y = 0.f; // one of -1, 0, 1
+		Vec2f input_dir = Vec2f::ZERO; // either zero or an unit vector
+
+		PlayerMotion motion = PlayerMotion::Motionless;
+
 		Timer hurt_timer = { 1.f };
 		int max_health = 3;
 		int health = 3;
@@ -146,70 +173,135 @@ namespace ecs {
 	};
 
 	void _player_start_normal(entt::entity entity) {
-		TileId& tile = _registry.get<TileId>(entity);
-		tile.flipped_horizontally = false;
-		TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		anim.set_progress(0.f); // Reset animation
-		anim.set_loop(true);
 	}
 
 	void _player_update_normal(entt::entity entity, float dt) {
+
+		Player& player = _registry.get<Player>(entity);
+		b2BodyId& body = _registry.get<b2BodyId>(entity);
+		Direction& dir = _registry.get<Direction>(entity);
 		TileId& tile = _registry.get<TileId>(entity);
-		const b2BodyId body = _registry.get<b2BodyId>(entity);
-		const Direction dir = _registry.get<Direction>(entity);
+		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 
 		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
 		const Vec2f vel = b2Body_GetLinearVelocity(body);
 		const float speed = length(vel);
 
-		// The tileset only has right-facing tiles, so we need to flip if we're facing left.
-		switch (dir) {
-			case Direction::E: tile.flipped_horizontally = false; break;
-			case Direction::W: tile.flipped_horizontally = true; break;
+		// Update direction.
+		if (player.input_dir != Vec2f::ZERO) {
+			dir = to_cardinal(player.input_dir);
 		}
 
-		if (speed >= _PLAYER_RUN_SPEED) {
-			switch (dir) {
-				case Direction::W: [[fallthrough]];
-				case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
-				case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
-				case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
-			}
-		} else if (speed >= _PLAYER_WALK_SPEED) {
-			switch (dir) {
-				case Direction::W: [[fallthrough]];
-				case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
-				case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
-				case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
-			}
-		} else {
-			switch (dir) {
-				case Direction::W: [[fallthrough]];
-				case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
-				case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
-				case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
+		// Update motion.
+		player.motion = PlayerMotion::Motionless;
+		if (player.input_dir != Vec2f::ZERO) {
+			if (player.holding_control_key) {
+				player.motion = PlayerMotion::Sneaking;
+			} else if (player.holding_shift_key) {
+				player.motion = PlayerMotion::Running;
+			} else {
+				player.motion = PlayerMotion::Walking;
 			}
 		}
+
+		// Set desired velocity.
+		const float desired_speed = get_desired_speed(player.motion);
+		const Vec2f desired_vel = desired_speed * player.input_dir;
+		b2Body_SetLinearVelocity(body, desired_vel);
 		
-		// Flip tile when facing up or down and animation loops to get a proper walk cycle.
-		TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
+		// Update tile depending on motion. Note that the tileset only has right-facing tiles
+		// and that the north/south (up/down) animations typically only have half a walk cycle.
+		// This means we sometimes have to flip the tile horizontally to cover all cases.
+		switch (player.motion) {
+			case PlayerMotion::Motionless: {
+				switch (dir) {
+					case Direction::W: [[fallthrough]];
+					case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
+					case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
+					case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
+				}
+			} break;
+			case PlayerMotion::Walking: {
+				switch (dir) {
+					case Direction::W: [[fallthrough]];
+					case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
+					case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
+					case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
+				}
+			} break;
+			case PlayerMotion::Running: {
+				switch (dir) {
+					case Direction::W: [[fallthrough]];
+					case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
+					case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
+					case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
+				}
+			} break;
+			case PlayerMotion::Sneaking: {
+				// TODO
+			} break;
+		}
+
+		// Update tile flip flags.
+		if (dir == Direction::E) {
+			tile.flipped_horizontally = false; // Never flip if we're facing east (right).
+		} else if (dir == Direction::W) {
+			tile.flipped_horizontally = true;  // Always flip if we're facing west (left).
+		} else if (anim.looped()) {
+			// Flip tile when facing north/south (up/down) and animation loops to get proper walk cycles.
 			tile.flipped_horizontally = !tile.flipped_horizontally;
+		}
+
+		// Update animation.
+		if (player.motion == PlayerMotion::Motionless) {
+			anim.set_progress(0.f);
+			anim.set_loop(false);
+		} else {
+			// PITFALL: Make sure to not reset the progress while moving so the animation
+			// "remembers" where it was in the walk cycle even if we change motion halfway.
+			anim.set_loop(true);
 		}
 	}
 
 	void _player_handle_normal_window_event(entt::entity entity, const window::Event& ev) {
 
 		Player& player = _registry.get<Player>(entity);
-		const b2BodyId body = _registry.get<b2BodyId>(entity);
-		Direction& dir = _registry.get<Direction>(entity);
+		b2BodyId& body = _registry.get<b2BodyId>(entity);
 
+		// Update held keys.
+		const bool key_press = (ev.type == window::EventType::KeyPress); // Otherwise release
+		switch (ev.key.code) {
+			case window::Key::Up:
+				player.holding_up_key = key_press;
+				break;
+			case window::Key::Down:
+				player.holding_down_key = key_press;
+				break;
+			case window::Key::Left:
+				player.holding_left_key = key_press;
+				break;
+			case window::Key::Right:
+				player.holding_right_key = key_press;
+				break;
+			case window::Key::LShift:
+				player.holding_shift_key = key_press;
+				break;
+			case window::Key::LControl:
+				player.holding_control_key = key_press;
+				break;
+		}
+
+		// Update inputs.
+		player.input_x = (float)player.holding_right_key - (float)player.holding_left_key;
+		player.input_y = (float)player.holding_down_key - (float)player.holding_up_key;
+		player.input_dir = normalize({ player.input_x, player.input_y });
+		
 		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
 
 		// Should interact?
 		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::C) {
 			// Interact with everything one tile in front of the player.
-			const Vec2f center = pos + to_unit(dir) * 16.f;
+			const Vec2f center = pos + player.input_dir * 16.f;
 			const Vec2f min = center - Vec2f(6.f, 6.f);
 			const Vec2f max = center + Vec2f(6.f, 6.f);
 			interact_with_all_in_box(min, max);
@@ -220,10 +312,15 @@ namespace ecs {
 			// TODO: swing sword
 		}
 
+		// Should shoot bow?
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X) {
+			// TODO: shoot bow
+		}
+
 		// Should place bomb?
 		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Z && player.bombs > 0) {
 			// Place a bomb one tile in front of the player.
-			const Vec2f bomb_pos = pos + to_unit(dir) * 16.f;
+			const Vec2f bomb_pos = pos + player.input_dir * 16.f;
 			if (create_bomb_at(bomb_pos) != entt::null) {
 				player.bombs--;
 				audio::create_event({ .path = "event:/player/place_bomb" });
@@ -231,82 +328,6 @@ namespace ecs {
 				audio::create_event({ .path = "event:/player/error" });
 			}
 		}
-
-		// Should shoot bow?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X) {
-			// TODO: shoot bow
-		}
-#if 0
-		if (ev.type == window::EventType::KeyPress) {
-			switch (ev.key.code) {
-				case window::Key::Left:
-					_input_flags_to_enable |= INPUT_W;
-					break;
-				case window::Key::Right:
-					_input_flags_to_enable |= INPUT_E;
-					break;
-				case window::Key::Up:
-					_input_flags_to_enable |= INPUT_N;
-					break;
-				case window::Key::Down:
-					_input_flags_to_enable |= INPUT_S;
-					break;
-				case window::Key::LShift:
-					_input_flags_to_enable |= INPUT_RUN;
-					break;
-				case window::Key::LControl:
-					_input_flags_to_enable |= INPUT_STEALTH;
-					break;
-			}
-		} else if (ev.type == window::EventType::KeyRelease) {
-			switch (ev.key.code) {
-				case window::Key::Left:
-					_input_flags_to_disable |= INPUT_W;
-					break;
-				case window::Key::Right:
-					_input_flags_to_disable |= INPUT_E;
-					break;
-				case window::Key::Up:
-					_input_flags_to_disable |= INPUT_N;
-					break;
-				case window::Key::Down:
-					_input_flags_to_disable |= INPUT_S;
-					break;
-				case window::Key::LShift:
-					_input_flags_to_disable |= INPUT_RUN;
-					break;
-				case window::Key::LControl:
-					_input_flags_to_disable |= INPUT_STEALTH;
-					break;
-			}
-		}
-#endif
-
-
-#if 0
-		if (player.input_flags & INPUT_W)
-			new_move_dir.x--;
-		if (player.input_flags & INPUT_E)
-			new_move_dir.x++;
-		if (player.input_flags & INPUT_N)
-			new_move_dir.y--;
-		if (player.input_flags & INPUT_S)
-			new_move_dir.y++;
-
-		if (new_move_dir != Vec2f::ZERO) {
-			player.dir = to_cardinal(new_move_dir);
-			new_move_dir = normalize(new_move_dir);
-			if (player.input_flags & INPUT_STEALTH) {
-				new_move_speed = _PLAYER_STEALTH_SPEED;
-				//} else if (player.touching_pushable_block) {
-				//	new_move_speed = _PLAYER_WALK_SPEED;
-			} else if (player.input_flags & INPUT_RUN) {
-				new_move_speed = _PLAYER_RUN_SPEED;
-			} else {
-				new_move_speed = _PLAYER_WALK_SPEED;
-			}
-		}
-#endif
 	}
 
 	void _player_handle_normal(entt::entity entity, const StateEvent& ev) {
