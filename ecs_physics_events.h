@@ -1,27 +1,28 @@
 #pragma once
 
 namespace ecs {
-	enum class PhysicsEventType {
-		SensorBeginTouch,
-		SensorEndTouch,
-		ContactBeginTouch,
-		ContactEndTouch,
+	enum class TouchEventType {
+		SensorBegin,
+		SensorEnd,
+		ContactBegin,
+		ContactEnd,
 	};
 
-	struct PhysicsEvent {
-		PhysicsEventType type = PhysicsEventType::SensorBeginTouch;
+	struct TouchEvent {
+		TouchEventType type = TouchEventType::SensorBegin;
 		b2ShapeId shape = b2_nullShapeId;
-		b2ShapeId other_shape = b2_nullShapeId; // WARNING: may be null if for EndTouch events!
+		b2ShapeId other_shape = b2_nullShapeId; // WARNING: may be invalid (but non-null) for End events!
 		b2BodyId body = b2_nullBodyId;
-		b2BodyId other_body = b2_nullBodyId; // WARNING: may be null if for EndTouch events!
+		b2BodyId other_body = b2_nullBodyId; // WARNING: may be null for End events!
 		entt::entity entity = entt::null;
-		entt::entity other_entity = entt::null; // WARNING: may be null if for EndTouch events!
+		entt::entity other_entity = entt::null; // WARNING: may be null for End events!
+		b2Manifold manifold{}; // only nonzero for ContactBegin events
 	};
 
-	using PhysicsEventHandler = void(*)(const PhysicsEvent& ev);
+	using TouchEventHandler = void(*)(const TouchEvent& ev);
 
-	void set_physics_event_handler(entt::entity entity, PhysicsEventHandler handler);
-	PhysicsEventHandler get_physics_event_handler(entt::entity entity);
+	void set_touch_event_handler(entt::entity entity, TouchEventHandler handler);
+	TouchEventHandler get_touch_event_handler(entt::entity entity);
 
 	struct BodyMoveEvent {
 		b2BodyId body = b2_nullBodyId;

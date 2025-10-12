@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #ifdef _DEBUG_PHYSICS
 #include "shapes.h"
+#include "ecs_physics.h"
 
 namespace ecs {
 	Color _to_color(b2HexColor hex_color) {

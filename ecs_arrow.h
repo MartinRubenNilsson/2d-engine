@@ -2,7 +2,7 @@
 
 namespace ecs {
 
-    struct PhysicsEvent;
+    struct TouchEvent;
 
     struct Arrow {
         int damage = 0;

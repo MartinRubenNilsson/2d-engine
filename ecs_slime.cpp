@@ -19,8 +19,8 @@ namespace ecs {
         return true;
     }
 
-    void _handle_physics_for_slime(const PhysicsEvent& ev) {
-        if (ev.type == PhysicsEventType::ContactBeginTouch && get_tag(ev.other_entity) == Tag::Player) {
+    void _handle_physics_for_slime(const TouchEvent& ev) {
+        if (ev.type == TouchEventType::ContactBegin && get_tag(ev.other_entity) == Tag::Player) {
             deal_damage(ev.other_entity, {
                 .type = DamageType::Touch,
                 .amount = 1,
@@ -49,7 +49,7 @@ namespace ecs {
     void setup_slimes() {
         for (auto [entity, object] : _registry.view<Type<Tag::Slime>, ObjectId>().each()) {
             _registry.emplace<Direction>(entity, Direction::S); // TODO: use this for something useful!
-            set_physics_event_handler(entity, _handle_physics_for_slime);
+            set_touch_event_handler(entity, _handle_physics_for_slime);
             set_damage_event_handler(entity, _handle_damage_for_slime);
             _do_slime_task(entity);
         }

@@ -10,6 +10,20 @@
 #endif
 
 namespace ecs {
+	void swap(b2Manifold& manifold) {
+		manifold.normal = -manifold.normal;
+		for (int i = 0; i < manifold.pointCount; ++i) {
+			b2ManifoldPoint& point = manifold.points[i];
+			std::swap(point.anchorA, point.anchorB);
+			// TODO: should we invert or swap anything else?
+		}
+	}
+
+	void swap(b2ContactData& contact) {
+		std::swap(contact.shapeIdA, contact.shapeIdB);
+		swap(contact.manifold);
+	}
+
 	void _on_destroy_b2BodyId(entt::registry& registry, entt::entity entity) {
 		b2DestroyBody(registry.get<b2BodyId>(entity));
 	}
@@ -18,7 +32,7 @@ namespace ecs {
 
 	void _clone_b2BodyId(entt::entity clone, const void* component) {
 		b2BodyId body = *(b2BodyId*)component;
-		b2BodyDef body_def = get_body_def(body);
+		b2BodyDef body_def = get_def(body);
 		b2BodyId body_clone = emplace_body(clone, body_def);
 #if 0
 		for (const b2Fixture* fixture = b2Body_GetFixtureList(); fixture; fixture = fixture->GetNext()) {
@@ -90,22 +104,7 @@ namespace ecs {
 		return (entt::entity)(uintptr_t)user_data;
 	}
 
-	b2ShapeDef get_shape_def(b2ShapeId shape) {
-		b2ShapeDef def = b2DefaultShapeDef();
-#if 0
-		def.shape = fixture->GetShape();
-		def.userData = fixture->GetUserData();
-		def.friction = fixture->GetFriction();
-		def.restitution = fixture->GetRestitution();
-		def.restitutionThreshold = fixture->GetRestitutionThreshold();
-		def.density = fixture->GetDensity();
-		def.isSensor = fixture->IsSensor();
-		def.filter = fixture->GetFilterData();
-#endif
-		return def;
-	}
-
-	b2BodyDef get_body_def(b2BodyId body) {
+	b2BodyDef get_def(b2BodyId body) {
 		b2BodyDef def = b2DefaultBodyDef();
 		def.type = b2Body_GetType(body);
 		def.position = b2Body_GetPosition(body);
@@ -127,18 +126,45 @@ namespace ecs {
 		return def;
 	}
 
-	std::span<const b2ShapeId> _get_shapes(b2BodyId body) {
-		constexpr size_t CAPACITY = 16;
-		b2ShapeId shapes[CAPACITY];
-		const size_t num_shapes = b2Body_GetShapeCount(body);
-		assert(num_shapes < CAPACITY);
-		b2Body_GetShapes(body, shapes, CAPACITY);
-		return { shapes, num_shapes };
+	std::span<const b2ShapeId> get_shapes(b2BodyId body) {
+		constexpr size_t CAPACITY = 32;
+		static b2ShapeId shapes[CAPACITY];
+		size_t count = b2Body_GetShapeCount(body);
+		assert(count < CAPACITY);
+		count = b2Body_GetShapes(body, shapes, CAPACITY);
+		return { shapes, count };
+	}
+
+	// This helper function gives no guarantees on whether shapeIdA or shapeIdB is
+	// the shape that belongs to the body. (This is just how the Box2D API works.)
+	std::span<b2ContactData> _get_unordered_contacts(b2BodyId body) {
+		constexpr size_t CAPACITY = 32;
+		static b2ContactData contacts[CAPACITY];
+		size_t count = b2Body_GetContactCapacity(body);
+		assert(count < CAPACITY);
+		count = b2Body_GetContactData(body, contacts, CAPACITY);
+		return { contacts, count };
+	}
+
+	std::span<const b2ContactData> get_contacts(b2BodyId body) {
+		const std::span<b2ContactData> contacts = _get_unordered_contacts(body);
+		if (contacts.empty()) return {};
+		// For each contact, if shapeIdB belongs to the body, swap the contact.
+		const std::span<const b2ShapeId> shapes = get_shapes(body);
+		for (b2ContactData& contact : contacts) {
+			for (const b2ShapeId& shape : shapes) {
+				if (B2_ID_EQUALS(contact.shapeIdB, shape)) {
+					swap(contact);
+					break; // Move on to the next contact.
+				}
+			}
+		}
+		return contacts;
 	}
 
 	uint32_t get_category_bits(b2BodyId body) {
 		uint32_t category_bits = 0;
-		for (b2ShapeId shape : _get_shapes(body)) {
+		for (b2ShapeId shape : get_shapes(body)) {
 			category_bits |= b2Shape_GetFilter(shape).categoryBits;
 		}
 		return category_bits;

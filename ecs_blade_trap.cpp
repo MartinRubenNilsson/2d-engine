@@ -120,8 +120,8 @@ namespace ecs {
 			.position = trap.start_position });
 	}
 
-	void _handle_physics_for_blade_trap(const PhysicsEvent& ev) {
-		if (ev.type == PhysicsEventType::ContactBeginTouch) {
+	void _handle_physics_for_blade_trap(const TouchEvent& ev) {
+		if (ev.type == TouchEventType::ContactBegin) {
 			if (get_current_state(ev.entity) == "extending") {
 				transition_to_state(ev.entity, "impacting");
 			}
@@ -156,7 +156,7 @@ namespace ecs {
 				circle.radius = 6.f;
 				b2CreateCircleShape(body, &shape_def, &circle);
 			}
-			set_physics_event_handler(entity, _handle_physics_for_blade_trap);
+			set_touch_event_handler(entity, _handle_physics_for_blade_trap);
 
 			// Setup state machine.
 			{

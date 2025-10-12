@@ -139,7 +139,7 @@ namespace ecs {
 		destroy_later(pickup_entity);
 	}
 
-	bool _handle_damage_for_player(entt::entity entity, const DamageEvent& ev) {
+	bool _player_handle_damage(entt::entity entity, const DamageEvent& ev) {
 		if (ev.amount <= 0) return false;
 		Player* player = _registry.try_get<Player>(entity);
 		if (!player) return false;
@@ -160,9 +160,9 @@ namespace ecs {
 		return true;
 	}
 
-	void _handle_physics_for_player(const PhysicsEvent& ev) {
-		const Tag other_tag = get_tag(ev.other_entity);
-		if (ev.type == PhysicsEventType::SensorBeginTouch) {
+	void _player_handle_touch(const TouchEvent& ev) {
+		if (ev.type == TouchEventType::SensorBegin) {
+			const Tag other_tag = get_tag(ev.other_entity);
 			if (other_tag == Tag::Pickup) {
 				_player_begin_touch_pickup(ev.entity, ev.other_entity);
 			}
@@ -191,6 +191,19 @@ namespace ecs {
 		// Update direction.
 		if (player.input_dir != Vec2f::ZERO) {
 			dir = to_cardinal(player.input_dir);
+		}
+
+		// Figure out if we're touching anything in the direction of motion.
+		for (const b2ContactData& contact : get_contacts(body)) {
+#if 0
+			static int i = 0;
+			console::log(
+				std::to_string(++i) + " " +
+				std::to_string(contact.shapeIdA.index1) + " " +
+				std::to_string(contact.shapeIdB.index1) + " (" +
+				std::to_string(contact.manifold.normal.x) + "," +
+				std::to_string(contact.manifold.normal.y) + ")");
+#endif
 		}
 
 		// Update motion.
@@ -411,8 +424,8 @@ namespace ecs {
 			emplace_tile_animation(entity);
 
 			set_audio_listener(entity);
-			set_physics_event_handler(entity, _handle_physics_for_player);
-			set_damage_event_handler(entity, _handle_damage_for_player);
+			set_touch_event_handler(entity, _player_handle_touch);
+			set_damage_event_handler(entity, _player_handle_damage);
 
 			_emplace_player_state_machine(entity);
 
@@ -597,10 +610,10 @@ namespace ecs {
 			ImGui::Text("Rupees: %d", player.rupees);
 
 			if (ImGui::Button("Apply 1 Damage")) {
-				_handle_damage_for_player(entity, { DamageType::Default, 1 });
+				_player_handle_damage(entity, { DamageType::Default, 1 });
 			}
 			if (ImGui::Button("Kill")) {
-				_handle_damage_for_player(entity, { DamageType::Default, 999 });
+				_player_handle_damage(entity, { DamageType::Default, 999 });
 			}
 
 			if (ImGui::Button("Give 5 Arrows")) {

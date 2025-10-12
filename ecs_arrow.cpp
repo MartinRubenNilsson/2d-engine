@@ -14,8 +14,8 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	void _handle_physics_for_arrow(const PhysicsEvent& ev) {
-		if (ev.type == PhysicsEventType::ContactBeginTouch) {
+	void _handle_physics_for_arrow(const TouchEvent& ev) {
+		if (ev.type == TouchEventType::ContactBegin) {
 			// Destroy the arrow and apply damage to the other entity
 			destroy_later(ev.entity);
 			deal_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
@@ -58,7 +58,7 @@ namespace ecs {
 			circle.radius = 6.f;
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
-		set_physics_event_handler(entity, _handle_physics_for_arrow);
+		set_touch_event_handler(entity, _handle_physics_for_arrow);
 		audio::create_event({ .path = "event:/snd_fire_arrow" });
 		return entity;
 	}
