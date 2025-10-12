@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
         }
 
 #ifdef _DEBUG
-        ecs::debug_draw();
+        ecs::debug();
 
 		// RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 

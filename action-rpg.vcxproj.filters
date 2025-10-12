@@ -296,6 +296,9 @@
     <ClCompile Include="ecs_player_slashing.cpp">
       <Filter>game\ecs\game\players\states</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_debugging.cpp">
+      <Filter>game\ecs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -582,6 +585,9 @@
     </ClInclude>
     <ClInclude Include="rect2.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_debugging.h">
+      <Filter>game\ecs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

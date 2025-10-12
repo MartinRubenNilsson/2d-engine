@@ -138,24 +138,4 @@ namespace ecs {
 		min = round(min); // snap to pixel
 		max = round(max); // snap to pixel
 	}
-
-	bool debug_physics = false;
-	bool debug_terrain = false;
-	bool debug_states = false;
-	bool debug_tasks = false;
-
-	void debug_draw() {
-		if (debug_physics) {
-			debug_draw_physics();
-		}
-		if (debug_terrain) {
-			debug_draw_terrain();
-		}
-		if (debug_states) {
-			debug_draw_state_machines();
-		}
-		if (debug_tasks) {
-			debug_draw_tasks();
-		}
-	}
 }

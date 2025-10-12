@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "console_commands.h"
 #include "ecs.h"
+#include "ecs_debugging.h"
 
 namespace console {
 	void _register_ecs_commands() {
