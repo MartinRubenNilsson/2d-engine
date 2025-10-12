@@ -24,7 +24,8 @@ namespace ecs {
 		const Vec2f& camera_center,
 		const Vec2f& camera_size,
 		const Vec2f& confines_min,
-		const Vec2f& confines_max) {
+		const Vec2f& confines_max
+	) {
 		const Vec2f center_min = confines_min + camera_size / 2.f;
 		const Vec2f center_max = confines_max - camera_size / 2.f;
 		Vec2f confined_center = camera_center;
@@ -42,13 +43,13 @@ namespace ecs {
 	}
 
 	void setup_cameras(MapId map) {
-		const Vec2f map_bottom_right = get_size_in_pixels(map);
+		const Vec2f map_size_in_pixels = get_size_in_pixels(map);
 
 		for (auto [entity, object] : _registry.view<Type<Tag::Camera>, ObjectId>().each()) {
 			Camera& camera = _registry.emplace<Camera>(entity);
-			camera.center = get_position(object);
-			camera.confines_min = { 0.f, 0.f };
-			camera.confines_max = map_bottom_right;
+			camera.center = get_center(object);
+			camera.confines_min = Vec2f::ZERO;
+			camera.confines_max = map_size_in_pixels;
 			camera.entity_to_follow = get_entity(object, "follow");
 		}
 	}

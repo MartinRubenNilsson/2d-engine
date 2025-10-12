@@ -332,6 +332,17 @@ namespace ecs {
 		return p;
 	}
 
+	Vec2f get_center(ObjectId obj) {
+		const tiled::Object& o = _get_object(obj);
+		Vec2f c = { o.x, o.y };
+		if (o.type == tiled::ObjectType::Tile) {
+			c.y -= o.height;
+		}
+		c.x += o.width * 0.5f;
+		c.y += o.height * 0.5f;
+		return c;
+	}
+
 	Vec2f get_size(ObjectId obj) {
 		const tiled::Object& o = _get_object(obj);
 		return { o.width, o.height };

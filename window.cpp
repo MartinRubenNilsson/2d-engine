@@ -14,7 +14,7 @@ namespace window {
 
 	void _error_callback(int error, const char* description) {
 		__debugbreak();
-		console::log_error("GLFW error: "s + description);
+		console::log_error("GLFW error: " + std::string(description));
 	}
 
 	void _window_close_callback(GLFWwindow* window) {
@@ -121,15 +121,6 @@ namespace window {
 		glfwSetMouseButtonCallback(_window, _mouse_button_callback);
 		glfwSetCursorPosCallback(_window, _cursor_pos_callback);
 
-		// Spoof resize events to ensure that other systems are aware of the window/framebuffer size.
-		{
-			int width, height;
-			glfwGetWindowSize(_window, &width, &height);
-			_window_size_callback(_window, width, height);
-			glfwGetFramebufferSize(_window, &width, &height);
-			_framebuffer_size_callback(_window, width, height);
-		}
-
 		// CREATE STANDARD CURSORS
 
 		_cursors[(int)CursorShape::Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
@@ -202,6 +193,15 @@ namespace window {
 
 	void update_events() {
 		clear_events();
+		static bool first_time = true;
+		if (first_time) { // HACK: Spoof resize events to ensure that other systems are aware of the window/framebuffer size.
+			int width, height;
+			glfwGetWindowSize(_window, &width, &height);
+			_window_size_callback(_window, width, height);
+			glfwGetFramebufferSize(_window, &width, &height);
+			_framebuffer_size_callback(_window, width, height);
+			first_time = false;
+		}
 		glfwPollEvents();
 	}
 
@@ -313,18 +313,18 @@ namespace window {
 		glfwSetCursor(_window, _cursors[(int)shape]);
 	}
 
-	void set_clipboard_string(const std::string& string) {
-		glfwSetClipboardString(_window, string.c_str());
+	void set_clipboard_string(const std::u8string& string) {
+		glfwSetClipboardString(nullptr, (const char*)string.c_str());
 	}
 
-	std::string get_clipboard_string() {
-		const char* string = glfwGetClipboardString(_window);
-		return string ? string : "";
+	std::u8string_view get_clipboard_string() {
+		const char* string = glfwGetClipboardString(nullptr);
+		return string ? (const char8_t*)string : u8"";
 	}
 
 #ifdef GRAPHICS_API_OPENGL
 	void make_opengl_context_current() {
-		glfwMakeContextCurrent(window::_window);
+		glfwMakeContextCurrent(_window);
 	}
 
 	GLADloadproc get_glad_load_proc() {
@@ -333,7 +333,7 @@ namespace window {
 
 	void set_swap_chain_sync_interval(int sync_interval) {
 		// Calling glfwSwapInverval() repetitively made the app lag,
-		// so I've added a check here to ensure it doesn't happen again.
+		// so I've added a check here to ensure we only set it if necessary.
 		static int last_sync_interval = INT_MAX;
 		if (sync_interval == last_sync_interval) return;
 		last_sync_interval = sync_interval;

@@ -51,6 +51,6 @@ namespace window {
 	};
 
 	void set_cursor_shape(CursorShape shape);
-	void set_clipboard_string(const std::string& string);
-	std::string get_clipboard_string();
+	void set_clipboard_string(const std::u8string& string);
+	std::u8string_view get_clipboard_string();
 }

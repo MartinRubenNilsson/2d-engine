@@ -91,6 +91,7 @@ namespace ecs {
 	// PITFALL: For tile objects this is the bottom left!
 	Vec2f get_position(ObjectId obj);
 	Vec2f get_top_left(ObjectId obj); // in world space
+	Vec2f get_center(ObjectId obj);
 	Vec2f get_size(ObjectId obj);
 	std::span<const Vec2f> get_points(ObjectId obj);
 	std::string_view get_string(ObjectId obj, std::string_view name);

@@ -31,10 +31,11 @@ namespace ui
 	}
 
 	void RmlUiSystemInterface::SetClipboardText(const Rml::String& text) {
-		window::set_clipboard_string(text);
+		//window::set_clipboard_string({ text.begin(), text.end() });
 	}
 
 	void RmlUiSystemInterface::GetClipboardText(Rml::String& text) {
-		text = window::get_clipboard_string();
+		//std::u8string_view string = window::get_clipboard_string();
+		//text.assign()
 	}
 }
