@@ -8,6 +8,10 @@
 namespace ecs {
 	extern entt::registry _registry;
 
+	TileId TileAnimation::get_frame() const {
+		return _frame;
+	}
+
 	void TileAnimation::set_progress(float progress) {
 		_progress = std::clamp(progress, 0.f, 1.f);
 	}
@@ -39,6 +43,10 @@ namespace ecs {
 
 	bool TileAnimation::looped() const {
 		return _looped;
+	}
+
+	bool TileAnimation::frame_changed() const {
+		return _frame_changed;
 	}
 
 	TileAnimation& emplace_tile_animation(entt::entity entity) {

@@ -88,11 +88,6 @@
    <frame tileid="135" duration="460"/>
   </animation>
  </tile>
- <tile id="135">
-  <properties>
-   <property name="shoot" value=""/>
-  </properties>
- </tile>
  <tile id="148">
   <animation>
    <frame tileid="148" duration="180"/>
@@ -107,11 +102,6 @@
    <frame tileid="151" duration="460"/>
   </animation>
  </tile>
- <tile id="151">
-  <properties>
-   <property name="shoot" value=""/>
-  </properties>
- </tile>
  <tile id="164">
   <animation>
    <frame tileid="164" duration="180"/>
@@ -125,11 +115,6 @@
    <frame tileid="166" duration="500"/>
    <frame tileid="167" duration="460"/>
   </animation>
- </tile>
- <tile id="167">
-  <properties>
-   <property name="shoot" value=""/>
-  </properties>
  </tile>
  <tile id="178">
   <animation>

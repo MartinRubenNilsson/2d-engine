@@ -34,32 +34,33 @@
 namespace ecs {
 
 	// player.tsx
-	enum TILE_ID_PLAYER {
-		TILE_ID_PLAYER_IDLE_S = 0,
-		TILE_ID_PLAYER_IDLE_N = 16,
-		TILE_ID_PLAYER_IDLE_E = 32,
-		TILE_ID_PLAYER_PUSH_S = 8,
-		TILE_ID_PLAYER_PUSH_N = 24,
-		TILE_ID_PLAYER_PUSH_E = 40,
-		TILE_ID_PLAYER_WALK_S = 48,
-		TILE_ID_PLAYER_WALK_N = 52,
-		TILE_ID_PLAYER_WALK_E = 64,
-		TILE_ID_PLAYER_RUN_S = 51,
-		TILE_ID_PLAYER_RUN_N = 55,
-		TILE_ID_PLAYER_RUN_E = 70,
-		TILE_ID_PLAYER_FOREHAND_STRIKE_S = 132,
-		TILE_ID_PLAYER_FOREHAND_STRIKE_N = 148,
-		TILE_ID_PLAYER_FOREHAND_STRIKE_E = 164,
-		TILE_ID_PLAYER_BOW_SHOT_S = 133,
-		TILE_ID_PLAYER_BOW_SHOT_N = 149,
-		TILE_ID_PLAYER_BOW_SHOT_E = 165,
-		TILE_ID_PLAYER_DYING_SE = 178,
-		TILE_ID_PLAYER_DYING_NE = 181,
-		TILE_ID_PLAYER_DEAD_SE = 180,
-		TILE_ID_PLAYER_DEAD_NE = 183,
+	enum PLAYER_TILE_ID {
+		PLAYER_TILE_ID_IDLE_S = 0,
+		PLAYER_TILE_ID_IDLE_N = 16,
+		PLAYER_TILE_ID_IDLE_E = 32,
+		PLAYER_TILE_ID_PUSH_S = 8,
+		PLAYER_TILE_ID_PUSH_N = 24,
+		PLAYER_TILE_ID_PUSH_E = 40,
+		PLAYER_TILE_ID_WALK_S = 48,
+		PLAYER_TILE_ID_WALK_N = 52,
+		PLAYER_TILE_ID_WALK_E = 64,
+		PLAYER_TILE_ID_RUN_S = 51,
+		PLAYER_TILE_ID_RUN_N = 55,
+		PLAYER_TILE_ID_RUN_E = 70,
+		PLAYER_TILE_ID_FOREHAND_STRIKE_S = 132,
+		PLAYER_TILE_ID_FOREHAND_STRIKE_N = 148,
+		PLAYER_TILE_ID_FOREHAND_STRIKE_E = 164,
+		PLAYER_TILE_ID_BOW_DRAW_S = 133,
+		PLAYER_TILE_ID_BOW_DRAW_N = 149,
+		PLAYER_TILE_ID_BOW_DRAW_E = 165,
+		PLAYER_TILE_ID_BOW_RELEASE_S = 135,
+		PLAYER_TILE_ID_BOW_RELEASE_N = 151,
+		PLAYER_TILE_ID_BOW_RELEASE_E = 167,
+		PLAYER_TILE_ID_DYING_SE = 178,
+		PLAYER_TILE_ID_DYING_NE = 181,
+		PLAYER_TILE_ID_DEAD_SE = 180,
+		PLAYER_TILE_ID_DEAD_NE = 183,
 	};
-
-	constexpr float _PLAYER_ARROW_SPEED = 160.f;
 
 	enum class PlayerMotion {
 		Motionless,
@@ -226,25 +227,25 @@ namespace ecs {
 			case PlayerMotion::Motionless: {
 				switch (dir) {
 					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, TILE_ID_PLAYER_IDLE_E); break;
-					case Direction::N: replace(tile, TILE_ID_PLAYER_IDLE_N); break;
-					case Direction::S: replace(tile, TILE_ID_PLAYER_IDLE_S); break;
+					case Direction::E: replace(tile, PLAYER_TILE_ID_IDLE_E); break;
+					case Direction::N: replace(tile, PLAYER_TILE_ID_IDLE_N); break;
+					case Direction::S: replace(tile, PLAYER_TILE_ID_IDLE_S); break;
 				}
 			} break;
 			case PlayerMotion::Walking: {
 				switch (dir) {
 					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, TILE_ID_PLAYER_WALK_E); break;
-					case Direction::N: replace(tile, TILE_ID_PLAYER_WALK_N); break;
-					case Direction::S: replace(tile, TILE_ID_PLAYER_WALK_S); break;
+					case Direction::E: replace(tile, PLAYER_TILE_ID_WALK_E); break;
+					case Direction::N: replace(tile, PLAYER_TILE_ID_WALK_N); break;
+					case Direction::S: replace(tile, PLAYER_TILE_ID_WALK_S); break;
 				}
 			} break;
 			case PlayerMotion::Running: {
 				switch (dir) {
 					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, TILE_ID_PLAYER_RUN_E); break;
-					case Direction::N: replace(tile, TILE_ID_PLAYER_RUN_N); break;
-					case Direction::S: replace(tile, TILE_ID_PLAYER_RUN_S); break;
+					case Direction::E: replace(tile, PLAYER_TILE_ID_RUN_E); break;
+					case Direction::N: replace(tile, PLAYER_TILE_ID_RUN_N); break;
+					case Direction::S: replace(tile, PLAYER_TILE_ID_RUN_S); break;
 				}
 			} break;
 			case PlayerMotion::Sneaking: {
@@ -253,9 +254,9 @@ namespace ecs {
 			case PlayerMotion::Pushing: {
 				switch (dir) {
 					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, TILE_ID_PLAYER_PUSH_E); break;
-					case Direction::N: replace(tile, TILE_ID_PLAYER_PUSH_N); break;
-					case Direction::S: replace(tile, TILE_ID_PLAYER_PUSH_S); break;
+					case Direction::E: replace(tile, PLAYER_TILE_ID_PUSH_E); break;
+					case Direction::N: replace(tile, PLAYER_TILE_ID_PUSH_N); break;
+					case Direction::S: replace(tile, PLAYER_TILE_ID_PUSH_S); break;
 				}
 			} break;
 		}
@@ -341,8 +342,8 @@ namespace ecs {
 		}
 
 		// Should shoot bow?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X) {
-			// TODO: shoot bow
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X && player.arrows > 0) {
+			transition_to_state(entity, "shooting");
 		}
 
 		// Should place bomb?
@@ -364,15 +365,51 @@ namespace ecs {
 		}
 	}
 
+	void _player_start_shooting(entt::entity entity) {
+		stop_moving(entity);
+		const Direction dir = _registry.get<Direction>(entity);
+		TileId& tile = _registry.get<TileId>(entity);
+		switch (dir) {
+			case Direction::W: [[fallthrough]];
+			case Direction::E: replace(tile, PLAYER_TILE_ID_BOW_DRAW_E); break;
+			case Direction::N: replace(tile, PLAYER_TILE_ID_BOW_DRAW_N); break;
+			case Direction::S: replace(tile, PLAYER_TILE_ID_BOW_DRAW_S); break;
+		}
+		TileAnimation& anim = _registry.get<TileAnimation>(entity);
+		anim.set_progress(0.f);
+		anim.set_loop(false);
+		const float anim_duration = get_animation_duration(tile);
+		transition_to_state_later(entity, "normal", anim_duration);
+	}
+
+	void _player_update_shooting(entt::entity entity, float dt) {
+		const TileAnimation& anim = _registry.get<TileAnimation>(entity);
+		// Check if the animation just arrived at the "release" frame.
+		if (!anim.frame_changed()) return;
+		const TileId frame = anim.get_frame();
+		if (frame.id != PLAYER_TILE_ID_BOW_RELEASE_E &&
+			frame.id != PLAYER_TILE_ID_BOW_RELEASE_N &&
+			frame.id != PLAYER_TILE_ID_BOW_RELEASE_S) {
+			return;
+		}
+		// Shoot arrow.
+		Player& player = _registry.get<Player>(entity);
+		const Vec2f pos = b2Body_GetWorldCenterOfMass(_registry.get<b2BodyId>(entity));
+		const Vec2f dir = to_unit(_registry.get<Direction>(entity));
+		constexpr float ARROW_SPEED = 16.f * 16;
+		create_arrow(pos + dir * 16.f, dir * ARROW_SPEED);
+		player.arrows--;
+	}
+
 	void _player_start_dying(entt::entity entity) {
 		remove_body(entity);
 		TileId& tile = _registry.get<TileId>(entity);
 		const Direction dir = _registry.get<Direction>(entity);
 		switch (dir) {
 			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
-			case Direction::N: replace(tile, TILE_ID_PLAYER_DYING_NE); break;
-			case Direction::S: replace(tile, TILE_ID_PLAYER_DYING_SE); break;
+			case Direction::E: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
+			case Direction::N: replace(tile, PLAYER_TILE_ID_DYING_NE); break;
+			case Direction::S: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
 		}
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);
@@ -386,9 +423,9 @@ namespace ecs {
 		const Direction dir = _registry.get<Direction>(entity);
 		switch (dir) {
 			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
-			case Direction::N: replace(tile, TILE_ID_PLAYER_DEAD_NE); break;
-			case Direction::S: replace(tile, TILE_ID_PLAYER_DEAD_SE); break;
+			case Direction::E: replace(tile, PLAYER_TILE_ID_DEAD_SE); break;
+			case Direction::N: replace(tile, PLAYER_TILE_ID_DEAD_NE); break;
+			case Direction::S: replace(tile, PLAYER_TILE_ID_DEAD_SE); break;
 		}
 		detach_camera(entity);
 		audio::stop_all_in_bus();
@@ -403,6 +440,10 @@ namespace ecs {
 			.name = "normal",
 			.update = _player_update_normal,
 			.handle = _player_handle_normal });
+		add_state(sm, {
+			.name = "shooting",
+			.start = _player_start_shooting,
+			.update = _player_update_shooting });
 		add_state(sm, {
 			.name = "dying",
 			.start = _player_start_dying });
@@ -504,9 +545,9 @@ namespace ecs {
 
 						switch (dir) {
 							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_FOREHAND_STRIKE_S); break;
+							case Direction::E: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_E); break;
+							case Direction::N: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_N); break;
+							case Direction::S: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_S); break;
 						}
 
 						audio::create_event({ .path = "event:/snd_sword_attack" });
@@ -514,20 +555,6 @@ namespace ecs {
 						anim.set_loop(false);
 
 						player.state = PlayerState::SwingingSword;
-
-					} else if (player.input_flags & INPUT_SHOOT_BOW && player.arrows > 0) {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_BOW_SHOT_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_BOW_SHOT_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_BOW_SHOT_S); break;
-						}
-
-						anim.set_progress(0.f);
-						anim.set_loop(false);
-
-						player.state = PlayerState::ShootingBow;
 
 					}
 
@@ -545,13 +572,7 @@ namespace ecs {
 					}
 				} break;
 				case PlayerState::ShootingBow: {
-					if (dir != Direction::E) {
-						tile.flipped_horizontally = false;
-					}
-					if (player.arrows > 0 && anim.get_progress() > ???) {
-						player.arrows--;
-						create_arrow(position + to_unit(player.dir) * 16.f, to_unit(player.dir)* _PLAYER_ARROW_SPEED);
-					}
+					
 					if (anim.done()) {
 						player.state = PlayerState::Normal;
 					}
@@ -560,19 +581,8 @@ namespace ecs {
 #endif
 		}
 
-		// Update hud. TODO: put in ecs_ui_hud.h or something
-		for (auto [entity, player] : _registry.view<Player>().each()) {
-			ui::bindings::hud_player_health = player.health;
-			ui::bindings::hud_arrow_ammo = player.arrows;
-			ui::bindings::hud_bomb_ammo = player.bombs;
-			ui::bindings::hud_rupee_amount = player.rupees;
-		}
-
 		// Update graphics.
 		for (auto [entity, player, tile, sprite] : _registry.view<Player, TileId, sprites::Sprite>().each()) {
-
-			const std::string_view state = get_current_state(entity);
-
 			if (player.hurt_timer.running()) {
 				constexpr float BLINK_PERIOD = 0.15f;
 				float fraction = fmod(player.hurt_timer.get_time(), BLINK_PERIOD) / BLINK_PERIOD;
@@ -580,6 +590,14 @@ namespace ecs {
 			} else {
 				sprite.color.a = 255;
 			}
+		}
+
+		// Update hud. TODO: put in ecs_ui_hud.h or something
+		for (auto [entity, player] : _registry.view<Player>().each()) {
+			ui::bindings::hud_player_health = player.health;
+			ui::bindings::hud_arrow_ammo = player.arrows;
+			ui::bindings::hud_bomb_ammo = player.bombs;
+			ui::bindings::hud_rupee_amount = player.rupees;
 		}
 	}
 
