@@ -194,22 +194,18 @@ namespace ecs {
 		}
 
 		// Figure out if we're touching anything in the direction of motion.
+		bool touching_something_in_dir = false;
 		for (const b2ContactData& contact : get_contacts(body)) {
-#if 0
-			static int i = 0;
-			console::log(
-				std::to_string(++i) + " " +
-				std::to_string(contact.shapeIdA.index1) + " " +
-				std::to_string(contact.shapeIdB.index1) + " (" +
-				std::to_string(contact.manifold.normal.x) + "," +
-				std::to_string(contact.manifold.normal.y) + ")");
-#endif
+			const Direction contact_dir = to_cardinal(contact.manifold.normal);
+			touching_something_in_dir = (contact_dir == dir);
 		}
 
 		// Update motion.
 		player.motion = PlayerMotion::Motionless;
 		if (player.input_dir != Vec2f::ZERO) {
-			if (player.holding_control_key) {
+			if (touching_something_in_dir) {
+				player.motion = PlayerMotion::Pushing;
+			} else if (player.holding_control_key) {
 				player.motion = PlayerMotion::Sneaking;
 			} else if (player.holding_shift_key) {
 				player.motion = PlayerMotion::Running;
