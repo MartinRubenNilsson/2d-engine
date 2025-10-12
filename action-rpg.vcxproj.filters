@@ -281,6 +281,15 @@
     <ClCompile Include="console_commands_ecs.cpp">
       <Filter>application\console\commands\implementations</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_player_dead.cpp">
+      <Filter>game\ecs\game\players\states</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_player_dying.cpp">
+      <Filter>game\ecs\game\players\states</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_player_hurt.cpp">
+      <Filter>game\ecs\game\players\states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -559,6 +568,9 @@
     <ClInclude Include="window_keys.h">
       <Filter>application\window</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_player_states.h">
+      <Filter>game\ecs\game\players\states</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -710,6 +722,9 @@
     </Filter>
     <Filter Include="application\console\scripts">
       <UniqueIdentifier>{bcf4b00e-9a56-41ff-b5fb-8acdcb63fae8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\players\states">
+      <UniqueIdentifier>{6ca37093-cc87-435f-97f6-22f5d435a687}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

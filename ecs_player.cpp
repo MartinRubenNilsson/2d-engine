@@ -29,46 +29,10 @@
 #include "ecs_audio.h"
 #include "ecs_terrain.h"
 #include "ui.h"
+#include "ecs_states.h"
+#include "ecs_player_states.h"
 
 namespace ecs {
-
-	// player.tsx
-	enum PLAYER_TILE_ID {
-		PLAYER_TILE_ID_IDLE_S = 0,
-		PLAYER_TILE_ID_IDLE_N = 16,
-		PLAYER_TILE_ID_IDLE_E = 32,
-		PLAYER_TILE_ID_PUSH_S = 8,
-		PLAYER_TILE_ID_PUSH_N = 24,
-		PLAYER_TILE_ID_PUSH_E = 40,
-		PLAYER_TILE_ID_WALK_S = 48,
-		PLAYER_TILE_ID_WALK_N = 52,
-		PLAYER_TILE_ID_WALK_E = 64,
-		PLAYER_TILE_ID_RUN_S = 51,
-		PLAYER_TILE_ID_RUN_N = 55,
-		PLAYER_TILE_ID_RUN_E = 70,
-		PLAYER_TILE_ID_FOREHAND_STRIKE_S = 132,
-		PLAYER_TILE_ID_FOREHAND_STRIKE_N = 148,
-		PLAYER_TILE_ID_FOREHAND_STRIKE_E = 164,
-		PLAYER_TILE_ID_BOW_DRAW_S = 133,
-		PLAYER_TILE_ID_BOW_DRAW_N = 149,
-		PLAYER_TILE_ID_BOW_DRAW_E = 165,
-		PLAYER_TILE_ID_BOW_RELEASE_S = 135,
-		PLAYER_TILE_ID_BOW_RELEASE_N = 151,
-		PLAYER_TILE_ID_BOW_RELEASE_E = 167,
-		PLAYER_TILE_ID_DYING_SE = 178,
-		PLAYER_TILE_ID_DYING_NE = 181,
-		PLAYER_TILE_ID_DEAD_SE = 180,
-		PLAYER_TILE_ID_DEAD_NE = 183,
-		PLAYER_TILE_ID_HURT_S = 244,
-	};
-
-	enum class PlayerMotion {
-		Motionless,
-		Walking,
-		Running,
-		Sneaking,
-		Pushing
-	};
 
 	float get_desired_speed(PlayerMotion motion) {
 		switch (motion) {
@@ -79,22 +43,6 @@ namespace ecs {
 			case PlayerMotion::Pushing: return 16.f;
 		}
 	}
-
-	struct Player {
-		float input_x = 0.f; // one of -1, 0, 1
-		float input_y = 0.f; // one of -1, 0, 1
-		Vec2f input_dir = Vec2f::ZERO; // either zero or an unit vector
-
-		PlayerMotion motion = PlayerMotion::Motionless;
-
-		int max_health = 3;
-		int health = 3;
-		int arrows = 10;
-		int bombs = 5;
-		int rupees = 10;
-
-		float invincibility_time = 0.f;
-	};
 
 	extern entt::registry _registry;
 
@@ -397,57 +345,6 @@ namespace ecs {
 		player.arrows--;
 	}
 
-	void _player_start_hurt(entt::entity entity) {
-		stop_moving(entity);
-		TileId& tile = _registry.get<TileId>(entity);
-		replace(tile, PLAYER_TILE_ID_HURT_S);
-		audio::create_event({ .path = "event:/player/hurt" });
-		Player& player = _registry.get<Player>(entity);
-		if (player.health > 0) {
-			transition_to_state_later(entity, "normal", 0.2f);
-		} else {
-			transition_to_state_later(entity, "dying", 0.4f);
-		}
-	}
-
-	void _player_stop_hurt(entt::entity entity) {
-		Player& player = _registry.get<Player>(entity);
-		player.invincibility_time = 1.f; // Become invincible for a time.
-	}
-
-	void _player_start_dying(entt::entity entity) {
-		remove_body(entity);
-		TileId& tile = _registry.get<TileId>(entity);
-		const Direction dir = _registry.get<Direction>(entity);
-		switch (dir) {
-			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
-			case Direction::N: replace(tile, PLAYER_TILE_ID_DYING_NE); break;
-			case Direction::S: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
-		}
-		audio::create_event({ .path = "event:/player/die" });
-		TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		anim.set_progress(0.f);
-		anim.set_loop(false);
-		const float anim_duration = get_animation_duration(tile);
-		transition_to_state_later(entity, "dead", anim_duration);
-	}
-
-	void _player_start_dead(entt::entity entity) {
-		TileId& tile = _registry.get<TileId>(entity);
-		const Direction dir = _registry.get<Direction>(entity);
-		switch (dir) {
-			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, PLAYER_TILE_ID_DEAD_SE); break;
-			case Direction::N: replace(tile, PLAYER_TILE_ID_DEAD_NE); break;
-			case Direction::S: replace(tile, PLAYER_TILE_ID_DEAD_SE); break;
-		}
-		detach_camera(entity);
-		audio::stop_all_in_bus();
-		audio::create_event({ .path = "event:/music/death_jingle" });
-		ui::open_or_enqueue_textbox_presets("player/die");
-	}
-
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
 		StateId alive = add_state(sm, {
@@ -463,17 +360,9 @@ namespace ecs {
 			.parent = alive,
 			.start = _player_start_shooting,
 			.update = _player_update_shooting });
-		add_state(sm, {
-			.name = "hurt",
-			.parent = alive,
-			.start = _player_start_hurt,
-			.stop = _player_stop_hurt });
-		add_state(sm, {
-			.name = "dying",
-			.start = _player_start_dying });
-		add_state(sm, {
-			.name = "dead",
-			.start = _player_start_dead });
+		add_player_hurt_state(sm, alive);
+		add_player_dying_state(sm);
+		add_player_dead_state(sm);
 		transition(sm, normal, entity);
 	}
 

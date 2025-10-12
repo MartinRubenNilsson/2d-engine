@@ -157,6 +157,9 @@
     <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_physics_queries.cpp" />
     <ClCompile Include="ecs_physics_setup.cpp" />
+    <ClCompile Include="ecs_player_dead.cpp" />
+    <ClCompile Include="ecs_player_dying.cpp" />
+    <ClCompile Include="ecs_player_hurt.cpp" />
     <ClCompile Include="ecs_pushable.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_sprites_setup.cpp" />
@@ -257,6 +260,7 @@
     <ClInclude Include="ecs_pathfinding.h" />
     <ClInclude Include="ecs_physics_events.h" />
     <ClInclude Include="ecs_physics_queries.h" />
+    <ClInclude Include="ecs_player_states.h" />
     <ClInclude Include="ecs_pushable.h" />
     <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_states.h" />
