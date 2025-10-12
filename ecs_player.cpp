@@ -4,7 +4,6 @@
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_physics_events.h"
-#include "ecs_arrow.h"
 #include "ecs_sprites.h"
 #include "ecs_animations.h"
 #include "ecs_camera.h"
@@ -16,7 +15,6 @@
 #include "audio.h"
 #include "window.h"
 #include "window_events.h"
-#include "ui_textbox.h"
 #include "ui_bindings.h"
 #include "postprocessing.h"
 #include "ecs_pickups.h"
@@ -310,42 +308,6 @@ namespace ecs {
 		}
 	}
 
-	void _player_start_shooting(entt::entity entity) {
-		stop_moving(entity);
-		const Direction dir = _registry.get<Direction>(entity);
-		TileId& tile = _registry.get<TileId>(entity);
-		switch (dir) {
-			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, PLAYER_TILE_ID_BOW_DRAW_E); break;
-			case Direction::N: replace(tile, PLAYER_TILE_ID_BOW_DRAW_N); break;
-			case Direction::S: replace(tile, PLAYER_TILE_ID_BOW_DRAW_S); break;
-		}
-		TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		anim.set_progress(0.f);
-		anim.set_loop(false);
-		const float anim_duration = get_animation_duration(tile);
-		transition_to_state_later(entity, "normal", anim_duration);
-	}
-
-	void _player_update_shooting(entt::entity entity, float dt) {
-		const TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		// Check if the animation just arrived at the "release" frame.
-		if (!anim.frame_changed()) return;
-		const TileId frame = anim.get_frame();
-		if (frame.id != PLAYER_TILE_ID_BOW_RELEASE_E &&
-			frame.id != PLAYER_TILE_ID_BOW_RELEASE_N &&
-			frame.id != PLAYER_TILE_ID_BOW_RELEASE_S) {
-			return;
-		}
-		// Shoot arrow.
-		Player& player = _registry.get<Player>(entity);
-		const Vec2f pos = b2Body_GetWorldCenterOfMass(_registry.get<b2BodyId>(entity));
-		const Vec2f dir = to_unit(_registry.get<Direction>(entity));
-		constexpr float ARROW_SPEED = 16.f * 16;
-		create_arrow(pos + dir * 16.f, dir * ARROW_SPEED);
-		player.arrows--;
-	}
-
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
 		StateId alive = add_state(sm, {
@@ -356,11 +318,7 @@ namespace ecs {
 			.parent = alive,
 			.update = _player_update_normal,
 			.handle = _player_handle_normal });
-		add_state(sm, {
-			.name = "shooting",
-			.parent = alive,
-			.start = _player_start_shooting,
-			.update = _player_update_shooting });
+		add_player_shooting_state(sm, alive);
 		add_player_hurt_state(sm, alive);
 		add_player_dying_state(sm);
 		add_player_dead_state(sm);
