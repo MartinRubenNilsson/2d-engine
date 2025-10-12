@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
                     } else if (ev.key.code == window::Key::F4) {
                         ecs::debug_flags ^= ecs::DEBUG_DRAW_AI;
                     } else if (ev.key.code == window::Key::F5) {
-                        ecs::debug_flags ^= ecs::DEBUG_DRAW_PLAYER;
+
                     } else if (ev.key.code == window::Key::F6) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {

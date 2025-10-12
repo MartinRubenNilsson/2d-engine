@@ -17,11 +17,11 @@ namespace ecs {
 	enum DEBUG_DRAW_FLAGS {
 		DEBUG_DRAW_PHYSICS = 1 << 1,
 		DEBUG_DRAW_AI      = 1 << 2,
-		DEBUG_DRAW_PLAYER  = 1 << 3,
 	};
 
 	extern int debug_flags;
 
+	extern bool debug_physics;
 	extern bool debug_terrain;
 
 	void debug_draw();

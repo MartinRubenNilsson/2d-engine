@@ -288,6 +288,7 @@ namespace console {
 
 	void bind(std::string_view key_string, std::string_view command_line) {
 		auto key = magic_enum::enum_cast<window::Key>(key_string, magic_enum::case_insensitive);
+		const auto array = magic_enum::enum_entries<window::Key>();
 		if (key.has_value()) {
 			bind(key.value(), command_line);
 		} else {

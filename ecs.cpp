@@ -141,18 +141,16 @@ namespace ecs {
 
 	int debug_flags = 0;
 
+	bool debug_physics = false;
 	bool debug_terrain = false;
 
 	void debug_draw() {
-		if (debug_flags & DEBUG_DRAW_PHYSICS) {
+		if (debug_physics) {
 			debug_draw_physics();
 		}
 		if (debug_flags & DEBUG_DRAW_AI) {
 			debug_draw_tasks();
 			debug_draw_state_machines();
-		}
-		if (debug_flags & DEBUG_DRAW_PLAYER) {
-			show_player_debug_window();
 		}
 		if (debug_terrain) {
 			debug_draw_terrain();
