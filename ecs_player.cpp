@@ -100,7 +100,9 @@ namespace ecs {
 				audio::create_event({ .path = "event:/snd_pickup" });
 			} break;
 			case PickupType::Heart: {
-				player->health = std::min(player->health + 1, player->max_health);
+				if (player->health < player->max_health) {
+					player->health++;
+				}
 				//TODO
 				//audio::play("event:/snd_pickup_heart");
 			} break;
@@ -115,7 +117,11 @@ namespace ecs {
 		if (!player) return false;
 		if (player->health <= 0) return false; // Player is already dead
 		if (player->hurt_timer.running()) return false; // Player is invulnerable
-		player->health = std::max(0, player->health - ev.amount);
+		if (ev.amount <= player->health) {
+			player->health -= ev.amount;
+		} else {
+			player->health = 0;
+		}
 		add_trauma_to_active_camera(0.8f);
 		if (player->health > 0) { // Player survived
 			audio::create_event({ .path = "event:/snd_player_hurt" });
@@ -192,12 +198,89 @@ namespace ecs {
 		}
 	}
 
-	void _player_handle_normal(entt::entity entity, const StateEvent& ev) {
-		if (ev.type != PLAYER_STATE_EVENT_KEY)
-			return;
-		const window::Event& window_ev = *(const window::Event*)ev.data;
+	void _player_handle_normal_window_event(entt::entity entity, const window::Event& ev) {
+
+		Player& player = _registry.get<Player>(entity);
 		const b2BodyId body = _registry.get<b2BodyId>(entity);
 		Direction& dir = _registry.get<Direction>(entity);
+
+		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
+
+		// Should interact?
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::C) {
+			// Interact with everything one tile in front of the player.
+			const Vec2f center = pos + to_unit(dir) * 16.f;
+			const Vec2f min = center - Vec2f(6.f, 6.f);
+			const Vec2f max = center + Vec2f(6.f, 6.f);
+			interact_with_all_in_box(min, max);
+		}
+
+		// Should attack?
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Space) {
+			// TODO: swing sword
+		}
+
+		// Should place bomb?
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Z && player.bombs > 0) {
+			// Place a bomb one tile in front of the player.
+			const Vec2f bomb_pos = pos + to_unit(dir) * 16.f;
+			if (create_bomb_at(bomb_pos) != entt::null) {
+				player.bombs--;
+				audio::create_event({ .path = "event:/player/place_bomb" });
+			} else { // Failed to place bomb.
+				audio::create_event({ .path = "event:/player/error" });
+			}
+		}
+
+		// Should shoot bow?
+		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X) {
+			// TODO: shoot bow
+		}
+#if 0
+		if (ev.type == window::EventType::KeyPress) {
+			switch (ev.key.code) {
+				case window::Key::Left:
+					_input_flags_to_enable |= INPUT_W;
+					break;
+				case window::Key::Right:
+					_input_flags_to_enable |= INPUT_E;
+					break;
+				case window::Key::Up:
+					_input_flags_to_enable |= INPUT_N;
+					break;
+				case window::Key::Down:
+					_input_flags_to_enable |= INPUT_S;
+					break;
+				case window::Key::LShift:
+					_input_flags_to_enable |= INPUT_RUN;
+					break;
+				case window::Key::LControl:
+					_input_flags_to_enable |= INPUT_STEALTH;
+					break;
+			}
+		} else if (ev.type == window::EventType::KeyRelease) {
+			switch (ev.key.code) {
+				case window::Key::Left:
+					_input_flags_to_disable |= INPUT_W;
+					break;
+				case window::Key::Right:
+					_input_flags_to_disable |= INPUT_E;
+					break;
+				case window::Key::Up:
+					_input_flags_to_disable |= INPUT_N;
+					break;
+				case window::Key::Down:
+					_input_flags_to_disable |= INPUT_S;
+					break;
+				case window::Key::LShift:
+					_input_flags_to_disable |= INPUT_RUN;
+					break;
+				case window::Key::LControl:
+					_input_flags_to_disable |= INPUT_STEALTH;
+					break;
+			}
+		}
+#endif
 
 
 #if 0
@@ -224,6 +307,12 @@ namespace ecs {
 			}
 		}
 #endif
+	}
+
+	void _player_handle_normal(entt::entity entity, const StateEvent& ev) {
+		if (ev.type == PLAYER_STATE_EVENT_KEY) {
+			_player_handle_normal_window_event(entity, *(const window::Event*)ev.data);
+		}
 	}
 
 	void _player_start_dying(entt::entity entity) {
@@ -299,7 +388,7 @@ namespace ecs {
 
 			{
 				Camera camera{};
-				camera.confines_min = { 0.f, 0.f };
+				camera.confines_min = Vec2f::ZERO;
 				camera.confines_max = map_size_in_pixels;
 				camera.entity_to_follow = entity;
 				emplace_camera(entity, camera);
@@ -351,64 +440,6 @@ namespace ecs {
 		if (dt > 0.f) {
 			_dispatch_window_events_to_players();
 		}
-
-#if 0
-		if (ev.type == window::EventType::KeyPress) {
-			switch (ev.key.code) {
-				case window::Key::Left:
-					_input_flags_to_enable |= INPUT_W;
-					break;
-				case window::Key::Right:
-					_input_flags_to_enable |= INPUT_E;
-					break;
-				case window::Key::Up:
-					_input_flags_to_enable |= INPUT_N;
-					break;
-				case window::Key::Down:
-					_input_flags_to_enable |= INPUT_S;
-					break;
-				case window::Key::LShift:
-					_input_flags_to_enable |= INPUT_RUN;
-					break;
-				case window::Key::LControl:
-					_input_flags_to_enable |= INPUT_STEALTH;
-					break;
-				case window::Key::C:
-					_input_flags_to_enable |= INPUT_INTERACT;
-					break;
-				case window::Key::X:
-					_input_flags_to_enable |= INPUT_SHOOT_BOW;
-					break;
-				case window::Key::Z:
-					_input_flags_to_enable |= INPUT_DROP_BOMB;
-					break;
-				case window::Key::Space:
-					_input_flags_to_enable |= INPUT_SWING_SWORD;
-					break;
-			}
-		} else if (ev.type == window::EventType::KeyRelease) {
-			switch (ev.key.code) {
-				case window::Key::Left:
-					_input_flags_to_disable |= INPUT_W;
-					break;
-				case window::Key::Right:
-					_input_flags_to_disable |= INPUT_E;
-					break;
-				case window::Key::Up:
-					_input_flags_to_disable |= INPUT_N;
-					break;
-				case window::Key::Down:
-					_input_flags_to_disable |= INPUT_S;
-					break;
-				case window::Key::LShift:
-					_input_flags_to_disable |= INPUT_RUN;
-					break;
-				case window::Key::LControl:
-					_input_flags_to_disable |= INPUT_STEALTH;
-					break;
-			}
-		}
-#endif
 
 		for (auto [entity, player] : _registry.view<Player>().each()) {
 			player.hurt_timer.update(dt);
@@ -462,17 +493,6 @@ namespace ecs {
 
 						player.state = PlayerState::ShootingBow;
 
-					} else if (player.input_flags & INPUT_DROP_BOMB && player.bombs > 0) {
-
-						const Vec2f bomb_position = position + to_unit(player.dir) * 16.f;
-						if (create_bomb(bomb_position) != entt::null) {
-							player.bombs--;
-							audio::create_event({ .path = "event:/player/place_bomb" });
-						} else {
-							audio::create_event({ .path = "event:/player/error" });
-						}
-
-#if 0
 					} else if (player.touching_pushable_block && new_velocity != Vec2f::ZERO) {
 
 						switch (dir) {
@@ -486,14 +506,7 @@ namespace ecs {
 						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
 							tile.flipped_horizontally = !tile.flipped_horizontally;
 						}
-#endif
 					} else
-					if (player.input_flags & INPUT_INTERACT) {
-						const Vec2f box_center = position + to_unit(player.dir) * 16.f;
-						const Vec2f box_min = box_center - Vec2f(6.f, 6.f);
-						const Vec2f box_max = box_center + Vec2f(6.f, 6.f);
-						interact_with_all_entities_in_box(box_min, box_max);
-					}
 
 				} break;
 				case PlayerState::SwingingSword: {

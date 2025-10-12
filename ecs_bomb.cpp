@@ -56,7 +56,7 @@ namespace ecs {
         return _registry.try_get<Bomb>(entity);
     }
 
-    entt::entity create_bomb(const Vec2f& position) {
+    entt::entity create_bomb_at(const Vec2f& position) {
         if (!overlap_circle(position, 4.f).empty()) {
             return entt::null;
         }

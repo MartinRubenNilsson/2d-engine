@@ -31,7 +31,7 @@ namespace ecs {
 		handler(entity);
 	}
 
-	void interact_with_all_entities_in_box(const Vec2f& box_min, const Vec2f& box_max) {
+	void interact_with_all_in_box(const Vec2f& box_min, const Vec2f& box_max) {
 		//shapes::add_box_to_render_queue(box_min, box_max, colors::CYAN, 0.2f);
 		for (const OverlapHit& hit : overlap_box(box_min, box_max, ~CC_Player)) {
 			interact_with(hit.entity);

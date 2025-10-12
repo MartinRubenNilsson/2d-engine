@@ -68,12 +68,12 @@ namespace ecs {
 			if (!animated(tile))
 				continue;
 
-			const unsigned int duration_ms = get_animation_duration(tile);
-			if (duration_ms == 0)
+			const unsigned int duration_ms = get_animation_duration_ms(tile);
+			if (duration_ms == 0.f)
 				continue; // defensive
 
 			// TODO: support for negative speed
-			const float delta_progress = animation._speed * dt * 1000.f / duration_ms;
+			const float delta_progress = animation._speed * dt / (duration_ms * 0.001f);
 
 			animation._progress += delta_progress;
 			if (animation._progress >= 1.f) {

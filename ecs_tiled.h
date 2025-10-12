@@ -53,7 +53,8 @@ namespace ecs {
 	Vec2u get_size(TileId tile); // in pixels
 	TextureRect get_texture_rect(TileId tile);
 	bool animated(TileId tile);
-	unsigned int get_animation_duration(TileId tile); // duration in milliseconds
+	unsigned int get_animation_duration_ms(TileId tile); // in milliseconds
+	float get_animation_duration(TileId tile); // in seconds
 	// preserves the flip flags of the input tile
 	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
 	void replace(TileId& tile, unsigned int id); // preserves flip flags

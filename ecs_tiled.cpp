@@ -195,13 +195,17 @@ namespace ecs {
 		return !_get_tile(tile).animation.empty();
 	}
 
-	unsigned int get_animation_duration(TileId tile) {
+	unsigned int get_animation_duration_ms(TileId tile) {
 		const auto& animation = _get_tile(tile).animation;
 		unsigned int duration_ms = 0; // in milliseconds
 		for (const tiled::Frame& frame : animation) {
 			duration_ms += frame.duration_ms;
 		}
 		return duration_ms;
+	}
+
+	float get_animation_duration(TileId tile) {
+		return get_animation_duration_ms(tile) / 1000.f;
 	}
 
 	TileId get_animation_frame(TileId tile, unsigned int time_ms) {
