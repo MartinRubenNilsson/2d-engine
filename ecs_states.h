@@ -14,11 +14,11 @@ namespace ecs {
 
 	struct State {
 		std::string_view name;
+		StateId parent{}; // For hierarchical states.
 		void (*start)(entt::entity entity) = nullptr;
 		void (*stop)(entt::entity entity) = nullptr;
 		void (*update)(entt::entity entity, float dt) = nullptr;
 		void (*handle)(entt::entity entity, const StateEvent& ev) = nullptr;
-		float time_active = 0.f; // since last start
 	};
 
 	struct StateMachine; // implementation is private
