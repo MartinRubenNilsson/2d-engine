@@ -161,6 +161,7 @@
     <ClCompile Include="ecs_player_dying.cpp" />
     <ClCompile Include="ecs_player_hurt.cpp" />
     <ClCompile Include="ecs_player_shooting.cpp" />
+    <ClCompile Include="ecs_player_slashing.cpp" />
     <ClCompile Include="ecs_pushable.cpp" />
     <ClCompile Include="ecs_slime.cpp" />
     <ClCompile Include="ecs_sprites_setup.cpp" />

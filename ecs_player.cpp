@@ -45,12 +45,6 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void _player_attack(entt::entity entity, const Vec2f& position) {
-		Vec2f box_min = position - Vec2f(6.f, 6.f);
-		Vec2f box_max = position + Vec2f(6.f, 6.f);
-		deal_damage_in_box({ DamageType::Touch, 1, entity }, box_min, box_max, ~CC_Player);
-	}
-
 	void _player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
 		Player* player = _registry.try_get<Player>(player_entity);
 		if (!player) return;
@@ -281,7 +275,7 @@ namespace ecs {
 
 		// Should attack?
 		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Space) {
-			// TODO: swing sword
+			transition_to_state(entity, "slashing");
 		}
 
 		// Should shoot bow?
@@ -318,6 +312,7 @@ namespace ecs {
 			.parent = alive,
 			.update = _player_update_normal,
 			.handle = _player_handle_normal });
+		add_player_slashing_state(sm, alive);
 		add_player_shooting_state(sm, alive);
 		add_player_hurt_state(sm, alive);
 		add_player_dying_state(sm);
@@ -400,48 +395,6 @@ namespace ecs {
 
 	void update_players(float dt) {
 		_dispatch_window_events_to_players();
-
-		for (auto [entity, player] : _registry.view<Player>().each()) {
-#if 0
-
-			const Direction dir = player.dir;
-
-			switch (player.state) {
-				case PlayerState::Normal: {
-
-					if (player.input_flags & INPUT_SWING_SWORD) {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_E); break;
-							case Direction::N: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_N); break;
-							case Direction::S: replace(tile, PLAYER_TILE_ID_FOREHAND_STRIKE_S); break;
-						}
-
-						audio::create_event({ .path = "event:/snd_sword_attack" });
-						anim.set_progress(0.f);
-						anim.set_loop(false);
-
-						player.state = PlayerState::SwingingSword;
-
-					}
-
-				} break;
-				case PlayerState::SwingingSword: {
-					if (tile_dir != Direction::E) {
-						sprite.flags &= ~sprites::SPRITE_FLIP_HORIZONTALLY;
-					}
-					// TODO
-					//if (animation._frame_changed && animation._frame_id == 1) {
-					//	_player_attack(player_entity, position + player.look_dir * 16.f);
-					//}
-					if (anim.done()) {
-						player.state = PlayerState::Normal;
-					}
-				} break;
-			}
-#endif
-		}
 
 		// Update hud. TODO: put in ecs_ui_hud.h or something
 		for (auto [entity, player] : _registry.view<Player>().each()) {

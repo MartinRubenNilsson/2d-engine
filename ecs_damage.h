@@ -4,6 +4,7 @@ namespace ecs {
 	enum class DamageType {
 		Default,
 		Touch,
+		Melee,
 		Projectile,
 		Explosion,
 	};

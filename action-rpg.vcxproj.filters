@@ -293,6 +293,9 @@
     <ClCompile Include="ecs_player_shooting.cpp">
       <Filter>game\ecs\game\players\states</Filter>
     </ClCompile>
+    <ClCompile Include="ecs_player_slashing.cpp">
+      <Filter>game\ecs\game\players\states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
