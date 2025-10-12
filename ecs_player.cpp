@@ -66,7 +66,7 @@ namespace ecs {
 		Walking,
 		Running,
 		Sneaking,
-		//Pushing //TODO
+		Pushing
 	};
 
 	float get_desired_speed(PlayerMotion motion) {
@@ -75,6 +75,7 @@ namespace ecs {
 			case PlayerMotion::Walking: return 60.f;
 			case PlayerMotion::Running: return 136.f;
 			case PlayerMotion::Sneaking: return 36.f;
+			case PlayerMotion::Pushing: return 16.f;
 		}
 	}
 
@@ -239,6 +240,14 @@ namespace ecs {
 			} break;
 			case PlayerMotion::Sneaking: {
 				// TODO
+			} break;
+			case PlayerMotion::Pushing: {
+				switch (dir) {
+					case Direction::W: [[fallthrough]];
+					case Direction::E: replace(tile, TILE_ID_PLAYER_PUSH_E); break;
+					case Direction::N: replace(tile, TILE_ID_PLAYER_PUSH_N); break;
+					case Direction::S: replace(tile, TILE_ID_PLAYER_PUSH_S); break;
+				}
 			} break;
 		}
 
@@ -514,20 +523,7 @@ namespace ecs {
 
 						player.state = PlayerState::ShootingBow;
 
-					} else if (player.touching_pushable_block && new_velocity != Vec2f::ZERO) {
-
-						switch (dir) {
-							case Direction::W: [[fallthrough]];
-							case Direction::E: replace(tile, TILE_ID_PLAYER_PUSH_E); break;
-							case Direction::N: replace(tile, TILE_ID_PLAYER_PUSH_N); break;
-							case Direction::S: replace(tile, TILE_ID_PLAYER_PUSH_S); break;
-						}
-
-						anim.set_loop(true);
-						if (anim.looped() && (dir == Direction::N || dir == Direction::S)) {
-							tile.flipped_horizontally = !tile.flipped_horizontally;
-						}
-					} else
+					}
 
 				} break;
 				case PlayerState::SwingingSword: {

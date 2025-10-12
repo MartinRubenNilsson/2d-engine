@@ -52,20 +52,20 @@ namespace ecs {
 	}
 
 	void _dispatch_physics_events(const b2SensorEndTouchEvent& b2ev) {
-		// PITFALL: Box2D generates this type of events also when two shapes are touching
-		// and one of them is destroyed, hence we need to check here if the shapes are valid.
-		if (!b2Shape_IsValid(b2ev.sensorShapeId))
-			return;
-		if (!b2Shape_IsValid(b2ev.visitorShapeId))
-			return;
 		PhysicsEvent ev{};
 		ev.type = PhysicsEventType::SensorEndTouch;
-		ev.shape = b2ev.sensorShapeId;
-		ev.other_shape = b2ev.visitorShapeId;
-		ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
-		ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		// PITFALL: Box2D generates this type of events also when two shapes are touching
+		// and one of them is destroyed, hence we need to check here if the shapes are valid.
+		if (B2_IS_NON_NULL(b2ev.sensorShapeId)) {
+			ev.shape = b2ev.sensorShapeId;
+			ev.body = b2Shape_GetBody(b2ev.sensorShapeId);
+			ev.entity = _get_entity(ev.body);
+		}
+		if (B2_IS_NON_NULL(b2ev.visitorShapeId)) {
+			ev.other_shape = b2ev.visitorShapeId;
+			ev.other_body = b2Shape_GetBody(b2ev.visitorShapeId);
+			ev.other_entity = _get_entity(ev.other_body);
+		}
 		_dispatch_physics_event(std::move(ev));
 	}
 
@@ -82,20 +82,20 @@ namespace ecs {
 	}
 
 	void _dispatch_physics_events(const b2ContactEndTouchEvent& b2ev) {
-		// PITFALL: Box2D generates this type of events also when two shapes are touching
-		// and one of them is destroyed, hence we need to check here if the shapes are valid.
-		if (!b2Shape_IsValid(b2ev.shapeIdA))
-			return;
-		if (!b2Shape_IsValid(b2ev.shapeIdB))
-			return;
 		PhysicsEvent ev{};
 		ev.type = PhysicsEventType::ContactEndTouch;
-		ev.shape = b2ev.shapeIdA;
-		ev.other_shape = b2ev.shapeIdB;
-		ev.body = b2Shape_GetBody(b2ev.shapeIdA);
-		ev.other_body = b2Shape_GetBody(b2ev.shapeIdB);
-		ev.entity = _get_entity(ev.body);
-		ev.other_entity = _get_entity(ev.other_body);
+		// PITFALL: Box2D generates this type of events also when two shapes are touching
+		// and one of them is destroyed, hence we need to check here if the shapes are valid.
+		if (B2_IS_NON_NULL(b2ev.shapeIdA)) {
+			ev.shape = b2ev.shapeIdA;
+			ev.body = b2Shape_GetBody(b2ev.shapeIdA);
+			ev.entity = _get_entity(ev.body);
+		}
+		if (B2_IS_NON_NULL(b2ev.shapeIdB)) {
+			ev.other_shape = b2ev.shapeIdB;
+			ev.other_body = b2Shape_GetBody(b2ev.shapeIdB);
+			ev.other_entity = _get_entity(ev.other_body);
+		}
 		_dispatch_physics_event(std::move(ev));
 	}
 

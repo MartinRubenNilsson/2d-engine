@@ -11,11 +11,11 @@ namespace ecs {
 	struct PhysicsEvent {
 		PhysicsEventType type = PhysicsEventType::SensorBeginTouch;
 		b2ShapeId shape = b2_nullShapeId;
-		b2ShapeId other_shape = b2_nullShapeId;
+		b2ShapeId other_shape = b2_nullShapeId; // WARNING: may be null if for EndTouch events!
 		b2BodyId body = b2_nullBodyId;
-		b2BodyId other_body = b2_nullBodyId;
+		b2BodyId other_body = b2_nullBodyId; // WARNING: may be null if for EndTouch events!
 		entt::entity entity = entt::null;
-		entt::entity other_entity = entt::null;
+		entt::entity other_entity = entt::null; // WARNING: may be null if for EndTouch events!
 	};
 
 	using PhysicsEventHandler = void(*)(const PhysicsEvent& ev);
