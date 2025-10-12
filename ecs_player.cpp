@@ -538,8 +538,8 @@ namespace ecs {
 			return;
 		if (console::has_focus())
 			return;
-		if (ui::is_menu_or_textbox_visible())
-			return;
+		//if (ui::is_menu_or_textbox_visible())
+		//	return;
 
 		const std::span<const window::Event> events = window::get_events();
 
@@ -559,9 +559,7 @@ namespace ecs {
 	}
 
 	void update_players(float dt) {
-		if (dt > 0.f) {
-			_dispatch_window_events_to_players();
-		}
+		_dispatch_window_events_to_players();
 
 		for (auto [entity, player] : _registry.view<Player>().each()) {
 			if (player.invincibility_time > 0.f) {
