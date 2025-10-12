@@ -169,6 +169,9 @@ namespace ecs {
 	};
 
 	void _player_update_alive(entt::entity entity, float dt) {
+		if (dt == 0.f)
+			return; // Important, otherwise we can move during frozen time (e.g. when UI is open).
+
 		Player& player = _registry.get<Player>(entity);
 
 		// Update inputs.
