@@ -95,7 +95,7 @@ namespace text {
                 continue; // Nothing to draw.
 
             // How many pixels high *on screen* the text should appear.
-            const float height_on_screen = text.letter_height * screen_pixels_per_world_unit;
+            const float font_size_on_screen = text.font_size * screen_pixels_per_world_unit;
 
             Vec2f text_min = { FLT_MAX, FLT_MAX }; // Bounding box min for the entire text (in text local-space).
             Vec2f text_max = { -FLT_MAX, -FLT_MAX }; // Bounding box max for the entire text (in text local-space).
@@ -143,7 +143,7 @@ namespace text {
                     text_max = ::max(text_max, max);
 
                     // PITFALL: It's important to use height_on_screen here!
-                    GlyphTextureRect rect = get_texture_rect(*font, glyph, height_on_screen);
+                    GlyphTextureRect rect = get_texture_rect(*font, glyph, font_size_on_screen);
                     // PITFALL: I'm not sure why we need to do this to be honest...
                     std::swap(rect.min.y, rect.max.y);
 
@@ -160,7 +160,7 @@ namespace text {
                 }
 
                 // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
-                const float scale_for_screen = get_scale_for_pixel_height(*font, height_on_screen);
+                const float scale_for_screen = get_scale_for_pixel_height(*font, font_size_on_screen);
                 // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
                 const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 

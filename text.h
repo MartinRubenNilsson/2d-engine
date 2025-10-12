@@ -20,8 +20,8 @@ namespace text {
 
 	struct Text {
 		Handle<Font> font{};
+		float font_size = 8.f; // In world units (NOT screen pixels!)
 		std::u8string string; // String of Unicode codepoints; can be created using u8"...".
-		float letter_height = 8.f; // In world units (NOT screen pixels!)
 		Vec2f position; // In world units
 		TextOrigin origin = TextOrigin::Default;
 		Color color = colors::WHITE;

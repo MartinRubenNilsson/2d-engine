@@ -86,7 +86,7 @@ namespace ecs {
 	void debug_draw_terrain() {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
-		text.letter_height = 8.f;
+		text.font_size = 8.f;
 		text.origin = text::TextOrigin::MiddleCenter;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {

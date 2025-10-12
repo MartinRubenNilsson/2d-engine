@@ -199,7 +199,7 @@ namespace ecs {
 	void debug_draw_state_machines() {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
-		text.letter_height = 6.f;
+		text.font_size = 6.f;
 		text.origin = text::TextOrigin::UpperCenter;
 
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
