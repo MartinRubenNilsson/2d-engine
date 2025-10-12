@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ecs_player.h"
+#include "ecs_player_types.h"
 #include "ecs_physics.h"
 #include "ecs_physics_filters.h"
 #include "ecs_physics_events.h"

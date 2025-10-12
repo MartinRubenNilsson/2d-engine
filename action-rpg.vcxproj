@@ -261,6 +261,7 @@
     <ClInclude Include="ecs_physics_events.h" />
     <ClInclude Include="ecs_physics_queries.h" />
     <ClInclude Include="ecs_player_states.h" />
+    <ClInclude Include="ecs_player_types.h" />
     <ClInclude Include="ecs_pushable.h" />
     <ClInclude Include="ecs_slime.h" />
     <ClInclude Include="ecs_states.h" />

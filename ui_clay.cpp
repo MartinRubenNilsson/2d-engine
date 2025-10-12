@@ -13,17 +13,13 @@
 #pragma warning(pop)
 
 namespace ui {
-
 	const Clay_Color COLOR_LIGHT = Clay_Color{ 224, 215, 210, 255 };
 	const Clay_Color COLOR_RED = Clay_Color{ 168, 66, 28, 255 };
 	const Clay_Color COLOR_ORANGE = Clay_Color{ 225, 138, 50, 255 };
 
-	std::string_view _clay_string_to_string_view(const Clay_String& string) {
-		return std::string_view{ string.chars, (size_t)string.length };
-	}
-
 	void _handle_clay_errors(Clay_ErrorData error_data) {
-		console::log_error(_clay_string_to_string_view(error_data.errorText));
+		std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
+		console::log_error(text);
 	}
 
 	std::vector<uint8_t> _clay_arena_memory;
@@ -69,6 +65,7 @@ namespace ui {
 		Clay_BeginLayout();
 	}
 
+#if 0
 	// Example measure text function
 	static inline Clay_Dimensions MeasureText(Clay_StringSlice text, Clay_TextElementConfig* config, uintptr_t userData) {
 		// Clay_TextElementConfig contains members such as fontId, fontSize, letterSpacing etc
@@ -93,8 +90,10 @@ namespace ui {
 			// children go here...
 		}
 	}
+#endif
 
 	void _test_clay() {
+#if 0
 		// An example of laying out a UI with a fixed width sidebar and flexible width main content
 		CLAY({
 			.id = CLAY_ID("OuterContainer"),
@@ -182,6 +181,7 @@ namespace ui {
 				}) {}
 			}
 		}
+#endif
 	}
 
 	void end_clay_layout() {
@@ -189,9 +189,11 @@ namespace ui {
 	}
 
 	void render_clay_layout() {
-		return;
-		if (!_clay_render_commands.length) return;
+		if (!_clay_render_commands.length)
+			return;
+
 		graphics::ScopedDebugGroup debug_group("ui::render_clay_layout()");
+
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
 			switch (command.commandType) {
@@ -215,6 +217,7 @@ namespace ui {
 						(unsigned char)rectangle.backgroundColor.a
 					};
 					sprites::draw_later(sprite);
+					sprites::draw_all_now(); // TODO: optimize
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.
@@ -242,7 +245,5 @@ namespace ui {
 				} break;
 			}
 		}
-		// No need to sort, since the Clay render commands are already sorted.
-		sprites::draw_all_now();
 	}
 }

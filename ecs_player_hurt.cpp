@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ecs_player.h"
+#include "ecs_player_types.h"
 #include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "audio.h"

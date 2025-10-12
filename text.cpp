@@ -7,17 +7,21 @@
 #include "graphics_vertices.h"
 
 namespace text {
-    // Sorts by draw order.
+    std::vector<Text> _texts;
+
+    void draw_later(const Text& text) {
+        _texts.push_back(text);
+    }
+
+    // Orders the texts by draw order.
     bool operator<(const Text& a, const Text& b) {
         if (a.font != b.font)
             return a.font < b.font;
         return a.linear_sampling < b.linear_sampling; // is this correct?
     }
 
-    std::vector<Text> _texts;
-
-    void draw_later(const Text& text) {
-        _texts.push_back(text);
+    void sort_all() {
+        std::sort(_texts.begin(), _texts.end());
     }
 
     struct Batch {
@@ -58,9 +62,6 @@ namespace text {
             return;
 
         const graphics::ScopedDebugGroup debug_group(debug_group_name);
-
-        // Sort the texts by draw order.
-        std::sort(_texts.begin(), _texts.end());
 
         // Find out how many screen pixels there are per world unit.
         unsigned int framebuffer_width = 0;

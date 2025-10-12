@@ -571,6 +571,9 @@
     <ClInclude Include="ecs_player_states.h">
       <Filter>game\ecs\game\players\states</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_player_types.h">
+      <Filter>game\ecs\game\players</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -725,6 +728,9 @@
     </Filter>
     <Filter Include="game\ecs\game\players\states">
       <UniqueIdentifier>{6ca37093-cc87-435f-97f6-22f5d435a687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui">
+      <UniqueIdentifier>{85975948-44e1-49b6-9181-efb64139a60f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

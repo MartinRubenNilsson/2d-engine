@@ -30,5 +30,6 @@ namespace text {
 	};
 
 	void draw_later(const Text& text);
+	void sort_all(); // Sorts all texts by draw order.
 	void draw_all_now(std::string_view debug_group_name);
 }
