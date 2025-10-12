@@ -279,6 +279,13 @@ namespace ecs {
 			// "remembers" where it was in the walk cycle even if we change motion halfway.
 			anim.set_loop(true);
 		}
+
+		// Play footstep sounds.
+		const std::string terrain(to_string(get_terrain_at(pos)));
+		if (anim.looped()) { // TODO: need to also play sound halfway though left and right run anims
+			Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
+			audio::set_event_parameter_label(ev, "terrain", terrain);
+		}
 	}
 
 	void _player_handle_normal_window_event(entt::entity entity, const window::Event& ev) {
@@ -484,16 +491,6 @@ namespace ecs {
 			player.hurt_timer.update(dt);
 
 #if 0
-			// UPDATE AUDIO
-			{
-				std::string terrain(to_string(get_terrain_at(position)));
-				//audio::set_parameter_label("terrain", terrain);
-				if (anim.looped()) {
-					// Take a step every 3 loop
-					Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
-					audio::set_event_parameter_label(ev, "terrain", terrain);
-				}
-			}
 
 			// UPDATE POST-PROCESSING
 			postprocessing::set_darkness_center(position);
