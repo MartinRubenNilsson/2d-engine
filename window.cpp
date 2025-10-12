@@ -259,16 +259,20 @@ namespace window {
 		return glfwGetWindowMonitor(_window) != nullptr;
 	}
 
-	void set_size(int width, int height) {
-		glfwSetWindowSize(_window, width, height);
+	void set_size(const Vec2i& size) {
+		glfwSetWindowSize(_window, size.x, size.y);
 	}
 
-	void get_size(int& width, int& height) {
-		glfwGetWindowSize(_window, &width, &height);
+	Vec2i get_size() {
+		Vec2i size;
+		glfwGetWindowSize(_window, &size.x, &size.y);
+		return size;
 	}
 
-	void get_framebuffer_size(int& width, int& height) {
-		glfwGetFramebufferSize(_window, &width, &height);
+	Vec2i get_framebuffer_size() {
+		Vec2i size;
+		glfwGetFramebufferSize(_window, &size.x, &size.y);
+		return size;
 	}
 
 	void set_title(const std::string& title) {
@@ -301,12 +305,14 @@ namespace window {
 		return glfwGetInputMode(_window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
 	}
 
-	void set_cursor_pos(double x, double y) {
-		glfwSetCursorPos(_window, x, y);
+	void set_cursor_pos(const Vec2d& pos) {
+		glfwSetCursorPos(_window, pos.x, pos.y);
 	}
 
-	void get_cursor_pos(double& x, double& y) {
-		glfwGetCursorPos(_window, &x, &y);
+	Vec2d get_cursor_pos() {
+		Vec2d pos;
+		glfwGetCursorPos(_window, &pos.x, &pos.y);
+		return pos;
 	}
 
 	void set_cursor_shape(CursorShape shape) {

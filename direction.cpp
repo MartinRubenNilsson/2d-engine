@@ -22,7 +22,7 @@ bool is_ordinal(Direction d) {
 }
 
 Vec2f to_unit(Direction d) {
-	constexpr float DIV_SQRT2 = 0.7071067811865475; // = 1/sqrt(2)
+	constexpr float DIV_SQRT2 = 0.7071067811865475f; // = 1/sqrt(2)
 	switch (d) {
 		case Direction::N:  return { 0.f, -1.f };
 		case Direction::NE: return { DIV_SQRT2, -DIV_SQRT2 };

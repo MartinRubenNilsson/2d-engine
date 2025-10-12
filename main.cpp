@@ -199,12 +199,10 @@ int main(int argc, char* argv[]) {
 
         sprites::clear_statistics();
 
-        int window_framebuffer_width = 0;
-        int window_framebuffer_height = 0;
-        window::get_framebuffer_size(window_framebuffer_width, window_framebuffer_height);
+        const Vec2i window_framebuffer_size = window::get_framebuffer_size();
 
         Vec2f camera_min = { 0.f, 0.f };
-		Vec2f camera_max = { (float)window_framebuffer_width, (float)window_framebuffer_height };
+		Vec2f camera_max = window_framebuffer_size;
         if (map::is_open()) {
             ecs::get_camera_bounds(camera_min, camera_max);
         }
@@ -229,8 +227,8 @@ int main(int argc, char* argv[]) {
             graphics::FrameUniformBlock frame_ub{};
 			frame_ub.app_time = app_time;
 			frame_ub.game_time = game_time;
-			frame_ub.window_framebuffer_width = (float)window_framebuffer_width;
-			frame_ub.window_framebuffer_height = (float)window_framebuffer_height;
+			frame_ub.window_framebuffer_width = (float)window_framebuffer_size.x;
+			frame_ub.window_framebuffer_height = (float)window_framebuffer_size.y;
             memcpy(frame_ub.view_proj_matrix, view_proj_matrix, sizeof(view_proj_matrix));
             graphics::update_buffer(graphics::frame_uniform_buffer, &frame_ub, sizeof(frame_ub));
         }
@@ -273,7 +271,7 @@ int main(int argc, char* argv[]) {
             graphics::bind_vertex_shader(graphics::fullscreen_vert);
             graphics::bind_fragment_shader(graphics::fullscreen_frag);
             graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_ping_framebuffer));
-            graphics::set_viewport({ .width = (float)window_framebuffer_width, .height = (float)window_framebuffer_height });
+            graphics::set_viewport({ .width = (float)window_framebuffer_size.x, .height = (float)window_framebuffer_size.y });
 			graphics::set_primitives(graphics::Primitives::TriangleList);
             graphics::draw(3); // draw a fullscreen-covering triangle
         }

@@ -12,9 +12,9 @@ namespace settings {
 	void apply(const AppSettings& settings) {
 		window::set_fullscreen(settings.fullscreen);
 		if (!settings.fullscreen) {
-			window::set_size(
-				GAME_FRAMEBUFFER_WIDTH * settings.window_scale,
-				GAME_FRAMEBUFFER_HEIGHT * settings.window_scale);
+			window::set_size({
+				GAME_FRAMEBUFFER_WIDTH * (int)settings.window_scale,
+				GAME_FRAMEBUFFER_HEIGHT * (int)settings.window_scale });
 		}
 		graphics::set_swap_chain_sync_interval(settings.vsync ? 1 : 0);
 		audio::set_bus_volume(audio::BUS_MASTER, settings.volume_master);
