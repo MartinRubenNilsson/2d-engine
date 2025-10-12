@@ -89,7 +89,6 @@ int main(int argc, char* argv[]) {
 #endif
 
     bool debug_stats = false;
-    bool debug_textboxes = false;
     bool debug_textures = false;
 
     // GAME LOOP
@@ -129,14 +128,6 @@ int main(int argc, char* argv[]) {
                         console::toggle_visible();
                     } else if (ev.key.code == window::Key::F1) {
                         debug_stats = !debug_stats;
-                    } else if (ev.key.code == window::Key::F2) {
-                        debug_textboxes = !debug_textboxes;
-                    } else if (ev.key.code == window::Key::F3) {
-                        ecs::debug_flags ^= ecs::DEBUG_DRAW_PHYSICS;
-                    } else if (ev.key.code == window::Key::F4) {
-                        ecs::debug_flags ^= ecs::DEBUG_DRAW_AI;
-                    } else if (ev.key.code == window::Key::F5) {
-
                     } else if (ev.key.code == window::Key::F6) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {
@@ -349,9 +340,6 @@ int main(int argc, char* argv[]) {
             ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
             ImGui::End();
         }
-        if (debug_textboxes) {
-			ui::show_textbox_debug_window();
-		}
         if (debug_textures) {
             graphics::show_texture_debug_window();
         }

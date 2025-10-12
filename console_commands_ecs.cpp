@@ -10,12 +10,19 @@ namespace console {
 			.callback = [](Args) { ecs::debug_physics = !ecs::debug_physics; }
 			});
 		register_command({
-			.name = "debug_terrain",
-			.desc = "Debug draw the terrain.",
-			.params = { { ParamType::Bool, "on", "Is debug drawing on?" } },
-			.callback = [](Args args) {
-				ecs::debug_terrain = get_bool(args[0]);
-			}
+			.name = "toggle_debug_terrain",
+			.desc = "Toggle debug drawing of the terrain.",
+			.callback = [](Args args) { ecs::debug_terrain = !ecs::debug_terrain; }
+			});
+		register_command({
+			.name = "toggle_debug_states",
+			.desc = "Toggle debug drawing of state machines.",
+			.callback = [](Args args) { ecs::debug_states = !ecs::debug_states; }
+			});
+		register_command({
+			.name = "toggle_debug_tasks",
+			.desc = "Toggle debug drawing of tasks.",
+			.callback = [](Args args) { ecs::debug_tasks = !ecs::debug_tasks; }
 			});
 	}
 }

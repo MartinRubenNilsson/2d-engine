@@ -1,8 +1,6 @@
-bind o "map_open summer_forest_00"
-bind p map_close
-bind r reload_shaders
-bind f1 toggle_debug_physics
-bind t "debug_terrain true"
-bind y "debug_terrain false"
+bind f2 toggle_debug_physics
+bind f3 toggle_debug_states
+bind f4 toggle_debug_tasks
+bind f5 toggle_debug_terrain
 ui_show hud
 map_open summer_forest_00
