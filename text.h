@@ -1,7 +1,6 @@
 #pragma once
 
 namespace text {
-	// TODO: vertical alignment (baseline, ascent, descent)
 	// TODO: horizontal alignment (center each line)
 
 	struct Font;
