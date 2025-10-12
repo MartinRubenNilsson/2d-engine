@@ -25,7 +25,6 @@
 #include "ecs_lifetime.h"
 #include "ecs_patch.h"
 #include "graphics_globals.h"
-#include "timer.h"
 #include "ecs_states.h"
 #include "ecs_audio.h"
 #include "ecs_terrain.h"
@@ -60,6 +59,7 @@ namespace ecs {
 		PLAYER_TILE_ID_DYING_NE = 181,
 		PLAYER_TILE_ID_DEAD_SE = 180,
 		PLAYER_TILE_ID_DEAD_NE = 183,
+		PLAYER_TILE_ID_HURT_S = 244,
 	};
 
 	enum class PlayerMotion {
@@ -94,12 +94,13 @@ namespace ecs {
 
 		PlayerMotion motion = PlayerMotion::Motionless;
 
-		Timer hurt_timer = { 1.f };
 		int max_health = 3;
 		int health = 3;
 		int arrows = 10;
 		int bombs = 5;
 		int rupees = 10;
+
+		float invincibility_time = 0.f;
 	};
 
 	extern entt::registry _registry;
@@ -143,21 +144,19 @@ namespace ecs {
 	bool _player_handle_damage(entt::entity entity, const DamageEvent& ev) {
 		if (ev.amount <= 0) return false;
 		Player* player = _registry.try_get<Player>(entity);
-		if (!player) return false;
-		if (player->health <= 0) return false; // Player is already dead
-		if (player->hurt_timer.running()) return false; // Player is invulnerable
+		if (!player)
+			return false;
+		if (player->health <= 0)
+			return false; // Player is already dead
+		if (player->invincibility_time > 0.f)
+			return false; // Player is invincible
 		if (ev.amount <= player->health) {
 			player->health -= ev.amount;
 		} else {
 			player->health = 0;
 		}
-		add_trauma_to_active_camera(0.8f);
-		if (player->health > 0) { // Player survived
-			audio::create_event({ .path = "event:/snd_player_hurt" });
-			player->hurt_timer.start();
-		} else { // Player died
-			transition_to_state(entity, "dying");
-		}
+		add_trauma_to_active_camera(0.8f); // TODO: broken?
+		transition_to_state(entity, "hurt");
 		return true;
 	}
 
@@ -401,6 +400,20 @@ namespace ecs {
 		player.arrows--;
 	}
 
+	void _player_start_hurt(entt::entity entity) {
+		stop_moving(entity);
+		TileId& tile = _registry.get<TileId>(entity);
+		replace(tile, PLAYER_TILE_ID_HURT_S);
+		audio::create_event({ .path = "event:/player/hurt" });
+		Player& player = _registry.get<Player>(entity);
+		if (player.health > 0) {
+			player.invincibility_time = 1.f;
+			transition_to_state_later(entity, "normal", 0.2f);
+		} else {
+			transition_to_state_later(entity, "dying", 0.4f);
+		}
+	}
+
 	void _player_start_dying(entt::entity entity) {
 		remove_body(entity);
 		TileId& tile = _registry.get<TileId>(entity);
@@ -411,6 +424,7 @@ namespace ecs {
 			case Direction::N: replace(tile, PLAYER_TILE_ID_DYING_NE); break;
 			case Direction::S: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
 		}
+		audio::create_event({ .path = "event:/player/die" });
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);
 		anim.set_loop(false);
@@ -429,8 +443,7 @@ namespace ecs {
 		}
 		detach_camera(entity);
 		audio::stop_all_in_bus();
-		audio::create_event({ .path = "event:/snd_player_die" });
-		audio::create_event({ .path = "event:/mus_coffin_dance" });
+		audio::create_event({ .path = "event:/music/death_jingle" });
 		ui::open_or_enqueue_textbox_presets("player/die");
 	}
 
@@ -444,6 +457,9 @@ namespace ecs {
 			.name = "shooting",
 			.start = _player_start_shooting,
 			.update = _player_update_shooting });
+		add_state(sm, {
+			.name = "hurt",
+			.start = _player_start_hurt });
 		add_state(sm, {
 			.name = "dying",
 			.start = _player_start_dying });
@@ -532,8 +548,12 @@ namespace ecs {
 		}
 
 		for (auto [entity, player] : _registry.view<Player>().each()) {
-			player.hurt_timer.update(dt);
-
+			if (player.invincibility_time > 0.f) {
+				player.invincibility_time -= dt;
+				if (player.invincibility_time <= 0.f) {
+					player.invincibility_time = 0.f;
+				}
+			}
 #if 0
 
 			const Direction dir = player.dir;
@@ -571,21 +591,15 @@ namespace ecs {
 						player.state = PlayerState::Normal;
 					}
 				} break;
-				case PlayerState::ShootingBow: {
-					
-					if (anim.done()) {
-						player.state = PlayerState::Normal;
-					}
-				} break;
 			}
 #endif
 		}
 
 		// Update graphics.
 		for (auto [entity, player, tile, sprite] : _registry.view<Player, TileId, sprites::Sprite>().each()) {
-			if (player.hurt_timer.running()) {
+			if (player.invincibility_time > 0.f) {
 				constexpr float BLINK_PERIOD = 0.15f;
-				float fraction = fmod(player.hurt_timer.get_time(), BLINK_PERIOD) / BLINK_PERIOD;
+				float fraction = fmod(player.invincibility_time, BLINK_PERIOD) / BLINK_PERIOD;
 				sprite.color.a = (unsigned char)(255 * fraction);
 			} else {
 				sprite.color.a = 255;

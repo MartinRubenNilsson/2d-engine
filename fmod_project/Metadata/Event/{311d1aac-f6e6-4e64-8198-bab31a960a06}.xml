@@ -2,13 +2,13 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{311d1aac-f6e6-4e64-8198-bab31a960a06}">
 		<property name="name">
-			<value>mus_coffin_dance</value>
+			<value>death_jingle</value>
 		</property>
 		<property name="outputFormat">
 			<value>1</value>
 		</property>
 		<relationship name="folder">
-			<destination>{2193e7ff-7646-43d4-b0ee-a4f2213d8c77}</destination>
+			<destination>{a8fc04ed-03ad-408b-959b-cc52a667378a}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{22781119-10b6-4c21-93c4-f791b76a5289}</destination>

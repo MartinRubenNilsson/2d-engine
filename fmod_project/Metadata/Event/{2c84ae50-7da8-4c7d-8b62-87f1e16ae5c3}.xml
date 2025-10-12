@@ -2,13 +2,13 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="Event" id="{2c84ae50-7da8-4c7d-8b62-87f1e16ae5c3}">
 		<property name="name">
-			<value>snd_player_die</value>
+			<value>die</value>
 		</property>
 		<property name="outputFormat">
 			<value>1</value>
 		</property>
 		<relationship name="folder">
-			<destination>{2193e7ff-7646-43d4-b0ee-a4f2213d8c77}</destination>
+			<destination>{7b69dc1f-bff1-480e-b858-70bf50d51555}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{eabac5cb-8514-4d91-b1b0-0bfb4c96f2e6}</destination>
@@ -72,9 +72,6 @@
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{3169dda4-ca91-4859-b65f-3ad0001f1b7f}">
-		<property name="volume">
-			<value>-12.5</value>
-		</property>
 		<relationship name="effectChain">
 			<destination>{5613a2ea-19cb-42ce-9ca1-6c084649ea2a}</destination>
 		</relationship>
