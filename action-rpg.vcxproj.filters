@@ -580,6 +580,9 @@
     <ClInclude Include="ecs_player_types.h">
       <Filter>game\ecs\game\players</Filter>
     </ClInclude>
+    <ClInclude Include="rect2.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

@@ -2238,7 +2238,7 @@ void Clay__InitializePersistentMemory(Clay_Context* context) {
     context->arenaResetOffset = arena->nextAllocation;
 }
 
-const float CLAY__EPSILON = 0.01;
+const float CLAY__EPSILON = 0.01f;
 
 bool Clay__FloatEqual(float left, float right) {
     float subtracted = left - right;

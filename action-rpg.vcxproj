@@ -289,6 +289,7 @@
     <ClInclude Include="ecs_tiled_ids.h" />
     <ClInclude Include="ecs_uniform_block.h" />
     <ClInclude Include="filesystem.h" />
+    <ClInclude Include="rect2.h" />
     <ClInclude Include="text_fonts.h" />
     <ClInclude Include="kdtree_test.h" />
     <ClInclude Include="graphics_globals.h" />
