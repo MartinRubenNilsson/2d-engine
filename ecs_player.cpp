@@ -173,6 +173,44 @@ namespace ecs {
 		PLAYER_STATE_EVENT_KEY // data = window::Event
 	};
 
+	void _player_handle_alive_window_event(entt::entity entity, const window::Event& ev) {
+		Player& player = _registry.get<Player>(entity);
+
+		// Update held keys.
+		const bool key_press = (ev.type == window::EventType::KeyPress); // Otherwise release
+		switch (ev.key.code) {
+			case window::Key::Up:
+				player.holding_up_key = key_press;
+				break;
+			case window::Key::Down:
+				player.holding_down_key = key_press;
+				break;
+			case window::Key::Left:
+				player.holding_left_key = key_press;
+				break;
+			case window::Key::Right:
+				player.holding_right_key = key_press;
+				break;
+			case window::Key::LShift:
+				player.holding_shift_key = key_press;
+				break;
+			case window::Key::LControl:
+				player.holding_control_key = key_press;
+				break;
+		}
+
+		// Update inputs.
+		player.input_x = (float)player.holding_right_key - (float)player.holding_left_key;
+		player.input_y = (float)player.holding_down_key - (float)player.holding_up_key;
+		player.input_dir = normalize({ player.input_x, player.input_y });
+	}
+
+	void _player_handle_alive(entt::entity entity, const StateEvent& ev) {
+		if (ev.type == PLAYER_STATE_EVENT_KEY) {
+			_player_handle_alive_window_event(entity, *(const window::Event*)ev.data);
+		}
+	}
+
 	void _player_start_normal(entt::entity entity) {
 	}
 
@@ -295,34 +333,6 @@ namespace ecs {
 
 		Player& player = _registry.get<Player>(entity);
 		b2BodyId& body = _registry.get<b2BodyId>(entity);
-
-		// Update held keys.
-		const bool key_press = (ev.type == window::EventType::KeyPress); // Otherwise release
-		switch (ev.key.code) {
-			case window::Key::Up:
-				player.holding_up_key = key_press;
-				break;
-			case window::Key::Down:
-				player.holding_down_key = key_press;
-				break;
-			case window::Key::Left:
-				player.holding_left_key = key_press;
-				break;
-			case window::Key::Right:
-				player.holding_right_key = key_press;
-				break;
-			case window::Key::LShift:
-				player.holding_shift_key = key_press;
-				break;
-			case window::Key::LControl:
-				player.holding_control_key = key_press;
-				break;
-		}
-
-		// Update inputs.
-		player.input_x = (float)player.holding_right_key - (float)player.holding_left_key;
-		player.input_y = (float)player.holding_down_key - (float)player.holding_up_key;
-		player.input_dir = normalize({ player.input_x, player.input_y });
 		
 		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
 
@@ -449,16 +459,22 @@ namespace ecs {
 
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
+		StateId alive = add_state(sm, {
+			.name = "alive",
+			.handle = _player_handle_alive });
 		StateId normal = add_state(sm, {
 			.name = "normal",
+			.parent = alive,
 			.update = _player_update_normal,
 			.handle = _player_handle_normal });
 		add_state(sm, {
 			.name = "shooting",
+			.parent = alive,
 			.start = _player_start_shooting,
 			.update = _player_update_shooting });
 		add_state(sm, {
 			.name = "hurt",
+			.parent = alive,
 			.start = _player_start_hurt });
 		add_state(sm, {
 			.name = "dying",
