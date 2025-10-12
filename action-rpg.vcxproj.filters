@@ -556,6 +556,9 @@
     <ClInclude Include="text_stb_truetype.h">
       <Filter>graphics\text</Filter>
     </ClInclude>
+    <ClInclude Include="window_keys.h">
+      <Filter>application\window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

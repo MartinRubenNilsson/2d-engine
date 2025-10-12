@@ -339,6 +339,7 @@
     <ClInclude Include="ui_textbox.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="window_graphics.h" />
+    <ClInclude Include="window_keys.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

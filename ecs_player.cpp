@@ -81,13 +81,6 @@ namespace ecs {
 	}
 
 	struct Player {
-		bool holding_up_key = false;
-		bool holding_down_key = false;
-		bool holding_left_key = false;
-		bool holding_right_key = false;
-		bool holding_shift_key = false;
-		bool holding_control_key = false;
-
 		float input_x = 0.f; // one of -1, 0, 1
 		float input_y = 0.f; // one of -1, 0, 1
 		Vec2f input_dir = Vec2f::ZERO; // either zero or an unit vector
@@ -150,6 +143,8 @@ namespace ecs {
 			return false; // Player is already dead
 		if (player->invincibility_time > 0.f)
 			return false; // Player is invincible
+		if (get_current_state(entity) == "hurt")
+			return false; // Player is already in hurt state
 		if (ev.amount <= player->health) {
 			player->health -= ev.amount;
 		} else {
@@ -173,41 +168,30 @@ namespace ecs {
 		PLAYER_STATE_EVENT_KEY // data = window::Event
 	};
 
-	void _player_handle_alive_window_event(entt::entity entity, const window::Event& ev) {
+	void _player_update_alive(entt::entity entity, float dt) {
 		Player& player = _registry.get<Player>(entity);
 
-		// Update held keys.
-		const bool key_press = (ev.type == window::EventType::KeyPress); // Otherwise release
-		switch (ev.key.code) {
-			case window::Key::Up:
-				player.holding_up_key = key_press;
-				break;
-			case window::Key::Down:
-				player.holding_down_key = key_press;
-				break;
-			case window::Key::Left:
-				player.holding_left_key = key_press;
-				break;
-			case window::Key::Right:
-				player.holding_right_key = key_press;
-				break;
-			case window::Key::LShift:
-				player.holding_shift_key = key_press;
-				break;
-			case window::Key::LControl:
-				player.holding_control_key = key_press;
-				break;
+		// Update inputs.
+		player.input_x = (float)window::pressed(window::Key::Right) - (float)window::pressed(window::Key::Left);
+		player.input_y = (float)window::pressed(window::Key::Down) - (float)window::pressed(window::Key::Up);
+		player.input_dir = normalize({ player.input_x, player.input_y });
+
+		// Update invincibility time.
+		if (player.invincibility_time > 0.f) {
+			player.invincibility_time -= dt;
+			if (player.invincibility_time <= 0.f) {
+				player.invincibility_time = 0.f;
+			}
 		}
 
-		// Update inputs.
-		player.input_x = (float)player.holding_right_key - (float)player.holding_left_key;
-		player.input_y = (float)player.holding_down_key - (float)player.holding_up_key;
-		player.input_dir = normalize({ player.input_x, player.input_y });
-	}
-
-	void _player_handle_alive(entt::entity entity, const StateEvent& ev) {
-		if (ev.type == PLAYER_STATE_EVENT_KEY) {
-			_player_handle_alive_window_event(entity, *(const window::Event*)ev.data);
+		// Update sprite.
+		sprites::Sprite& sprite = _registry.get<sprites::Sprite>(entity);
+		if (player.invincibility_time > 0.f) {
+			constexpr float BLINK_PERIOD = 0.15f;
+			float fraction = fmod(player.invincibility_time, BLINK_PERIOD) / BLINK_PERIOD;
+			sprite.color.a = (unsigned char)(255 * fraction);
+		} else {
+			sprite.color.a = 255;
 		}
 	}
 
@@ -243,9 +227,9 @@ namespace ecs {
 		if (player.input_dir != Vec2f::ZERO) {
 			if (touching_something_in_dir) {
 				player.motion = PlayerMotion::Pushing;
-			} else if (player.holding_control_key) {
+			} else if (window::pressed(window::Key::LControl)) {
 				player.motion = PlayerMotion::Sneaking;
-			} else if (player.holding_shift_key) {
+			} else if (window::pressed(window::Key::LShift)) {
 				player.motion = PlayerMotion::Running;
 			} else {
 				player.motion = PlayerMotion::Walking;
@@ -417,11 +401,15 @@ namespace ecs {
 		audio::create_event({ .path = "event:/player/hurt" });
 		Player& player = _registry.get<Player>(entity);
 		if (player.health > 0) {
-			player.invincibility_time = 1.f;
 			transition_to_state_later(entity, "normal", 0.2f);
 		} else {
 			transition_to_state_later(entity, "dying", 0.4f);
 		}
+	}
+
+	void _player_stop_hurt(entt::entity entity) {
+		Player& player = _registry.get<Player>(entity);
+		player.invincibility_time = 1.f; // Become invincible for a time.
 	}
 
 	void _player_start_dying(entt::entity entity) {
@@ -461,7 +449,7 @@ namespace ecs {
 		StateMachine& sm = emplace_state_machine(entity);
 		StateId alive = add_state(sm, {
 			.name = "alive",
-			.handle = _player_handle_alive });
+			.update = _player_update_alive });
 		StateId normal = add_state(sm, {
 			.name = "normal",
 			.parent = alive,
@@ -475,7 +463,8 @@ namespace ecs {
 		add_state(sm, {
 			.name = "hurt",
 			.parent = alive,
-			.start = _player_start_hurt });
+			.start = _player_start_hurt,
+			.stop = _player_stop_hurt });
 		add_state(sm, {
 			.name = "dying",
 			.start = _player_start_dying });
@@ -538,8 +527,8 @@ namespace ecs {
 			return;
 		if (console::has_focus())
 			return;
-		//if (ui::is_menu_or_textbox_visible())
-		//	return;
+		if (ui::is_menu_or_textbox_visible())
+			return;
 
 		const std::span<const window::Event> events = window::get_events();
 
@@ -562,12 +551,6 @@ namespace ecs {
 		_dispatch_window_events_to_players();
 
 		for (auto [entity, player] : _registry.view<Player>().each()) {
-			if (player.invincibility_time > 0.f) {
-				player.invincibility_time -= dt;
-				if (player.invincibility_time <= 0.f) {
-					player.invincibility_time = 0.f;
-				}
-			}
 #if 0
 
 			const Direction dir = player.dir;
@@ -607,17 +590,6 @@ namespace ecs {
 				} break;
 			}
 #endif
-		}
-
-		// Update graphics.
-		for (auto [entity, player, tile, sprite] : _registry.view<Player, TileId, sprites::Sprite>().each()) {
-			if (player.invincibility_time > 0.f) {
-				constexpr float BLINK_PERIOD = 0.15f;
-				float fraction = fmod(player.invincibility_time, BLINK_PERIOD) / BLINK_PERIOD;
-				sprite.color.a = (unsigned char)(255 * fraction);
-			} else {
-				sprite.color.a = 255;
-			}
 		}
 
 		// Update hud. TODO: put in ecs_ui_hud.h or something
