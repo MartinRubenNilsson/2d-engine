@@ -158,6 +158,7 @@
     <ClCompile Include="ecs_physics_events.cpp" />
     <ClCompile Include="ecs_physics_queries.cpp" />
     <ClCompile Include="ecs_physics_setup.cpp" />
+    <ClCompile Include="ecs_player_alive.cpp" />
     <ClCompile Include="ecs_player_dead.cpp" />
     <ClCompile Include="ecs_player_dying.cpp" />
     <ClCompile Include="ecs_player_hurt.cpp" />

@@ -20,7 +20,6 @@
 #include "ecs_audio.h"
 #include "ui.h"
 #include "ecs_player_states.h"
-#include "input.h"
 
 namespace ecs {
 
@@ -86,37 +85,13 @@ namespace ecs {
 		return true;
 	}
 
-	void _player_update_alive(entt::entity entity, float dt) {
-		Player& player = _registry.get<Player>(entity);
-
-		// Update invincibility time.
-		if (player.invincibility_time > 0.f) {
-			player.invincibility_time -= dt;
-			if (player.invincibility_time <= 0.f) {
-				player.invincibility_time = 0.f;
-			}
-		}
-
-		// Update sprite.
-		sprites::Sprite& sprite = _registry.get<sprites::Sprite>(entity);
-		if (player.invincibility_time > 0.f) {
-			constexpr float BLINK_PERIOD = 0.15f;
-			float fraction = fmod(player.invincibility_time, BLINK_PERIOD) / BLINK_PERIOD;
-			sprite.color.a = (unsigned char)(255 * fraction);
-		} else {
-			sprite.color.a = 255;
-		}
-	}
-
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
-		StateId alive = add_state(sm, {
-			.name = "alive",
-			.update = _player_update_alive });
-		StateId normal = add_player_normal_state(sm, alive);
-		add_player_slashing_state(sm, alive);
-		add_player_shooting_state(sm, alive);
-		add_player_hurt_state(sm, alive);
+		StateId alive = add_player_alive_state(sm);
+			StateId normal = add_player_normal_state(sm, alive);
+			add_player_slashing_state(sm, alive);
+			add_player_shooting_state(sm, alive);
+			add_player_hurt_state(sm, alive);
 		add_player_dying_state(sm);
 		add_player_dead_state(sm);
 		transition(sm, normal, entity);
