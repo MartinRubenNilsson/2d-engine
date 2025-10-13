@@ -281,7 +281,7 @@ int main(int argc, char* argv[]) {
 
 		// RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
-        shapes::draw_all("shapes::draw_all() [ECS debug]", camera_min, camera_max);
+        shapes::draw_all_now("shapes::draw_all() [ECS debug]", camera_min, camera_max);
         shapes::update_lifetimes(game_delta_time);
 #endif
 

@@ -105,12 +105,14 @@ namespace ecs {
 				text.position += Vec2f(0.5f, 0.5f);
 				text.position *= Vec2f(_terrain_tile_size);
 
-				// TODO: culling. need text::get_bounding_box(const Text& text)
+				const Rect2f text_box = text::get_bounding_box(text);
+				if (!intersects(text_box, view))
+					continue; // The text was frustum culled.
 
 				text::draw_later(text);
 			}
 		}
 
-		text::draw_all_now("ecs::debug_draw_terrain()");
+		text::draw_all_now(__FUNCTION__);
 	}
 }

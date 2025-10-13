@@ -68,18 +68,19 @@ namespace text {
             // coordinate system with positive y down, so we need to flip the sign here.
             box.min.y = -box.min.y;
             box.max.y = -box.max.y;
+            // PITFALL: We must also swap the min.y and max.y, since the above sign flip has caused min.y > max.y.
+            std::swap(box.min.y, box.max.y);
+            // Translate the glyph box to the pen position.
             box.min += pen;
             box.max += pen;
 
-            // Update text bounding box.
+            // Expand the text bounding box to include the bounding box of the glyph.
             text_box = join(text_box, box);
 
             if (font_pixel_size > 0.f && !empty(font, glyph)) { // only add vertices for glyphs that have something to render
 
-                // PITFALL: It's important to use font_size_on_screen here!
+                // PITFALL: It's vital to use font_pixel_size here and not just text.font_size!
                 Rect2f rect = get_texture_rect(font, glyph, font_pixel_size);
-                // PITFALL: I'm not sure why we need to do this to be honest...
-                std::swap(rect.min.y, rect.max.y);
 
                 graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), text.color, Vec2f(rect.min.x, rect.min.y));
                 graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), text.color, Vec2f(rect.max.x, rect.min.y));
@@ -89,7 +90,7 @@ namespace text {
                 graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), text.color, Vec2f(rect.max.x, rect.max.y));
             }
 
-            pen.x += get_advance(font, glyph); // Advance the origin to the next glyph.
+            pen.x += get_advance(font, glyph); // Advance the pen to prepare for the next glyph.
             prev_glyph = glyph;
         }
 

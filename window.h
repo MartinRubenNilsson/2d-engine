@@ -10,8 +10,6 @@ namespace window {
 	double get_elapsed_time(); // Time since the window was created, in seconds.
 	bool should_close();
 	void set_should_close(bool should_close);
-	// Processes all pending events and populates the event queue. Call at the start of each frame.
-	void update_events();
 	bool has_focus();
 	void set_visible(bool visible);
 	bool get_visible();

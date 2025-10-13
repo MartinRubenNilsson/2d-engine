@@ -258,7 +258,7 @@ namespace shapes {
 		}
 	}
 
-	void draw_all(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
+	void draw_all_now(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
 
 		_last_calculated_view_bounds.min_x = camera_min.x;
 		_last_calculated_view_bounds.min_y = camera_min.y;
