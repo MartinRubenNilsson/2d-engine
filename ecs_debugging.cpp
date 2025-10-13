@@ -12,11 +12,12 @@ namespace ecs {
 	bool debug_tasks = false;
 
 	void debug_draw() {
+		Rect2f view{}; // TODO
 		if (debug_physics) {
 			debug_draw_physics();
 		}
 		if (debug_terrain) {
-			debug_draw_terrain();
+			debug_draw_terrain(view);
 		}
 		if (debug_states) {
 			debug_draw_state_machines();

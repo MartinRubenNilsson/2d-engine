@@ -83,23 +83,29 @@ namespace ecs {
 		_terrain.clear();
 	}
 
-	void debug_draw_terrain() {
+	void debug_draw_terrain(const Rect2f& view) {
+
 		text::Text text{};
-		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
+		text.font = text::load_font("assets/fonts/Helvetica.ttf");
 		text.font_size = 8.f;
 		text.anchor = text::TextAnchor::MiddleCenter;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {
 			for (unsigned int x = 0; x < _terrain_size.x; ++x) {
+
 				const Vec2u coord = { x, y };
 				const unsigned int id = _terrain_tile_coord_to_id(coord);
 				const TerrainType type = _terrain[id];
 				if (type == TerrainType::None) continue;
-				std::string string = std::to_string((int)type);
+
+				const std::string string = std::to_string((int)type);
 				text.string.assign(string.begin(), string.end());
 				text.position = coord;
 				text.position += Vec2f(0.5f, 0.5f);
 				text.position *= Vec2f(_terrain_tile_size);
+
+				// TODO: culling. need text::get_bounding_box(const Text& text)
+
 				text::draw_later(text);
 			}
 		}

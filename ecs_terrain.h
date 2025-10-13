@@ -18,5 +18,5 @@ namespace ecs {
 
 	void setup_terrain(MapId map);
 	void clear_terrain();
-	void debug_draw_terrain();
+	void debug_draw_terrain(const Rect2f& view);
 }
