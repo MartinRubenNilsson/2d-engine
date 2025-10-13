@@ -27,6 +27,20 @@ namespace input {
 		return _released_keys[_to_index(key)];
 	}
 
+	float get_x_axis() {
+		return (float)held(Key::Right) - (float)held(Key::Left);
+	}
+
+	float get_y_axis() {
+		return (float)held(Key::Down) - (float)held(Key::Up);
+	}
+
+	Vec2f get_dir() {
+		const float x_axis = get_x_axis();
+		const float y_axis = get_y_axis();
+		return normalize({ x_axis, y_axis });
+	}
+
 	void update() {
 		_pressed_keys.reset();
 		_released_keys.reset();

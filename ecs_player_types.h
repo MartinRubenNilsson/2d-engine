@@ -43,10 +43,6 @@ namespace ecs {
 	};
 
 	struct Player {
-		float input_x = 0.f; // one of -1, 0, 1
-		float input_y = 0.f; // one of -1, 0, 1
-		Vec2f input_dir = Vec2f::ZERO; // either zero or an unit vector
-
 		PlayerMotion motion = PlayerMotion::Motionless;
 
 		int max_health = 3;

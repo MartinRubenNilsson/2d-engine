@@ -36,9 +36,11 @@ namespace ecs {
 		const Vec2f vel = b2Body_GetLinearVelocity(body);
 		const float speed = length(vel);
 
+		const Vec2f input_dir = input::get_dir();
+
 		// Update direction.
-		if (player.input_dir != Vec2f::ZERO) {
-			dir = to_cardinal(player.input_dir);
+		if (input::get_dir() != Vec2f::ZERO) {
+			dir = to_cardinal(input_dir);
 		}
 
 		// Figure out if we're touching anything in the direction of motion.
@@ -50,7 +52,7 @@ namespace ecs {
 
 		// Update motion.
 		player.motion = PlayerMotion::Motionless;
-		if (player.input_dir != Vec2f::ZERO) {
+		if (input_dir != Vec2f::ZERO) {
 			if (touching_something_in_dir) {
 				player.motion = PlayerMotion::Pushing;
 			} else if (input::held(input::Key::LControl)) {
@@ -64,7 +66,7 @@ namespace ecs {
 
 		// Set desired velocity.
 		const float desired_speed = _get_desired_speed(player.motion);
-		const Vec2f desired_vel = desired_speed * player.input_dir;
+		const Vec2f desired_vel = desired_speed * input_dir;
 		b2Body_SetLinearVelocity(body, desired_vel);
 
 		// Update tile depending on motion. Note that the tileset only has right-facing tiles
@@ -141,7 +143,7 @@ namespace ecs {
 		// Should interact?
 		if (input::pressed(input::Key::C)) {
 			// Interact with everything one tile in front of the player.
-			const Vec2f center = pos + player.input_dir * 16.f;
+			const Vec2f center = pos + input_dir * 16.f;
 			const Vec2f min = center - Vec2f(6.f, 6.f);
 			const Vec2f max = center + Vec2f(6.f, 6.f);
 			interact_with_all_in_box(min, max);
@@ -160,7 +162,7 @@ namespace ecs {
 		// Should place bomb?
 		if (input::pressed(input::Key::Z) && player.bombs > 0) {
 			// Place a bomb one tile in front of the player.
-			const Vec2f bomb_pos = pos + player.input_dir * 16.f;
+			const Vec2f bomb_pos = pos + to_unit(dir) * 16.f;
 			if (create_bomb_at(bomb_pos) != entt::null) {
 				player.bombs--;
 				audio::create_event({ .path = "event:/player/place_bomb" });
