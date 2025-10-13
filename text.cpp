@@ -64,11 +64,9 @@ namespace text {
         const graphics::ScopedDebugGroup debug_group(debug_group_name);
 
         // Find out how many screen pixels there are per world unit.
-        unsigned int framebuffer_width = 0;
-        unsigned int framebuffer_height = 0;
-        graphics::get_texture_size(graphics::get_framebuffer_texture(graphics::final_framebuffer),
-            framebuffer_width, framebuffer_height);
-        const float screen_pixels_per_world_unit = (float)framebuffer_height / GAME_FRAMEBUFFER_HEIGHT;
+        const Vec2u framebuffer_size = graphics::get_texture_size(
+            graphics::get_framebuffer_texture(graphics::final_framebuffer));
+        const float screen_pixels_per_world_unit = (float)framebuffer_size.y / GAME_FRAMEBUFFER_HEIGHT;
 
         // Preallocate storage for the vertices.
         graphics::temp_vertices.clear();

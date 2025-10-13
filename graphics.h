@@ -74,7 +74,7 @@ namespace graphics {
 	void bind_texture(unsigned int binding, Handle<Texture> handle);
 	void update_texture(Handle<Texture> handle, const unsigned char* data);
 	void copy_texture(Handle<Texture> dest, Handle<Texture> src);
-	void get_texture_size(Handle<Texture> handle, unsigned int& width, unsigned int& height);
+	Vec2u get_texture_size(Handle<Texture> handle);
 
 	Handle<Sampler> create_sampler(SamplerDesc&& desc);
 	void destroy_sampler(Handle<Sampler> handle);

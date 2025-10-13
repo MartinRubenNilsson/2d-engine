@@ -558,14 +558,13 @@ namespace graphics {
 			src_texture->desc.width, src_texture->desc.height, 1);
 	}
 
-	void get_texture_size(Handle<Texture> handle, unsigned int& width, unsigned int& height) {
+	Vec2u get_texture_size(Handle<Texture> handle) {
+		Vec2u size;
 		if (const Texture* texture = _texture_pool.get(handle)) {
-			width = texture->desc.width;
-			height = texture->desc.height;
-		} else {
-			width = 0;
-			height = 0;
+			size.x = texture->desc.width;
+			size.y = texture->desc.height;
 		}
+		return size;
 	}
 
 	Handle<Sampler> create_sampler(SamplerDesc&& desc) {

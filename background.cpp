@@ -18,8 +18,7 @@ namespace background
 	struct Layer
 	{
 		Handle<graphics::Texture> texture;
-		unsigned int texture_width = 0;
-		unsigned int texture_height = 0;
+		Vec2u texture_size;
 		float offset_x = 0.f;
 	};
 
@@ -41,7 +40,7 @@ namespace background
 				if (texture == Handle<graphics::Texture>()) continue;
 				Layer& layer = _layers.emplace_back();
 				layer.texture = texture;
-				graphics::get_texture_size(texture, layer.texture_width, layer.texture_height);
+				layer.texture_size = graphics::get_texture_size(texture);
 			}
 		} break;
 		}
@@ -53,8 +52,8 @@ namespace background
 		for (size_t i = 0; i < _layers.size(); ++i) {
 			Layer& layer = _layers[i];
 			layer.offset_x += i * i * i * dt; // different layers scroll at different speeds
-			if (layer.offset_x >= layer.texture_width) {
-				layer.offset_x -= layer.texture_width; // wrap around
+			if (layer.offset_x >= layer.texture_size.x) {
+				layer.offset_x -= layer.texture_size.x; // wrap around
 			}
 		}
 	}
@@ -67,10 +66,10 @@ namespace background
 		sprites::Sprite sprite{};
 		for (const Layer& layer : _layers) {
 			if (layer.texture == Handle<graphics::Texture>()) continue;
-			if (!layer.texture_width) continue;
+			if (!layer.texture_size.x) continue;
 			sprite.texture = layer.texture;
-			sprite.size = { (float)layer.texture_width, (float)layer.texture_height };
-			for (float x = camera_min.x - layer.offset_x; x < camera_max.x; x += layer.texture_width) {
+			sprite.size = layer.texture_size;
+			for (float x = camera_min.x - layer.offset_x; x < camera_max.x; x += layer.texture_size.x) {
 				sprite.position = { x, camera_min.y };
 				sprites::draw_later(sprite);
 			}

@@ -101,11 +101,9 @@ namespace ui {
 	Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) {
 		const Handle<graphics::Texture> texture = graphics::load_texture(source);
 		if (texture == Handle<graphics::Texture>()) return Rml::TextureHandle();
-		unsigned int width = 0;
-		unsigned int height = 0;
-		graphics::get_texture_size(texture, width, height);
-		texture_dimensions.x = width;
-		texture_dimensions.y = height;
+		const Vec2u size = graphics::get_texture_size(texture);
+		texture_dimensions.x = size.x;
+		texture_dimensions.y = size.y;
 		return _texture_handle_to_rml(texture);
 	}
 
