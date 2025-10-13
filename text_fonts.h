@@ -38,8 +38,8 @@ namespace text {
 	// by the value returned by get_scale_for_font_size() to get correct results.
 	Rect2i get_bounding_box(const Font& font, GlyphId glyph);
 	// Get the texture rect of the glyph in the font texture atlas. If the glyph isn't already
-	// in the atlas it will be written to it. The same glyph can have different texture rects
-	// for different pixel heights. The coordinates are in UV-space (normalized coordinates).
+	// in the atlas it will be written to it. The same glyph will have different texture rects
+	// for different font sizes. The coordinates are in UV-space (normalized coordinates).
 	Rect2f get_texture_rect(Font& font, GlyphId glyph, float font_size);
 
 	bool atlas_texture_needs_updating(const Font& font);
