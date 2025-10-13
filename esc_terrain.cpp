@@ -41,6 +41,7 @@ namespace ecs {
 	extern entt::registry _registry;
 
 	void setup_terrain(MapId map) {
+
 		// We subdivide each map tile into 4 terrain tiles, one for each corner,
 		// hence the terrain size in tiles becomes twice the map size.
 		_terrain_tile_size = get_tile_size(map) / 2u;

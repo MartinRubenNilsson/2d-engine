@@ -197,6 +197,7 @@ namespace ecs {
 	}
 
 	void debug_draw_state_machines() {
+
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 6.f;

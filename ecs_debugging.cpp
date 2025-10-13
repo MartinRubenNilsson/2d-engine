@@ -11,8 +11,7 @@ namespace ecs {
 	bool debug_states = false;
 	bool debug_tasks = false;
 
-	void debug_draw() {
-		Rect2f view{}; // TODO
+	void debug_draw(const Rect2f& view) {
 		if (debug_physics) {
 			debug_draw_physics();
 		}
