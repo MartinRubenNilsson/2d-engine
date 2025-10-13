@@ -21,7 +21,7 @@ struct Vec2 {
 		return { static_cast<float>(x), static_cast<float>(y) };
 	}
 
-	constexpr auto operator<=>(const Vec2<T>&) const = default;
+	constexpr auto operator<=>(const Vec2&) const = default;
 
 	static const Vec2 ZERO;
 	static const Vec2 MIN; // negative infinity for signed types, zero for unsigned types

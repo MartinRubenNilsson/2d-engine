@@ -6,8 +6,15 @@ struct Rect2 {
 	Vec2<T> min{};
 	Vec2<T> max{};
 
+	template <typename U>
+	constexpr operator Rect2<U>() const {
+		return { static_cast<Vec2<U>>(min), static_cast<Vec2<U>>(max) };
+	}
+
+	constexpr auto operator<=>(const Rect2&) const = default;
+
 	static const Rect2 ZERO;
-	static const Rect2 EMPTY; // min = Vec2::MAX, max = Vec2::MIN
+	static const Rect2 EMPTY;
 };
 
 template <typename T> const Rect2<T> Rect2<T>::ZERO{ Vec2<T>::ZERO, Vec2<T>::ZERO };
@@ -58,14 +65,14 @@ bool intersects(const Rect2<T>& r1, const Rect2<T>& r2) {
 
 template <typename T>
 Rect2<T> intersection(const Rect2<T>& r1, const Rect2<T>& r2) {
-	return { { max(r1.min.x, r2.min.x), max(r1.min.y, r2.min.y) },
-			 { min(r1.max.x, r2.max.x), min(r1.max.y, r2.max.y) } };
+	return { { std::max(r1.min.x, r2.min.x), std::max(r1.min.y, r2.min.y) },
+			 { std::min(r1.max.x, r2.max.x), std::min(r1.max.y, r2.max.y) } };
 }
 
 template <typename T>
 Rect2<T> join(const Rect2<T>& r1, const Rect2<T>& r2) { // aka "union", but that keyword is taken
-	return { { min(r1.min.x, r2.min.x), min(r1.min.y, r2.min.y) },
-			 { max(r1.max.x, r2.max.x), max(r1.max.y, r2.max.y) } };
+	return { { std::min(r1.min.x, r2.min.x), std::min(r1.min.y, r2.min.y) },
+			 { std::max(r1.max.x, r2.max.x), std::max(r1.max.y, r2.max.y) } };
 }
 
 using Rect2i = Rect2<int>;

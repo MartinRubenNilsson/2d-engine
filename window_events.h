@@ -68,8 +68,12 @@ namespace window {
 		};
 	};
 
+	// PITFALL: New events may be (unintentionally?) created in the middle of a frame by calling certain functions,
+	// e.g. calling window::set_size() will create a new SizeEvent. To ensure that each system recieves this event
+	// one and only one time, we double buffer the events. Newly created events are added to a "back buffer" while
+	// get_events() returns a "front buffer". update_events() swaps these and clears the back buffer.
 	std::span<const Event> get_events();
 
-	void clear_events();
-	void add_event(const Event& ev);
+	// Call as early as possible each frame.
+	void update_events();
 }

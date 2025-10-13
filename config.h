@@ -19,6 +19,5 @@
 #define _DEBUG_RENDERDOC
 #define _DEBUG_IMGUI
 #define _DEBUG_GRAPHICS
-#define _DEBUG_PHYSICS
 #define _DEBUG_UI
 #endif

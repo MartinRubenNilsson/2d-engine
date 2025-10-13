@@ -201,7 +201,7 @@ namespace text {
 
 	// Returns the new texture rect (in UV-space). You need to call update_atlas_texture()
 	// after calling this in order for the texture on the GPU to recieve the changes.
-	Rect2f _pack_glyph_in_atlas(Font& font, int glyph_index, float font_size) {
+	Rect2f _pack_and_rasterize_glyph_to_atlas(Font& font, int glyph_index, float font_size) {
 		stbtt_packedchar packed_char{};
 		stbtt_pack_range pack_range{};
 		pack_range.first_glyph_index_in_range = glyph_index;
@@ -238,7 +238,7 @@ namespace text {
 		// texture atlas. Then we record the result in the table so we can look it up in the future.
 		entry.glyph_texture_rect_index = (int)font.glyph_tex_rects.size();
 		table.insert(table.begin() + first, entry);
-		Rect2f tex_rect = _pack_glyph_in_atlas(font, glyph.index, font_size);
+		Rect2f tex_rect = _pack_and_rasterize_glyph_to_atlas(font, glyph.index, font_size);
 		font.glyph_tex_rects.push_back(tex_rect);
 		return tex_rect;
 	}

@@ -1,7 +1,5 @@
 #include "stdafx.h"
-#ifdef _DEBUG_PHYSICS
 #include "shapes.h"
-#include "ecs_physics.h"
 
 namespace ecs {
 	Color _to_color(b2HexColor hex_color) {
@@ -56,6 +54,8 @@ namespace ecs {
 	extern b2WorldId _physics_world;
 
 	void debug_draw_physics() {
+		// TODO: shapes::clear
+
 		b2DebugDraw debug_draw{};
 		debug_draw.DrawPolygonFcn = _b2_debug_draw_polygon;
 		debug_draw.DrawSolidPolygonFcn = _b2_debug_draw_solid_polygon;
@@ -70,13 +70,7 @@ namespace ecs {
 		debug_draw.drawContacts = true;
 		debug_draw.drawContactNormals = true;
 		b2World_Draw(_physics_world, &debug_draw);
+
+		// TODO: shapes::draw_all_now()
 	}
 }
-
-#else
-
-namespace ecs {
-	void debug_draw_physics() {}
-}
-
-#endif
