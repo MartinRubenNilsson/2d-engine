@@ -6,7 +6,10 @@ namespace text {
 	struct Font;
 
 	enum class TextAnchor : uint8_t {
-		Default, // Origin is at the first row's baseline (so the first row will extend above the origin).
+		// The default position of the anchor is at the first row's baseline, where the imaginary "pen" that
+		// that draws the glyphs has its starting position. This means that the glyphs on the first line will
+		// typically extend *above* Text::position. 
+		Default,
 		UpperLeft,
 		UpperCenter,
 		UpperRight,
