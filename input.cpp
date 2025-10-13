@@ -3,6 +3,7 @@
 #include "window.h"
 #include "window_events.h"
 #include "console.h"
+#include "ui.h"
 
 namespace input {
 	constexpr size_t KEY_COUNT = (size_t)Key::Last - (size_t)Key::First + 1;
@@ -41,11 +42,21 @@ namespace input {
 		return normalize({ x_axis, y_axis });
 	}
 
+	bool _should_capture_input() {
+		if (!window::has_focus())
+			return false;
+		if (console::has_focus())
+			return false;
+		if (ui::is_menu_or_textbox_visible()) // TODO: this should be "ui::has_focus()" or something!!!
+			return false;
+		return true;
+	}
+
 	void update() {
 		_pressed_keys.reset();
 		_released_keys.reset();
 
-		if (!window::has_focus() || console::has_focus()) {
+		if (!_should_capture_input()) {
 			_held_keys.reset();
 			return;
 		}
