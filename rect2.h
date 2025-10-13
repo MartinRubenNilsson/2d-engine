@@ -5,7 +5,13 @@ template <typename T>
 struct Rect2 {
 	Vec2<T> min{};
 	Vec2<T> max{};
+
+	static const Rect2 ZERO;
+	static const Rect2 EMPTY; // min = Vec2::MAX, max = Vec2::MIN
 };
+
+template <typename T> const Rect2<T> Rect2<T>::ZERO{ Vec2<T>::ZERO, Vec2<T>::ZERO };
+template <typename T> const Rect2<T> Rect2<T>::EMPTY{ Vec2<T>::MAX, Vec2<T>::MIN };
 
 template <typename T>
 bool empty(const Vec2<T>& min, const Vec2<T>& max) {

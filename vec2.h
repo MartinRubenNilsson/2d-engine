@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 
 struct b2Vec2;
 
@@ -23,11 +24,15 @@ struct Vec2 {
 	constexpr auto operator<=>(const Vec2<T>&) const = default;
 
 	static const Vec2 ZERO;
+	static const Vec2 MIN; // negative infinity for signed types, zero for unsigned types
+	static const Vec2 MAX; // positive infinity for both signed and unsigned types
 	static const Vec2 UNIT_X;
 	static const Vec2 UNIT_Y;
 };
 
 template <typename T> const Vec2<T> Vec2<T>::ZERO{ 0, 0 };
+template <typename T> const Vec2<T> Vec2<T>::MIN{ std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest() };
+template <typename T> const Vec2<T> Vec2<T>::MAX{ std::numeric_limits<T>::max(), std::numeric_limits<T>::max() };
 template <typename T> const Vec2<T> Vec2<T>::UNIT_X{ 1, 0 };
 template <typename T> const Vec2<T> Vec2<T>::UNIT_Y{ 0, 1 };
 
