@@ -39,12 +39,27 @@ bool contains(const Rect2<T>& r1, const Rect2<T>& r2) {
 
 template <typename T>
 bool intersects(const Rect2<T>& r1, const Rect2<T>& r2) {
-	return false; //TODO
+	if (r1.max.x < r2.min.x)
+		return false;
+	if (r1.max.y < r2.min.y)
+		return false;
+	if (r2.max.x < r1.min.x)
+		return false;
+	if (r2.max.y < r1.min.y)
+		return false;
+	return true;
 }
 
 template <typename T>
 Rect2<T> intersection(const Rect2<T>& r1, const Rect2<T>& r2) {
-	return { }; // TODO
+	return { { max(r1.min.x, r2.min.x), max(r1.min.y, r2.min.y) },
+			 { min(r1.max.x, r2.max.x), min(r1.max.y, r2.max.y) } };
+}
+
+template <typename T>
+Rect2<T> join(const Rect2<T>& r1, const Rect2<T>& r2) { // aka "union", but that keyword is taken
+	return { { min(r1.min.x, r2.min.x), min(r1.min.y, r2.min.y) },
+			 { max(r1.max.x, r2.max.x), max(r1.max.y, r2.max.y) } };
 }
 
 using Rect2i = Rect2<int>;
