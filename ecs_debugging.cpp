@@ -11,7 +11,7 @@ namespace ecs {
 	bool debug_states = false;
 	bool debug_tasks = false;
 
-	void debug() {
+	void debug_draw() {
 		if (debug_physics) {
 			debug_draw_physics();
 		}

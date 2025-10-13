@@ -2,7 +2,6 @@
 #include "ecs_player.h"
 #include "ecs_player_types.h"
 #include "ecs_physics.h"
-#include "ecs_physics_filters.h"
 #include "ecs_physics_events.h"
 #include "ecs_sprites.h"
 #include "ecs_animations.h"
@@ -13,8 +12,6 @@
 #include "player_outfit.h"
 #include "console.h"
 #include "audio.h"
-#include "window.h"
-#include "window_events.h"
 #include "ui_bindings.h"
 #include "postprocessing.h"
 #include "ecs_pickups.h"
@@ -28,8 +25,8 @@
 #include "ecs_audio.h"
 #include "ecs_terrain.h"
 #include "ui.h"
-#include "ecs_states.h"
 #include "ecs_player_states.h"
+#include "input.h"
 
 namespace ecs {
 
@@ -105,10 +102,6 @@ namespace ecs {
 		}
 	}
 
-	enum PLAYER_STATE_EVENT {
-		PLAYER_STATE_EVENT_KEY // data = window::Event
-	};
-
 	void _player_update_alive(entt::entity entity, float dt) {
 		if (dt == 0.f)
 			return; // Important, otherwise we can move during frozen time (e.g. when UI is open).
@@ -116,8 +109,8 @@ namespace ecs {
 		Player& player = _registry.get<Player>(entity);
 
 		// Update inputs.
-		player.input_x = (float)window::pressed(window::Key::Right) - (float)window::pressed(window::Key::Left);
-		player.input_y = (float)window::pressed(window::Key::Down) - (float)window::pressed(window::Key::Up);
+		player.input_x = (float)input::held(input::Key::Right) - (float)input::held(input::Key::Left);
+		player.input_y = (float)input::held(input::Key::Down) - (float)input::held(input::Key::Up);
 		player.input_dir = normalize({ player.input_x, player.input_y });
 
 		// Update invincibility time.
@@ -171,9 +164,9 @@ namespace ecs {
 		if (player.input_dir != Vec2f::ZERO) {
 			if (touching_something_in_dir) {
 				player.motion = PlayerMotion::Pushing;
-			} else if (window::pressed(window::Key::LControl)) {
+			} else if (input::held(input::Key::LControl)) {
 				player.motion = PlayerMotion::Sneaking;
-			} else if (window::pressed(window::Key::LShift)) {
+			} else if (input::held(input::Key::LShift)) {
 				player.motion = PlayerMotion::Running;
 			} else {
 				player.motion = PlayerMotion::Walking;
@@ -255,17 +248,9 @@ namespace ecs {
 
 		// Update postprocessing. TODO: this should be in another place
 		postprocessing::set_darkness_center(pos);
-	}
-
-	void _player_handle_normal_window_event(entt::entity entity, const window::Event& ev) {
-
-		Player& player = _registry.get<Player>(entity);
-		b2BodyId& body = _registry.get<b2BodyId>(entity);
-		
-		const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
 
 		// Should interact?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::C) {
+		if (input::pressed(input::Key::C)) {
 			// Interact with everything one tile in front of the player.
 			const Vec2f center = pos + player.input_dir * 16.f;
 			const Vec2f min = center - Vec2f(6.f, 6.f);
@@ -274,17 +259,17 @@ namespace ecs {
 		}
 
 		// Should attack?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Space) {
+		if (input::pressed(input::Key::Space)) {
 			transition_to_state(entity, "slashing");
 		}
 
 		// Should shoot bow?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::X && player.arrows > 0) {
+		if (input::pressed(input::Key::X) && player.arrows > 0) {
 			transition_to_state(entity, "shooting");
 		}
 
 		// Should place bomb?
-		if (ev.type == window::EventType::KeyPress && ev.key.code == window::Key::Z && player.bombs > 0) {
+		if (input::pressed(input::Key::Z) && player.bombs > 0) {
 			// Place a bomb one tile in front of the player.
 			const Vec2f bomb_pos = pos + player.input_dir * 16.f;
 			if (create_bomb_at(bomb_pos) != entt::null) {
@@ -296,12 +281,6 @@ namespace ecs {
 		}
 	}
 
-	void _player_handle_normal(entt::entity entity, const StateEvent& ev) {
-		if (ev.type == PLAYER_STATE_EVENT_KEY) {
-			_player_handle_normal_window_event(entity, *(const window::Event*)ev.data);
-		}
-	}
-
 	void _emplace_player_state_machine(entt::entity entity) {
 		StateMachine& sm = emplace_state_machine(entity);
 		StateId alive = add_state(sm, {
@@ -310,8 +289,7 @@ namespace ecs {
 		StateId normal = add_state(sm, {
 			.name = "normal",
 			.parent = alive,
-			.update = _player_update_normal,
-			.handle = _player_handle_normal });
+			.update = _player_update_normal });
 		add_player_slashing_state(sm, alive);
 		add_player_shooting_state(sm, alive);
 		add_player_hurt_state(sm, alive);
@@ -369,32 +347,11 @@ namespace ecs {
 	}
 
 	void _dispatch_window_events_to_players() {
-		if (!window::has_focus())
-			return;
-		if (console::has_focus())
-			return;
 		if (ui::is_menu_or_textbox_visible())
 			return;
-
-		const std::span<const window::Event> events = window::get_events();
-
-		for (auto [entity] : _registry.view<Type<Tag::Player>>().each()) {
-			for (const window::Event& ev : events) {
-				if (ev.type != window::EventType::KeyPress &&
-					ev.type != window::EventType::KeyRelease) {
-					continue;
-				}
-				// Dispatch the window event to the player state machine.
-				StateEvent state_ev{};
-				state_ev.type = PLAYER_STATE_EVENT_KEY;
-				state_ev.data = &ev;
-				handle(entity, state_ev);
-			}
-		}
 	}
 
 	void update_players(float dt) {
-		_dispatch_window_events_to_players();
 
 		// Update hud. TODO: put in ecs_ui_hud.h or something
 		for (auto [entity, player] : _registry.view<Player>().each()) {

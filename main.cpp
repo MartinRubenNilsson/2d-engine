@@ -7,9 +7,7 @@
 #include "window_events.h"
 #include "audio.h"
 #include "ui.h"
-#include "ui_hud.h"
 #include "ui_menus.h"
-#include "ui_textbox.h"
 #include "map.h"
 #include "ecs.h"
 #include "console.h"
@@ -22,6 +20,7 @@
 #include "sprites.h"
 #include "renderdoc.h"
 #include "imgui_impl.h"
+#include "input.h"
 
 int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "en_US.utf8");
@@ -104,6 +103,7 @@ int main(int argc, char* argv[]) {
 
         steam::run_message_loop();
         window::update_events();
+        input::update();
 
 #ifdef _DEBUG_IMGUI
         // TODO: should this be moved to after the window event loop?
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
         }
 
 #ifdef _DEBUG
-        ecs::debug();
+        ecs::debug_draw();
 
 		// RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 

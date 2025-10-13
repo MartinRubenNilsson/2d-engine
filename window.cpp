@@ -362,8 +362,4 @@ namespace window {
 		return { extensions, count };
 	}
 #endif
-
-	bool pressed(Key key) {
-		return glfwGetKey(_window, (int)key) == GLFW_PRESS;
-	}
 }

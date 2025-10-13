@@ -126,16 +126,13 @@ namespace window {
 		RSuper = 347,
 		Menu = 348,
 
-		FirstKey = Space,
-		LastKey = Menu,
+		First = Space,
+		Last = Menu,
 	};
-
-	// True if the key is currently being held down.
-	bool pressed(Key key);
 }
 
 template <>
 struct magic_enum::customize::enum_range<window::Key> {
-	static constexpr int min = (int)window::Key::FirstKey;
-	static constexpr int max = (int)window::Key::LastKey;
+	static constexpr int min = (int)window::Key::First;
+	static constexpr int max = (int)window::Key::Last;
 };

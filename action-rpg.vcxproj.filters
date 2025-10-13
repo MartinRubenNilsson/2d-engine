@@ -299,6 +299,7 @@
     <ClCompile Include="ecs_debugging.cpp">
       <Filter>game\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -589,6 +590,7 @@
     <ClInclude Include="ecs_debugging.h">
       <Filter>game\ecs</Filter>
     </ClInclude>
+    <ClInclude Include="input.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
