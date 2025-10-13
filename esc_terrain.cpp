@@ -28,11 +28,14 @@ namespace ecs {
 		return coord.x + coord.y * _terrain_size.x;
 	}
 
-	TerrainType get_terrain_at(const Vec2f& position) {
+	Vec2u _position_to_terrain_tile_coord(const Vec2f& position) {
 		if (_terrain_tile_size.x == 0 || _terrain_tile_size.y == 0)
-			return TerrainType::None;
-		const Vec2 coord = floor(position / (Vec2f)_terrain_tile_size);
-		const const unsigned int id = _terrain_tile_coord_to_id(coord);
+			return Vec2u::ZERO;
+		return floor(position / (Vec2f)_terrain_tile_size);
+	}
+
+	TerrainType get_terrain_at(const Vec2f& position) {
+		const unsigned int id = _terrain_tile_coord_to_id(_position_to_terrain_tile_coord(position));
 		if (id >= _terrain.size())
 			return TerrainType::None;
 		return _terrain[id];
@@ -85,29 +88,34 @@ namespace ecs {
 	}
 
 	void debug_draw_terrain(const Rect2f& view) {
+		if (_terrain_size.x == 0 || _terrain_size.y == 0)
+			return;
+
+		Vec2u min = _position_to_terrain_tile_coord(view.min);
+		Vec2u max = _position_to_terrain_tile_coord(view.max);
+		max = ::min(max, _terrain_size - Vec2u(1, 1));
+		min = ::min(min, max);
 
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");
 		text.font_size = 8.f;
 		text.anchor = text::TextAnchor::MiddleCenter;
 
-		for (unsigned int y = 0; y < _terrain_size.y; ++y) {
-			for (unsigned int x = 0; x < _terrain_size.x; ++x) {
+		for (unsigned int y = min.y; y <= max.y; ++y) {
+			for (unsigned int x = min.x; x <= max.x; ++x) {
 
 				const Vec2u coord = { x, y };
 				const unsigned int id = _terrain_tile_coord_to_id(coord);
 				const TerrainType type = _terrain[id];
-				if (type == TerrainType::None) continue;
+				if (type == TerrainType::None)
+					continue;
 
 				const std::string string = std::to_string((int)type);
 				text.string.assign(string.begin(), string.end());
 				text.position = coord;
 				text.position += Vec2f(0.5f, 0.5f);
 				text.position *= Vec2f(_terrain_tile_size);
-
-				const Rect2f text_box = text::get_bounding_box(text);
-				if (!intersects(text_box, view))
-					continue; // The text was frustum culled.
+				// TODO: color
 
 				text::draw_later(text);
 			}

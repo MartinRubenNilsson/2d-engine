@@ -7,7 +7,7 @@ namespace random
 	int range_i(int min, int max);
 	unsigned int range_ui(unsigned int min, unsigned int max);
 	Color color();
-	Color color(uint32_t seed);
+	Color color(unsigned int seed);
 	Vec2f on_circle(float radius = 1.f);
 	Vec2f in_circle(float radius = 1.f);
 	float perlin_noise(float x, float y = 0.f, float z = 0.f);
