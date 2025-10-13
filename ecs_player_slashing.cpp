@@ -36,7 +36,7 @@ namespace ecs {
 
 	void _player_update_slashing(entt::entity entity, float dt) {
 		const TileAnimation& anim = _registry.get<TileAnimation>(entity);
-		// Check if the animation just arrived at the "release" frame.
+		// Check if the animation just arrived at the "done" frame.
 		if (!anim.frame_changed()) return;
 		const TileId frame = anim.get_frame();
 		if (frame.id != PLAYER_TILE_ID_SLASH_DONE_E &&
