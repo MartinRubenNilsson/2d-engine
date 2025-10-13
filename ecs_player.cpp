@@ -18,7 +18,6 @@
 #include "graphics_globals.h"
 #include "ecs_states.h"
 #include "ecs_audio.h"
-#include "ui.h"
 #include "ecs_player_states.h"
 
 namespace ecs {
@@ -143,11 +142,6 @@ namespace ecs {
 		if (!patch.portal_to_exit.empty()) {
 			_teleport_players_to_portal(patch.portal_to_exit);
 		}
-	}
-
-	void _dispatch_window_events_to_players() {
-		if (ui::is_menu_or_textbox_visible())
-			return;
 	}
 
 	void update_players(float dt) {
