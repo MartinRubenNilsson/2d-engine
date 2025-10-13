@@ -157,8 +157,6 @@ namespace text {
                         graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(rect.max.x, rect.max.y));
 
                         vertex_count += 6;
-                    } else {
-                        vertex_count += 0;
                     }
 
                     glyph_origin.x += get_advance(*font, glyph); // Advance the origin to the next glyph.
