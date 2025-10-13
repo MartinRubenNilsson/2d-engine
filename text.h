@@ -24,7 +24,7 @@ namespace text {
 	struct Text {
 		Handle<Font> font{};
 		float font_size = 8.f; // In world units (NOT screen coordinates!)
-		std::u8string string; // String of Unicode codepoints; can be created using u8"...".
+		std::u8string string; // UTF-8 string, can be created using u8"...".
 		Vec2f position; // In world units (NOT screen coordinates!)
 		TextAnchor anchor = TextAnchor::Default;
 		Color color = colors::WHITE;
