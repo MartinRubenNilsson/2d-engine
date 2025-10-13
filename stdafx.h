@@ -22,7 +22,7 @@ using namespace std::literals::string_literals;
 
 #include <entt/entity/registry.hpp>
 #include <box2d/box2d.h>
-#include <RmlUi/Core.h>
+#include <RmlUi/Core.h> // TODO: get rid of this crap!!!
 
 #ifdef _DEBUG_IMGUI
 #include <imgui.h>
@@ -34,6 +34,7 @@ using namespace std::literals::string_literals;
 #include "fwd.h"
 #include "handle.h"
 #include "vec2.h"
+#include "rect2.h"
 #include "color.h"
 #include "math.h"
 #include "direction.h"

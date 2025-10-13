@@ -87,7 +87,7 @@ namespace ecs {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 8.f;
-		text.origin = text::TextOrigin::MiddleCenter;
+		text.anchor = text::TextAnchor::MiddleCenter;
 
 		for (unsigned int y = 0; y < _terrain_size.y; ++y) {
 			for (unsigned int x = 0; x < _terrain_size.x; ++x) {

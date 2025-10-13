@@ -41,19 +41,19 @@ namespace text {
         return _batches.emplace_back(texture, sampler, _batches.back().vertex_offset + _batches.back().vertex_count);
     }
 
-    Vec2f _get_origin(const Vec2f& min, const Vec2f& max, TextOrigin origin) {
+    Vec2f _get_anchor_pos(const Vec2f& min, const Vec2f& max, TextAnchor anchor) {
         const Vec2f cen = (min + max) * 0.5f; // center
-        switch (origin) {
+        switch (anchor) {
             default: return Vec2f::ZERO;
-            case TextOrigin::UpperLeft:    return { min.x, max.y };
-            case TextOrigin::UpperCenter:  return { cen.x, max.y };
-            case TextOrigin::UpperRight:   return { max.y, max.y };
-            case TextOrigin::MiddleLeft:   return { min.x, cen.y };
-            case TextOrigin::MiddleCenter: return { cen.x, cen.y };
-            case TextOrigin::MiddleRight:  return { max.y, cen.y };
-            case TextOrigin::LowerLeft:    return { min.x, min.y };
-            case TextOrigin::LowerCenter:  return { cen.x, min.y };
-            case TextOrigin::LowerRight:   return { max.y, min.y };
+            case TextAnchor::UpperLeft:    return { min.x, max.y };
+            case TextAnchor::UpperCenter:  return { cen.x, max.y };
+            case TextAnchor::UpperRight:   return { max.y, max.y };
+            case TextAnchor::MiddleLeft:   return { min.x, cen.y };
+            case TextAnchor::MiddleCenter: return { cen.x, cen.y };
+            case TextAnchor::MiddleRight:  return { max.y, cen.y };
+            case TextAnchor::LowerLeft:    return { min.x, min.y };
+            case TextAnchor::LowerCenter:  return { cen.x, min.y };
+            case TextAnchor::LowerRight:   return { max.y, min.y };
         }
     }
 
@@ -94,7 +94,7 @@ namespace text {
             if (texture == Handle<graphics::Texture>())
                 continue; // Nothing to draw.
 
-            // How many pixels high *on screen* the text should appear.
+            // How many pixels high *on screen* the glyphs should appear.
             const float font_size_on_screen = text.font_size * screen_pixels_per_world_unit;
 
             Vec2f text_min = { FLT_MAX, FLT_MAX }; // Bounding box min for the entire text (in text local-space).
@@ -130,7 +130,7 @@ namespace text {
                         } continue;
                     }
 
-                    GlyphBoundingBox box = get_bounding_box(*font, glyph);
+                    Rect2i box = get_bounding_box(*font, glyph);
                     // PITFALL: The glyphs use a local coordinate system with positive y up, while our game world use a
                     // coordinate system with positive y down, so we need to flip the sign here.
                     box.min.y = -box.min.y;
@@ -142,31 +142,37 @@ namespace text {
                     text_min = ::min(text_min, min);
                     text_max = ::max(text_max, max);
 
-                    // PITFALL: It's important to use height_on_screen here!
-                    GlyphTextureRect rect = get_texture_rect(*font, glyph, font_size_on_screen);
-                    // PITFALL: I'm not sure why we need to do this to be honest...
-                    std::swap(rect.min.y, rect.max.y);
+                    if (!empty(*font, glyph)) { // only add vertices for glyphs that have something to render
 
-                    graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(rect.min.x, rect.min.y));
-                    graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
-                    graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
-                    graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
-                    graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
-                    graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(rect.max.x, rect.max.y));
+                        // PITFALL: It's important to use font_size_on_screen here!
+                        Rect2f rect = get_texture_rect(*font, glyph, font_size_on_screen);
+                        // PITFALL: I'm not sure why we need to do this to be honest...
+                        std::swap(rect.min.y, rect.max.y);
 
-                    vertex_count += 6;
+                        graphics::temp_vertices.emplace_back(Vec2f(min.x, min.y), text.color, Vec2f(rect.min.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(min.x, max.y), text.color, Vec2f(rect.min.x, rect.max.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(max.x, min.y), text.color, Vec2f(rect.max.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(max.x, max.y), text.color, Vec2f(rect.max.x, rect.max.y));
+
+                        vertex_count += 6;
+                    } else {
+                        vertex_count += 0;
+                    }
+
                     glyph_origin.x += get_advance(*font, glyph); // Advance the origin to the next glyph.
                     prev_glyph = glyph;
                 }
 
                 // How much the glyphs need to be scaled to appear height_on_screen pixels high *on screen*.
-                const float scale_for_screen = get_scale_for_pixel_height(*font, font_size_on_screen);
-                // How much the glyphs need to be scaled to appear text.height units high *in the game world*.
+                const float scale_for_screen = get_scale_for_font_size(*font, font_size_on_screen);
+                // How much the glyphs need to be scaled to appear text.font_size units high *in the game world*.
                 const float scale_for_world = scale_for_screen / screen_pixels_per_world_unit;
 
-                // Determine the world-space position of the origin.
-                const Vec2f origin = _get_origin(text_min, text_max, text.origin) * scale_for_world;
-                const Vec2f position = text.position - origin;
+                // Determine the world-space position of the anchor.
+                const Vec2f anchor_pos = _get_anchor_pos(text_min, text_max, text.anchor) * scale_for_world;
+                const Vec2f position = text.position - anchor_pos;
 
                 // Transform the vertices in the text.
                 for (unsigned int v = 0; v < vertex_count; ++v) {

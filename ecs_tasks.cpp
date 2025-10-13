@@ -99,7 +99,7 @@ namespace ecs {
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 6.f;
-		text.origin = text::TextOrigin::UpperCenter;
+		text.anchor = text::TextAnchor::UpperCenter;
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
 			if (task.name.empty())
