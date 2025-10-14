@@ -83,6 +83,11 @@ namespace ui {
 
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
+		// Find out how many screen pixels there are per world unit.
+		const Vec2u framebuffer_size = graphics::get_texture_size(
+			graphics::get_framebuffer_texture(graphics::final_framebuffer));
+		const float pixels_per_world_unit = (float)framebuffer_size.y / GAME_FRAMEBUFFER_HEIGHT;
+
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
 			switch (command.commandType) {
@@ -95,10 +100,10 @@ namespace ui {
 					sprites::Sprite sprite{};
 					sprite.vertex_shader = graphics::ui_rectangle_vert;
 					sprite.fragment_shader = graphics::ui_rectangle_frag;
-					sprite.position.x = command.boundingBox.x;
-					sprite.position.y = command.boundingBox.y;
-					sprite.size.x = command.boundingBox.width;
-					sprite.size.y = command.boundingBox.height;
+					sprite.position.x = command.boundingBox.x * pixels_per_world_unit;
+					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
+					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
+					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
 					sprite.color = {
 						(unsigned char)rectangle.backgroundColor.r,
 						(unsigned char)rectangle.backgroundColor.g,

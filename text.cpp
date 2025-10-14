@@ -7,10 +7,9 @@
 #include "graphics_vertices.h"
 
 namespace text {
-    Vec2f _get_anchor_pos(const Vec2f& min, const Vec2f& max, TextAnchor anchor) {
+    Vec2f _get_anchor_position(const Vec2f& min, const Vec2f& max, TextAnchor anchor) {
         const Vec2f cen = (min + max) * 0.5f; // center
         switch (anchor) {
-            default: return cen;
             case TextAnchor::UpperLeft:    return { min.x, max.y };
             case TextAnchor::UpperCenter:  return { cen.x, max.y };
             case TextAnchor::UpperRight:   return { max.y, max.y };
@@ -20,46 +19,47 @@ namespace text {
             case TextAnchor::LowerLeft:    return { min.x, min.y };
             case TextAnchor::LowerCenter:  return { cen.x, min.y };
             case TextAnchor::LowerRight:   return { max.y, min.y };
+            default: return cen; // Should never happen.
         }
     }
 
-    // Calculates the bounding box of the text and, optionally, creates vertices for it.
+    // Calculates the bounding box of the text and, optionally, creates vertices.
     // Pass a negative value for pixels_per_world_unit to skip creating vertices.
     Rect2f _shape_text(Font& font, const Text& text, float pixels_per_world_unit = -1.f) {
 
         // The pixel resolution (in number of pixels from ascender to descender) the glyphs will have.
-        // This will usually be much larger than text.font_size since there are many pixels (on screen)
+        // This will usually be much larger than text.font_size since there are many pixels on screen
         // per world-space length unit.
         const float font_pixel_size = text.font_size * pixels_per_world_unit;
 
-        const int whitespace_advance = get_whitespace_advance(font);
-        const int line_spacing = get_line_spacing(font);
+        const int whitespace_advance = get_whitespace_advance(font); // How much to horizontally advance past a whitespace.
+        const int line_spacing = get_line_spacing(font); // How much to vertically advance on a newline.
 
-        Vec2f pen; // Aka "current position". This is the origin for where to draw the next glyph.
+        Vec2f glyph_pos; // Aka "current position" or "pen". This is the origin for where to draw the next glyph.
         GlyphId prev_glyph{};
         Rect2f text_box = Rect2f::EMPTY; // Bounding box for the entire text (in text local-space).
 
         const size_t vertex_count_before = graphics::temp_vertices.size();
 
         std::u8string_view string = text.string; // This will shink as the codepoints are being decoded.
-        while (char32_t codepoint = to_c32(string)) {
+        while (char32_t codepoint = to_c32(string)) { // Decode the next codepoint.
             if (codepoint == U'\r')
-                continue; // Skip carriage returns
+                continue; // Skip carriage returns.
 
             const GlyphId glyph = get_glyph(font, codepoint);
 
-            pen.x += get_kerning_advance(font, prev_glyph, glyph);
+            glyph_pos.x += get_kerning_advance(font, prev_glyph, glyph);
 
             switch (codepoint) {
                 case U' ': {
-                    pen.x += whitespace_advance;
+                    glyph_pos.x += whitespace_advance;
                 } continue;
                 case U'\t': {
-                    pen.x += whitespace_advance * 4.f; // 1 tab = 4 whitespaces
+                    glyph_pos.x += whitespace_advance * 4.f; // 1 tab = 4 whitespaces
                 } continue;
                 case U'\n': {
-                    pen.x = 0.f;
-                    pen.y += line_spacing; // Move the origin *down* a line.
+                    glyph_pos.x = 0.f;
+                    glyph_pos.y += line_spacing; // Move the origin *down* a line.
                 } continue;
             }
 
@@ -71,15 +71,16 @@ namespace text {
             // PITFALL: We must also swap the min.y and max.y, since the above sign flip has caused min.y > max.y.
             std::swap(box.min.y, box.max.y);
             // Translate the glyph box to the pen position.
-            box.min += pen;
-            box.max += pen;
+            box.min += glyph_pos;
+            box.max += glyph_pos;
 
             // Expand the text bounding box to include the bounding box of the glyph.
             text_box = join(text_box, box);
 
             if (font_pixel_size > 0.f && !empty(font, glyph)) { // only add vertices for glyphs that have something to render
 
-                // PITFALL: It's vital to use font_pixel_size here and not just text.font_size!
+                // PITFALL: It's vital to use font_pixel_size here and not just text.font_size! Otherwise the pixel density
+                // of the glyphs will not match their size on screen and they will appear to have very low resolution.
                 Rect2f rect = get_texture_rect(font, glyph, font_pixel_size);
 
                 graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), text.color, Vec2f(rect.min.x, rect.min.y));
@@ -90,13 +91,13 @@ namespace text {
                 graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), text.color, Vec2f(rect.max.x, rect.max.y));
             }
 
-            pen.x += get_advance(font, glyph); // Advance the pen to prepare for the next glyph.
+            glyph_pos.x += get_advance(font, glyph);
             prev_glyph = glyph;
         }
 
         const size_t vertex_count_after = graphics::temp_vertices.size();
 
-        // How much the glyphs need to be scaled to appear text.font_size units high in world-space.
+        // How much the glyphs need to be scaled in order to appear text.font_size units high in world-space.
         const float scale = get_scale_for_font_size(font, text.font_size);
 
         // Scale the text bounding box so it has the correct world-space size.
@@ -104,13 +105,13 @@ namespace text {
         text_box.max *= scale;
 
         // How much the glyphs need to be translated in order for the anchor to coincide with text.position.
-        const Vec2f translation = text.position - _get_anchor_pos(text_box.min, text_box.max, text.anchor);
+        const Vec2f translation = text.position - _get_anchor_position(text_box.min, text_box.max, text.anchor);
 
         // Translate the text bounding box so it has the correct world-space position.
         text_box.min += translation;
         text_box.max += translation;
 
-        // Transform the new vertices to have the desired world-space scale and position.
+        // Transform any new vertices to have the desired world-space scale and position.
         for (size_t v = vertex_count_before; v < vertex_count_after; ++v) {
             graphics::Vertex& vertex = graphics::temp_vertices[v];
             vertex.position *= scale;

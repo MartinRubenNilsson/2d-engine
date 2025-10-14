@@ -30,7 +30,7 @@ namespace hud {
 	}
 
 	void _layout_health() {
-		CLAY(CLAY_ID("HudHealth"), { .layout = { .childGap = 2 } }) {
+		CLAY(CLAY_ID("HudHealth"), { .layout = { .childGap = 3 } }) {
 			for (unsigned i = 0; i < max_health; ++i) {
 				_layout_heart(i, i < health);
 			}
@@ -38,7 +38,7 @@ namespace hud {
 	}
 
 	void layout() {
-		CLAY(CLAY_ID("HudContainer"), { .layout = { .padding = CLAY_PADDING_ALL(2), .childGap = 2 } }) {
+		CLAY(CLAY_ID("HudContainer"), { .layout = { .padding = CLAY_PADDING_ALL(3), .childGap = 3 } }) {
 			_layout_health();
 		}
 	}
