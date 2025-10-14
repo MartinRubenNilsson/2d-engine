@@ -6,7 +6,7 @@ namespace ecs
 	{
 		Vec2f center;
 		float radius;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 	};
 
 	//TODO

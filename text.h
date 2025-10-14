@@ -27,7 +27,7 @@ namespace text {
 		std::u8string string; // UTF-8 string, can be created using u8"...".
 		Vec2f position; // In world units (NOT screen coordinates!)
 		TextAnchor anchor = TextAnchor::Default;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		bool linear_sampling = true; // otherwise uses nearest sampling
 	};
 

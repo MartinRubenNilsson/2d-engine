@@ -27,7 +27,7 @@ namespace hud {
 		// TODO: image
 		CLAY(CLAY_IDI("HudHeart", index), { .layout = {
 			.sizing = { .width = CLAY_SIZING_FIXED(16), .height = CLAY_SIZING_FIXED(16) } },
-			.backgroundColor = colors::WHITE }) {
+			.backgroundColor = Color::WHITE }) {
 		}
 	}
 

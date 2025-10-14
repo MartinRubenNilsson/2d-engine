@@ -11,16 +11,14 @@ struct Color {
     }
 
     constexpr auto operator<=>(const Color&) const = default;
-};
 
-namespace colors {
-    inline constexpr Color TRANSPARENT = { 0,     0,   0,   0 };
-    inline constexpr Color BLACK       = { 0,     0,   0, 255 };
-    inline constexpr Color WHITE       = { 255, 255, 255, 255 };
-    inline constexpr Color RED         = { 255,   0,   0, 255 };
-    inline constexpr Color GREEN       = { 0,   255,   0, 255 };
-    inline constexpr Color BLUE        = { 0,     0, 255, 255 };
-    inline constexpr Color YELLOW      = { 255, 255,   0, 255 };
-    inline constexpr Color MAGENTA     = { 255,   0, 255, 255 };
-    inline constexpr Color CYAN        = { 0,   255, 255, 255 };
-}
+    static const Color TRANSPARENT;
+    static const Color BLACK;
+    static const Color WHITE;
+    static const Color RED;
+    static const Color GREEN;
+    static const Color BLUE;
+    static const Color YELLOW;
+    static const Color MAGENTA;
+    static const Color CYAN;
+};

@@ -8,7 +8,7 @@ namespace ecs {
 	struct SpriteBlink {
 		float duration = 0.f; // in seconds
 		float interval = 0.f; // in seconds
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 
 		Color _original_color; // for internal use only!
 	};

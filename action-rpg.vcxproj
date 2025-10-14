@@ -145,6 +145,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="color.cpp" />
     <ClCompile Include="console_commands_ecs.cpp" />
     <ClCompile Include="console_commands_registration.cpp" />
     <ClCompile Include="direction.cpp" />

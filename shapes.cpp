@@ -15,35 +15,35 @@ namespace shapes {
 
 	struct Point {
 		Vec2f position;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Line {
 		Vec2f p1;
 		Vec2f p2;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Box {
 		Vec2f min;
 		Vec2f max;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Polygon {
 		Vec2f points[MAX_POLYGON_VERTICES];
 		unsigned int count = 0;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		float lifetime = 0.f;
 	};
 
 	struct Circle {
 		Vec2f center;
 		float radius = 0.f;
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		float lifetime = 0.f;
 	};
 

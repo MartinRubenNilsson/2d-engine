@@ -31,7 +31,7 @@ namespace sprites {
 		Vec2f tex_position = { 0.f, 0.f }; // top-left corner in normalized texture coordinates
 		Vec2f tex_size = { 1.f, 1.f }; // width and height in normalized texture coordinates
 		Vec2f sorting_point; // relative to position
-		Color color = colors::WHITE;
+		Color color = Color::WHITE;
 		uint8_t sorting_layer = 0;
 		uint8_t flags = SPRITE_VISIBLE;
 		uint8_t _unused = 0;
