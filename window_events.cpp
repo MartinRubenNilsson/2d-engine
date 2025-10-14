@@ -88,6 +88,14 @@ namespace window {
 		_add_event(ev);
 	}
 
+	void _mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+		Event ev{};
+		ev.type = EventType::MouseScroll;
+		ev.mouse_scroll.delta_x = xoffset;
+		ev.mouse_scroll.delta_y = xoffset;
+		_add_event(ev);
+	}
+
 	extern GLFWwindow* _window;
 
 	void _set_event_callbacks() {
@@ -97,6 +105,7 @@ namespace window {
 		glfwSetFramebufferSizeCallback(_window, _framebuffer_size_callback);
 		glfwSetMouseButtonCallback(_window, _mouse_button_callback);
 		glfwSetCursorPosCallback(_window, _cursor_pos_callback);
+		glfwSetScrollCallback(_window, _mouse_scroll_callback);
 	}
 
 	void update_events() {

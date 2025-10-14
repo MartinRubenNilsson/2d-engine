@@ -25,9 +25,6 @@
     <ClCompile Include="ui_textbox.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_hud.cpp">
-      <Filter>ui</Filter>
-    </ClCompile>
     <ClCompile Include="ui_textbox_presets.cpp">
       <Filter>ui</Filter>
     </ClCompile>
@@ -306,6 +303,9 @@
     <ClCompile Include="ecs_player_alive.cpp">
       <Filter>game\ecs\game\players\states</Filter>
     </ClCompile>
+    <ClCompile Include="ui_hud.cpp">
+      <Filter>game\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -339,9 +339,6 @@
       <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ui_textbox.h">
-      <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_hud.h">
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics.h">
@@ -596,6 +593,9 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="ecs_player_states.h">
       <Filter>game\ecs\game\players</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_hud.h">
+      <Filter>game\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -100,7 +100,7 @@ namespace ui {
 	}
 
 	void initialize() {
-		initialize_clay();
+		startup_clay();
 
 		Rml::SetSystemInterface(&_system_interface);
 		Rml::SetRenderInterface(&_render_interface);
@@ -247,7 +247,6 @@ namespace ui {
 			// Don't set density independent pixel ratio for the debugger context!
 			// It should always be 1.0, so that it remains the same size.
 
-			set_clay_layout_dimensions((float)ev.size.width, (float)ev.size.height);
 		} break;
 		case window::EventType::KeyPress:
 		{
@@ -336,13 +335,6 @@ namespace ui {
 
 	void update(float dt) {
 		set_clay_pointer_state((float)_mouse_position_x, (float)_mouse_position_y, _mouse_is_down);
-		update_clay_scroll_containers(_scroll_delta_x, dt); //TODO
-
-		begin_clay_layout();
-
-		_test_clay();
-		//TODO
-		end_clay_layout();
 
 		// As an optimization, update the UI at a lower FPS than the game.
 		_dt_accumulator += dt;
@@ -363,7 +355,10 @@ namespace ui {
 
 	void render() {
 
-		render_clay_layout();
+		{ // Test clay
+			layout_clay();
+			render_clay();
+		}
 
 		prepare_render_state();
 		_context->Render();

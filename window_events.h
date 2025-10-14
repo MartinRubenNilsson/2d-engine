@@ -35,6 +35,7 @@ namespace window {
 		MouseButtonPress, // A mouse button was pressed.
 		MouseButtonRelease, // A mouse button was released.
 		MouseMove, // The mouse moved.
+		MouseScroll, // The scroll wheel was scrolled OR the touchpad was swiped.
 	};
 
 	struct SizeEvent {
@@ -58,6 +59,11 @@ namespace window {
 		double y;
 	};
 
+	struct MouseScrollEvent {
+		double delta_x;
+		double delta_y;
+	};
+
 	struct Event {
 		EventType type;
 		union {
@@ -65,6 +71,7 @@ namespace window {
 			KeyEvent key;
 			MouseButtonEvent mouse_button;
 			MouseMoveEvent mouse_move;
+			MouseScrollEvent mouse_scroll;
 		};
 	};
 

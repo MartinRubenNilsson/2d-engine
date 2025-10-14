@@ -1,9 +1,10 @@
 #include "stdafx.h"
-#include "ui.h"
+#include "window_events.h"
 #include "console.h"
 #include "sprites.h"
 #include "graphics.h"
 #include "graphics_globals.h"
+#include "ui_hud.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
@@ -17,7 +18,7 @@ namespace ui {
 	const Clay_Color COLOR_RED = Clay_Color{ 168, 66, 28, 255 };
 	const Clay_Color COLOR_ORANGE = Clay_Color{ 225, 138, 50, 255 };
 
-	void _handle_clay_errors(Clay_ErrorData error_data) {
+	void _handle_clay_error(Clay_ErrorData error_data) {
 		std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
 		console::log_error(text);
 	}
@@ -26,20 +27,12 @@ namespace ui {
 	Clay_Arena _clay_arena{};
 	Clay_RenderCommandArray _clay_render_commands{};
 
-	bool initialize_clay() {
+	bool startup_clay() {
 		_clay_arena_memory.resize(Clay_MinMemorySize());
-		_clay_arena = Clay_CreateArenaWithCapacityAndMemory(
-			(uint32_t)_clay_arena_memory.size(),
-			_clay_arena_memory.data()
-		);
-		return Clay_Initialize(
-			_clay_arena, {
-				.width = GAME_FRAMEBUFFER_WIDTH,
-				.height = GAME_FRAMEBUFFER_HEIGHT,
-			}, {
-				.errorHandlerFunction = _handle_clay_errors,
-			}
-		);
+		_clay_arena = Clay_CreateArenaWithCapacityAndMemory(_clay_arena_memory.size(), _clay_arena_memory.data());
+		const Clay_Dimensions dimensions{ .width = GAME_FRAMEBUFFER_WIDTH, .height = GAME_FRAMEBUFFER_HEIGHT };
+		const Clay_ErrorHandler error_handler{ .errorHandlerFunction = _handle_clay_error };
+		return Clay_Initialize(_clay_arena, dimensions, error_handler);
 	}
 
 	void shutdown_clay() {
@@ -48,151 +41,47 @@ namespace ui {
 		_clay_arena_memory.clear();
 	}
 
-	void set_clay_layout_dimensions(float width, float height) {
-		Clay_SetLayoutDimensions({ .width = width, .height = height });
-	}
-
 	void set_clay_pointer_state(float x, float y, bool is_down) {
+		// TODO: If in the future we render the game world to a smaller viewport, then
+		// we need to remap the mouse coordinates to the smaller viewport.
 		Clay_SetPointerState({ .x = x, .y = y }, is_down);
 	}
 
-	void update_clay_scroll_containers(float scroll_delta_x, float dt) {
-		Clay_UpdateScrollContainers(false, { .x = scroll_delta_x }, dt);
-	}
-
-	void begin_clay_layout() {
-		_clay_render_commands = {};
-		Clay_BeginLayout();
-	}
-
+	void update_clay(float dt) {
+		for (const window::Event& ev : window::get_events()) {
+			switch (ev.type) {
 #if 0
-	// Example measure text function
-	static inline Clay_Dimensions MeasureText(Clay_StringSlice text, Clay_TextElementConfig* config, uintptr_t userData) {
-		// Clay_TextElementConfig contains members such as fontId, fontSize, letterSpacing etc
-		// Note: Clay_String->chars is not guaranteed to be null terminated
-		return {
-			.width = (float)text.length * config->fontSize, // <- this will only work for monospace fonts, see the renderers/ directory for more advanced text measurement
-				.height = (float)config->fontSize
-		};
-	}
-
-	// Layout config is just a struct that can be declared statically, or inline
-	Clay_ElementDeclaration sidebarItemConfig = {
-		.layout = {
-			.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }
-		},
-		.backgroundColor = COLOR_ORANGE
-	};
-
-	// Re-useable components are just normal functions
-	void SidebarItemComponent() {
-		CLAY(sidebarItemConfig) {
-			// children go here...
-		}
-	}
+				case window::EventType::FramebufferSize: {
+					// TODO: If in the future we render the game world to a smaller viewport, then
+					// we should probably still pass the gameworld size here???
+					const Clay_Dimensions dimensions{
+						.width = (float)ev.size.width,
+						.height = (float)ev.size.height };
+					Clay_SetLayoutDimensions(dimensions);
+				} break;
 #endif
-
-	void _test_clay() {
-#if 0
-		// An example of laying out a UI with a fixed width sidebar and flexible width main content
-		CLAY({
-			.id = CLAY_ID("OuterContainer"),
-			.layout = {
-				.sizing = {
-					CLAY_SIZING_GROW(0),
-					CLAY_SIZING_GROW(0)
-				},
-				.padding = CLAY_PADDING_ALL(16),
-				.childGap = 16
-			},
-			.backgroundColor = {250,250,255,255}
-		}) {
-			CLAY({
-				.id = CLAY_ID("SideBar"),
-				.layout = {
-					.sizing = {
-						.width = CLAY_SIZING_FIXED(300),
-						.height = CLAY_SIZING_GROW(0)
-					},
-					.padding = CLAY_PADDING_ALL(16),
-					.childGap = 16,
-					.layoutDirection = CLAY_TOP_TO_BOTTOM
-				},
-				.backgroundColor = COLOR_LIGHT
-			}) {
-				CLAY({
-					.id = CLAY_ID("ProfilePictureOuter"),
-					.layout = {
-						.sizing = {
-							.width = CLAY_SIZING_GROW(0)
-						},
-						.padding = CLAY_PADDING_ALL(16),
-						.childGap = 16,
-						.childAlignment = {
-							.y = CLAY_ALIGN_Y_CENTER
-						}
-					},
-					.backgroundColor = COLOR_RED
-				}) {
-
-#if 0
-					static int imageData = 0;
-
-					CLAY({
-						.id = CLAY_ID("ProfilePicture"),
-						.layout = {
-							.sizing = {
-								.width = CLAY_SIZING_FIXED(60),
-								.height = CLAY_SIZING_FIXED(60)
-							}
-						},
-						.image = {
-							.imageData = &imageData,
-							.sourceDimensions = {60, 60}
-						}
-					}) {}
-#endif
-
-#if 0
-					CLAY_TEXT(
-						CLAY_STRING("Clay - UI Library"),
-						CLAY_TEXT_CONFIG({
-							.textColor = {255, 255, 255, 255},
-							.fontSize = 24
-						})
-					);
-#endif
-				}
-
-				// Standard C code like loops etc work inside components
-				for (int i = 0; i < 5; i++) {
-					SidebarItemComponent();
-				}
-
-				CLAY({
-					.id = CLAY_ID("MainContent"),
-					.layout = {
-						.sizing = {
-							.width = CLAY_SIZING_GROW(0),
-							.height = CLAY_SIZING_GROW(0)
-						}
-					},
-					.backgroundColor = COLOR_LIGHT
-				}) {}
+				case window::EventType::MouseScroll: {
+					const Clay_Vector2 scoll_delta{
+						.x = (float)ev.mouse_scroll.delta_x,
+						.y = (float)ev.mouse_scroll.delta_y };
+					Clay_UpdateScrollContainers(false, scoll_delta, dt);
+				} break;
 			}
 		}
-#endif
 	}
 
-	void end_clay_layout() {
+	void layout_clay() {
+		_clay_render_commands = {};
+		Clay_BeginLayout();
+		hud::layout();
 		_clay_render_commands = Clay_EndLayout();
 	}
 
-	void render_clay_layout() {
+	void render_clay() {
 		if (!_clay_render_commands.length)
 			return;
 
-		graphics::ScopedDebugGroup debug_group("ui::render_clay_layout()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
