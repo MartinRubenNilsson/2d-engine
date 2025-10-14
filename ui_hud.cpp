@@ -1,11 +1,10 @@
 #include "stdafx.h"
 #include "ui_hud.h"
 #include "graphics.h"
-#include <clay/clay.h>
 
 namespace ui {
 namespace hud {
-	bool visible = false;
+	bool show = false;
 	unsigned int max_health = 3;
 	unsigned int health = 2;
 	unsigned int rupees = 0;
@@ -13,25 +12,28 @@ namespace hud {
 	unsigned int bombs = 0;
 
 	void startup() {
-		// TODO: load textures
+		// TODO: load heart texture
 	}
 
 	void shutdown() {
+		// TODO: unload heart texture
 	}
 
 	void update(float dt) {
+		// TODO: load heart texture
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
+		// TODO: image
 		CLAY(CLAY_IDI("HudHeart", index), { .layout = {
 			.sizing = { .width = CLAY_SIZING_FIXED(16), .height = CLAY_SIZING_FIXED(16) } },
-			.backgroundColor = { 255, 255, 255, 255 } }) {
+			.backgroundColor = colors::WHITE }) {
 		}
 	}
 
 	void _layout_health() {
 		CLAY(CLAY_ID("HudHealth"), { .layout = { .childGap = 3 } }) {
-			for (unsigned i = 0; i < max_health; ++i) {
+			for (unsigned int i = 0; i < max_health; ++i) {
 				_layout_heart(i, i < health);
 			}
 		}

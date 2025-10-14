@@ -1,16 +1,17 @@
 #include "stdafx.h"
+#include "ui_clay.h"
 #include "window_events.h"
 #include "console.h"
 #include "sprites.h"
 #include "graphics.h"
 #include "graphics_globals.h"
+
 #include "ui_hud.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
 #define CLAY_IMPLEMENTATION
 #include <clay/clay.h>
-#include "ui_clay.h"
 #pragma warning(pop)
 
 namespace ui {

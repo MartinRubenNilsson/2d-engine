@@ -2,7 +2,7 @@
 
 namespace ui {
 namespace hud {
-	extern bool visible;
+	extern bool show;
 	extern unsigned int max_health;
 	extern unsigned int health;
 	extern unsigned int rupees;
@@ -11,7 +11,6 @@ namespace hud {
 
 	void startup();
 	void shutdown();
-
 	void update(float dt);
 	void layout();
 }

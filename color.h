@@ -5,6 +5,12 @@ struct Color {
     unsigned char g = 0;
     unsigned char b = 0;
     unsigned char a = 255;
+
+    constexpr operator Clay_Color() const {
+        return { (float)r, (float)g, (float)b, (float)a };
+    }
+
+    constexpr auto operator<=>(const Color&) const = default;
 };
 
 namespace colors {
