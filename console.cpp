@@ -178,8 +178,13 @@ namespace console {
 	void handle_window_events() {
 		if (ImGui::GetIO().WantCaptureKeyboard)
 			return; // Don't execute bound commands while we're typing in console.
+
 		for (const window::Event& ev : window::get_events()) {
-			if (ev.type == window::EventType::KeyPress) {
+			if (ev.type != window::EventType::KeyPress)
+				continue;
+			if (ev.key.code == window::Key::GraveAccent) {
+				console::toggle_visible();
+			} else {
 				execute_bind(ev.key.code);
 			}
 		}

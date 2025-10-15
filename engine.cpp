@@ -122,21 +122,13 @@ namespace engine {
                         graphics::resize_final_framebuffer(ev.size.width, ev.size.height);
                     }
                 } else if (ev.type == window::EventType::KeyPress) {
-#ifdef _DEBUG
-                    if (ev.key.code == window::Key::GraveAccent) {
-                        console::toggle_visible();
-                    } else if (ev.key.code == window::Key::F1) {
+                    if (ev.key.code == window::Key::F1) {
                         debug_stats = !debug_stats;
                     } else if (ev.key.code == window::Key::F6) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {
                         map::debug = !map::debug;
                     }
-#endif // _DEBUG
-                }
-
-                if (ev.type == window::EventType::KeyPress && ImGui::GetIO().WantCaptureKeyboard) {
-                    continue;
                 }
 
                 ui::handle_window_event_for_rmlui(ev);
@@ -170,7 +162,7 @@ namespace engine {
 
         audio::update();
         console::update(app_delta_time);
-        background::update(app_delta_time);
+        background::update(app_delta_time); // TODO: this doesn't belong in engine.cpp
         ui::update_rmlui(app_delta_time);
         map::update(app_delta_time);
 
@@ -178,7 +170,7 @@ namespace engine {
         if (steam::is_overlay_active()) {
             game_delta_time = 0.0;
         }
-        if (ui::is_menu_or_textbox_visible()) {
+        if (ui::is_menu_or_textbox_visible()) { // TODO: this doesn't belong in engine.cpp
             game_delta_time = 0.0;
         }
         if (map::get_transition_progress() != 0.f) {
@@ -210,9 +202,6 @@ namespace engine {
         ImGui::PlotLines("##dt", dt_buffer, 256, buffer_offset, overlay_text, 0.f, 0.01f, ImVec2(0, 80));
         sprintf(overlay_text, "%.f FPS", smoothed_fps);
         ImGui::PlotLines("##fps", fps_buffer, 256, buffer_offset, overlay_text, 0.f, 600.f, ImVec2(0, 80));
-        ImGui::Value("Sprites Drawn", sprites::get_num_sprites_drawn());
-        ImGui::Value("Batches Drawn", sprites::get_num_batches_drawn());
-        ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
         ImGui::End();
     }
 

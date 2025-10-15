@@ -77,6 +77,9 @@ namespace ui {
 			}
 		}
 
+		if (ImGui::GetIO().WantCaptureMouse)
+			mouse_is_down = false;
+
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
 	}
 
