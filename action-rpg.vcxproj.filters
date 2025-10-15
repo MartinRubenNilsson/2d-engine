@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="ui.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="ui_bindings.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="map.cpp">
       <Filter>game\map</Filter>
@@ -14,19 +14,19 @@
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="audio.cpp">
-      <Filter>audio</Filter>
+      <Filter>engine\audio</Filter>
     </ClCompile>
     <ClCompile Include="console.cpp">
-      <Filter>application\console</Filter>
+      <Filter>engine\console</Filter>
     </ClCompile>
     <ClCompile Include="ecs.cpp">
       <Filter>game\ecs</Filter>
     </ClCompile>
     <ClCompile Include="ui_textbox.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="ui_textbox_presets.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_physics.cpp">
       <Filter>game\ecs\engine\physics</Filter>
@@ -35,56 +35,47 @@
       <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="postprocessing.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ui_menus.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player.cpp">
       <Filter>game\ecs\game\players</Filter>
     </ClCompile>
     <ClCompile Include="steam.cpp">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClCompile>
     <ClCompile Include="shapes.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="steam_server.cpp">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClCompile>
     <ClCompile Include="sprites.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="graphics.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="steam_client.cpp">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClCompile>
     <ClCompile Include="easings.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>application</Filter>
-    </ClCompile>
-    <ClCompile Include="settings.cpp">
-      <Filter>application</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="timer.cpp">
-      <Filter>utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="main_win32.cpp">
-      <Filter>application</Filter>
+      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="ui_rmlui_system_interface.cpp">
-      <Filter>ui\rmlui_interfaces</Filter>
+      <Filter>engine\ui\rmlui_interfaces</Filter>
     </ClCompile>
     <ClCompile Include="ui_rmlui_render_interface.cpp">
-      <Filter>ui\rmlui_interfaces</Filter>
+      <Filter>engine\ui\rmlui_interfaces</Filter>
     </ClCompile>
     <ClCompile Include="renderdoc.cpp">
-      <Filter>application\renderdoc</Filter>
+      <Filter>engine\renderdoc</Filter>
     </ClCompile>
     <ClCompile Include="ecs_interactions.cpp">
       <Filter>game\ecs\game\mechanics</Filter>
@@ -93,16 +84,16 @@
       <Filter>game\ecs\game\mechanics</Filter>
     </ClCompile>
     <ClCompile Include="random.cpp">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="graphics_globals.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="ecs_blade_trap.cpp">
       <Filter>game\ecs\game\enemies</Filter>
     </ClCompile>
     <ClCompile Include="eastl_allocator.cpp">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="ecs_sprites.cpp">
       <Filter>game\ecs\engine\graphics</Filter>
@@ -129,31 +120,31 @@
       <Filter>game\ecs\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="images.cpp">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="networking.cpp">
-      <Filter>networking</Filter>
+      <Filter>engine\networking</Filter>
     </ClCompile>
     <ClCompile Include="window.cpp">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClCompile>
     <ClCompile Include="window_events.cpp">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClCompile>
     <ClCompile Include="files.cpp">
-      <Filter>application\files</Filter>
+      <Filter>engine\files</Filter>
     </ClCompile>
     <ClCompile Include="console_commands.cpp">
-      <Filter>application\console\commands</Filter>
+      <Filter>engine\console\commands</Filter>
     </ClCompile>
     <ClCompile Include="imgui_impl.cpp">
-      <Filter>application\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="platform_windows.cpp">
-      <Filter>application\platform</Filter>
+      <Filter>engine\platform</Filter>
     </ClCompile>
     <ClCompile Include="ui_clay.cpp">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="kdtree.cpp">
       <Filter>math\geometry</Filter>
@@ -255,28 +246,28 @@
       <Filter>game\ecs\game</Filter>
     </ClCompile>
     <ClCompile Include="text.cpp">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClCompile>
     <ClCompile Include="text_unicode.cpp">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClCompile>
     <ClCompile Include="text_fonts.cpp">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClCompile>
     <ClCompile Include="text_stb_truetype.cpp">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClCompile>
     <ClCompile Include="console_commands_registration.cpp">
-      <Filter>application\console\commands</Filter>
+      <Filter>engine\console\commands</Filter>
     </ClCompile>
     <ClCompile Include="console_commands_steam.cpp">
-      <Filter>application\console\commands\implementations</Filter>
+      <Filter>engine\console\commands\implementations</Filter>
     </ClCompile>
     <ClCompile Include="console_commands_misc.cpp">
-      <Filter>application\console\commands\implementations</Filter>
+      <Filter>engine\console\commands\implementations</Filter>
     </ClCompile>
     <ClCompile Include="console_commands_ecs.cpp">
-      <Filter>application\console\commands\implementations</Filter>
+      <Filter>engine\console\commands\implementations</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player_dead.cpp">
       <Filter>game\ecs\game\players\states</Filter>
@@ -309,24 +300,32 @@
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="input.cpp">
-      <Filter>input</Filter>
+      <Filter>engine\input</Filter>
     </ClCompile>
+    <ClCompile Include="engine.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="main_win32.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
     <None Include="output\assets\scripts\camtest.script">
-      <Filter>application\console\scripts</Filter>
+      <Filter>engine\console\scripts</Filter>
     </None>
     <None Include="output\assets\scripts\martin_debug.script">
-      <Filter>application\console\scripts</Filter>
+      <Filter>engine\console\scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui.h">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_bindings.h">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="map.h">
       <Filter>game\map</Filter>
@@ -335,16 +334,16 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="audio.h">
-      <Filter>audio</Filter>
+      <Filter>engine\audio</Filter>
     </ClInclude>
     <ClInclude Include="console.h">
-      <Filter>application\console</Filter>
+      <Filter>engine\console</Filter>
     </ClInclude>
     <ClInclude Include="ecs.h">
       <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ui_textbox.h">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_physics.h">
       <Filter>game\ecs\engine\physics</Filter>
@@ -353,61 +352,58 @@
       <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="postprocessing.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ui_menus.h">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player.h">
       <Filter>game\ecs\game\players</Filter>
     </ClInclude>
     <ClInclude Include="steam.h">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClInclude>
     <ClInclude Include="shapes.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="steam_server.h">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClInclude>
     <ClInclude Include="sprites.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="steam_client.h">
-      <Filter>steam</Filter>
+      <Filter>engine\steam</Filter>
     </ClInclude>
     <ClInclude Include="easings.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="settings.h">
-      <Filter>application</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="timer.h">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="config.h" />
     <ClInclude Include="color.h">
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="ui_rmlui_render_interface.h">
-      <Filter>ui\rmlui_interfaces</Filter>
+      <Filter>engine\ui\rmlui_interfaces</Filter>
     </ClInclude>
     <ClInclude Include="ui_rmlui_system_interface.h">
-      <Filter>ui\rmlui_interfaces</Filter>
+      <Filter>engine\ui\rmlui_interfaces</Filter>
     </ClInclude>
     <ClInclude Include="fwd.h" />
     <ClInclude Include="renderdoc.h">
-      <Filter>application\renderdoc</Filter>
+      <Filter>engine\renderdoc</Filter>
     </ClInclude>
     <ClInclude Include="pool.h">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="handle.h">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="ecs_interactions.h">
       <Filter>game\ecs\game\mechanics</Filter>
@@ -416,10 +412,10 @@
       <Filter>game\ecs\game\mechanics</Filter>
     </ClInclude>
     <ClInclude Include="random.h">
-      <Filter>utilities</Filter>
+      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics_globals.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ecs_blade_trap.h">
       <Filter>game\ecs\game\enemies</Filter>
@@ -449,40 +445,40 @@
       <Filter>game\ecs\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="images.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="networking.h">
-      <Filter>networking</Filter>
+      <Filter>engine\networking</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClInclude>
     <ClInclude Include="window_events.h">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClInclude>
     <ClInclude Include="window_graphics.h">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClInclude>
     <ClInclude Include="files.h">
-      <Filter>application\files</Filter>
+      <Filter>engine\files</Filter>
     </ClInclude>
     <ClInclude Include="console_commands.h">
-      <Filter>application\console\commands</Filter>
+      <Filter>engine\console\commands</Filter>
     </ClInclude>
     <ClInclude Include="tile_ids.h">
       <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="imgui_impl.h">
-      <Filter>application\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
-      <Filter>application\platform</Filter>
+      <Filter>engine\platform</Filter>
     </ClInclude>
     <ClInclude Include="graphics_vertices.h">
-      <Filter>graphics</Filter>
+      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="ui_clay.h">
-      <Filter>ui</Filter>
+      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="kdtree.h">
       <Filter>math\geometry</Filter>
@@ -572,19 +568,19 @@
       <Filter>game\ecs\game</Filter>
     </ClInclude>
     <ClInclude Include="text.h">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="text_unicode.h">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="text_fonts.h">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="text_stb_truetype.h">
-      <Filter>graphics\text</Filter>
+      <Filter>engine\graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="window_keys.h">
-      <Filter>application\window</Filter>
+      <Filter>engine\window</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player_types.h">
       <Filter>game\ecs\game\players</Filter>
@@ -602,33 +598,18 @@
       <Filter>game\ui</Filter>
     </ClInclude>
     <ClInclude Include="input.h">
-      <Filter>input</Filter>
+      <Filter>engine\input</Filter>
+    </ClInclude>
+    <ClInclude Include="engine.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
       <UniqueIdentifier>{fff1760b-f79a-4c10-886f-a39f2230c48d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="audio">
-      <UniqueIdentifier>{1da6159c-bc5a-43d9-9e98-d5e1e32a5579}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ui">
-      <UniqueIdentifier>{c3167945-45a3-4c9c-ad21-9950dd64fdfc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphics">
-      <UniqueIdentifier>{cd3119d2-6df6-4778-bf8a-2ac760001e68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="steam">
-      <UniqueIdentifier>{029569e4-8e84-4e37-99f3-3b57c5057e89}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application">
-      <UniqueIdentifier>{11af7b6c-13f6-4f3d-9d96-435780a3cff7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="utilities">
-      <UniqueIdentifier>{fda23f39-2e34-4c02-b91d-10ef539bed08}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ui\rmlui_interfaces">
-      <UniqueIdentifier>{cb12366d-8c11-48b4-a752-e5b39ec96b0e}</UniqueIdentifier>
     </Filter>
     <Filter Include="game">
       <UniqueIdentifier>{5f4911be-b72a-4a81-bdf6-a53443597ca1}</UniqueIdentifier>
@@ -641,27 +622,6 @@
     </Filter>
     <Filter Include="game\player">
       <UniqueIdentifier>{03b5b10a-d728-4b19-a8d7-517a4b0f078d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="networking">
-      <UniqueIdentifier>{23c79627-6974-476a-9bf9-3a2b86f11791}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\window">
-      <UniqueIdentifier>{c9d5b9b0-c7e4-4d67-bceb-a9d4aa431794}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\console">
-      <UniqueIdentifier>{c1397a93-51e2-4458-ab20-242be6dbecef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\console\commands">
-      <UniqueIdentifier>{c632e66c-526e-4e77-b232-5abc64cf46ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\imgui">
-      <UniqueIdentifier>{5dd64d01-ed82-4fc9-8e06-3e968066e017}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\platform">
-      <UniqueIdentifier>{17beda9f-e4af-44d4-8299-f467bbcb1756}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\renderdoc">
-      <UniqueIdentifier>{bf527ac4-533e-4928-8221-bccdf1999347}</UniqueIdentifier>
     </Filter>
     <Filter Include="math\geometry">
       <UniqueIdentifier>{ab000c27-cdf7-472a-bf6e-87da02d252a5}</UniqueIdentifier>
@@ -744,26 +704,68 @@
     <Filter Include="game\ecs\engine\tiled">
       <UniqueIdentifier>{80551027-5e98-4522-bf3a-1ed40182e650}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphics\text">
-      <UniqueIdentifier>{a0f6f43e-e5a9-491e-8c52-e15daed680ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\console\commands\implementations">
-      <UniqueIdentifier>{0ecb7be7-4e89-4c9d-952d-36b29e6f9b35}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="application\console\scripts">
-      <UniqueIdentifier>{bcf4b00e-9a56-41ff-b5fb-8acdcb63fae8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ecs\game\players\states">
       <UniqueIdentifier>{6ca37093-cc87-435f-97f6-22f5d435a687}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\ui">
       <UniqueIdentifier>{85975948-44e1-49b6-9181-efb64139a60f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="application\files">
+    <Filter Include="engine">
+      <UniqueIdentifier>{2f725307-a831-47ec-8b8e-0c5bf4b22a5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\networking">
+      <UniqueIdentifier>{23c79627-6974-476a-9bf9-3a2b86f11791}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\input">
+      <UniqueIdentifier>{3ac9a1d6-3b26-4038-b805-f53b65bda2a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics">
+      <UniqueIdentifier>{cd3119d2-6df6-4778-bf8a-2ac760001e68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics\text">
+      <UniqueIdentifier>{a0f6f43e-e5a9-491e-8c52-e15daed680ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\audio">
+      <UniqueIdentifier>{1da6159c-bc5a-43d9-9e98-d5e1e32a5579}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\console">
+      <UniqueIdentifier>{c1397a93-51e2-4458-ab20-242be6dbecef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\console\commands">
+      <UniqueIdentifier>{c632e66c-526e-4e77-b232-5abc64cf46ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\console\commands\implementations">
+      <UniqueIdentifier>{0ecb7be7-4e89-4c9d-952d-36b29e6f9b35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\console\scripts">
+      <UniqueIdentifier>{bcf4b00e-9a56-41ff-b5fb-8acdcb63fae8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\files">
       <UniqueIdentifier>{15fbe91b-35fe-4b00-82c9-5703cdcb0e04}</UniqueIdentifier>
     </Filter>
-    <Filter Include="input">
-      <UniqueIdentifier>{3ac9a1d6-3b26-4038-b805-f53b65bda2a6}</UniqueIdentifier>
+    <Filter Include="engine\imgui">
+      <UniqueIdentifier>{5dd64d01-ed82-4fc9-8e06-3e968066e017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\platform">
+      <UniqueIdentifier>{17beda9f-e4af-44d4-8299-f467bbcb1756}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\renderdoc">
+      <UniqueIdentifier>{bf527ac4-533e-4928-8221-bccdf1999347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\window">
+      <UniqueIdentifier>{c9d5b9b0-c7e4-4d67-bceb-a9d4aa431794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\steam">
+      <UniqueIdentifier>{029569e4-8e84-4e37-99f3-3b57c5057e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\ui">
+      <UniqueIdentifier>{c3167945-45a3-4c9c-ad21-9950dd64fdfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\ui\rmlui_interfaces">
+      <UniqueIdentifier>{cb12366d-8c11-48b4-a752-e5b39ec96b0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{fda23f39-2e34-4c02-b91d-10ef539bed08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -193,6 +193,7 @@
     <ClCompile Include="ecs_sprites.cpp" />
     <ClCompile Include="ecs_tiled_setup.cpp" />
     <ClCompile Include="ecs_uniform_block.cpp" />
+    <ClCompile Include="engine.cpp" />
     <ClCompile Include="esc_terrain.cpp" />
     <ClCompile Include="files.cpp" />
     <ClCompile Include="input.cpp" />
@@ -294,6 +295,7 @@
     <ClInclude Include="ecs_tiled.h" />
     <ClInclude Include="ecs_tiled_ids.h" />
     <ClInclude Include="ecs_uniform_block.h" />
+    <ClInclude Include="engine.h" />
     <ClInclude Include="files.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="rect2.h" />
