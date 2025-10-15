@@ -10,7 +10,7 @@ namespace audio
 
 	extern bool log_errors;
 
-	void initialize();
+	void startup();
 	void shutdown();
 	void update();
 	void load_bank_from_file(const std::string& path);

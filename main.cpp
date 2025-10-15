@@ -23,72 +23,79 @@
 #include "imgui_impl.h"
 #include "input.h"
 
-int main(int argc, char* argv[]) {
-    setlocale(LC_ALL, "en_US.utf8");
-    if (steam::restart_app_if_necessary()) {
-        return EXIT_FAILURE;
-    }
-    steam::initialize(); // Fails silently if Steam is not running.
-    files::initialize();
-	networking::initialize();
+namespace engine {
+    bool _should_run = false;
+
+    void startup(int argc, char* argv[]) {
+        setlocale(LC_ALL, "en_US.utf8");
+        if (steam::restart_app_if_necessary())
+            return;
+        steam::startup(); // Fails silently if Steam is not running.
+        files::startup();
+        networking::startup();
 #ifdef _DEBUG_RENDERDOC
-    renderdoc::initialize();
+        renderdoc::startup();
 #endif
-    window::startup();
-#if 0
-#ifdef _DEBUG_GRAPHICS
-    // HACK: We should be using a post-build event to copy the shaders,
-    // but then it doesn't run when only debugging and not recompiling,
-    // which is annoying when you've changed a shader but not the code,
-    // because then the new shader doesn't get copied.
-    platform::system("del /q assets\\shaders\\*");
-#ifdef GRAPHICS_API_OPENGL
-    platform::system("copy /Y ..\\shaders\\glsl\\* assets\\shaders");
-#endif
-#ifdef GRAPHICS_API_D3D11
-	platform::system("copy /Y ..\\shaders\\dxbc\\* assets\\shaders");
-#endif
-#endif
-#endif
-    graphics::initialize();
-    graphics::initialize_globals();
-    imgui_impl::startup();
-    console::initialize();
-    audio::initialize();
-    ui::startup();
-    ui::startup_rmlui(); // TODO: remove
-    ecs::startup();
+        window::startup();
+        graphics::startup();
+        graphics::startup_globals();
+        imgui_impl::startup();
+        console::startup();
+        audio::startup();
+        ui::startup();
+        ui::startup_rmlui(); // TODO: remove
+        ecs::startup();
 
-    for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
-        if (file.format != files::FileFormat::FmodStudioBank) continue;
-        audio::load_bank_from_file(file.path);
-    }
-    for (const files::File& file : files::get_all_files_in_directory("assets/fonts")) {
-        if (file.format != files::FileFormat::TrueTypeFont) continue;
-        ui::load_font_from_file(file.path);
-    }
-    for (const files::File& file : files::get_all_files_in_directory("assets/ui")) {
-        if (file.format != files::FileFormat::RmlUiDocument) continue;
-        ui::load_document_from_file(file.path);
+        for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
+            if (file.format != files::FileFormat::FmodStudioBank) continue;
+            audio::load_bank_from_file(file.path);
+        }
+        for (const files::File& file : files::get_all_files_in_directory("assets/fonts")) { // TODO: remove
+            if (file.format != files::FileFormat::TrueTypeFont) continue;
+            ui::load_font_from_file(file.path);
+        }
+        for (const files::File& file : files::get_all_files_in_directory("assets/ui")) { // TODO: remove
+            if (file.format != files::FileFormat::RmlUiDocument) continue;
+            ui::load_document_from_file(file.path);
+        }
+
+        ui::add_event_listeners(); // Must come after loading RML documents.
+
+        settings::load_from_file(settings::APP_SETTINGS_PATH, settings::app_settings);
+        settings::apply(settings::app_settings);
+
+        window::set_visible(true);
+
+        console::execute(argc, argv);
+
+        _should_run = true;
     }
 
-    ui::add_event_listeners(); // Must come after loading RML documents.
+    void shutdown() {
+        ecs::shutdown();
+        ui::shutdown_rmlui();
+        ui::shutdown();
+        audio::shutdown();
+        imgui_impl::shutdown();
+        graphics::shutdown();
+        window::shutdown();
+        networking::shutdown();
+        steam::shutdown();
+    }
 
-    settings::load_from_file(settings::APP_SETTINGS_PATH, settings::app_settings);
-    settings::apply(settings::app_settings);
+    bool should_run() {
+        return _should_run;
+    }
 
-    window::set_visible(true);
+    void run() {
 
-    // PREPARE FOR GAME LOOP
+    }
+}
 
-#ifdef _DEBUG
-    console::execute(argc, argv);
-#else
-    console::execute("execute_script assets/scripts/martin_debug.script");
-#endif
+int main(int argc, char* argv[]) {
+    engine::startup(argc, argv);
 
     bool debug_stats = false;
-    bool debug_textures = false;
 
     // GAME LOOP
 
@@ -103,10 +110,9 @@ int main(int argc, char* argv[]) {
 
         steam::run_message_loop();
         window::update_events();
-        input::update();
-
-        // TODO: should this be moved to after the window event loop?
         imgui_impl::new_frame();
+        input::handle_window_events();
+        console::handle_window_events();
 
         // PROCESS WINDOW EVENTS
         {
@@ -130,8 +136,6 @@ int main(int argc, char* argv[]) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {
                         map::debug = !map::debug;
-                    } else if (ev.key.code == window::Key::F8) {
-                        debug_textures = !debug_textures;
                     }
 #endif // _DEBUG
                 }
@@ -139,7 +143,7 @@ int main(int argc, char* argv[]) {
                 if (ev.type == window::EventType::KeyPress && ImGui::GetIO().WantCaptureKeyboard) {
                     continue;
                 }
-                console::process_window_event(ev);
+                
                 ui::handle_window_event_for_rmlui(ev);
             }
         }
@@ -336,9 +340,7 @@ int main(int argc, char* argv[]) {
             ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
             ImGui::End();
         }
-        if (debug_textures) {
-            graphics::show_texture_debug_window();
-        }
+
         // PITFALL: ImGui uses its own shaders and such, so we need to render it
         // to the back buffer, not the final framebuffer, since when using OpenGL
         // as backend we flip the final framebuffer vertically.
@@ -357,17 +359,6 @@ int main(int argc, char* argv[]) {
 #endif
     }
 
-    // SHUTDOWN
-
-    ecs::shutdown();
-    ui::shutdown_rmlui();
-    ui::shutdown();
-    audio::shutdown();
-    imgui_impl::shutdown();
-    graphics::shutdown();
-    window::shutdown();
-	networking::shutdown();
-    steam::shutdown();
-
-    return EXIT_SUCCESS;
+    engine::shutdown();
+    return 0;
 }

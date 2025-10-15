@@ -17,7 +17,7 @@ namespace graphics {
 	struct RasterizerState;
 	struct BlendState;
 
-	bool initialize();
+	bool startup();
 	void shutdown();
 
 	bool is_spirv_supported();

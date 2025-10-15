@@ -2,6 +2,6 @@
 
 namespace networking
 {
-	void initialize();
+	void startup();
 	void shutdown();
 }

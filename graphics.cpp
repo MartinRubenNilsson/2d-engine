@@ -85,7 +85,7 @@ namespace graphics {
 	}
 #endif
 
-	bool initialize() {
+	bool startup() {
 #ifdef GRAPHICS_API_DEBUG
 		api::set_debug_message_callback(_debug_message_callback);
 #endif

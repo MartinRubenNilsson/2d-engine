@@ -118,6 +118,6 @@ namespace graphics {
 
 	extern Handle<BlendState> default_blend_state;
 
-	void initialize_globals();
+	void startup_globals();
 	void resize_final_framebuffer(unsigned int new_width, unsigned int new_height);
 }

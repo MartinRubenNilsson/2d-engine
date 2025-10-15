@@ -6,7 +6,7 @@
 
 namespace networking
 {
-	void initialize()
+	void startup()
 	{
 		WSADATA wsa_data{};
 		WSAStartup(MAKEWORD(2, 2), &wsa_data);

@@ -397,7 +397,7 @@ namespace graphics {
 		bind_blend_state(default_blend_state);
 	}
 
-	void initialize_globals() {
+	void startup_globals() {
 		_load_and_create_shaders_and_vertex_inputs();
 		_create_framebuffers();
 		_create_buffers();

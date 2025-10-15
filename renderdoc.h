@@ -2,7 +2,7 @@
 #ifdef _DEBUG_RENDERDOC
 
 namespace renderdoc {
-	bool initialize();
+	bool startup();
 	bool is_frame_capturing();
 	const char* get_capture_file_path_template();
 }

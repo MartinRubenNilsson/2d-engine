@@ -23,7 +23,7 @@ namespace files {
 
 	std::vector<File> _files;
 
-	void initialize() {
+	void startup() {
 		_files.clear();
 		for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(".")) {
 			if (!entry.is_regular_file()) continue;

@@ -74,7 +74,7 @@
     <ClCompile Include="timer.cpp">
       <Filter>utilities</Filter>
     </ClCompile>
-    <ClCompile Include="main_windows.cpp">
+    <ClCompile Include="main_win32.cpp">
       <Filter>application</Filter>
     </ClCompile>
     <ClCompile Include="ui_rmlui_system_interface.cpp">
@@ -296,7 +296,6 @@
     <ClCompile Include="ecs_debugging.cpp">
       <Filter>game\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="input.cpp" />
     <ClCompile Include="ecs_player_normal.cpp">
       <Filter>game\ecs\game\players\states</Filter>
     </ClCompile>
@@ -308,6 +307,9 @@
     </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -593,12 +595,14 @@
     <ClInclude Include="ecs_debugging.h">
       <Filter>game\ecs</Filter>
     </ClInclude>
-    <ClInclude Include="input.h" />
     <ClInclude Include="ecs_player_states.h">
       <Filter>game\ecs\game\players</Filter>
     </ClInclude>
     <ClInclude Include="ui_hud.h">
       <Filter>game\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -757,6 +761,9 @@
     </Filter>
     <Filter Include="application\files">
       <UniqueIdentifier>{15fbe91b-35fe-4b00-82c9-5703cdcb0e04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input">
+      <UniqueIdentifier>{3ac9a1d6-3b26-4038-b805-f53b65bda2a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

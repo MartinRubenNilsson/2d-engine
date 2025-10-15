@@ -2,13 +2,12 @@
 
 namespace window {
 	enum class Key;
-	struct Event;
 }
 
 namespace console {
-	void initialize();
+	void startup();
 	void update(float dt);
-	void process_window_event(const window::Event& ev);
+	void handle_window_events();
 
 	bool is_visible();
 	void set_visible(bool visible);
@@ -25,4 +24,5 @@ namespace console {
 	void bind(std::string_view key_string, std::string_view command_line);
 	void unbind(window::Key key);
 	void unbind(std::string_view key_string);
+	void execute_bind(window::Key key);
 }

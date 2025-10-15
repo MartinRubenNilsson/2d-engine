@@ -22,7 +22,6 @@ namespace console {
 	std::deque<std::string> _command_history; // TODO: use a ringbuffer instead
 	std::deque<std::string>::iterator _command_history_it = _command_history.end(); // TODO: use a ringbuffer instead
 	std::deque<std::pair<std::string, Color>> _history; // TODO: use a ringbuffer instead
-	std::unordered_map<window::Key, std::string> _key_bindings;
 
 	int _input_text_callback(ImGuiInputTextCallbackData* data) {
 		// COMPLETE COMMANDS
@@ -65,7 +64,7 @@ namespace console {
 		return 0;
 	}
 
-	void initialize() {
+	void startup() {
 #if 0
 		// REDIRECT COUT AND CERR
 
@@ -176,11 +175,12 @@ namespace console {
 		ImGui::End();
 	}
 
-	void process_window_event(const window::Event& ev) {
-		if (ev.type == window::EventType::KeyPress) {
-			auto it = _key_bindings.find(ev.key.code);
-			if (it != _key_bindings.end()) {
-				execute(it->second);
+	void handle_window_events() {
+		if (ImGui::GetIO().WantCaptureKeyboard)
+			return; // Don't execute bound commands while we're typing in console.
+		for (const window::Event& ev : window::get_events()) {
+			if (ev.type == window::EventType::KeyPress) {
+				execute_bind(ev.key.code);
 			}
 		}
 	}
@@ -278,6 +278,8 @@ namespace console {
 		}
 	}
 
+	std::unordered_map<window::Key, std::string> _key_bindings; // Maps keys to command lines
+
 	void bind(window::Key key, std::string_view command_line) {
 		_key_bindings[key] = command_line;
 	}
@@ -303,5 +305,11 @@ namespace console {
 		} else {
 			log_error("Failed to unbind key: " + std::string(key_string));
 		}
+	}
+
+	void execute_bind(window::Key key) {
+		auto it = _key_bindings.find(key);
+		if (it == _key_bindings.end()) return;
+		execute(it->second);
 	}
 }

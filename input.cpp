@@ -52,7 +52,7 @@ namespace input {
 		return true;
 	}
 
-	void update() {
+	void handle_window_events() {
 		_pressed_keys.reset();
 		_released_keys.reset();
 

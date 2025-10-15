@@ -22,7 +22,7 @@ namespace files {
 		FileFormat format = FileFormat::Unknown;
 	};
 
-	void initialize();
+	void startup();
 
 	// FILES
 

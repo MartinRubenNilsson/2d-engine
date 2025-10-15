@@ -12,5 +12,5 @@ namespace input {
 	float get_y_axis(); // one of -1, 0, 1
 	Vec2f get_dir(); // zero or unit vector
 
-	void update();
+	void handle_window_events();
 }

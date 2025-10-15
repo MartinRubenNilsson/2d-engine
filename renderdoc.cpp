@@ -8,7 +8,7 @@
 namespace renderdoc {
 	RENDERDOC_API_1_6_0* _rdoc_api = nullptr;
 
-	bool initialize() {
+	bool startup() {
 		HMODULE mod = LoadLibraryA("renderdoc.dll");
 		if (!mod) {
 			console::log_error("Failed to load renderdoc.dll");

@@ -95,7 +95,7 @@ namespace audio {
 		return ev->instance;
 	}
 
-	void initialize() {
+	void startup() {
 		FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
 		assert(result == FMOD_OK);
 		FMOD_STUDIO_INITFLAGS flags = 0;

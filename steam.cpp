@@ -20,7 +20,7 @@ namespace steam
 		return SteamAPI_IsSteamRunning();
 	}
 
-	bool initialize()
+	bool startup()
 	{
 		if (_is_initialized) return false;
 		if (!SteamAPI_Init()) return false;

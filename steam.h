@@ -4,7 +4,7 @@ namespace steam
 {
 	bool restart_app_if_necessary();
 	bool is_steam_running();
-	bool initialize();
+	bool startup();
 	void shutdown();
 	void run_message_loop();
 	bool is_overlay_active();
