@@ -24,18 +24,37 @@ namespace ui {
 	Clay_Arena _clay_arena{};
 	Clay_RenderCommandArray _clay_render_commands{};
 
-	bool startup() {
+	void _startup_clay() {
 		_clay_arena_memory.resize(Clay_MinMemorySize());
 		_clay_arena = Clay_CreateArenaWithCapacityAndMemory(_clay_arena_memory.size(), _clay_arena_memory.data());
 		const Clay_Dimensions dimensions{ .width = GAME_FRAMEBUFFER_WIDTH, .height = GAME_FRAMEBUFFER_HEIGHT };
 		const Clay_ErrorHandler error_handler{ .errorHandlerFunction = _handle_clay_error };
-		return Clay_Initialize(_clay_arena, dimensions, error_handler);
+		Clay_Initialize(_clay_arena, dimensions, error_handler);
+	}
+
+	void _shutdown_clay() {
+		_clay_render_commands = {};
+		_clay_arena = {};
+		_clay_arena_memory = {};
+	}
+
+	Handle<graphics::VertexShader> _image_vert{};
+	Handle<graphics::FragmentShader> _image_frag{};
+
+	void _load_shaders() {
+		_image_vert = graphics::load_vertex_shader("assets/shaders/ui_image.vert");
+		_image_frag = graphics::load_fragment_shader("assets/shaders/ui_image.frag");
+	}
+
+	void startup() {
+		_startup_clay();
+		_load_shaders();
+		hud::startup(); // TODO: move somewhere else
 	}
 
 	void shutdown() {
-		_clay_render_commands = {};
-		_clay_arena = {};
-		_clay_arena_memory.clear();
+		hud::shutdown(); // TODO: move somewhere else
+		_shutdown_clay();
 	}
 
 	void update(float dt) {
@@ -86,7 +105,7 @@ namespace ui {
 	void layout() {
 		_clay_render_commands = {};
 		Clay_BeginLayout();
-		hud::layout();
+		hud::layout(); // TODO: move to like game_ui.h or someting
 		_clay_render_commands = Clay_EndLayout();
 	}
 
@@ -106,8 +125,7 @@ namespace ui {
 					// This command type should be skipped.
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
-					// The renderer should draw a solid color rectangle.
-					const Clay_RectangleRenderData& rectangle = command.renderData.rectangle;
+					const Clay_RectangleRenderData& data = command.renderData.rectangle;
 					sprites::Sprite sprite{};
 					sprite.vertex_shader = graphics::ui_rectangle_vert;
 					sprite.fragment_shader = graphics::ui_rectangle_frag;
@@ -115,12 +133,7 @@ namespace ui {
 					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
 					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
 					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
-					sprite.color = {
-						(unsigned char)rectangle.backgroundColor.r,
-						(unsigned char)rectangle.backgroundColor.g,
-						(unsigned char)rectangle.backgroundColor.b,
-						(unsigned char)rectangle.backgroundColor.a
-					};
+					sprite.color = data.backgroundColor;
 					sprites::draw_later(sprite);
 					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
 				} break;
@@ -133,8 +146,26 @@ namespace ui {
 					__debugbreak();
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
-					// The renderer should draw an image.
-					//__debugbreak(); //TODO
+					const Clay_ImageRenderData& data = command.renderData.image;
+					const Image& image = *(const Image*)data.imageData;
+					sprites::Sprite sprite{};
+					sprite.vertex_shader = _image_vert;
+					sprite.fragment_shader = _image_frag;
+					sprite.texture = image.texture;
+					sprite.position.x = command.boundingBox.x * pixels_per_world_unit;
+					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
+					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
+					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
+					sprite.tex_position = image.tex_rect.min;
+					sprite.tex_size = image.tex_rect.max - image.tex_rect.min;
+					const Vec2f texture_size = graphics::get_texture_size(image.texture);
+					sprite.tex_position /= texture_size;
+					sprite.tex_size /= texture_size;
+					sprite.color = data.backgroundColor;
+					if (sprite.color == Color(0, 0, 0, 0)) // untinted
+						sprite.color = Color::WHITE;
+					sprites::draw_later(sprite);
+					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
 					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.

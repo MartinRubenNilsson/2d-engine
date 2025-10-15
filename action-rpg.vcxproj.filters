@@ -767,5 +767,8 @@
     <Filter Include="utils">
       <UniqueIdentifier>{fda23f39-2e34-4c02-b91d-10ef539bed08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\graphics\shaders">
+      <UniqueIdentifier>{6bfffb68-a074-4bea-b1f4-76f7353f2597}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

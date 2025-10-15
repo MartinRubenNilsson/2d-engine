@@ -66,11 +66,13 @@ namespace graphics {
 	Rect _scissor;
 	bool _scissor_test_enabled = false;
 	Pool<VertexShader> _vertex_shader_pool;
+	std::unordered_map<std::string, Handle<VertexShader>> _vertex_shader_cache;
 	Pool<FragmentShader> _fragment_shader_pool;
+	std::unordered_map<std::string, Handle<FragmentShader>> _fragment_shader_cache;
 	Pool<VertexInput> _vertex_input_pool;
 	Pool<Buffer> _buffer_pool;
 	Pool<Texture> _texture_pool;
-	std::unordered_map<std::string, Handle<Texture>> _path_to_texture;
+	std::unordered_map<std::string, Handle<Texture>> _texture_cache;
 	unsigned int _total_texture_memory_usage_in_bytes = 0;
 	Pool<Sampler> _sampler_pool;
 	Pool<Framebuffer> _framebuffer_pool;
@@ -190,7 +192,7 @@ namespace graphics {
 			}
 		}
 		_texture_pool.clear();
-		_path_to_texture.clear();
+		_vertex_shader_cache.clear();
 
 		// DELETE SAMPLERS
 
@@ -290,6 +292,50 @@ namespace graphics {
 		return _vertex_shader_pool.emplace(api_handle);
 	}
 
+	bool _shader_code_is_binary() {
+#if defined GRAPHICS_API_OPENGL
+		return graphics::is_spirv_supported();
+#elif defined GRAPHICS_API_D3D11
+		return true;
+#else
+#error No graphics API enabled
+#endif
+	}
+
+	std::string_view _get_shader_file_extension() {
+		const bool binary = _shader_code_is_binary();
+#if defined GRAPHICS_API_OPENGL
+		return binary ? ".spv" : "";
+#elif defined GRAPHICS_API_D3D11
+		return binary ? ".dxbc" : ".hlsl";
+#else
+#error No graphics API enabled
+#endif
+	}
+
+	Handle<VertexShader> load_vertex_shader(std::string_view path) {
+		std::string normalized_path = files::get_normalized_path(path);
+		normalized_path += _get_shader_file_extension();
+		if (auto it = _vertex_shader_cache.find(normalized_path); it != _vertex_shader_cache.end())
+			return it->second;
+		std::vector<unsigned char> shader_code;
+		if (!files::read_binary_file(normalized_path, shader_code)) {
+			console::log_error("Failed to load vertex shader code: " + normalized_path);
+			return Handle<VertexShader>();
+		}
+		const Handle<VertexShader> handle = create_vertex_shader({
+			.debug_name = normalized_path,
+			.code = shader_code,
+			.binary = _shader_code_is_binary() });
+		if (handle == Handle<VertexShader>()) {
+			console::log_error("Failed to create vertex shader: " + normalized_path);
+			return Handle<VertexShader>();
+		}
+		// CRITICAL: Move normalized_path so it is kept alive, otherwise debug_name is invalidated.
+		_vertex_shader_cache[std::move(normalized_path)] = handle;
+		return handle;
+	}
+
 	void bind_vertex_shader(Handle<VertexShader> handle) {
 		if (handle == Handle<VertexShader>()) {
 			api::bind_vertex_shader(api::VertexShaderHandle());
@@ -302,6 +348,29 @@ namespace graphics {
 		api::FragmentShaderHandle api_handle = api::create_fragment_shader(desc);
 		if (!api_handle.object) return Handle<FragmentShader>();
 		return _fragment_shader_pool.emplace(api_handle);
+	}
+
+	Handle<FragmentShader> load_fragment_shader(std::string_view path) {
+		std::string normalized_path = files::get_normalized_path(path);
+		normalized_path += _get_shader_file_extension();
+		if (auto it = _fragment_shader_cache.find(normalized_path); it != _fragment_shader_cache.end())
+			return it->second;
+		std::vector<unsigned char> shader_code;
+		if (!files::read_binary_file(normalized_path, shader_code)) {
+			console::log_error("Failed to load fragment shader code: " + normalized_path);
+			return Handle<FragmentShader>();
+		}
+		const Handle<FragmentShader> handle = create_fragment_shader({
+			.debug_name = normalized_path,
+			.code = shader_code,
+			.binary = _shader_code_is_binary() });
+		if (handle == Handle<FragmentShader>()) {
+			console::log_error("Failed to create fragment shader: " + normalized_path);
+			return Handle<FragmentShader>();
+		}
+		// CRITICAL: Move normalized_path so it is kept alive, otherwise debug_name is invalidated.
+		_fragment_shader_cache[std::move(normalized_path)] = handle;
+		return handle;
 	}
 
 	void bind_fragment_shader(Handle<FragmentShader> handle) {
@@ -453,11 +522,11 @@ namespace graphics {
 		std::string normalized_path_ktx2 = files::replace_extension(normalized_path, ".ktx2");
 
 		// Check if the KTX2 texture is already loaded.
-		if (const auto it = _path_to_texture.find(normalized_path_ktx2); it != _path_to_texture.end()) {
+		if (const auto it = _texture_cache.find(normalized_path_ktx2); it != _texture_cache.end()) {
 			return it->second;
 		}
 		// Check if the non-KTX2 texture is already loaded.
-		if (const auto it = _path_to_texture.find(normalized_path); it != _path_to_texture.end()) {
+		if (const auto it = _texture_cache.find(normalized_path); it != _texture_cache.end()) {
 			return it->second;
 		}
 
@@ -506,7 +575,7 @@ namespace graphics {
 		images::free_image(image); // Don't forget!
 
 		// CRITICAL: Move path_used so it is kept alive.
-		_path_to_texture[std::move(path_used)] = handle;
+		_texture_cache[std::move(path_used)] = handle;
 
 		return handle;
 	}
@@ -526,7 +595,7 @@ namespace graphics {
 		api::destroy_texture(texture->api_handle);
 		_total_texture_memory_usage_in_bytes -= _get_texture_byte_size(texture->desc);
 		// HACK: When a texture is loaded, its debug_name is set to the path.
-		_path_to_texture.erase(std::string(texture->desc.debug_name));
+		_vertex_shader_cache.erase(std::string(texture->desc.debug_name));
 		*texture = Texture();
 		_texture_pool.free(handle);
 	}

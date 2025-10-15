@@ -35,10 +35,12 @@ namespace graphics {
 	};
 
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc);
+	Handle<VertexShader> load_vertex_shader(std::string_view path);
 	// Pass an empty handle to unbind any currently bound vertex shader.
 	void bind_vertex_shader(Handle<VertexShader> handle);
 
 	Handle<FragmentShader> create_fragment_shader(ShaderDesc&& desc);
+	Handle<FragmentShader> load_fragment_shader(std::string_view path);
 	// Pass an empty handle to unbind any currently bound fragment shader.
 	void bind_fragment_shader(Handle<FragmentShader> handle);
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ui_hud.h"
+#include "ui_clay.h"
 #include "graphics.h"
 
 namespace ui {
@@ -11,23 +12,26 @@ namespace hud {
 	unsigned int arrows = 0;
 	unsigned int bombs = 0;
 
+	Handle<graphics::Texture> _spritesheet{};
+	Image _heart_image{};
+
 	void startup() {
-		// TODO: load heart texture
+		_spritesheet = graphics::load_texture("assets/ui/hud.png");
+		_heart_image.texture = _spritesheet;
+		_heart_image.tex_rect.min = { 16.f, 16.f };
+		_heart_image.tex_rect.max = _heart_image.tex_rect.min + Vec2f{ 16.f, 16.f };
 	}
 
 	void shutdown() {
-		// TODO: unload heart texture
 	}
 
 	void update(float dt) {
-		// TODO: load heart texture
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
-		// TODO: image
 		CLAY(CLAY_IDI("HudHeart", index), { .layout = {
 			.sizing = { .width = CLAY_SIZING_FIXED(16), .height = CLAY_SIZING_FIXED(16) } },
-			.backgroundColor = Color::WHITE }) {
+			.image = { .imageData = &_heart_image } }) {
 		}
 	}
 
