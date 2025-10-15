@@ -91,10 +91,10 @@ namespace ui {
 		if (!_clay_render_commands.length)
 			return;
 
-		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
+		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
 		// How many pixels on screen there are per world unit.
-		const float pixels_per_world_unit = (float)viewport.y / GAME_FRAMEBUFFER_HEIGHT;
+		const float pixels_per_world_unit = (float)viewport.height / GAME_FRAMEBUFFER_HEIGHT;
 
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
@@ -119,7 +119,7 @@ namespace ui {
 						(unsigned char)rectangle.backgroundColor.a
 					};
 					sprites::draw_later(sprite);
-					sprites::draw_all_now(); // TODO: optimize
+					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.

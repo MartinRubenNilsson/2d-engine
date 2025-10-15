@@ -52,7 +52,7 @@ namespace postprocessing {
 	void _render_shockwaves(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_shockwaves.empty()) return;
 		if (graphics::shockwave_frag == Handle<graphics::FragmentShader>()) return;
-		graphics::ScopedDebugGroup debug_group("postprocessing::_render_shockwaves()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		graphics::bind_fragment_shader(graphics::shockwave_frag);
 		graphics::bind_uniform_buffer(1, graphics::shockwave_uniform_buffer);
 		graphics::ShockwaveUniformBlock shockwave_ub{};
@@ -75,7 +75,7 @@ namespace postprocessing {
 	void _render_darkness(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_darkness_intensity == 0.f) return;
 		if (graphics::darkness_frag == Handle<graphics::FragmentShader>()) return;
-		graphics::ScopedDebugGroup debug_group("postprocesssing::_render_darkness()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 		graphics::bind_framebuffer(graphics::game_ping_framebuffer);
 		graphics::bind_fragment_shader(graphics::darkness_frag);
@@ -94,7 +94,7 @@ namespace postprocessing {
 	void _render_screen_transition() {
 		if (_screen_transition_progress == 0.f) return;
 		if (graphics::screen_transition_frag == Handle<graphics::FragmentShader>()) return;
-		graphics::ScopedDebugGroup debug_group("postprocessing::_render_screen_transition()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		graphics::bind_fragment_shader(graphics::screen_transition_frag);
 		graphics::ScreenTransitionUniformBlock screen_transition_ub{};
 		screen_transition_ub.progress = _screen_transition_progress;
@@ -111,7 +111,7 @@ namespace postprocessing {
 		if (_gaussian_blur_iterations == 0) return;
 		if (graphics::gaussian_blur_hor_frag == Handle<graphics::FragmentShader>()) return;
 		if (graphics::gaussian_blur_ver_frag == Handle<graphics::FragmentShader>()) return;
-		graphics::ScopedDebugGroup debug_group("postprocessing::_render_gaussian_blur()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		graphics::bind_sampler(0, graphics::linear_sampler);
 		for (size_t i = 0; i < _gaussian_blur_iterations; ++i) {
 			// Horizontal pass
@@ -133,7 +133,7 @@ namespace postprocessing {
 	}
 
 	void render(const Vec2f& camera_min, const Vec2f& camera_max) {
-		graphics::ScopedDebugGroup debug_group("postprocessing::render()");
+		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		graphics::set_primitives(graphics::Primitives::TriangleList);
 		graphics::bind_vertex_shader(graphics::fullscreen_vert);
 		_render_shockwaves(camera_min, camera_max);

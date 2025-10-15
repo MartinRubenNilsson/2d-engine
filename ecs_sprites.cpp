@@ -102,7 +102,7 @@ namespace ecs {
 	}
 
 	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
-		graphics::ScopedDebugGroup debug_group("ecs::draw_sprites_now()");
+		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
 		_blink_sprites_before_drawing();
 		_shake_sprites_before_drawing();
@@ -130,11 +130,14 @@ namespace ecs {
 			sprites::draw_later(copy);
 		}
 
-		graphics::update_buffer(graphics::sprite_uniform_buffer,
-			blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
+		{
+			const graphics::ScopedDebugGroup debug_group("graphics::update_buffer");
+			graphics::update_buffer(graphics::sprite_uniform_buffer,
+				blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
+		}
 
 		sprites::sort_all();
-		sprites::draw_all_now();
+		sprites::draw_all_now("sprites::draw_all_now");
 
 		_unblink_sprites_after_drawing();
 		_unshake_sprites_after_drawing();

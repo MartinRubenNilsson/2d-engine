@@ -2,10 +2,8 @@
 #include "background.h"
 #include "graphics.h"
 #include "sprites.h"
-#include "console.h"
 
-namespace background
-{
+namespace background {
 	const std::string _MOUNTAIN_DUSK_TEXTURE_PATHS[] = {
 		"assets/textures/backgrounds/mountain_dusk/sky.png",
 		"assets/textures/backgrounds/mountain_dusk/far-clouds.png",
@@ -15,8 +13,7 @@ namespace background
 		"assets/textures/backgrounds/mountain_dusk/trees.png",
 	};
 
-	struct Layer
-	{
+	struct Layer {
 		Handle<graphics::Texture> texture;
 		Vec2u texture_size;
 		float offset_x = 0.f;
@@ -25,29 +22,27 @@ namespace background
 	Type _type = Type::None;
 	std::vector<Layer> _layers;
 
-	void set_type(Type type)
-	{
+	void set_type(Type type) {
 		if (_type == type) return;
 		_type = type;
 		switch (type) {
-		case Type::None: {
-			_layers.clear();
-		} break;
-		case Type::MountainDusk: {
-			_layers.clear();
-			for (const std::string& path : _MOUNTAIN_DUSK_TEXTURE_PATHS) {
-				const Handle<graphics::Texture> texture = graphics::load_texture(path);
-				if (texture == Handle<graphics::Texture>()) continue;
-				Layer& layer = _layers.emplace_back();
-				layer.texture = texture;
-				layer.texture_size = graphics::get_texture_size(texture);
-			}
-		} break;
+			case Type::None: {
+				_layers.clear();
+			} break;
+			case Type::MountainDusk: {
+				_layers.clear();
+				for (const std::string& path : _MOUNTAIN_DUSK_TEXTURE_PATHS) {
+					const Handle<graphics::Texture> texture = graphics::load_texture(path);
+					if (texture == Handle<graphics::Texture>()) continue;
+					Layer& layer = _layers.emplace_back();
+					layer.texture = texture;
+					layer.texture_size = graphics::get_texture_size(texture);
+				}
+			} break;
 		}
 	}
 
-	void update(float dt)
-	{
+	void update(float dt) {
 		if (_type == Type::None) return;
 		for (size_t i = 0; i < _layers.size(); ++i) {
 			Layer& layer = _layers[i];
@@ -58,10 +53,8 @@ namespace background
 		}
 	}
 
-	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max)
-	{
+	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_type == Type::None) return;
-		graphics::ScopedDebugGroup debug_group("background::draw_sprites()");
 
 		sprites::Sprite sprite{};
 		for (const Layer& layer : _layers) {
@@ -76,6 +69,6 @@ namespace background
 		}
 
 		// We don't have to sort before drawing, since the sprites were added in draw order.
-		sprites::draw_all_now();
+		sprites::draw_all_now(__FUNCTION__);
 	}
 }

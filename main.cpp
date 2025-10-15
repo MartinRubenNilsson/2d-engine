@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     graphics::initialize();
     graphics::initialize_globals();
 #ifdef _DEBUG_IMGUI
-    imgui_impl::initialize();
+    imgui_impl::startup();
 #endif
     console::initialize();
     audio::initialize();
@@ -346,13 +346,10 @@ int main(int argc, char* argv[]) {
         if (debug_textures) {
             graphics::show_texture_debug_window();
         }
-        {
-            graphics::ScopedDebugGroup debug_group("imgui_impl::render()");
-            // PITFALL: ImGui uses its own shaders and such, so we need to render it
-			// to the back buffer, not the final framebuffer, since when using OpenGL
-			// as backend we flip the final framebuffer vertically.
-            imgui_impl::render();
-        }
+        // PITFALL: ImGui uses its own shaders and such, so we need to render it
+        // to the back buffer, not the final framebuffer, since when using OpenGL
+        // as backend we flip the final framebuffer vertically.
+        imgui_impl::render();
 #endif
 
         // PRESENT BACK BUFFER

@@ -77,8 +77,10 @@ namespace sprites {
 		eastl::tim_sort_buffer(_sprites.begin(), _sprites.end(), _sprites.end());
 	}
 
-	void draw_all_now() {
+	void draw_all_now(std::string_view debug_group_name) {
 		if (_sprites.empty()) return;
+
+		const graphics::ScopedDebugGroup debug_group(debug_group_name);
 
 		// Sprites sharing the same state (shader, texture, etc.) are batched together to reduce draw calls.
 		// This is done by creating a triangle strip for each batch and drawing it only when the state changes.

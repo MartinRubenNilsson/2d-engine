@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #ifdef _DEBUG_IMGUI
 #include "imgui_impl.h"
+#include "window.h"
+#include "graphics.h"
+#include "graphics_api.h"
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
-#include "window.h"
-#include "graphics_api.h"
 #ifdef GRAPHICS_API_OPENGL
 #include <imgui_impl_opengl3.h>
 #endif
@@ -28,7 +30,7 @@ namespace graphics {
 
 namespace imgui_impl {
 
-	bool initialize() {
+	bool startup() {
 		IMGUI_CHECKVERSION();
 		if (!ImGui::CreateContext()) {
 			return false;
@@ -135,6 +137,7 @@ namespace imgui_impl {
 	}
 
 	void render() {
+		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		ImGui::Render();
 #ifdef GRAPHICS_API_OPENGL
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
