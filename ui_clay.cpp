@@ -156,8 +156,8 @@ namespace ui {
 					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
 					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
 					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
-					sprite.tex_position = image.tex_rect.min;
-					sprite.tex_size = image.tex_rect.max - image.tex_rect.min;
+					sprite.tex_position = image.tex_rect_pos;
+					sprite.tex_size = image.tex_rect_size;
 					const Vec2f texture_size = graphics::get_texture_size(image.texture);
 					sprite.tex_position /= texture_size;
 					sprite.tex_size /= texture_size;

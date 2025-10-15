@@ -3,7 +3,8 @@
 namespace ui {
 	struct Image {
 		Handle<graphics::Texture> texture{};
-		Rect2f tex_rect{}; // uv coordinates
+		Vec2u tex_rect_pos{}; // texture rect top left corner position in pixels
+		Vec2u tex_rect_size{}; // texture rect size in pixels
 	};
 
 	void startup();

@@ -18,8 +18,8 @@ namespace hud {
 	void startup() {
 		_spritesheet = graphics::load_texture("assets/ui/hud.png");
 		_heart_image.texture = _spritesheet;
-		_heart_image.tex_rect.min = { 16.f, 16.f };
-		_heart_image.tex_rect.max = _heart_image.tex_rect.min + Vec2f{ 16.f, 16.f };
+		_heart_image.tex_rect_pos = { 16, 16 };
+		_heart_image.tex_rect_size = { 16, 16 };
 	}
 
 	void shutdown() {
