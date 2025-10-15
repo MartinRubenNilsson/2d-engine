@@ -95,12 +95,12 @@ namespace engine {
     }
 
     bool should_run() {
-        return _should_run && !window::should_close();;
+        return _should_run && !window::should_close();
     }
 
     void _update() {
         const float new_app_time = (float)window::get_elapsed_time();
-        const float app_delta_time = new_app_time - app_time;
+        app_delta_time = new_app_time - app_time;
         app_time = new_app_time;
 
         steam::run_message_loop();
@@ -189,6 +189,31 @@ namespace engine {
 
         ecs::update(game_delta_time);
         postprocessing::update(game_delta_time);
+    }
+
+    void _show_debug_stats_imgui() {
+        constexpr float SMOOTHING_FACTOR = 0.99f;
+        static float smoothed_dt = 0.f;
+        static float smoothed_fps = 0.f;
+        static float dt_buffer[256] = { 0.f };
+        static float fps_buffer[256] = { 0.f };
+        static int buffer_offset = 0;
+        dt_buffer[buffer_offset] = app_delta_time;
+        fps_buffer[buffer_offset] = 1.f / app_delta_time;
+        buffer_offset = (buffer_offset + 1) % 256;
+        smoothed_dt = SMOOTHING_FACTOR * smoothed_dt + (1.f - SMOOTHING_FACTOR) * app_delta_time;
+        smoothed_fps = SMOOTHING_FACTOR * smoothed_fps + (1.f - SMOOTHING_FACTOR) / app_delta_time;
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::Begin("Stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
+        char overlay_text[64];
+        sprintf(overlay_text, "%.f us", smoothed_dt * 1'000'000.f);
+        ImGui::PlotLines("##dt", dt_buffer, 256, buffer_offset, overlay_text, 0.f, 0.01f, ImVec2(0, 80));
+        sprintf(overlay_text, "%.f FPS", smoothed_fps);
+        ImGui::PlotLines("##fps", fps_buffer, 256, buffer_offset, overlay_text, 0.f, 600.f, ImVec2(0, 80));
+        ImGui::Value("Sprites Drawn", sprites::get_num_sprites_drawn());
+        ImGui::Value("Batches Drawn", sprites::get_num_batches_drawn());
+        ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
+        ImGui::End();
     }
 
     void _render() {
@@ -309,31 +334,8 @@ namespace engine {
             graphics::draw(3); // draw a fullscreen-covering triangle
         }
 
-        // CREATE DEBUG STATS WINDOW
-
         if (debug_stats) {
-            constexpr float smoothing_factor = 0.99f;
-            static float smoothed_dt = 0.f;
-            static float smoothed_fps = 0.f;
-            static float dt_buffer[256] = { 0.f };
-            static float fps_buffer[256] = { 0.f };
-            static int buffer_offset = 0;
-            dt_buffer[buffer_offset] = app_delta_time;
-            fps_buffer[buffer_offset] = 1.f / app_delta_time;
-            buffer_offset = (buffer_offset + 1) % 256;
-            smoothed_dt = smoothing_factor * smoothed_dt + (1.f - smoothing_factor) * app_delta_time;
-            smoothed_fps = smoothing_factor * smoothed_fps + (1.f - smoothing_factor) / app_delta_time;
-            ImGui::SetNextWindowPos(ImVec2(0, 0));
-            ImGui::Begin("Stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
-            char overlay_text[64];
-            sprintf(overlay_text, "%.f us", smoothed_dt * 1'000'000.f);
-            ImGui::PlotLines("##dt", dt_buffer, 256, buffer_offset, overlay_text, 0.f, 0.01f, ImVec2(0, 80));
-            sprintf(overlay_text, "%.f FPS", smoothed_fps);
-            ImGui::PlotLines("##fps", fps_buffer, 256, buffer_offset, overlay_text, 0.f, 600.f, ImVec2(0, 80));
-            ImGui::Value("Sprites Drawn", sprites::get_num_sprites_drawn());
-            ImGui::Value("Batches Drawn", sprites::get_num_batches_drawn());
-            ImGui::Value("Largest Batch", sprites::get_num_sprites_in_largest_batch());
-            ImGui::End();
+            _show_debug_stats_imgui();
         }
 
         // PITFALL: ImGui uses its own shaders and such, so we need to render it
