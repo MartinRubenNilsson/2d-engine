@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "map.h"
-#include "filesystem.h"
+#include "files.h"
 #include "console.h"
 #include "audio.h"
 #include "ui_textbox.h"
@@ -23,7 +23,7 @@ namespace map {
 			for (ecs::MapId map : ecs::get_all_maps()) {
 				std::string_view path = ecs::get_path(map);
 				bool is_selected = (_current_map_path == path);
-				const std::string stem = filesystem::get_stem(path);
+				const std::string stem = files::get_stem(path);
 				if (ImGui::Selectable(stem.c_str(), is_selected)) {
 					open(stem);
 				}
@@ -171,7 +171,7 @@ namespace map {
 	}
 
 	std::string get_name() {
-		return filesystem::get_stem(_current_map_path);
+		return files::get_stem(_current_map_path);
 	}
 
 	float get_transition_progress() {

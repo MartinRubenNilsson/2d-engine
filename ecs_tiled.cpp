@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ecs_tiled.h"
 #include "tiled.h"
-#include "filesystem.h"
+#include "files.h"
 #include "console.h"
 
 namespace ecs {
@@ -26,28 +26,28 @@ namespace ecs {
 
 	void startup_tiled() {
 		_tiled_context.file_load_callback = [](std::string_view path, std::string& contents) {
-			return filesystem::read_text_file(path, contents);
+			return files::read_text_file(path, contents);
 		};
 		_tiled_context.debug_message_callback = [](std::string_view message) {
 			console::log(message);
 		};
 
 		// Preload all Tiled assets.
-		const std::span<const filesystem::File> files = filesystem::get_all_files_in_directory("assets/tiled");
+		const std::span<const files::File> files = files::get_all_files_in_directory("assets/tiled");
 
 		// Load tilesets first...
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledTileset) continue;
+		for (const files::File& file : files) {
+			if (file.format != files::FileFormat::TiledTileset) continue;
 			tiled::load_tileset(_tiled_context, file.path);
 		}
 		// ...then templates...
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledTemplate) continue;
+		for (const files::File& file : files) {
+			if (file.format != files::FileFormat::TiledTemplate) continue;
 			tiled::load_template(_tiled_context, file.path);
 		}
 		// ...and lastly maps.
-		for (const filesystem::File& file : files) {
-			if (file.format != filesystem::FileFormat::TiledMap) continue;
+		for (const files::File& file : files) {
+			if (file.format != files::FileFormat::TiledMap) continue;
 			tiled::load_map(_tiled_context, file.path);
 		}
 	}
@@ -61,7 +61,7 @@ namespace ecs {
 			std::string_view tentative_path = _tiled_context.maps[i].path;
 			if (tentative_path == path) {
 				return { .id = i };
-			} else if (filesystem::get_stem(tentative_path) == filesystem::get_stem(path)) {
+			} else if (files::get_stem(tentative_path) == files::get_stem(path)) {
 				return { .id = i };
 			}
 		}

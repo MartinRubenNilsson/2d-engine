@@ -6,7 +6,7 @@
 #include "window_graphics.h"
 #include "pool.h"
 #include "console.h"
-#include "filesystem.h"
+#include "files.h"
 #include "images.h"
 #include "platform.h"
 
@@ -448,9 +448,9 @@ namespace graphics {
 
 	Handle<Texture> load_texture(std::string_view path) {
 
-		std::string normalized_path = filesystem::get_normalized_path(path);
+		std::string normalized_path = files::get_normalized_path(path);
 		// KTX2 compressed textures load much MUCH faster, so we prefer those whenever possible.
-		std::string normalized_path_ktx2 = filesystem::replace_extension(normalized_path, ".ktx2");
+		std::string normalized_path_ktx2 = files::replace_extension(normalized_path, ".ktx2");
 
 		// Check if the KTX2 texture is already loaded.
 		if (const auto it = _path_to_texture.find(normalized_path_ktx2); it != _path_to_texture.end()) {
@@ -464,13 +464,13 @@ namespace graphics {
 		images::Image image{};
 		std::string path_used;
 		
-		if (filesystem::file_exists(normalized_path_ktx2)) {
+		if (files::file_exists(normalized_path_ktx2)) {
 			// Try to load a KTX2 texture first if it exists.
 			if (!images::load_image(normalized_path_ktx2, image)) {
 				return Handle<Texture>();
 			}
 			path_used = std::move(normalized_path_ktx2);
-		} else if (filesystem::file_exists(normalized_path)) {
+		} else if (files::file_exists(normalized_path)) {
 			// Fall back to loading the non-KTX2 texture.
 			if (!images::load_image(normalized_path, image)) {
 				return Handle<Texture>();

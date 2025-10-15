@@ -10,7 +10,7 @@
 #include "audio.h"
 #include "window.h"
 #include "window_events.h"
-#include "filesystem.h"
+#include "files.h"
 
 #ifdef _DEBUG_UI
 #include <RmlUi/Debugger.h>
@@ -99,9 +99,7 @@ namespace ui {
 		}
 	}
 
-	void initialize() {
-		startup_clay();
-
+	void startup_rmlui() {
 		Rml::SetSystemInterface(&_system_interface);
 		Rml::SetRenderInterface(&_render_interface);
 		Rml::Initialise();
@@ -115,14 +113,12 @@ namespace ui {
 		create_textbox_presets();
 	}
 
-	void shutdown() {
+	void shutdown_rmlui() {
 		Rml::Shutdown();
 		_context = nullptr;
 #ifdef _DEBUG_UI
 		_debugger_context = nullptr;
 #endif
-
-		shutdown_clay();
 	}
 
 	Rml::Input::KeyIdentifier _translate_key_identifier_to_rml(window::Key key) {
@@ -231,7 +227,7 @@ namespace ui {
 	bool _mouse_is_down = false;
 	float _scroll_delta_x = 0.f;
 
-	void process_window_event(const window::Event& ev) {
+	void handle_window_event_for_rmlui(const window::Event& ev) {
 		switch (ev.type) {
 		case window::EventType::FramebufferSize:
 		{
@@ -333,9 +329,7 @@ namespace ui {
 		}
 	}
 
-	void update(float dt) {
-		set_clay_pointer_state((float)_mouse_position_x, (float)_mouse_position_y, _mouse_is_down);
-
+	void update_rmlui(float dt) {
 		// As an optimization, update the UI at a lower FPS than the game.
 		_dt_accumulator += dt;
 		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
@@ -353,13 +347,7 @@ namespace ui {
 		_dt_accumulator = 0.0f;
 	}
 
-	void render() {
-
-		{ // Test clay
-			layout_clay();
-			render_clay();
-		}
-
+	void render_rmlui() {
 		prepare_render_state();
 		_context->Render();
 #ifdef _DEBUG_UI
@@ -378,7 +366,7 @@ namespace ui {
 			console::log_error("Failed to load RmlUi document: " + path);
 			return;
 		}
-		doc->SetId(filesystem::get_stem(path));
+		doc->SetId(files::get_stem(path));
 	}
 
 	void add_event_listeners() {

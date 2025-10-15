@@ -6,7 +6,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 
-#include "ui_hud.h"
+#include "ui_hud.h" // TODO: don't put this here
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
@@ -15,10 +15,6 @@
 #pragma warning(pop)
 
 namespace ui {
-	const Clay_Color COLOR_LIGHT = Clay_Color{ 224, 215, 210, 255 };
-	const Clay_Color COLOR_RED = Clay_Color{ 168, 66, 28, 255 };
-	const Clay_Color COLOR_ORANGE = Clay_Color{ 225, 138, 50, 255 };
-
 	void _handle_clay_error(Clay_ErrorData error_data) {
 		std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
 		console::log_error(text);
@@ -28,7 +24,7 @@ namespace ui {
 	Clay_Arena _clay_arena{};
 	Clay_RenderCommandArray _clay_render_commands{};
 
-	bool startup_clay() {
+	bool startup() {
 		_clay_arena_memory.resize(Clay_MinMemorySize());
 		_clay_arena = Clay_CreateArenaWithCapacityAndMemory(_clay_arena_memory.size(), _clay_arena_memory.data());
 		const Clay_Dimensions dimensions{ .width = GAME_FRAMEBUFFER_WIDTH, .height = GAME_FRAMEBUFFER_HEIGHT };
@@ -36,19 +32,16 @@ namespace ui {
 		return Clay_Initialize(_clay_arena, dimensions, error_handler);
 	}
 
-	void shutdown_clay() {
+	void shutdown() {
 		_clay_render_commands = {};
 		_clay_arena = {};
 		_clay_arena_memory.clear();
 	}
 
-	void set_clay_pointer_state(float x, float y, bool is_down) {
-		// TODO: If in the future we render the game world to a smaller viewport, then
-		// we need to remap the mouse coordinates to the smaller viewport.
-		Clay_SetPointerState({ .x = x, .y = y }, is_down);
-	}
+	void update(float dt) {
+		static Clay_Vector2 mouse_pos{};
+		static bool mouse_is_down = false;
 
-	void update_clay(float dt) {
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
 #if 0
@@ -61,6 +54,20 @@ namespace ui {
 					Clay_SetLayoutDimensions(dimensions);
 				} break;
 #endif
+				case window::EventType::MouseMove: {
+					mouse_pos.x = (float)ev.mouse_move.x;
+					mouse_pos.y = (float)ev.mouse_move.y;
+				} break;
+				case window::EventType::MouseButtonPress: {
+					if (ev.mouse_button.button == window::MouseButton::Left) {
+						mouse_is_down = true;
+					}
+				} break;
+				case window::EventType::MouseButtonRelease: {
+					if (ev.mouse_button.button == window::MouseButton::Left) {
+						mouse_is_down = false;
+					}
+				} break;
 				case window::EventType::MouseScroll: {
 					const Clay_Vector2 scoll_delta{
 						.x = (float)ev.mouse_scroll.delta_x,
@@ -69,25 +76,25 @@ namespace ui {
 				} break;
 			}
 		}
+
+		Clay_SetPointerState(mouse_pos, mouse_is_down);
 	}
 
-	void layout_clay() {
+	void layout() {
 		_clay_render_commands = {};
 		Clay_BeginLayout();
 		hud::layout();
 		_clay_render_commands = Clay_EndLayout();
 	}
 
-	void render_clay() {
+	void render(const graphics::Viewport& viewport) {
 		if (!_clay_render_commands.length)
 			return;
 
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
-		// Find out how many screen pixels there are per world unit.
-		const Vec2u framebuffer_size = graphics::get_texture_size(
-			graphics::get_framebuffer_texture(graphics::final_framebuffer));
-		const float pixels_per_world_unit = (float)framebuffer_size.y / GAME_FRAMEBUFFER_HEIGHT;
+		// How many pixels on screen there are per world unit.
+		const float pixels_per_world_unit = (float)viewport.y / GAME_FRAMEBUFFER_HEIGHT;
 
 		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
 			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];

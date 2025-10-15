@@ -2,7 +2,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
-#include "filesystem.h"
+#include "files.h"
 
 namespace graphics {
 	eastl::vector<graphics::Vertex> temp_vertices;
@@ -64,63 +64,63 @@ namespace graphics {
 		const bool binary = true;
 		const std::string extension = binary ? ".dxbc" : ".hlsl";
 #endif
-		if (filesystem::read_binary_file("assets/shaders/fullscreen.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/fullscreen.vert" + extension, shader_code)) {
 			fullscreen_vert = create_vertex_shader({
 				.debug_name = "fullscreen vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/fullscreen_flip.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/fullscreen_flip.vert" + extension, shader_code)) {
 			fullscreen_flip_vert = create_vertex_shader({
 				.debug_name = "fullscreen flip vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/fullscreen.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/fullscreen.frag" + extension, shader_code)) {
 			fullscreen_frag = create_fragment_shader({
 				.debug_name = "fullscreen fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/gaussian_blur_hor.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/gaussian_blur_hor.frag" + extension, shader_code)) {
 			gaussian_blur_hor_frag = create_fragment_shader({
 				.debug_name = "gaussian blur horizontal fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/gaussian_blur_ver.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/gaussian_blur_ver.frag" + extension, shader_code)) {
 			gaussian_blur_ver_frag = create_fragment_shader({
 				.debug_name = "gaussian blur vertical fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/screen_transition.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/screen_transition.frag" + extension, shader_code)) {
 			screen_transition_frag = create_fragment_shader({
 				.debug_name = "screen transition fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/shockwave.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/shockwave.frag" + extension, shader_code)) {
 			shockwave_frag = create_fragment_shader({
 				.debug_name = "shockwave fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/darkness.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/darkness.frag" + extension, shader_code)) {
 			darkness_frag = create_fragment_shader({
 				.debug_name = "darkness fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/sprite.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/sprite.vert" + extension, shader_code)) {
 			sprite_vert = create_vertex_shader({
 				.debug_name = "sprite vertex shader",
 				.code = shader_code,
@@ -142,70 +142,70 @@ namespace graphics {
 				.bytecode = shader_code
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/sprite.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/sprite.frag" + extension, shader_code)) {
 			sprite_frag = create_fragment_shader({
 				.debug_name = "sprite fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/grass.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/grass.vert" + extension, shader_code)) {
 			grass_vert = create_vertex_shader({
 				.debug_name = "grass vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/shape.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/shape.vert" + extension, shader_code)) {
 			shape_vert = create_vertex_shader({
 				.debug_name = "shape vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/shape.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/shape.frag" + extension, shader_code)) {
 			shape_frag = create_fragment_shader({
 				.debug_name = "shape fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/text.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/text.frag" + extension, shader_code)) {
 			text_frag = create_fragment_shader({
 				.debug_name = "text fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/ui.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/ui.vert" + extension, shader_code)) {
 			ui_vert = create_vertex_shader({
 				.debug_name = "ui vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/ui.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/ui.frag" + extension, shader_code)) {
 			ui_frag = create_fragment_shader({
 				.debug_name = "ui fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/ui_rectangle.vert" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/ui_rectangle.vert" + extension, shader_code)) {
 			ui_rectangle_vert = create_vertex_shader({
 				.debug_name = "ui rectangle vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/ui_rectangle.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/ui_rectangle.frag" + extension, shader_code)) {
 			ui_rectangle_frag = create_fragment_shader({
 				.debug_name = "ui rectangle fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
 		}
-		if (filesystem::read_binary_file("assets/shaders/player_outfit.frag" + extension, shader_code)) {
+		if (files::read_binary_file("assets/shaders/player_outfit.frag" + extension, shader_code)) {
 			player_outfit_frag = create_fragment_shader({
 				.debug_name = "player outfit fragment shader",
 				.code = shader_code,

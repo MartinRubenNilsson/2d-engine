@@ -4,7 +4,7 @@
 #include "pool.h"
 #include "console.h"
 #include "graphics.h"
-#include "filesystem.h"
+#include "files.h"
 #include <stb_rect_pack.h>
 
 namespace text {
@@ -61,13 +61,13 @@ namespace text {
 	constexpr int ATLAS_TEXTURE_SIZE = 1024;
 
 	Handle<Font> load_font(std::string_view path) {
-		const std::string normalized_path = filesystem::get_normalized_path(path);
+		const std::string normalized_path = files::get_normalized_path(path);
 		if (auto it = _font_cache.find(normalized_path);  it != _font_cache.end()) {
 			return it->second;
 		}
 
 		Font font{};
-		if (!filesystem::read_binary_file(path, font.data)) {
+		if (!files::read_binary_file(path, font.data)) {
 			console::log_error("Failed to open font file: " + normalized_path);
 			return {};
 		}

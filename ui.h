@@ -29,11 +29,11 @@ namespace ui {
 
 	extern bool debug;
 
-	void initialize();
-	void shutdown();
-	void process_window_event(const window::Event& ev);
-	void update(float dt);
-	void render();
+	void startup_rmlui();
+	void shutdown_rmlui();
+	void handle_window_event_for_rmlui(const window::Event& ev);
+	void update_rmlui(float dt);
+	void render_rmlui();
 
 	void load_font_from_file(const std::string& path);
 	void load_document_from_file(const std::string& path);

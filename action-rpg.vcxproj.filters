@@ -140,8 +140,8 @@
     <ClCompile Include="window_events.cpp">
       <Filter>application\window</Filter>
     </ClCompile>
-    <ClCompile Include="filesystem.cpp">
-      <Filter>application\filesystem</Filter>
+    <ClCompile Include="files.cpp">
+      <Filter>application\files</Filter>
     </ClCompile>
     <ClCompile Include="console_commands.cpp">
       <Filter>application\console\commands</Filter>
@@ -461,8 +461,8 @@
     <ClInclude Include="window_graphics.h">
       <Filter>application\window</Filter>
     </ClInclude>
-    <ClInclude Include="filesystem.h">
-      <Filter>application\filesystem</Filter>
+    <ClInclude Include="files.h">
+      <Filter>application\files</Filter>
     </ClInclude>
     <ClInclude Include="console_commands.h">
       <Filter>application\console\commands</Filter>
@@ -647,9 +647,6 @@
     <Filter Include="application\console">
       <UniqueIdentifier>{c1397a93-51e2-4458-ab20-242be6dbecef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="application\filesystem">
-      <UniqueIdentifier>{15fbe91b-35fe-4b00-82c9-5703cdcb0e04}</UniqueIdentifier>
-    </Filter>
     <Filter Include="application\console\commands">
       <UniqueIdentifier>{c632e66c-526e-4e77-b232-5abc64cf46ec}</UniqueIdentifier>
     </Filter>
@@ -757,6 +754,9 @@
     </Filter>
     <Filter Include="game\ui">
       <UniqueIdentifier>{85975948-44e1-49b6-9181-efb64139a60f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\files">
+      <UniqueIdentifier>{15fbe91b-35fe-4b00-82c9-5703cdcb0e04}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

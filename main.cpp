@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "steam.h"
 #include "platform.h"
-#include "filesystem.h"
+#include "files.h"
 #include "networking.h"
 #include "window.h"
 #include "window_events.h"
 #include "audio.h"
 #include "ui.h"
 #include "ui_menus.h"
+#include "ui_clay.h"
 #include "map.h"
 #include "ecs.h"
 #include "console.h"
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
     steam::initialize(); // Fails silently if Steam is not running.
-    filesystem::initialize();
+    files::initialize();
 	networking::initialize();
 #ifdef _DEBUG_RENDERDOC
     renderdoc::initialize();
@@ -56,19 +57,20 @@ int main(int argc, char* argv[]) {
 #endif
     console::initialize();
     audio::initialize();
-    ui::initialize();
+    ui::startup();
+    ui::startup_rmlui(); // TODO: remove
     ecs::startup();
 
-    for (const filesystem::File& file : filesystem::get_all_files_in_directory("assets/audio/banks")) {
-        if (file.format != filesystem::FileFormat::FmodStudioBank) continue;
+    for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
+        if (file.format != files::FileFormat::FmodStudioBank) continue;
         audio::load_bank_from_file(file.path);
     }
-    for (const filesystem::File& file : filesystem::get_all_files_in_directory("assets/fonts")) {
-        if (file.format != filesystem::FileFormat::TrueTypeFont) continue;
+    for (const files::File& file : files::get_all_files_in_directory("assets/fonts")) {
+        if (file.format != files::FileFormat::TrueTypeFont) continue;
         ui::load_font_from_file(file.path);
     }
-    for (const filesystem::File& file : filesystem::get_all_files_in_directory("assets/ui")) {
-        if (file.format != filesystem::FileFormat::RmlUiDocument) continue;
+    for (const files::File& file : files::get_all_files_in_directory("assets/ui")) {
+        if (file.format != files::FileFormat::RmlUiDocument) continue;
         ui::load_document_from_file(file.path);
     }
 
@@ -144,7 +146,7 @@ int main(int argc, char* argv[]) {
                 }
 #endif
                 console::process_window_event(ev);
-                ui::process_window_event(ev);
+                ui::handle_window_event_for_rmlui(ev);
             }
         }
 
@@ -176,7 +178,7 @@ int main(int argc, char* argv[]) {
         audio::update();
         console::update(app_delta_time);
         background::update(app_delta_time);
-        ui::update(app_delta_time);
+        ui::update_rmlui(app_delta_time);
         map::update(app_delta_time);
 
         float game_delta_time = app_delta_time;
@@ -287,7 +289,10 @@ int main(int argc, char* argv[]) {
 
 		// RENDER UI TO FINAL FRAMEBUFFER
 
-        ui::render();
+        ui::update(app_delta_time);
+        ui::layout();
+        ui::render({ .width = (float)window_framebuffer_size.x, .height = (float)window_framebuffer_size.y });
+        ui::render_rmlui();
 
 		// COPY FINAL FRAMEBUFFER TO BACK BUFFER
         {
@@ -357,7 +362,7 @@ int main(int argc, char* argv[]) {
 #ifdef _DEBUG_RENDERDOC
         if (renderdoc::is_frame_capturing()) {
 			const std::string capture_file_directory =
-                filesystem::get_parent_path(renderdoc::get_capture_file_path_template());
+                files::get_parent_path(renderdoc::get_capture_file_path_template());
             platform::open(capture_file_directory.c_str());
         }
 #endif
@@ -366,6 +371,7 @@ int main(int argc, char* argv[]) {
     // SHUTDOWN
 
     ecs::shutdown();
+    ui::shutdown_rmlui();
     ui::shutdown();
     audio::shutdown();
 #ifdef _DEBUG_IMGUI

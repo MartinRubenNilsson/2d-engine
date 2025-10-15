@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "filesystem.h"
+#include "files.h"
 #include <filesystem>
 #include <fstream>
 
-namespace filesystem {
+namespace files {
 
 	FileFormat _path_to_file_format(std::string_view path) {
 		if (path.ends_with(".txt"))  return FileFormat::Text;

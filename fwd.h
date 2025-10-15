@@ -20,4 +20,5 @@ namespace graphics {
 	struct Texture;
 	struct Sampler;
 	struct Framebuffer;
+	struct Viewport;
 }

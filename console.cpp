@@ -2,7 +2,7 @@
 #include "console.h"
 #include "console_commands.h"
 #include "window_events.h"
-#include "filesystem.h"
+#include "files.h"
 #include <deque> // TODO: use a ringbuffer instead
 
 namespace console {
@@ -272,7 +272,7 @@ namespace console {
 
 	void execute_script_from_file(std::string_view path) {
 		std::string script;
-		if (!filesystem::read_text_file(path, script)) {
+		if (!files::read_text_file(path, script)) {
 			log_error("Failed to open console script: " + std::string(path));
 			return;
 		}

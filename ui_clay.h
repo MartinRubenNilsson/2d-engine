@@ -1,12 +1,10 @@
 #pragma once
 
 namespace ui {
-	bool startup_clay();
-	void shutdown_clay();
+	bool startup();
+	void shutdown();
 
-	void set_clay_pointer_state(float x, float y, bool is_down);
-
-	void update_clay(float dt);
-	void layout_clay();
-	void render_clay();
+	void update(float dt);
+	void layout();
+	void render(const graphics::Viewport& viewport);
 }

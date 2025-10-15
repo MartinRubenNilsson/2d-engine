@@ -3,7 +3,7 @@
 #include "window.h"
 #include "graphics.h"
 #include "audio.h"
-#include "filesystem.h"
+#include "files.h"
 
 namespace settings {
 
@@ -58,12 +58,12 @@ namespace settings {
 	bool save_to_file(std::string_view path, const AppSettings& settings) {
 		std::ostringstream oss;
 		save_to_stream(oss, settings);
-		return filesystem::write_text_file(path, oss.str());
+		return files::write_text_file(path, oss.str());
 	}
 
 	bool load_from_file(std::string_view path, AppSettings& settings) {
 		std::string text;
-		if (!filesystem::read_text_file(path, text)) return false;
+		if (!files::read_text_file(path, text)) return false;
 		std::istringstream iss(std::move(text));
 		load_from_stream(iss, settings);
 		return true;

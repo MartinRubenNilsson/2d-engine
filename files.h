@@ -1,6 +1,6 @@
 #pragma once
 
-namespace filesystem {
+namespace files {
 	enum class FileFormat {
 		Unknown,
 		Text, // .txt
