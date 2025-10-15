@@ -1,5 +1,4 @@
 #pragma once
-#ifdef _DEBUG_IMGUI
 
 namespace imgui_impl {
 	bool startup();
@@ -7,5 +6,3 @@ namespace imgui_impl {
 	void new_frame();
 	void render();
 }
-
-#endif // _DEBUG_IMGUI

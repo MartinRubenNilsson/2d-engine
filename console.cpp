@@ -24,7 +24,6 @@ namespace console {
 	std::deque<std::pair<std::string, Color>> _history; // TODO: use a ringbuffer instead
 	std::unordered_map<window::Key, std::string> _key_bindings;
 
-#ifdef _DEBUG_IMGUI
 	int _input_text_callback(ImGuiInputTextCallbackData* data) {
 		// COMPLETE COMMANDS
 
@@ -65,7 +64,6 @@ namespace console {
 
 		return 0;
 	}
-#endif
 
 	void initialize() {
 #if 0
@@ -113,7 +111,6 @@ namespace console {
 
 		if (!_visible) return;
 
-#ifdef _DEBUG_IMGUI
 		ImVec2 size = ImGui::GetIO().DisplaySize;
 		size.x *= 0.75f;
 		size.y *= 0.5f;
@@ -177,7 +174,6 @@ namespace console {
 			_has_focus = ImGui::IsWindowFocused();
 		}
 		ImGui::End();
-#endif
 	}
 
 	void process_window_event(const window::Event& ev) {

@@ -21,7 +21,6 @@ namespace kdtree_test {
 	}
 
 	void show_imgui_window(int framebuffer_width, int framebuffer_height) {
-#ifdef _DEBUG_IMGUI
 		ImGui::Begin("k-d tree");
 		if (ImGui::InputInt("Size", &_size)) {
 			_size = std::max(_size, 0);
@@ -32,7 +31,6 @@ namespace kdtree_test {
 		}
 		ImGui::Checkbox("Use k-d tree", &_use_kdtree);
 		ImGui::End();
-#endif
 	}
 
 	void set_cursor_pos(double x, double y) {

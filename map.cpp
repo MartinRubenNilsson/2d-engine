@@ -17,7 +17,6 @@ namespace map {
 	float _transition_progress = 1.f; // -1 to 1
 
 	void _show_debug_window(float dt) {
-#ifdef _DEBUG_IMGUI
 		ImGui::Begin("Maps");
 		if (ImGui::BeginCombo("Map", _current_map_path.c_str())) {
 			for (ecs::MapId map : ecs::get_all_maps()) {
@@ -37,7 +36,6 @@ namespace map {
 		if (ImGui::Button("Reset")) reset();
 		ImGui::Value("Transition Progress", _transition_progress);
 		ImGui::End();
-#endif
 	}
 
 	// Returns nullptr if no music event is associated with the map.

@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#ifdef _DEBUG_IMGUI
 #include "imgui_impl.h"
 #include "window.h"
 #include "graphics.h"
@@ -150,5 +149,3 @@ namespace imgui_impl {
 #endif
 	}
 }
-
-#endif // _DEBUG_IMGUI

@@ -24,11 +24,8 @@ using namespace std::literals::string_literals;
 #include <box2d/box2d.h>
 #include <RmlUi/Core.h> // TODO: get rid of this crap!!!
 #include <clay/clay.h>
-
-#ifdef _DEBUG_IMGUI
 #include <imgui.h>
 #include <imgui_stdlib.h>
-#endif
 
 #include <magic_enum/magic_enum.hpp>
 

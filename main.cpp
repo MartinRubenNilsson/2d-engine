@@ -52,9 +52,7 @@ int main(int argc, char* argv[]) {
 #endif
     graphics::initialize();
     graphics::initialize_globals();
-#ifdef _DEBUG_IMGUI
     imgui_impl::startup();
-#endif
     console::initialize();
     audio::initialize();
     ui::startup();
@@ -107,10 +105,8 @@ int main(int argc, char* argv[]) {
         window::update_events();
         input::update();
 
-#ifdef _DEBUG_IMGUI
         // TODO: should this be moved to after the window event loop?
         imgui_impl::new_frame();
-#endif
 
         // PROCESS WINDOW EVENTS
         {
@@ -140,11 +136,9 @@ int main(int argc, char* argv[]) {
 #endif // _DEBUG
                 }
 
-#ifdef _DEBUG_IMGUI
                 if (ev.type == window::EventType::KeyPress && ImGui::GetIO().WantCaptureKeyboard) {
                     continue;
                 }
-#endif
                 console::process_window_event(ev);
                 ui::handle_window_event_for_rmlui(ev);
             }
@@ -316,7 +310,6 @@ int main(int argc, char* argv[]) {
             graphics::draw(3); // draw a fullscreen-covering triangle
         }
 
-#ifdef _DEBUG_IMGUI
         // CREATE DEBUG STATS WINDOW
 
         if (debug_stats) {
@@ -350,7 +343,6 @@ int main(int argc, char* argv[]) {
         // to the back buffer, not the final framebuffer, since when using OpenGL
         // as backend we flip the final framebuffer vertically.
         imgui_impl::render();
-#endif
 
         // PRESENT BACK BUFFER
 
@@ -371,9 +363,7 @@ int main(int argc, char* argv[]) {
     ui::shutdown_rmlui();
     ui::shutdown();
     audio::shutdown();
-#ifdef _DEBUG_IMGUI
     imgui_impl::shutdown();
-#endif
     graphics::shutdown();
     window::shutdown();
 	networking::shutdown();

@@ -731,7 +731,6 @@ namespace graphics {
 	}
 
 	void show_texture_debug_window() {
-#ifdef _DEBUG_IMGUI
 		ImGui::Begin("Textures");
 		ImGui::Text("Total memory usage: %d MB", _total_texture_memory_usage_in_bytes / 1024 / 1024);
 		for (size_t i = 0; i < _texture_pool.size(); ++i) {
@@ -754,6 +753,5 @@ namespace graphics {
 			}
 		}
 		ImGui::End();
-#endif
 	}
 }
