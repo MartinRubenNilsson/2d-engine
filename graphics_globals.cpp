@@ -10,11 +10,6 @@ namespace graphics {
 	Handle<VertexShader> fullscreen_vert;
 	Handle<VertexShader> fullscreen_flip_vert;
 	Handle<FragmentShader> fullscreen_frag;
-	Handle<FragmentShader> gaussian_blur_hor_frag;
-	Handle<FragmentShader> gaussian_blur_ver_frag;
-	Handle<FragmentShader> screen_transition_frag;
-	Handle<FragmentShader> shockwave_frag;
-	Handle<FragmentShader> darkness_frag;
 	Handle<VertexShader> sprite_vert;
 	Handle<FragmentShader> sprite_frag;
 	Handle<VertexShader> shape_vert;
@@ -34,9 +29,6 @@ namespace graphics {
 	Handle<Buffer> ui_uniform_buffer;
 	Handle<Buffer> sprite_uniform_buffer;
 	Handle<Buffer> player_outfit_uniform_buffer;
-	Handle<Buffer> darkness_uniform_buffer;
-	Handle<Buffer> screen_transition_uniform_buffer;
-	Handle<Buffer> shockwave_uniform_buffer;
 
 	Handle<Texture> error_texture; // 32x32 magenta-black checkerboard
 	Handle<Texture> white_texture; // 1x1 white texture
@@ -80,41 +72,6 @@ namespace graphics {
 		if (files::read_binary_file("assets/shaders/fullscreen.frag" + extension, shader_code)) {
 			fullscreen_frag = create_fragment_shader({
 				.debug_name = "fullscreen fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/gaussian_blur_hor.frag" + extension, shader_code)) {
-			gaussian_blur_hor_frag = create_fragment_shader({
-				.debug_name = "gaussian blur horizontal fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/gaussian_blur_ver.frag" + extension, shader_code)) {
-			gaussian_blur_ver_frag = create_fragment_shader({
-				.debug_name = "gaussian blur vertical fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/screen_transition.frag" + extension, shader_code)) {
-			screen_transition_frag = create_fragment_shader({
-				.debug_name = "screen transition fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/shockwave.frag" + extension, shader_code)) {
-			shockwave_frag = create_fragment_shader({
-				.debug_name = "shockwave fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/darkness.frag" + extension, shader_code)) {
-			darkness_frag = create_fragment_shader({
-				.debug_name = "darkness fragment shader",
 				.code = shader_code,
 				.binary = binary
 			});
@@ -240,24 +197,6 @@ namespace graphics {
 		player_outfit_uniform_buffer = create_buffer({
 			.debug_name = "player outfit uniform buffer",
 			.size = sizeof(PlayerOutfitUniformBlock),
-			.type = BufferType::UniformBuffer,
-			.dynamic = true
-		});
-		darkness_uniform_buffer = create_buffer({
-			.debug_name = "darkness uniform buffer",
-			.size = sizeof(DarknessUniformBlock),
-			.type = BufferType::UniformBuffer,
-			.dynamic = true
-		});
-		screen_transition_uniform_buffer = create_buffer({
-			.debug_name = "screen transition uniform buffer",
-			.size = sizeof(ScreenTransitionUniformBlock),
-			.type = BufferType::UniformBuffer,
-			.dynamic = true
-		});
-		shockwave_uniform_buffer = create_buffer({
-			.debug_name = "shockwave uniform buffer",
-			.size = sizeof(ShockwaveUniformBlock),
 			.type = BufferType::UniformBuffer,
 			.dynamic = true
 		});

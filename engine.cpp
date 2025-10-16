@@ -52,6 +52,7 @@ namespace engine {
         graphics::startup();
         graphics::startup_globals();
         imgui_impl::startup();
+        postprocessing::startup();
         console::startup();
         audio::startup();
         _load_all_audio_banks();

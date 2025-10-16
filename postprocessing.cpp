@@ -4,6 +4,33 @@
 #include "graphics_globals.h"
 
 namespace postprocessing {
+	struct DarknessUniformBlock {
+		Vec2f resolution;
+		Vec2f center;
+
+		float intensity = 0.f;
+		float padding0 = 0.f;
+		float padding1 = 0.f;
+		float padding2 = 0.f;
+	};
+
+	struct ScreenTransitionUniformBlock {
+		float progress = 0.f;
+		float padding0 = 0.f;
+		float padding1 = 0.f;
+		float padding2 = 0.f;
+	};
+
+	struct ShockwaveUniformBlock {
+		Vec2f resolution; // in pixels
+		Vec2f center; // in pixels
+
+		float force;
+		float size;
+		float thickness;
+		float padding0;
+	};
+
 	struct Shockwave {
 		Vec2f position_ws; // ws = world space
 		float force = 0.f;
@@ -11,7 +38,40 @@ namespace postprocessing {
 		float thickness = 0.f;
 	};
 
-	const size_t MAX_GAUSSIAN_BLUR_ITERATIONS = 5;
+	Handle<graphics::Buffer> _darkness_uniform_buffer;
+	Handle<graphics::Buffer> _screen_transition_uniform_buffer;
+	Handle<graphics::Buffer> _shockwave_uniform_buffer;
+	Handle<graphics::FragmentShader> _gaussian_blur_hor_frag;
+	Handle<graphics::FragmentShader> _gaussian_blur_ver_frag;
+	Handle<graphics::FragmentShader> _screen_transition_frag;
+	Handle<graphics::FragmentShader> _shockwave_frag;
+	Handle<graphics::FragmentShader> _darkness_frag;
+
+	void startup() {
+		_darkness_uniform_buffer = graphics::create_buffer({
+			.debug_name = "darkness uniform buffer",
+			.size = sizeof(DarknessUniformBlock),
+			.type = graphics::BufferType::UniformBuffer,
+			.dynamic = true });
+		_screen_transition_uniform_buffer = graphics::create_buffer({
+			.debug_name = "screen transition uniform buffer",
+			.size = sizeof(ScreenTransitionUniformBlock),
+			.type = graphics::BufferType::UniformBuffer,
+			.dynamic = true });
+		_shockwave_uniform_buffer = graphics::create_buffer({
+			.debug_name = "shockwave uniform buffer",
+			.size = sizeof(ShockwaveUniformBlock),
+			.type = graphics::BufferType::UniformBuffer,
+			.dynamic = true
+			});
+		_gaussian_blur_hor_frag = graphics::load_fragment_shader("assets/shaders/gaussian_blur_hor.frag");
+		_gaussian_blur_ver_frag = graphics::load_fragment_shader("assets/shaders/gaussian_blur_ver.frag");
+		_screen_transition_frag = graphics::load_fragment_shader("assets/shaders/screen_transition.frag");
+		_shockwave_frag = graphics::load_fragment_shader("assets/shaders/shockwave.frag");
+		_darkness_frag = graphics::load_fragment_shader("assets/shaders/darkness.frag");
+	}
+
+	const size_t _MAX_GAUSSIAN_BLUR_ITERATIONS = 5;
 
 	std::vector<Shockwave> _shockwaves;
 	float _darkness_intensity = 0.f;
@@ -51,11 +111,11 @@ namespace postprocessing {
 
 	void _render_shockwaves(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_shockwaves.empty()) return;
-		if (graphics::shockwave_frag == Handle<graphics::FragmentShader>()) return;
+		if (_shockwave_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
-		graphics::bind_fragment_shader(graphics::shockwave_frag);
-		graphics::bind_uniform_buffer(1, graphics::shockwave_uniform_buffer);
-		graphics::ShockwaveUniformBlock shockwave_ub{};
+		graphics::bind_fragment_shader(_shockwave_frag);
+		graphics::bind_uniform_buffer(1, _shockwave_uniform_buffer);
+		ShockwaveUniformBlock shockwave_ub{};
 		shockwave_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		for (const Shockwave& shockwave : _shockwaves) {
 			shockwave_ub.center = _map_world_to_target(
@@ -64,7 +124,7 @@ namespace postprocessing {
 			shockwave_ub.force = shockwave.force;
 			shockwave_ub.size = shockwave.size;
 			shockwave_ub.thickness = shockwave.thickness;
-			graphics::update_buffer(graphics::shockwave_uniform_buffer, &shockwave_ub, sizeof(shockwave_ub));
+			graphics::update_buffer(_shockwave_uniform_buffer, &shockwave_ub, sizeof(shockwave_ub));
 			std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 			graphics::bind_framebuffer(graphics::game_ping_framebuffer);
 			graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_pong_framebuffer));
@@ -74,32 +134,32 @@ namespace postprocessing {
 
 	void _render_darkness(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_darkness_intensity == 0.f) return;
-		if (graphics::darkness_frag == Handle<graphics::FragmentShader>()) return;
+		if (_darkness_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 		graphics::bind_framebuffer(graphics::game_ping_framebuffer);
-		graphics::bind_fragment_shader(graphics::darkness_frag);
-		graphics::DarknessUniformBlock darkness_ub{};
+		graphics::bind_fragment_shader(_darkness_frag);
+		DarknessUniformBlock darkness_ub{};
 		darkness_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		darkness_ub.center = _map_world_to_target(
 			_darkness_center_ws, camera_min, camera_max,
 			GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		darkness_ub.intensity = _darkness_intensity;
-		graphics::update_buffer(graphics::darkness_uniform_buffer, &darkness_ub, sizeof(darkness_ub));
-		graphics::bind_uniform_buffer(1, graphics::darkness_uniform_buffer);
+		graphics::update_buffer(_darkness_uniform_buffer, &darkness_ub, sizeof(darkness_ub));
+		graphics::bind_uniform_buffer(1, _darkness_uniform_buffer);
 		graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_pong_framebuffer));
 		graphics::draw(3); // draw a fullscreen-covering triangle
 	}
 
 	void _render_screen_transition() {
 		if (_screen_transition_progress == 0.f) return;
-		if (graphics::screen_transition_frag == Handle<graphics::FragmentShader>()) return;
+		if (_screen_transition_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
-		graphics::bind_fragment_shader(graphics::screen_transition_frag);
-		graphics::ScreenTransitionUniformBlock screen_transition_ub{};
+		graphics::bind_fragment_shader(_screen_transition_frag);
+		ScreenTransitionUniformBlock screen_transition_ub{};
 		screen_transition_ub.progress = _screen_transition_progress;
-		graphics::update_buffer(graphics::screen_transition_uniform_buffer, &screen_transition_ub, sizeof(screen_transition_ub));
-		graphics::bind_uniform_buffer(1, graphics::screen_transition_uniform_buffer);
+		graphics::update_buffer(_screen_transition_uniform_buffer, &screen_transition_ub, sizeof(screen_transition_ub));
+		graphics::bind_uniform_buffer(1, _screen_transition_uniform_buffer);
 		std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 		graphics::bind_framebuffer(Handle<graphics::Framebuffer>()); // ensure pong framebuffer is unbound
 		graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_pong_framebuffer));
@@ -109,20 +169,20 @@ namespace postprocessing {
 
 	void _render_gaussian_blur() {
 		if (_gaussian_blur_iterations == 0) return;
-		if (graphics::gaussian_blur_hor_frag == Handle<graphics::FragmentShader>()) return;
-		if (graphics::gaussian_blur_ver_frag == Handle<graphics::FragmentShader>()) return;
+		if (_gaussian_blur_hor_frag == Handle<graphics::FragmentShader>()) return;
+		if (_gaussian_blur_ver_frag == Handle<graphics::FragmentShader>()) return;
 		graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 		graphics::bind_sampler(0, graphics::linear_sampler);
 		for (size_t i = 0; i < _gaussian_blur_iterations; ++i) {
 			// Horizontal pass
-			graphics::bind_fragment_shader(graphics::gaussian_blur_hor_frag);
+			graphics::bind_fragment_shader(_gaussian_blur_hor_frag);
 			std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 			graphics::bind_framebuffer(Handle<graphics::Framebuffer>()); // ensure pong framebuffer is unbound
 			graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_pong_framebuffer));
 			graphics::bind_framebuffer(graphics::game_ping_framebuffer);
 			graphics::draw(3); // draw a fullscreen-covering triangle
 			// Vertical pass
-			graphics::bind_fragment_shader(graphics::gaussian_blur_ver_frag);
+			graphics::bind_fragment_shader(_gaussian_blur_ver_frag);
 			std::swap(graphics::game_ping_framebuffer, graphics::game_pong_framebuffer);
 			graphics::bind_framebuffer(Handle<graphics::Framebuffer>()); // ensure pong framebuffer is unbound
 			graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_pong_framebuffer));
@@ -164,6 +224,6 @@ namespace postprocessing {
 	}
 
 	void set_gaussian_blur_iterations(size_t iterations) {
-		_gaussian_blur_iterations = std::min(iterations, MAX_GAUSSIAN_BLUR_ITERATIONS);
+		_gaussian_blur_iterations = std::min(iterations, _MAX_GAUSSIAN_BLUR_ITERATIONS);
 	}
 }

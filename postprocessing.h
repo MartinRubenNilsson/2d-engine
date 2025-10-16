@@ -1,7 +1,6 @@
 #pragma once
 
-namespace postprocessing
-{
+namespace postprocessing {
 	// Calling render() applies the following effects in order:
 	// 
 	// 1. Shockwaves
@@ -9,8 +8,7 @@ namespace postprocessing
 	// 3. Screen transition
 	// 4. Gaussian blur
 
-	extern const size_t MAX_GAUSSIAN_BLUR_ITERATIONS;
-
+	void startup();
 	void update(float dt);
 	void render(const Vec2f &camera_min, const Vec2f& camera_max);
 

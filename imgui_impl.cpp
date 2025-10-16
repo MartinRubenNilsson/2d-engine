@@ -28,7 +28,6 @@ namespace graphics {
 }
 
 namespace imgui_impl {
-
 	bool startup() {
 		IMGUI_CHECKVERSION();
 		if (!ImGui::CreateContext()) {
