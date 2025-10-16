@@ -14,13 +14,13 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	bool _handle_damage_for_grass(entt::entity entity, const DamageEvent& ev) {
+	bool _grass_handle_damage(entt::entity entity, const DamageEvent& ev) {
 		b2BodyId body = get_body(entity);
 		if (B2_IS_NULL(body)) return false;
 		const Vec2f position = b2Body_GetWorldCenterOfMass(body);
 		audio::create_event({ .path = "event:/snd_cut_grass" });
 		if (random::chance(0.2f)) {
-			PickupType pickup_type = (PickupType)random::range_i(0, (int)PickupType::Count - 1);
+			PickupType pickup_type = (PickupType)random::uniform_int(0, (int)PickupType::Count - 1);
 			create_pickup(pickup_type, position + Vec2f(8.f, 20.f));
 		}
 		destroy_later(entity);
@@ -49,7 +49,7 @@ namespace ecs {
 				block.tex_max = sprite.tex_position + sprite.tex_size;
 				emplace_uniform_block(entity, &block, sizeof(GrassUniformBlock));
 			}
-			set_damage_event_handler(entity, _handle_damage_for_grass);
+			set_damage_event_handler(entity, _grass_handle_damage);
 		}
 	}
 }

@@ -1,11 +1,10 @@
 #pragma once
 
-namespace random
-{
+namespace random {
 	bool chance(float probability_of_true = 0.5f);
-	float range_f(float min = 0.f, float max = 1.f);
-	int range_i(int min, int max);
-	unsigned int range_ui(unsigned int min, unsigned int max);
+	int uniform_int(int min, int max);
+	unsigned int uniform_uint(unsigned int min, unsigned int max);
+	float uniform_float(float min = 0.f, float max = 1.f);
 	Color color();
 	Color color(unsigned int seed);
 	Vec2f on_circle(float radius = 1.f);

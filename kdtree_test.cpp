@@ -15,8 +15,8 @@ namespace kdtree_test {
 	void _generate_points(int framebuffer_width, int framebuffer_height) {
 		_kdtree.resize(_size);
 		for (Vec2f& point : _kdtree) {
-			point.x = random::range_f(0.f, (float)framebuffer_width);
-			point.y = random::range_f(0.f, (float)framebuffer_height);
+			point.x = random::uniform_float(0.f, (float)framebuffer_width);
+			point.y = random::uniform_float(0.f, (float)framebuffer_height);
 		}
 	}
 

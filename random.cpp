@@ -16,18 +16,18 @@ namespace random {
 		return dist(_engine);
 	}
 
-	float range_f(float min, float max) {
-		std::uniform_real_distribution<float> dist(min, max);
-		return dist(_engine);
-	}
-
-	int range_i(int min, int max) {
+	int uniform_int(int min, int max) {
 		std::uniform_int_distribution<int> dist(min, max);
 		return dist(_engine);
 	}
 
-	unsigned int range_ui(unsigned int min, unsigned int max) {
+	unsigned int uniform_uint(unsigned int min, unsigned int max) {
 		std::uniform_int_distribution<unsigned int> dist(min, max);
+		return dist(_engine);
+	}
+
+	float uniform_float(float min, float max) {
+		std::uniform_real_distribution<float> dist(min, max);
 		return dist(_engine);
 	}
 
@@ -43,13 +43,13 @@ namespace random {
 	}
 
 	Vec2f on_circle(float radius) {
-		float angle = range_f(0, PI_2);
+		float angle = uniform_float(0, PI_2);
 		return Vec2f(cos(angle) * radius, sin(angle) * radius);
 	}
 
 	Vec2f in_circle(float radius) {
 		// http://mathworld.wolfram.com/DiskPointPicking.html
-		float r = sqrt(range_f(0.0f, radius));
+		float r = sqrt(uniform_float(0.0f, radius));
 		return on_circle(r);
 	}
 

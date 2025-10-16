@@ -23,30 +23,30 @@ namespace player {
 	const int HAT_COLORS_2 = C4_LUT_COLORS;
 
 	void randomize_outfit(Outfit& outfit) {
-		outfit.body = (Outfit::Body)(random::range_i(1, (int)Outfit::Body::Count - 1));
-		outfit.skin_color = random::range_i(0, SKIN_COLORS - 1);
-		outfit.socks = (Outfit::Socks)(random::range_i(0, (int)Outfit::Socks::Count - 1));
-		outfit.socks_color = random::range_i(0, SOCK_COLORS - 1);
-		outfit.shoes = (Outfit::Shoes)(random::range_i(0, (int)Outfit::Shoes::Count - 1));
-		outfit.shoes_color = random::range_i(0, SHOE_COLORS - 1);
-		outfit.lowerwear = (Outfit::Lowerwear)(random::range_i(0, (int)Outfit::Lowerwear::Count - 1));
-		outfit.lowerwear_color = random::range_i(0, LOWERWEAR_COLORS - 1);
-		outfit.shirt = (Outfit::Shirt)(random::range_i(0, (int)Outfit::Shirt::Count - 1));
-		outfit.shirt_color = random::range_i(0, SHIRT_COLORS - 1);
-		outfit.gloves = (Outfit::Gloves)(random::range_i(0, (int)Outfit::Gloves::Count - 1));
-		outfit.gloves_color = random::range_i(0, GLOVES_COLORS - 1);
-		outfit.outerwear = (Outfit::Outerwear)(random::range_i(0, (int)Outfit::Outerwear::Count - 1));
-		outfit.outerwear_color = random::range_i(0, OUTERWEAR_COLORS - 1);
-		outfit.neckwear = (Outfit::Neckwear)(random::range_i(0, (int)Outfit::Neckwear::Count - 1));
-		outfit.neckwear_color_1 = random::range_i(0, NECKWEAR_COLORS_1 - 1);
-		outfit.neckwear_color_2 = random::range_i(0, NECKWEAR_COLORS_2 - 1);
-		outfit.glasses = (Outfit::Glasses)(random::range_i(0, (int)Outfit::Glasses::Count - 1));
-		outfit.glasses_color = random::range_i(0, GLASSES_COLORS - 1);
-		outfit.hair = (Outfit::Hair)(random::range_i(0, (int)Outfit::Hair::Count - 1));
-		outfit.hair_color = random::range_i(0, HAIR_COLORS - 1);
-		outfit.hat = (Outfit::Hat)(random::range_i(0, (int)Outfit::Hat::Count - 1));
-		outfit.hat_color_1 = random::range_i(0, HAT_COLORS_1 - 1);
-		outfit.hat_color_2 = random::range_i(0, HAT_COLORS_2 - 1);
+		outfit.body = (Outfit::Body)(random::uniform_int(1, (int)Outfit::Body::Count - 1));
+		outfit.skin_color = random::uniform_int(0, SKIN_COLORS - 1);
+		outfit.socks = (Outfit::Socks)(random::uniform_int(0, (int)Outfit::Socks::Count - 1));
+		outfit.socks_color = random::uniform_int(0, SOCK_COLORS - 1);
+		outfit.shoes = (Outfit::Shoes)(random::uniform_int(0, (int)Outfit::Shoes::Count - 1));
+		outfit.shoes_color = random::uniform_int(0, SHOE_COLORS - 1);
+		outfit.lowerwear = (Outfit::Lowerwear)(random::uniform_int(0, (int)Outfit::Lowerwear::Count - 1));
+		outfit.lowerwear_color = random::uniform_int(0, LOWERWEAR_COLORS - 1);
+		outfit.shirt = (Outfit::Shirt)(random::uniform_int(0, (int)Outfit::Shirt::Count - 1));
+		outfit.shirt_color = random::uniform_int(0, SHIRT_COLORS - 1);
+		outfit.gloves = (Outfit::Gloves)(random::uniform_int(0, (int)Outfit::Gloves::Count - 1));
+		outfit.gloves_color = random::uniform_int(0, GLOVES_COLORS - 1);
+		outfit.outerwear = (Outfit::Outerwear)(random::uniform_int(0, (int)Outfit::Outerwear::Count - 1));
+		outfit.outerwear_color = random::uniform_int(0, OUTERWEAR_COLORS - 1);
+		outfit.neckwear = (Outfit::Neckwear)(random::uniform_int(0, (int)Outfit::Neckwear::Count - 1));
+		outfit.neckwear_color_1 = random::uniform_int(0, NECKWEAR_COLORS_1 - 1);
+		outfit.neckwear_color_2 = random::uniform_int(0, NECKWEAR_COLORS_2 - 1);
+		outfit.glasses = (Outfit::Glasses)(random::uniform_int(0, (int)Outfit::Glasses::Count - 1));
+		outfit.glasses_color = random::uniform_int(0, GLASSES_COLORS - 1);
+		outfit.hair = (Outfit::Hair)(random::uniform_int(0, (int)Outfit::Hair::Count - 1));
+		outfit.hair_color = random::uniform_int(0, HAIR_COLORS - 1);
+		outfit.hat = (Outfit::Hat)(random::uniform_int(0, (int)Outfit::Hat::Count - 1));
+		outfit.hat_color_1 = random::uniform_int(0, HAT_COLORS_1 - 1);
+		outfit.hat_color_2 = random::uniform_int(0, HAT_COLORS_2 - 1);
 	}
 
 	Handle<graphics::Texture> create_outfit_texture(Outfit& outfit) {
