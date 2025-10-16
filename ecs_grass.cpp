@@ -19,7 +19,7 @@ namespace ecs {
 		if (B2_IS_NULL(body)) return false;
 		const Vec2f position = b2Body_GetWorldCenterOfMass(body);
 		audio::create_event({ .path = "event:/snd_cut_grass" });
-		if (random::chance(0.2f)) {
+		if (random::boolean(0.2f)) {
 			PickupType pickup_type = (PickupType)random::uniform_int(0, (int)PickupType::Count - 1);
 			create_pickup(pickup_type, position + Vec2f(8.f, 20.f));
 		}

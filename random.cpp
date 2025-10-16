@@ -11,7 +11,7 @@ namespace random {
 	std::default_random_engine _engine(std::random_device{}());
 	std::default_random_engine _seeded_engine;
 
-	bool chance(float probability_of_true) {
+	bool boolean(float probability_of_true) {
 		std::bernoulli_distribution dist(probability_of_true);
 		return dist(_engine);
 	}
