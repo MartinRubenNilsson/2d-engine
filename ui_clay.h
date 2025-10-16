@@ -7,6 +7,8 @@ namespace ui {
 		Vec2u tex_rect_size{}; // texture rect size in pixels
 	};
 
+	uint16_t to_id(Handle<text::Font> font);
+
 	void startup();
 	void shutdown();
 	void update(float dt);

@@ -313,6 +313,7 @@
     <ClInclude Include="pool.h" />
     <ClInclude Include="renderdoc.h" />
     <ClInclude Include="text.h" />
+    <ClInclude Include="text_ids.h" />
     <ClInclude Include="text_stb_truetype.h" />
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />

@@ -122,14 +122,14 @@ namespace text {
     }
 
     Rect2f get_bounding_box(const Text& text) {
-        Font* font = get_font(text.font);
-        if (!font) return Rect2f::EMPTY;
-        return _shape_text(*font, text);
+        if (!text.font) return Rect2f::EMPTY;
+        return _shape_text(get_font(text.font), text);
     }
 
     std::vector<Text> _texts;
 
     void draw_later(const Text& text) {
+        if (!text.font) return;
         _texts.push_back(text);
     }
 
@@ -190,19 +190,19 @@ namespace text {
         // Create batches.
         _batches.clear();
         for (const Text& text : _texts) {
-            Font* font = get_font(text.font);
-            if (!font) continue;
             if (text.string.empty())
                 continue; // Nothing to draw.
 
-            const Handle<graphics::Texture> texture = get_atlas_texture(*font);
+            Font& font = get_font(text.font);
+
+            const Handle<graphics::Texture> texture = get_atlas_texture(font);
             if (texture == Handle<graphics::Texture>())
                 continue; // Nothing to draw.
 
 
             const unsigned int vertex_count_before = (unsigned int)graphics::temp_vertices.size();
 
-            _shape_text(*font, text, pixels_per_world_unit);
+            _shape_text(font, text, pixels_per_world_unit);
 
             const unsigned int vertex_count_after = (unsigned int)graphics::temp_vertices.size();
 
@@ -214,10 +214,9 @@ namespace text {
 
         // Update font texture atlases.
         for (const Text& text : _texts) {
-            Font* font = get_font(text.font);
-            if (!font) continue;
-            if (atlas_texture_needs_updating(*font)) {
-                update_atlas_texture(*font);
+            Font& font = get_font(text.font);
+            if (atlas_texture_needs_updating(font)) {
+                update_atlas_texture(font);
             }
         }
         _texts.clear(); // At this point we don't need the texts anymore.

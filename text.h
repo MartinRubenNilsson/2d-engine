@@ -3,8 +3,6 @@
 namespace text {
 	// TODO: horizontal alignment (center each line)
 
-	struct Font;
-
 	enum class TextAnchor : uint8_t {
 		// The default position of the anchor is at the first row's baseline, where the imaginary "pen" that
 		// that draws the glyphs has its starting position. This means that the glyphs on the first line will
@@ -22,7 +20,7 @@ namespace text {
 	};
 
 	struct Text {
-		Handle<Font> font{};
+		FontId font{};
 		float font_size = 8.f; // In world units (NOT screen coordinates!)
 		std::u8string string; // UTF-8 string, can be created using u8"...".
 		Vec2f position; // In world units (NOT screen coordinates!)

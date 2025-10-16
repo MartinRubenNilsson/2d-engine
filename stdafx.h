@@ -36,4 +36,6 @@ using namespace std::literals::string_literals;
 #include "color.h"
 #include "math.h"
 #include "direction.h"
+
+#include "text_ids.h"
 #include "ecs_tiled_ids.h"

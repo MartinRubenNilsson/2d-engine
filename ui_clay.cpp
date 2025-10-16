@@ -4,7 +4,7 @@
 #include "console.h"
 #include "sprites.h"
 #include "graphics.h"
-#include "graphics_globals.h"
+#include "graphics_globals.h" // TODO: don't put this here
 
 #include "ui_hud.h" // TODO: don't put this here
 

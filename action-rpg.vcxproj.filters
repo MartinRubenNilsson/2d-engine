@@ -606,6 +606,9 @@
     <ClInclude Include="settings.h">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="text_ids.h">
+      <Filter>engine\graphics\text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

@@ -35,6 +35,7 @@ namespace text {
 	};
 
 	struct Font {
+		std::string path;
 		std::vector<unsigned char> data;
 
 		stbtt_fontinfo info{};
@@ -55,15 +56,20 @@ namespace text {
 		bool atlas_texture_needs_updating = false;
 	};
 
-	Pool<Font> _font_pool;
-	std::unordered_map<std::string, Handle<Font>> _font_cache; // path to handle
+	std::vector<Font> _fonts;
+
+	FontId::operator bool() const {
+		return id < _fonts.size();
+	}
 
 	constexpr int ATLAS_TEXTURE_SIZE = 1024;
 
-	Handle<Font> load_font(std::string_view path) {
+	FontId load_font(std::string_view path) {
 		const std::string normalized_path = files::get_normalized_path(path);
-		if (auto it = _font_cache.find(normalized_path);  it != _font_cache.end()) {
-			return it->second;
+		for (uint16_t index = 0; index < _fonts.size(); ++index) {
+			if (_fonts[index].path == normalized_path) {
+				return { index };
+			}
 		}
 
 		Font font{};
@@ -101,17 +107,16 @@ namespace text {
 		stbtt_PackBegin(&font.pack_context, font.atlas_pixels.data(),
 			ATLAS_TEXTURE_SIZE, ATLAS_TEXTURE_SIZE, 0, 1, nullptr);
 
+		const uint16_t index = (uint16_t)_fonts.size();
 		// IMPORTANT: We must move construct the font, otherwise
 		// font.data/font.atlas_pixels are reallocated and
 		// font.info/font.pack_context are invalidated.
-		const Handle<Font> handle = _font_pool.emplace(std::move(font));
-		_font_cache[normalized_path] = handle;
-
-		return handle;
+		_fonts.emplace_back(std::move(font));
+		return { index };
 	}
 
-	Font* get_font(Handle<Font> handle) {
-		return _font_pool.get(handle);
+	Font& get_font(FontId font) {
+		return _fonts[font.id];
 	}
 
 	float get_scale_for_font_size(const Font& font, float font_size) {

@@ -22,3 +22,7 @@ namespace graphics {
 	struct Framebuffer;
 	struct Viewport;
 }
+
+namespace text {
+	struct Font;
+}

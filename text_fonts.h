@@ -1,10 +1,11 @@
 #pragma once
+#include "text_ids.h"
 
 namespace text {
 	struct Font;
 
-	Handle<Font> load_font(std::string_view path);
-	Font* get_font(Handle<Font> handle);
+	FontId load_font(std::string_view path);
+	Font& get_font(FontId font); // Doesn't check if the ID is valid!
 
 	// How much each glyph's bounding box must be scaled in order for their height
 	// (as measured from ascent to descent) to be equal to font_size.
