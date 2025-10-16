@@ -24,9 +24,18 @@
 #include "ecs_terrain.h"
 
 namespace ecs {
-	void startup() {
+	void _startup_engine() {
 		startup_physics();
 		startup_tiled();
+	}
+
+	void _startup_game() {
+		startup_grass();
+	}
+
+	void startup() {
+		_startup_engine();
+		_startup_game();
 	}
 
 	void shutdown() {

@@ -17,7 +17,6 @@ namespace graphics {
 	Handle<FragmentShader> darkness_frag;
 	Handle<VertexShader> sprite_vert;
 	Handle<FragmentShader> sprite_frag;
-	Handle<VertexShader> grass_vert;
 	Handle<VertexShader> shape_vert;
 	Handle<FragmentShader> shape_frag;
 	Handle<FragmentShader> text_frag;
@@ -145,13 +144,6 @@ namespace graphics {
 		if (files::read_binary_file("assets/shaders/sprite.frag" + extension, shader_code)) {
 			sprite_frag = create_fragment_shader({
 				.debug_name = "sprite fragment shader",
-				.code = shader_code,
-				.binary = binary
-			});
-		}
-		if (files::read_binary_file("assets/shaders/grass.vert" + extension, shader_code)) {
-			grass_vert = create_vertex_shader({
-				.debug_name = "grass vertex shader",
 				.code = shader_code,
 				.binary = binary
 			});

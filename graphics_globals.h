@@ -67,7 +67,6 @@ namespace graphics {
 	extern Handle<FragmentShader> darkness_frag;
 	extern Handle<VertexShader> sprite_vert;
 	extern Handle<FragmentShader> sprite_frag;
-	extern Handle<VertexShader> grass_vert;
 	extern Handle<VertexShader> shape_vert;
 	extern Handle<FragmentShader> shape_frag;
 	extern Handle<FragmentShader> text_frag;

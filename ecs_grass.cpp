@@ -33,9 +33,15 @@ namespace ecs {
 		Vec2f tex_max;
 	};
 
+	Handle<graphics::VertexShader> _grass_vert{};
+
+	void startup_grass() {
+		_grass_vert = graphics::load_vertex_shader("assets/shaders/grass.vert");
+	}
+
 	void setup_grass() {
 		for (auto [entity, sprite] : _registry.view<Type<Tag::Grass>, sprites::Sprite>().each()) {
-			sprite.vertex_shader = graphics::grass_vert;
+			sprite.vertex_shader = _grass_vert;
 			{
 				GrassUniformBlock block{};
 				block.position = sprite.position;
