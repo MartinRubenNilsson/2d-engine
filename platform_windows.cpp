@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <shellapi.h> // ShellExecuteA
 #include <debugapi.h>
+#include <libloaderapi.h>
 
 namespace platform {
 	int system(const char* command) {
@@ -34,6 +35,14 @@ namespace platform {
 
 	void output_debug_string(const char* string) {
 		OutputDebugStringA(string);
+	}
+
+	Library load_library(const char* lib_file_name) {
+		return { .ptr = (uintptr_t)LoadLibraryA(lib_file_name) };
+	}
+
+	LibraryProc get_library_proc(Library lib, const char* proc_name) {
+		return GetProcAddress((HMODULE)lib.ptr, proc_name);
 	}
 }
 

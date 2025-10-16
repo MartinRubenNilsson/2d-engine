@@ -1,10 +1,7 @@
 #pragma once
-#ifdef _DEBUG_RENDERDOC
 
 namespace renderdoc {
 	bool startup();
 	bool is_frame_capturing();
-	const char* get_capture_file_path_template();
+	void open_capture_directory_if_frame_capturing();
 }
-
-#endif // DEBUG_RENDERDOC

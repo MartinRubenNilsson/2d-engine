@@ -45,9 +45,7 @@ namespace engine {
         steam::startup(); // Fails silently if Steam is not running.
         files::startup();
         networking::startup();
-#ifdef _DEBUG_RENDERDOC
         renderdoc::startup();
-#endif
         window::startup();
         graphics::startup();
         graphics::startup_globals();
@@ -333,17 +331,9 @@ namespace engine {
         // as backend we flip the final framebuffer vertically.
         imgui_impl::render();
 
-        // PRESENT BACK BUFFER
-
         graphics::present_swap_chain_back_buffer();
 
-#ifdef _DEBUG_RENDERDOC
-        if (renderdoc::is_frame_capturing()) {
-            const std::string capture_file_directory =
-                files::get_parent_path(renderdoc::get_capture_file_path_template());
-            platform::open(capture_file_directory.c_str());
-        }
-#endif
+        renderdoc::open_capture_directory_if_frame_capturing();
     }
 
     void run() {
