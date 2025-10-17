@@ -334,8 +334,7 @@ namespace player {
 
 		if (graphics::player_outfit_frag == Handle<graphics::FragmentShader>()) return Handle<graphics::Texture>();
 
-		graphics::Viewport viewport{};
-		graphics::get_viewport(viewport);
+		graphics::Viewport prev_viewport = graphics::get_viewport();
 		graphics::set_viewport({ .width = 1024.f, .height = 1024.f });
 
 		constexpr float CLEAR_COLOR[4] = { 0.f, 0.f, 0.f, 0.f };
@@ -397,7 +396,7 @@ namespace player {
 			graphics::draw(3); // draw a fullscreen-covering triangle
 		}
 
-		graphics::set_viewport(viewport);
+		graphics::set_viewport(prev_viewport);
 
 		return graphics::get_framebuffer_texture(graphics::player_outfit_framebuffer);
 	}

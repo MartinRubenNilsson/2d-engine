@@ -189,7 +189,6 @@ namespace engine {
     }
 
     void _show_debug_stats_imgui() {
-        constexpr float SMOOTHING_FACTOR = 0.99f;
         static float smoothed_dt = 0.f;
         static float smoothed_fps = 0.f;
         static float dt_buffer[256] = { 0.f };
@@ -198,6 +197,7 @@ namespace engine {
         dt_buffer[buffer_offset] = _delta_time;
         fps_buffer[buffer_offset] = 1.f / _delta_time;
         buffer_offset = (buffer_offset + 1) % 256;
+        constexpr float SMOOTHING_FACTOR = 0.99f;
         smoothed_dt = SMOOTHING_FACTOR * smoothed_dt + (1.f - SMOOTHING_FACTOR) * _delta_time;
         smoothed_fps = SMOOTHING_FACTOR * smoothed_fps + (1.f - SMOOTHING_FACTOR) / _delta_time;
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -325,7 +325,7 @@ namespace engine {
 
         ui::update(_delta_time);
         ui::layout();
-        ui::render(viewport);
+        ui::render();
         ui::render_rmlui(); // TODO: remove
 
         _render_copy_final_framebuffer_to_back_buffer();

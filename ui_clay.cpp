@@ -122,13 +122,13 @@ namespace ui {
 		_clay_render_commands = Clay_EndLayout();
 	}
 
-	void render(const graphics::Viewport& viewport) {
+	void render() {
 		if (!_clay_render_commands.length)
 			return;
 
 		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
-		// How many pixels on screen there are per world unit.
+		const graphics::Viewport& viewport = graphics::get_viewport();
 		const float pixels_per_world_unit = (float)viewport.height / GAME_FRAMEBUFFER_HEIGHT;
 
 		const std::span<const Clay_RenderCommand> commands{ // This is just to make it easier to debug.

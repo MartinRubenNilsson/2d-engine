@@ -34,7 +34,7 @@ namespace ui {
 
 	void prepare_render_state() {
 		graphics::push_debug_group("UI");
-		graphics::get_viewport(_previous_viewport);
+		_previous_viewport = graphics::get_viewport();
 		_previous_scissor_test_enabled = graphics::get_scissor_test_enabled();
 		graphics::get_scissor(_previous_scissor);
 		graphics::set_viewport({ .width = (float)_viewport_width, .height = (float)_viewport_height });

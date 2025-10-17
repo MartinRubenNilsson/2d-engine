@@ -102,7 +102,7 @@ namespace graphics {
 
 	void set_primitives(Primitives primitives);
 	void set_viewport(const Viewport& viewport);
-	void get_viewport(Viewport& viewport);
+	const Viewport& get_viewport();
 	void set_scissor(const Rect& scissor);
 	void get_scissor(Rect& scissor);
 	void set_scissor_test_enabled(bool enable);

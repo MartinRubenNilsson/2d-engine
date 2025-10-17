@@ -793,8 +793,8 @@ namespace graphics {
 		_viewport = viewport;
 	}
 
-	void get_viewport(Viewport& viewport) {
-		viewport = _viewport;
+	const Viewport& get_viewport() {
+		return _viewport;
 	}
 
 	void set_scissor(const Rect& scissor) {
