@@ -308,7 +308,6 @@
     <ClCompile Include="settings.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="main_windows.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -22,6 +22,7 @@
 #include "imgui_impl.h"
 #include "input.h"
 #include "text_fonts.h"
+#include "platform.h"
 
 namespace engine {
     bool _should_run = false;
@@ -81,6 +82,8 @@ namespace engine {
 
         _should_run = true;
         _time = window::get_elapsed_time();
+        
+        platform::start_watching_directory_changes(L"assets", true); // TEST
     }
 
     void shutdown() {
@@ -108,6 +111,13 @@ namespace engine {
 
     void _update() {
         _update_times();
+
+        platform::update_directory_changes();
+
+        for (const platform::DirectoryChange& change : platform::get_directory_changes()) {
+            std::string string{ change.file_path.begin(), change.file_path.end() };
+            console::log(string);
+        }
 
         steam::run_message_loop();
         window::update_events();
