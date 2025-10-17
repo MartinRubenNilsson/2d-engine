@@ -28,8 +28,6 @@ namespace graphics {
 		~ScopedDebugGroup() { pop_debug_group(); }
 	};
 
-#define GRAPHICS_DEBUG_GROUP const ScopedDebugGroup __FUNCTION__ _debug_group(__FUNCTION__)
-
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc);
 	Handle<VertexShader> load_vertex_shader(std::string_view path); // TODO: reload vertex shader
 	// Pass an empty handle to unbind any currently bound vertex shader.
