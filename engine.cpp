@@ -83,7 +83,7 @@ namespace engine {
         _should_run = true;
         _time = window::get_elapsed_time();
         
-        platform::start_watching_directory_changes(L"assets", true); // TEST
+        //platform::start_watching_directory_changes(L"assets", true); // TEST
     }
 
     void shutdown() {
@@ -97,6 +97,7 @@ namespace engine {
         window::shutdown();
         networking::shutdown();
         steam::shutdown();
+        platform::shutdown();
     }
 
     bool should_run() {

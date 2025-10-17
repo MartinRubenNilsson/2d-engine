@@ -17,9 +17,13 @@ namespace platform {
 		std::wstring directory_path;
 		std::wstring file_path;
 		FileAction action = FileAction::Added;
+
+		auto operator<=>(const DirectoryChange&) const = default;
 	};
 
 	std::span<const DirectoryChange> get_directory_changes();
+
+	void shutdown();
 
 	int system(const char* command);
 	bool set_environment_variable(const char* name, const char* value);

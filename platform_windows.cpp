@@ -36,11 +36,23 @@ namespace platform {
 			nullptr);
 	}
 
+	void _clear(DirectoryChangeContext& context) {
+		CloseHandle(context.file);
+		CloseHandle(context.overlapped->hEvent);
+		context = {};
+	}
+
 	void start_watching_directory_changes(const std::wstring& directory_path, bool watch_subdirectories) {
-		for (const DirectoryChangeContext& context : _directory_change_contexts) {
-			if (context.directory_path == directory_path) {
-				return; // We're already watching this directory.
-			}
+		// Check if we're already watching this directory. If we are, and we're watching it in the same way,
+		// do nothing. Otherwise if we want to watch it in another way, start watching anew.
+		for (auto it = _directory_change_contexts.begin(); it != _directory_change_contexts.end(); it++) {
+			if (it->directory_path != directory_path)
+				continue; // This is not the directory we want to watch.
+			if (it->watch_subdirectories == watch_subdirectories)
+				return; // We're already watching this directory in the same way.
+			_clear(*it);
+			_directory_change_contexts.erase(it);
+			break;
 		}
 		// PITFALL: Contrary to the name of the function, this just gets a handle to an existing directory.
 		const HANDLE file = CreateFileW(directory_path.c_str(),
@@ -63,11 +75,18 @@ namespace platform {
 		context.buffer.resize(1024);
 		if (!_read_directory_changes(context)) {
 			console::log_error("Error 1251671700: Cannot start watching directory changes, failed to read directory changes.");
-			CloseHandle(file);
-			CloseHandle(context.overlapped->hEvent);
+			_clear(context);
 			return;
 		}
 		_directory_change_contexts.emplace_back(std::move(context));
+	}
+
+	void stop_watching_directory_changes(const std::wstring& directory_path) {
+		for (auto it = _directory_change_contexts.begin(); it != _directory_change_contexts.end(); it++) {
+			if (it->directory_path != directory_path) continue;
+			_clear(*it);
+			it = _directory_change_contexts.erase(it);
+		}
 	}
 
 	FileAction _get_action(const FILE_NOTIFY_INFORMATION& info) {
@@ -110,10 +129,23 @@ namespace platform {
 			}
 			_read_directory_changes(context); // Start watching again.
 		}
+		// Remove duplicate changes.
+		_directory_changes.erase(std::unique(_directory_changes.begin(), _directory_changes.end()), _directory_changes.end());
 	}
 
 	std::span<const DirectoryChange> get_directory_changes() {
 		return _directory_changes;
+	}
+
+	void _clear_directory_change_contexts() {
+		for (DirectoryChangeContext& context : _directory_change_contexts) {
+			_clear(context);
+		}
+		_directory_change_contexts.clear();
+	}
+
+	void shutdown() {
+		_clear_directory_change_contexts();
 	}
 
 	int system(const char* command) {
