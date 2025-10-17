@@ -157,8 +157,20 @@ namespace ui {
 					__debugbreak();
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
-					// The renderer should draw text.
-					// TODO
+					const Clay_TextRenderData& data = command.renderData.text;
+					text::Text text{};
+					text.position.x = command.boundingBox.x;
+					text.position.y = command.boundingBox.y;
+					text.font.id = data.fontId;
+					text.font_size = (float)data.fontSize;
+					text.string.assign((const char8_t*)data.stringContents.chars, data.stringContents.length);
+					text.color = data.textColor;
+					if (text.color == Color(0, 0, 0, 0)) // untinted
+						text.color = Color::WHITE;
+					text.linear_sampling = false;
+					text.anchor = text::TextAnchor::UpperLeft;
+					text::draw_later(text);
+					text::draw_all_now(__FUNCTION__); // TODO: camera is all wrong
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
 					const Clay_ImageRenderData& data = command.renderData.image;

@@ -18,20 +18,21 @@ namespace hud {
 	Image _heart_image{};
 
 	void startup() {
-		_font = text::load_font("assets/fonts/Retro Gaming.ttf");
+		_font = text::load_font("assets/fonts/Mozart NBP.ttf");
 		_spritesheet = graphics::load_texture("assets/ui/hud.png");
 		_heart_image.texture = _spritesheet;
 		_heart_image.tex_rect_pos = { 16, 16 };
 		_heart_image.tex_rect_size = { 16, 16 };
 	}
 
-	std::string _health_string;
 	std::string _rupees_string;
 	std::string _arrows_string;
 	std::string _bombs_string;
 
 	void update(float dt) {
-		_health_string = "Health: " + std::to_string(health);
+		_rupees_string = "Rupeeds: " + std::to_string(rupees);
+		_arrows_string = "Arrows: " + std::to_string(arrows);
+		_bombs_string = "Bombs: " + std::to_string(bombs);
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
@@ -59,7 +60,7 @@ namespace hud {
 	}
 
 	void _layout_text(std::string_view string) {
-		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG({ .fontId = _font.id, .fontSize = 8 }));
+		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG({ .fontId = _font.id, .fontSize = 13 }));
 	}
 
 	void layout() {
@@ -69,9 +70,9 @@ namespace hud {
 			.layoutDirection = CLAY_TOP_TO_BOTTOM } })
 		{
 			_layout_health();
-			_layout_text(_health_string);
-			//_layout_text("Arrows: " + std::to_string(arrows));
-			//_layout_text("Bombs: " + std::to_string(bombs));
+			_layout_text(_rupees_string);
+			_layout_text(_arrows_string);
+			_layout_text(_bombs_string);
 		}
 	}
 }
