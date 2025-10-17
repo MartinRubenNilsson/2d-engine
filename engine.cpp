@@ -24,10 +24,11 @@
 
 namespace engine {
     bool _should_run = false;
-    float app_time = 0.f;
-    float app_delta_time = 0.f;
-    float game_time = 0.f;
-    float game_delta_time = 0.f;
+    double _time = 0.f; // since engine startup
+    double _delta_time = 0.f; // since last call to run()
+    double _game_time = 0.f;
+    double _game_delta_time = 0.f;
+
     bool debug_stats = false;
 
     void _load_all_audio_banks() {
@@ -78,7 +79,7 @@ namespace engine {
         console::execute(argc, argv);
 
         _should_run = true;
-        app_time = (float)window::get_elapsed_time();
+        _time = window::get_elapsed_time();
     }
 
     void shutdown() {
@@ -97,10 +98,14 @@ namespace engine {
         return _should_run && !window::should_close();
     }
 
+    void _update_times() {
+        const double new_elapsed_time = window::get_elapsed_time();
+        _delta_time = new_elapsed_time - _time;
+        _time = new_elapsed_time;
+    }
+
     void _update() {
-        const float new_app_time = (float)window::get_elapsed_time();
-        app_delta_time = new_app_time - app_time;
-        app_time = new_app_time;
+        _update_times();
 
         steam::run_message_loop();
         window::update_events();
@@ -161,12 +166,12 @@ namespace engine {
         // UPDATE
 
         audio::update();
-        console::update(app_delta_time);
-        background::update(app_delta_time); // TODO: this doesn't belong in engine.cpp
-        ui::update_rmlui(app_delta_time);
-        map::update(app_delta_time);
+        console::update(_delta_time);
+        background::update(_delta_time); // TODO: this doesn't belong in engine.cpp
+        ui::update_rmlui(_delta_time);
+        map::update(_delta_time);
 
-        float game_delta_time = app_delta_time;
+        double game_delta_time = _delta_time;
         if (steam::is_overlay_active()) {
             game_delta_time = 0.0;
         }
@@ -177,7 +182,7 @@ namespace engine {
             game_delta_time = 0.0; // pause game while map is transitioning
         }
 
-        game_time += game_delta_time;
+        _game_time += game_delta_time;
 
         ecs::update(game_delta_time);
         postprocessing::update(game_delta_time);
@@ -190,11 +195,11 @@ namespace engine {
         static float dt_buffer[256] = { 0.f };
         static float fps_buffer[256] = { 0.f };
         static int buffer_offset = 0;
-        dt_buffer[buffer_offset] = app_delta_time;
-        fps_buffer[buffer_offset] = 1.f / app_delta_time;
+        dt_buffer[buffer_offset] = _delta_time;
+        fps_buffer[buffer_offset] = 1.f / _delta_time;
         buffer_offset = (buffer_offset + 1) % 256;
-        smoothed_dt = SMOOTHING_FACTOR * smoothed_dt + (1.f - SMOOTHING_FACTOR) * app_delta_time;
-        smoothed_fps = SMOOTHING_FACTOR * smoothed_fps + (1.f - SMOOTHING_FACTOR) / app_delta_time;
+        smoothed_dt = SMOOTHING_FACTOR * smoothed_dt + (1.f - SMOOTHING_FACTOR) * _delta_time;
+        smoothed_fps = SMOOTHING_FACTOR * smoothed_fps + (1.f - SMOOTHING_FACTOR) / _delta_time;
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("Stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
         char overlay_text[64];
@@ -256,8 +261,8 @@ namespace engine {
                 c, d, 0.f, 1.f
             };
             graphics::FrameUniformBlock frame_ub{};
-            frame_ub.app_time = app_time;
-            frame_ub.game_time = game_time;
+            frame_ub.engine_time = _time;
+            frame_ub.game_time = _game_time;
             frame_ub.window_framebuffer_width = (float)window_framebuffer_size.x;
             frame_ub.window_framebuffer_height = (float)window_framebuffer_size.y;
             memcpy(frame_ub.view_proj_matrix, view_proj_matrix, sizeof(view_proj_matrix));
@@ -313,12 +318,12 @@ namespace engine {
         // RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
         shapes::draw_all_now("shapes::draw_all() [ECS debug]", camera_min, camera_max);
-        shapes::update_lifetimes(game_delta_time);
+        shapes::update_lifetimes(_game_delta_time);
 #endif
 
         // RENDER UI TO FINAL FRAMEBUFFER
 
-        ui::update(app_delta_time);
+        ui::update(_delta_time);
         ui::layout();
         ui::render(viewport);
         ui::render_rmlui(); // TODO: remove
