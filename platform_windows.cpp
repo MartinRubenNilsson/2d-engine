@@ -129,8 +129,6 @@ namespace platform {
 			}
 			_read_directory_changes(context); // Start watching again.
 		}
-		// Remove duplicate changes.
-		_directory_changes.erase(std::unique(_directory_changes.begin(), _directory_changes.end()), _directory_changes.end());
 	}
 
 	std::span<const DirectoryChange> get_directory_changes() {

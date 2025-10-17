@@ -17,8 +17,6 @@ namespace platform {
 		std::wstring directory_path;
 		std::wstring file_path;
 		FileAction action = FileAction::Added;
-
-		auto operator<=>(const DirectoryChange&) const = default;
 	};
 
 	std::span<const DirectoryChange> get_directory_changes();
