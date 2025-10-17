@@ -140,9 +140,6 @@
     <ClCompile Include="imgui_impl.cpp">
       <Filter>engine\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="platform_windows.cpp">
-      <Filter>engine\platform</Filter>
-    </ClCompile>
     <ClCompile Include="ui_clay.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
@@ -309,6 +306,9 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="platform_windows.cpp">
+      <Filter>engine\platform\implementations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -608,6 +608,15 @@
     <ClInclude Include="text_ids.h">
       <Filter>engine\graphics\text</Filter>
     </ClInclude>
+    <ClInclude Include="platform_libraries.h">
+      <Filter>engine\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_debugging.h">
+      <Filter>engine\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_directory_changes.h">
+      <Filter>engine\platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -771,6 +780,9 @@
     </Filter>
     <Filter Include="engine\graphics\shaders">
       <UniqueIdentifier>{6bfffb68-a074-4bea-b1f4-76f7353f2597}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\platform\implementations">
+      <UniqueIdentifier>{33198917-b645-4219-87a3-b6ba634d07c0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

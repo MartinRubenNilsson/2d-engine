@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #ifdef PLATFORM_WINDOWS
 #include "platform.h"
+#include "platform_debugging.h"
+#include "platform_libraries.h"
+#include "platform_directory_changes.h"
 #include "console.h"
 #include <Windows.h>
 #include <shellapi.h>

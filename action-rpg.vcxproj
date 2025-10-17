@@ -297,6 +297,9 @@
     <ClInclude Include="engine.h" />
     <ClInclude Include="files.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="platform_debugging.h" />
+    <ClInclude Include="platform_directory_changes.h" />
+    <ClInclude Include="platform_libraries.h" />
     <ClInclude Include="rect2.h" />
     <ClInclude Include="text_fonts.h" />
     <ClInclude Include="kdtree_test.h" />

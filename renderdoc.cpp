@@ -4,6 +4,7 @@
 #include "files.h"
 #include "console.h"
 #include "platform.h"
+#include "platform_libraries.h"
 #include <renderdoc/renderdoc_app.h>
 
 namespace renderdoc {

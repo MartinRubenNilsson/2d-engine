@@ -23,6 +23,7 @@
 #include "input.h"
 #include "text_fonts.h"
 #include "platform.h"
+#include "platform_directory_changes.h"
 
 namespace engine {
     bool _should_run = false;
