@@ -3,8 +3,6 @@
 #include "handle.h"
 #include <string_view>
 
-// graphics.h - High-level graphics API
-
 namespace graphics {
 
 	struct VertexShader;
@@ -20,11 +18,7 @@ namespace graphics {
 	bool startup();
 	void shutdown();
 
-	bool is_spirv_supported();
-
-	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height);
-	void set_swap_chain_sync_interval(unsigned int sync_interval);
-	void present_swap_chain_back_buffer();
+	bool is_spirv_supported(); // TODO: remove from public api, this should be internal
 
 	void push_debug_group(std::string_view name);
 	void pop_debug_group();
@@ -34,13 +28,15 @@ namespace graphics {
 		~ScopedDebugGroup() { pop_debug_group(); }
 	};
 
+#define GRAPHICS_DEBUG_GROUP const ScopedDebugGroup __FUNCTION__ _debug_group(__FUNCTION__)
+
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc);
-	Handle<VertexShader> load_vertex_shader(std::string_view path);
+	Handle<VertexShader> load_vertex_shader(std::string_view path); // TODO: reload vertex shader
 	// Pass an empty handle to unbind any currently bound vertex shader.
 	void bind_vertex_shader(Handle<VertexShader> handle);
 
 	Handle<FragmentShader> create_fragment_shader(ShaderDesc&& desc);
-	Handle<FragmentShader> load_fragment_shader(std::string_view path);
+	Handle<FragmentShader> load_fragment_shader(std::string_view path); // TODO: reload fragment shader
 	// Pass an empty handle to unbind any currently bound fragment shader.
 	void bind_fragment_shader(Handle<FragmentShader> handle);
 
@@ -78,24 +74,32 @@ namespace graphics {
 	void copy_texture(Handle<Texture> dest, Handle<Texture> src);
 	Vec2u get_texture_size(Handle<Texture> handle);
 
-	Handle<Sampler> create_sampler(SamplerDesc&& desc);
-	void destroy_sampler(Handle<Sampler> handle);
-	// Pass an empty handle to unbind any currently bound sampler.
-	void bind_sampler(unsigned int binding, Handle<Sampler> handle);
+	constexpr float DEFAULT_CLEAR_COLOR[4] = { 0.f, 0.f, 0.f, 0.f };
 
-	Handle<Framebuffer> get_swap_chain_back_buffer();
 	Handle<Framebuffer> create_framebuffer(FramebufferDesc&& desc);
 	void attach_framebuffer_texture(Handle<Framebuffer> framebuffer_handle, Handle<Texture> texture_handle);
 	Handle<Texture> get_framebuffer_texture(Handle<Framebuffer> handle);
 	// Resizes all textures attached to the framebuffer.
 	void resize_framebuffer(Handle<Framebuffer> framebuffer_handle, unsigned int width, unsigned int height);
 	void bind_framebuffer(Handle<Framebuffer> handle);
-	void clear_framebuffer(Handle<Framebuffer> handle, const float color[4]);
+	void clear_framebuffer(Handle<Framebuffer> handle, const float color[4] = DEFAULT_CLEAR_COLOR);
+
+	Handle<Framebuffer> get_swap_chain_back_buffer();
+	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height);
+	void set_swap_chain_sync_interval(unsigned int sync_interval);
+	void present_swap_chain_back_buffer();
+
+	Handle<Sampler> create_sampler(SamplerDesc&& desc);
+	void destroy_sampler(Handle<Sampler> handle);
+	// Pass an empty handle to unbind any currently bound sampler.
+	void bind_sampler(unsigned int binding, Handle<Sampler> handle);
 
 	Handle<RasterizerState> create_rasterizer_state(RasterizerDesc&& desc);
+	void destroy_rasterizer_state(Handle<RasterizerState> handle);
 	void bind_rasterizer_state(Handle<RasterizerState> handle);
 
 	Handle<BlendState> create_blend_state(BlendDesc&& desc);
+	void destroy_blend_state(Handle<BlendState> handle);
 	void bind_blend_state(Handle<BlendState> handle);
 
 	void set_primitives(Primitives primitives);
@@ -108,6 +112,4 @@ namespace graphics {
 
 	void draw(unsigned int vertex_count, unsigned int vertex_offset = 0);
 	void draw_indexed(unsigned int index_count);
-
-	void show_texture_debug_window();
 }

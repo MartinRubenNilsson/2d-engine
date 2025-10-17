@@ -126,7 +126,7 @@ namespace window {
 		}
 	}
 
-	bool get_visible() {
+	bool visible() {
 		return glfwGetWindowAttrib(_window, GLFW_VISIBLE);
 	}
 
@@ -138,12 +138,12 @@ namespace window {
 		}
 	}
 
-	bool get_minimized() {
+	bool minimized() {
 		return glfwGetWindowAttrib(_window, GLFW_ICONIFIED);
 	}
 
 	void set_fullscreen(bool fullscreen) {
-		if (fullscreen == get_fullscreen()) return;
+		if (fullscreen == is_fullscreen()) return;
 		static int last_windowed_xpos = 0;
 		static int last_windowed_ypos = 0;
 		static int last_windowed_width = 0;
@@ -164,7 +164,7 @@ namespace window {
 		}
 	}
 
-	bool get_fullscreen() {
+	bool is_fullscreen() {
 		return glfwGetWindowMonitor(_window) != nullptr;
 	}
 
@@ -210,7 +210,7 @@ namespace window {
 		glfwSetInputMode(_window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
 	}
 
-	bool get_cursor_visible() {
+	bool cursor_visible() {
 		return glfwGetInputMode(_window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
 	}
 

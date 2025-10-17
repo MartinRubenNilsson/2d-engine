@@ -12,11 +12,11 @@ namespace window {
 	void set_should_close(bool should_close);
 	bool has_focus();
 	void set_visible(bool visible);
-	bool get_visible();
+	bool visible();
 	void set_minimized(bool minimized);
-	bool get_minimized();
+	bool minimized();
 	void set_fullscreen(bool fullscreen);
-	bool get_fullscreen();
+	bool is_fullscreen();
 	void set_size(const Vec2i& size);
 	Vec2i get_size();
 	Vec2i get_framebuffer_size();
@@ -24,7 +24,7 @@ namespace window {
 	void set_icon_from_memory(int width, int height, unsigned char* pixels);
 	void set_icon_from_file(const std::string& path);
 	void set_cursor_visible(bool visible);
-	bool get_cursor_visible();
+	bool cursor_visible();
 	void set_cursor_pos(const Vec2d& pos);
 	Vec2d get_cursor_pos();
 

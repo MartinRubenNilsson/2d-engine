@@ -6,6 +6,7 @@
 #include "graphics.h"
 #include "graphics_globals.h" // TODO: don't put this here
 
+#include "text.h"
 #include "ui_hud.h" // TODO: don't put this here
 
 #pragma warning(push)
@@ -20,9 +21,18 @@ namespace ui {
 		console::log_error(text);
 	}
 
+	Clay_Dimensions _measure_text(Clay_StringSlice string, Clay_TextElementConfig* config, void* userData) {
+		text::Text text{};
+		text.font = { .id = config->fontId };
+		text.font_size = config->fontSize;
+		text.string.assign((const char8_t*)string.chars, string.length);
+		const Rect2f rect = text::get_bounding_box(text);
+		const Vec2f size = rect.max - rect.min;
+		return { size.x, size.y };
+	}
+
 	std::vector<uint8_t> _clay_arena_memory;
 	Clay_Arena _clay_arena{};
-	Clay_RenderCommandArray _clay_render_commands{};
 
 	void _startup_clay() {
 		_clay_arena_memory.resize(Clay_MinMemorySize());
@@ -30,10 +40,10 @@ namespace ui {
 		const Clay_Dimensions dimensions{ .width = GAME_FRAMEBUFFER_WIDTH, .height = GAME_FRAMEBUFFER_HEIGHT };
 		const Clay_ErrorHandler error_handler{ .errorHandlerFunction = _handle_clay_error };
 		Clay_Initialize(_clay_arena, dimensions, error_handler);
+		Clay_SetMeasureTextFunction(_measure_text, nullptr);
 	}
 
 	void _shutdown_clay() {
-		_clay_render_commands = {};
 		_clay_arena = {};
 		_clay_arena_memory = {};
 	}
@@ -53,7 +63,6 @@ namespace ui {
 	}
 
 	void shutdown() {
-		hud::shutdown(); // TODO: move somewhere else
 		_shutdown_clay();
 	}
 
@@ -100,7 +109,11 @@ namespace ui {
 			mouse_is_down = false;
 
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
+
+		hud::update(dt); // TODO: move to like game_ui.h or someting
 	}
+
+	Clay_RenderCommandArray _clay_render_commands{};
 
 	void layout() {
 		_clay_render_commands = {};
@@ -118,8 +131,10 @@ namespace ui {
 		// How many pixels on screen there are per world unit.
 		const float pixels_per_world_unit = (float)viewport.height / GAME_FRAMEBUFFER_HEIGHT;
 
-		for (int32_t i = 0; i < _clay_render_commands.length; ++i) {
-			const Clay_RenderCommand& command = _clay_render_commands.internalArray[i];
+		const std::span<const Clay_RenderCommand> commands{ // This is just to make it easier to debug.
+			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
+
+		for (const Clay_RenderCommand& command : commands) {
 			switch (command.commandType) {
 				case CLAY_RENDER_COMMAND_TYPE_NONE: {
 					// This command type should be skipped.
@@ -143,7 +158,7 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
 					// The renderer should draw text.
-					__debugbreak();
+					// TODO
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
 					const Clay_ImageRenderData& data = command.renderData.image;
@@ -177,7 +192,7 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
 					// The renderer should provide a custom implementation for handling this render command based on its .customData
-					__debugbreak();
+					console::log_error("CLAY_RENDER_COMMAND_TYPE_CUSTOM is not supported");
 				} break;
 			}
 		}

@@ -53,7 +53,7 @@ namespace background {
 		}
 	}
 
-	void draw_sprites(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_type == Type::None) return;
 
 		sprites::Sprite sprite{};

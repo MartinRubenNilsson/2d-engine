@@ -11,7 +11,7 @@ namespace graphics {
 		// - A string containing the source code (e.g., GLSL, HLSL)
 		// - Bytecode for a compiled shader (e.g., SPIR-V, DXBC, DXIL)
 		std::span<const unsigned char> code;
-		bool binary = false;
+		bool binary = false; // True if bytecode, false if source code.
 	};
 
 	enum class Format {

@@ -66,9 +66,9 @@ namespace text {
 
 	FontId load_font(std::string_view path) {
 		const std::string normalized_path = files::get_normalized_path(path);
-		for (uint16_t index = 0; index < _fonts.size(); ++index) {
-			if (_fonts[index].path == normalized_path) {
-				return { index };
+		for (uint16_t id = 0; id < _fonts.size(); ++id) {
+			if (_fonts[id].path == normalized_path) {
+				return { id };
 			}
 		}
 
@@ -107,12 +107,12 @@ namespace text {
 		stbtt_PackBegin(&font.pack_context, font.atlas_pixels.data(),
 			ATLAS_TEXTURE_SIZE, ATLAS_TEXTURE_SIZE, 0, 1, nullptr);
 
-		const uint16_t index = (uint16_t)_fonts.size();
+		const uint16_t id = (uint16_t)_fonts.size();
 		// IMPORTANT: We must move construct the font, otherwise
 		// font.data/font.atlas_pixels are reallocated and
 		// font.info/font.pack_context are invalidated.
 		_fonts.emplace_back(std::move(font));
-		return { index };
+		return { id };
 	}
 
 	Font& get_font(FontId font) {

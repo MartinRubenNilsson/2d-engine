@@ -61,10 +61,7 @@ namespace graphics {
 		api::BlendStateHandle api_handle{};
 		BlendDesc desc{};
 	};
-
-	Viewport _viewport;
-	Rect _scissor;
-	bool _scissor_test_enabled = false;
+	
 	Pool<VertexShader> _vertex_shader_pool;
 	std::unordered_map<std::string, Handle<VertexShader>> _vertex_shader_cache;
 	Pool<FragmentShader> _fragment_shader_pool;
@@ -74,11 +71,14 @@ namespace graphics {
 	Pool<Texture> _texture_pool;
 	std::unordered_map<std::string, Handle<Texture>> _texture_cache;
 	unsigned int _total_texture_memory_usage_in_bytes = 0;
-	Pool<Sampler> _sampler_pool;
 	Pool<Framebuffer> _framebuffer_pool;
 	Handle<Framebuffer> _swap_chain_back_buffer_handle;
+	Pool<Sampler> _sampler_pool;
 	Pool<RasterizerState> _rasterizer_state_pool;
 	Pool<BlendState> _blend_state_pool;
+	Viewport _viewport;
+	Rect _scissor;
+	bool _scissor_test_enabled = false;
 
 #ifdef GRAPHICS_API_DEBUG
 	void _debug_message_callback(std::string_view message) {
@@ -141,10 +141,7 @@ namespace graphics {
 		return true;
 	}
 
-	void shutdown() {
-
-		// DELETE VERTEX SHADERS
-
+	void _destroy_vertex_shaders() {
 		for (VertexShader& shader : _vertex_shader_pool.span()) {
 			if (shader.api_handle.object) {
 				api::destroy_vertex_shader(shader.api_handle);
@@ -152,9 +149,10 @@ namespace graphics {
 			}
 		}
 		_vertex_shader_pool.clear();
+		_vertex_shader_cache.clear();
+	}
 
-		// DELETE FRAGMENT SHADERS
-
+	void _destroy_fragment_shaders() {
 		for (FragmentShader& shader : _fragment_shader_pool.span()) {
 			if (shader.api_handle.object) {
 				api::destroy_fragment_shader(shader.api_handle);
@@ -162,9 +160,10 @@ namespace graphics {
 			}
 		}
 		_fragment_shader_pool.clear();
+		_fragment_shader_cache.clear();
+	}
 
-		// DELETE VERTEX INPUTS
-
+	void _destroy_vertex_inputs() {
 		for (VertexInput& vertex_input : _vertex_input_pool.span()) {
 			if (vertex_input.api_handle.object) {
 				api::destroy_vertex_input(vertex_input.api_handle);
@@ -172,9 +171,9 @@ namespace graphics {
 			}
 		}
 		_vertex_input_pool.clear();
+	}
 
-		// DELETE BUFFERS
-
+	void _destroy_buffers() {
 		for (Buffer& buffer : _buffer_pool.span()) {
 			if (buffer.api_handle.object) {
 				api::destroy_buffer(buffer.api_handle);
@@ -182,9 +181,9 @@ namespace graphics {
 			}
 		}
 		_buffer_pool.clear();
+	}
 
-		// DELETE TEXTURES
-
+	void _destroy_textures() {
 		for (Texture& texture : _texture_pool.span()) {
 			if (texture.api_handle.object) {
 				api::destroy_texture(texture.api_handle);
@@ -192,20 +191,10 @@ namespace graphics {
 			}
 		}
 		_texture_pool.clear();
-		_vertex_shader_cache.clear();
+		_texture_cache.clear();
+	}
 
-		// DELETE SAMPLERS
-
-		for (Sampler& sampler : _sampler_pool.span()) {
-			if (sampler.api_handle.object) {
-				api::destroy_sampler(sampler.api_handle);
-				sampler.api_handle = api::SamplerHandle();
-			}
-		}
-		_sampler_pool.clear();
-
-		// DELETE FRAMEBUFFERS
-
+	void _destroy_framebuffers() {
 		for (Framebuffer& framebuffer : _framebuffer_pool.span()) {
 			// The swap chain back buffer can't be destroyed the usual way
 			// since it it handled differently from the user-created framebuffers.
@@ -218,9 +207,19 @@ namespace graphics {
 			}
 		}
 		_framebuffer_pool.clear();
+	}
 
-		// DELETE RASTERIZER STATES
+	void _destroy_samplers() {
+		for (Sampler& sampler : _sampler_pool.span()) {
+			if (sampler.api_handle.object) {
+				api::destroy_sampler(sampler.api_handle);
+				sampler.api_handle = api::SamplerHandle();
+			}
+		}
+		_sampler_pool.clear();
+	}
 
+	void _destroy_rasterizer_states() {
 		for (RasterizerState& rasterizer_state : _rasterizer_state_pool.span()) {
 			if (rasterizer_state.api_handle.object) {
 				api::destroy_rasterizer_state(rasterizer_state.api_handle);
@@ -228,9 +227,9 @@ namespace graphics {
 			}
 		}
 		_rasterizer_state_pool.clear();
+	}
 
-		// DELETE BLEND STATES
-
+	void _destroy_blend_states() {
 		for (BlendState& blend_state : _blend_state_pool.span()) {
 			if (blend_state.api_handle.object) {
 				api::destroy_blend_state(blend_state.api_handle);
@@ -238,44 +237,23 @@ namespace graphics {
 			}
 		}
 		_blend_state_pool.clear();
+	}
 
-		// SHUTDOWN API
-
+	void shutdown() {
+		_destroy_vertex_shaders();
+		_destroy_fragment_shaders();
+		_destroy_vertex_inputs();
+		_destroy_buffers();
+		_destroy_textures();
+		_destroy_framebuffers();
+		_destroy_samplers();
+		_destroy_rasterizer_states();
+		_destroy_blend_states();
 		api::shutdown();
 	}
 
 	bool is_spirv_supported() {
 		return api::is_spirv_supported();
-	}
-
-	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height) {
-#ifdef GRAPHICS_API_OPENGL
-		// The window owns the swap chain, so this is a no-op.
-		return true;
-#endif
-#ifdef GRAPHICS_API_D3D11
-		return api::resize_swap_chain_framebuffer(new_width, new_height);
-#endif
-	}
-
-	unsigned int _swap_chain_sync_interval = 0;
-
-	void set_swap_chain_sync_interval(unsigned int sync_interval) {
-		_swap_chain_sync_interval = sync_interval;
-#ifdef GRAPHICS_API_OPENGL
-		// The window owns the swap chain.
-		window::set_swap_chain_sync_interval(sync_interval);
-#endif
-	}
-
-	void present_swap_chain_back_buffer() {
-#ifdef GRAPHICS_API_OPENGL
-		// The window owns the swap chain.
-		window::present_swap_chain_back_buffer();
-#endif
-#ifdef GRAPHICS_API_D3D11
-		api::present_swap_chain_back_buffer(_swap_chain_sync_interval);
-#endif
 	}
 
 	void push_debug_group(std::string_view name) {
@@ -636,32 +614,6 @@ namespace graphics {
 		return size;
 	}
 
-	Handle<Sampler> create_sampler(SamplerDesc&& desc) {
-		api::SamplerHandle api_handle = api::create_sampler(desc);
-		if (!api_handle.object) return Handle<Sampler>();
-		return _sampler_pool.emplace(api_handle, std::move(desc));
-	}
-
-	void destroy_sampler(Handle<Sampler> handle) {
-		Sampler* sampler = _sampler_pool.get(handle);
-		if (!sampler) return;
-		api::destroy_sampler(sampler->api_handle);
-		*sampler = Sampler();
-		_sampler_pool.free(handle);
-	}
-
-	void bind_sampler(unsigned int binding, Handle<Sampler> handle) {
-		if (handle == Handle<Sampler>()) {
-			api::bind_sampler(binding, api::SamplerHandle());
-		} else if (const Sampler* sampler = _sampler_pool.get(handle)) {
-			api::bind_sampler(binding, sampler->api_handle);
-		}
-	}
-
-	Handle<Framebuffer> get_swap_chain_back_buffer() {
-		return _swap_chain_back_buffer_handle;
-	}
-
 	Handle<Framebuffer> create_framebuffer(FramebufferDesc&& desc) {
 		api::FramebufferHandle api_handle = api::create_framebuffer(desc);
 		if (!api_handle.object) return Handle<Framebuffer>();
@@ -732,10 +684,74 @@ namespace graphics {
 		}
 	}
 
+	Handle<Framebuffer> get_swap_chain_back_buffer() {
+		return _swap_chain_back_buffer_handle;
+	}
+
+	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height) {
+#ifdef GRAPHICS_API_OPENGL
+		// The window owns the swap chain, so this is a no-op.
+		return true;
+#endif
+#ifdef GRAPHICS_API_D3D11
+		return api::resize_swap_chain_framebuffer(new_width, new_height);
+#endif
+	}
+
+	unsigned int _swap_chain_sync_interval = 0;
+
+	void set_swap_chain_sync_interval(unsigned int sync_interval) {
+		_swap_chain_sync_interval = sync_interval;
+#ifdef GRAPHICS_API_OPENGL
+		// The window owns the swap chain.
+		window::set_swap_chain_sync_interval(sync_interval);
+#endif
+	}
+
+	void present_swap_chain_back_buffer() {
+#ifdef GRAPHICS_API_OPENGL
+		// The window owns the swap chain.
+		window::present_swap_chain_back_buffer();
+#endif
+#ifdef GRAPHICS_API_D3D11
+		api::present_swap_chain_back_buffer(_swap_chain_sync_interval);
+#endif
+	}
+
+	Handle<Sampler> create_sampler(SamplerDesc&& desc) {
+		api::SamplerHandle api_handle = api::create_sampler(desc);
+		if (!api_handle.object) return Handle<Sampler>();
+		return _sampler_pool.emplace(api_handle, std::move(desc));
+	}
+
+	void destroy_sampler(Handle<Sampler> handle) {
+		Sampler* sampler = _sampler_pool.get(handle);
+		if (!sampler) return;
+		api::destroy_sampler(sampler->api_handle);
+		*sampler = Sampler();
+		_sampler_pool.free(handle);
+	}
+
+	void bind_sampler(unsigned int binding, Handle<Sampler> handle) {
+		if (handle == Handle<Sampler>()) {
+			api::bind_sampler(binding, api::SamplerHandle());
+		} else if (const Sampler* sampler = _sampler_pool.get(handle)) {
+			api::bind_sampler(binding, sampler->api_handle);
+		}
+	}
+
 	Handle<RasterizerState> create_rasterizer_state(RasterizerDesc&& desc) {
 		api::RasterizerStateHandle api_handle = api::create_rasterizer_state(desc);
 		if (!api_handle.object) return Handle<RasterizerState>();
 		return _rasterizer_state_pool.emplace(api_handle, std::move(desc));
+	}
+
+	void destroy_rasterizer_state(Handle<RasterizerState> handle) {
+		RasterizerState* state = _rasterizer_state_pool.get(handle);
+		if (!state) return;
+		api::destroy_rasterizer_state(state->api_handle);
+		*state = RasterizerState();
+		_rasterizer_state_pool.free(handle);
 	}
 
 	void bind_rasterizer_state(Handle<RasterizerState> handle) {
@@ -750,6 +766,14 @@ namespace graphics {
 		api::BlendStateHandle api_handle = api::create_blend_state(desc);
 		if (!api_handle.object) return Handle<BlendState>();
 		return _blend_state_pool.emplace(api_handle, std::move(desc));
+	}
+
+	void destroy_blend_state(Handle<BlendState> handle) {
+		BlendState* state = _blend_state_pool.get(handle);
+		if (!state) return;
+		api::destroy_blend_state(state->api_handle);
+		*state = BlendState();
+		_blend_state_pool.free(handle);
 	}
 
 	void bind_blend_state(Handle<BlendState> handle) {
@@ -799,6 +823,7 @@ namespace graphics {
 		api::draw_indexed(index_count);
 	}
 
+#if 0
 	void show_texture_debug_window() {
 		ImGui::Begin("Textures");
 		ImGui::Text("Total memory usage: %d MB", _total_texture_memory_usage_in_bytes / 1024 / 1024);
@@ -823,4 +848,5 @@ namespace graphics {
 		}
 		ImGui::End();
 	}
+#endif
 }

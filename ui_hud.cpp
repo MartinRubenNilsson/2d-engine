@@ -25,10 +25,13 @@ namespace hud {
 		_heart_image.tex_rect_size = { 16, 16 };
 	}
 
-	void shutdown() {
-	}
+	std::string _health_string;
+	std::string _rupees_string;
+	std::string _arrows_string;
+	std::string _bombs_string;
 
 	void update(float dt) {
+		_health_string = "Health: " + std::to_string(health);
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
@@ -51,8 +54,12 @@ namespace hud {
 		}
 	}
 
+	Clay_String _to_clay_string(std::string_view string) {
+		return { false, (int32_t)string.size(), string.data() };
+	}
+
 	void _layout_text(std::string_view string) {
-		// TODO
+		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG({ .fontId = _font.id, .fontSize = 8 }));
 	}
 
 	void layout() {
@@ -62,9 +69,9 @@ namespace hud {
 			.layoutDirection = CLAY_TOP_TO_BOTTOM } })
 		{
 			_layout_health();
-			_layout_text("Rupees: " + std::to_string(rupees));
-			_layout_text("Arrows: " + std::to_string(arrows));
-			_layout_text("Bombs: " + std::to_string(bombs));
+			_layout_text(_health_string);
+			//_layout_text("Arrows: " + std::to_string(arrows));
+			//_layout_text("Bombs: " + std::to_string(bombs));
 		}
 	}
 }
