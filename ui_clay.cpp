@@ -154,7 +154,7 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.
-					__debugbreak();
+					__debugbreak(); // TODO
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
 					const Clay_TextRenderData& data = command.renderData.text;
@@ -165,7 +165,7 @@ namespace ui {
 					text.font_size = (float)data.fontSize;
 					text.string.assign((const char8_t*)data.stringContents.chars, data.stringContents.length);
 					text.color = data.textColor;
-					if (text.color == Color(0, 0, 0, 0)) // untinted
+					if (text.color == Color(0, 0, 0, 0)) // PITFALL: this is the default color
 						text.color = Color::WHITE;
 					text.linear_sampling = false;
 					text.anchor = text::TextAnchor::UpperLeft;
@@ -174,6 +174,7 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
 					const Clay_ImageRenderData& data = command.renderData.image;
+					if (!data.imageData) continue; // DEFENSIVE
 					const Image& image = *(const Image*)data.imageData;
 					sprites::Sprite sprite{};
 					sprite.vertex_shader = _image_vert;
@@ -189,18 +190,18 @@ namespace ui {
 					sprite.tex_position /= texture_size;
 					sprite.tex_size /= texture_size;
 					sprite.color = data.backgroundColor;
-					if (sprite.color == Color(0, 0, 0, 0)) // untinted
+					if (sprite.color == Color(0, 0, 0, 0)) // PITFALL: this is the default color
 						sprite.color = Color::WHITE;
 					sprites::draw_later(sprite);
 					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
 					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
-					__debugbreak();
+					__debugbreak(); // TODO
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END: {
 					// The renderer should finish any previously active clipping, and begin rendering elements in full again.
-					__debugbreak();
+					__debugbreak(); // TODO
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
 					// The renderer should provide a custom implementation for handling this render command based on its .customData

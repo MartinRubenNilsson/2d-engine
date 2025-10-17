@@ -6,19 +6,19 @@
 #include "ecs_animations.h"
 #include "ecs_camera.h"
 #include "ecs_damage.h"
-#include "player_outfit.h"
-#include "audio.h"
-#include "ui_bindings.h"
 #include "ecs_pickups.h"
 #include "ecs_tiled.h"
 #include "ecs_tags.h"
 #include "ecs_portal.h"
 #include "ecs_lifetime.h"
 #include "ecs_patch.h"
-#include "graphics_globals.h"
 #include "ecs_states.h"
 #include "ecs_audio.h"
 #include "ecs_player_states.h"
+#include "graphics_globals.h"
+#include "player_outfit.h"
+#include "audio.h"
+#include "ui_hud.h"
 
 namespace ecs {
 
@@ -148,10 +148,10 @@ namespace ecs {
 
 		// Update hud. TODO: put in ecs_ui_hud.h or something
 		for (auto [entity, player] : _registry.view<Player>().each()) {
-			ui::bindings::hud_player_health = player.health;
-			ui::bindings::hud_arrow_ammo = player.arrows;
-			ui::bindings::hud_bomb_ammo = player.bombs;
-			ui::bindings::hud_rupee_amount = player.rupees;
+			ui::hud::health = player.health;
+			ui::hud::arrows = player.arrows;
+			ui::hud::bombs = player.bombs;
+			ui::hud::rupees = player.rupees;
 		}
 	}
 }

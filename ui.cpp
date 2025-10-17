@@ -62,7 +62,7 @@ namespace ui {
 	namespace bindings {
 		void on_click_play() {
 			pop_all_menus();
-			set_hud_visible(true);
+			hud::show = true;
 			_events.push_back({ EventType::PlayGame });
 		}
 
@@ -92,7 +92,7 @@ namespace ui {
 		}
 
 		void on_click_main_menu() {
-			set_hud_visible(false);
+			hud::show = false;
 			pop_all_menus();
 			push_menu(MenuType::Main);
 			_events.push_back({ EventType::GoToMainMenu });

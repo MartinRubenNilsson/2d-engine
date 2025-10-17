@@ -4,7 +4,7 @@
 //#include "window.h"
 #include "audio.h"
 #include "map.h"
-#include "ui.h"
+//#include "ui.h"
 //#include "shaders.h"
 #include "ecs.h"
 #include "ecs_player.h"
@@ -153,15 +153,6 @@ namespace console {
 			.name = "map_reset",
 			.desc = "Resets the current map",
 			.callback = [](Args) { map::reset(); }
-			});
-
-		// UI
-
-		register_command({
-			.name = "ui_show",
-			.desc = "Shows an RML document",
-			.params = { { ParamType::String, "name", "The name of the document" } },
-			.callback = [](Args args) { ui::show_document(get_string(args[0])); }
 			});
 
 		// GAME

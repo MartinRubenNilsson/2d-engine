@@ -15,14 +15,18 @@ namespace hud {
 
 	text::FontId _font{};
 	Handle<graphics::Texture> _spritesheet{};
-	Image _heart_image{};
+	Image _filled_heart_image{};
+	Image _empty_heart_image{};
 
 	void startup() {
 		_font = text::load_font("assets/fonts/Mozart NBP.ttf");
 		_spritesheet = graphics::load_texture("assets/ui/hud.png");
-		_heart_image.texture = _spritesheet;
-		_heart_image.tex_rect_pos = { 16, 16 };
-		_heart_image.tex_rect_size = { 16, 16 };
+		_filled_heart_image.texture = _spritesheet;
+		_filled_heart_image.tex_rect_pos = { 16, 16 };
+		_filled_heart_image.tex_rect_size = { 16, 16 };
+		_empty_heart_image.texture = _spritesheet;
+		_empty_heart_image.tex_rect_pos = { 16 * 4, 16 };
+		_empty_heart_image.tex_rect_size = { 16, 16 };
 	}
 
 	std::string _rupees_string;
@@ -36,12 +40,13 @@ namespace hud {
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
+		Image* heart_image = filled ? &_filled_heart_image : &_empty_heart_image;
 		CLAY(CLAY_IDI("HudHeart", index), { .layout = {
 			.sizing = {
 				.width = CLAY_SIZING_FIXED(16),
 				.height = CLAY_SIZING_FIXED(16) } },
 			.image = {
-				.imageData = &_heart_image } })
+				.imageData = heart_image } })
 		{}
 	}
 
@@ -76,22 +81,4 @@ namespace hud {
 		}
 	}
 }
-	/// OLD
-
-	extern Rml::Context* _context;
-
-	Rml::ElementDocument* _get_hud_document() {
-		return _context->GetDocument("hud");
-	}
-
-	bool get_hud_visible() {
-		Rml::ElementDocument* doc = _get_hud_document();
-		return doc && doc->IsVisible();
-	}
-
-	void set_hud_visible(bool visible) {
-		if (Rml::ElementDocument* doc = _get_hud_document()) {
-			visible ? doc->Show() : doc->Hide();
-		}
-	}
 }
