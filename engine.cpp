@@ -21,6 +21,7 @@
 #include "renderdoc.h"
 #include "imgui_impl.h"
 #include "input.h"
+#include "text_fonts.h"
 
 namespace engine {
     bool _should_run = false;
@@ -86,6 +87,7 @@ namespace engine {
         ecs::shutdown();
         ui::shutdown_rmlui();
         ui::shutdown();
+        text::shutdown_fonts();
         audio::shutdown();
         imgui_impl::shutdown();
         graphics::shutdown();

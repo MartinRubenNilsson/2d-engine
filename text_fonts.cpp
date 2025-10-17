@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "text_fonts.h"
 #include "text_stb_truetype.h"
-#include "pool.h"
 #include "console.h"
 #include "graphics.h"
 #include "files.h"
@@ -29,7 +28,7 @@ namespace text {
 	struct GlyphTexRectTableEntry {
 		int glyph_index = 0;
 		float font_size = 0.f;
-		int glyph_texture_rect_index = -1; // index into Font::glyph_tex_rects[]
+		int glyph_tex_rect_index = -1; // index into Font::glyph_tex_rects[]
 
 		auto operator<=>(const GlyphTexRectTableEntry&) const = default;
 	};
@@ -60,6 +59,13 @@ namespace text {
 
 	FontId::operator bool() const {
 		return id < _fonts.size();
+	}
+
+	void shutdown_fonts() {
+		for (Font& font : _fonts) {
+			stbtt_PackEnd(&font.pack_context);
+		}
+		_fonts.clear();
 	}
 
 	constexpr int ATLAS_TEXTURE_SIZE = 1024;
@@ -236,12 +242,12 @@ namespace text {
 			table[first].glyph_index == entry.glyph_index &&
 			table[first].font_size == entry.font_size
 		) { // if we found it in the table
-			const int texture_rect_index = table[first].glyph_texture_rect_index;
+			const int texture_rect_index = table[first].glyph_tex_rect_index;
 			return font.glyph_tex_rects[texture_rect_index];
 		}
 		// We didn't find it in the table, so we need to call the stbtt API to pack the glyph in the
 		// texture atlas. Then we record the result in the table so we can look it up in the future.
-		entry.glyph_texture_rect_index = (int)font.glyph_tex_rects.size();
+		entry.glyph_tex_rect_index = (int)font.glyph_tex_rects.size();
 		table.insert(table.begin() + first, entry);
 		Rect2f tex_rect = _pack_and_rasterize_glyph_to_atlas(font, glyph.index, font_size);
 		font.glyph_tex_rects.push_back(tex_rect);

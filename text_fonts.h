@@ -4,6 +4,8 @@
 namespace text {
 	struct Font;
 
+	void shutdown_fonts();
+
 	FontId load_font(std::string_view path);
 	Font& get_font(FontId font); // Doesn't check if the ID is valid!
 
