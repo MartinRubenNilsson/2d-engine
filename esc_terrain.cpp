@@ -87,6 +87,19 @@ namespace ecs {
 		_terrain.clear();
 	}
 
+	std::string_view _to_index_string(TerrainType type) {
+		const int n = (int)type;
+		static char buffer[2];
+		if (n < 0) {
+			return {};
+		}
+		if (n < 10) {
+			buffer[0] = '0' + n;
+			return { buffer, 1 };
+		}
+		return {};
+	}
+
 	void debug_draw_terrain(const Rect2f& view) {
 		if (_terrain_size.x == 0 || _terrain_size.y == 0)
 			return;
@@ -110,7 +123,7 @@ namespace ecs {
 				if (type == TerrainType::None)
 					continue;
 
-				text.string = std::to_string((int)type);
+				text.string = _to_index_string(type);
 				text.position = coord;
 				text.position += Vec2f(0.5f, 0.5f);
 				text.position *= Vec2f(_terrain_tile_size);
