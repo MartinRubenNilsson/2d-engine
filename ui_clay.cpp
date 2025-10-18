@@ -49,22 +49,18 @@ namespace ui {
 		_clay_arena_memory = {};
 	}
 
-	Handle<graphics::VertexShader> _rectangle_vert;
-	Handle<graphics::FragmentShader> _rectangle_frag;
-	Handle<graphics::VertexShader> _image_vert;
-	Handle<graphics::FragmentShader> _image_frag;
+	Handle<graphics::VertexShader> _ui_clay_vert;
+	Handle<graphics::FragmentShader> _ui_clay_frag;
 
 	void _load_shaders() {
-		_rectangle_vert = graphics::load_vertex_shader("assets/shaders/ui_rectangle.vert");
-		_rectangle_frag = graphics::load_fragment_shader("assets/shaders/ui_rectangle.frag");
-		_image_vert = graphics::load_vertex_shader("assets/shaders/ui_image.vert");
-		_image_frag = graphics::load_fragment_shader("assets/shaders/ui_image.frag");
+		_ui_clay_vert = graphics::load_vertex_shader("assets/shaders/ui_clay.vert");
+		_ui_clay_frag = graphics::load_fragment_shader("assets/shaders/ui_clay.frag");
 	}
 
 	void startup() {
 		_startup_clay();
 		_load_shaders();
-		hud::startup(); // TODO: move somewh
+		hud::startup();
 	}
 
 	void shutdown() {
@@ -127,6 +123,31 @@ namespace ui {
 		_clay_render_commands = Clay_EndLayout();
 	}
 
+	void _add_quad_vertices(const Rect2f& box, const Rect2f& uv, const Color& color) {
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(uv.min.x, uv.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(uv.max.x, uv.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(uv.min.x, uv.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(uv.min.x, uv.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(uv.max.x, uv.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(uv.max.x, uv.max.y));
+	}
+
+	void _transform_vertices_to_clip_space(const Clay_Dimensions& dimensions) {
+		for (graphics::Vertex& v : graphics::temp_vertices) {
+			v.position.x /= dimensions.width;
+			v.position.y /= dimensions.height;
+			v.position.x = v.position.x * 2.f - 1.f;
+			v.position.y = v.position.y * 2.f - 1.f;
+		}
+	}
+
+	void _update_and_bind_vertex_buffer() {
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
+			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+		graphics::temp_vertices.clear();
+	}
+
 	void render() {
 		if (!_clay_render_commands.length)
 			return;
@@ -134,10 +155,18 @@ namespace ui {
 		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 
 		const graphics::Viewport& viewport = graphics::get_viewport();
-		const float pixels_per_world_unit = (float)viewport.height / GAME_FRAMEBUFFER_HEIGHT;
+		const Clay_Dimensions dimensions = Clay_GetCurrentContext()->layoutDimensions;
+		// How many pixels we're rendering to per layout unit.
+		const float pixels_per_unit = viewport.height / dimensions.height;
 
 		const std::span<const Clay_RenderCommand> commands{ // This is just to make it easier to debug.
 			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
+
+		graphics::temp_vertices.clear();
+
+		graphics::set_primitives(graphics::Primitives::TriangleList);
+		graphics::bind_vertex_shader(_ui_clay_vert);
+		graphics::bind_fragment_shader(_ui_clay_frag);
 
 		for (const Clay_RenderCommand& command : commands) {
 			switch (command.commandType) {
@@ -146,22 +175,25 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
 					const Clay_RectangleRenderData& data = command.renderData.rectangle;
-					sprites::Sprite sprite{};
-					sprite.vertex_shader = _rectangle_vert;
-					sprite.fragment_shader = _rectangle_frag;
-					sprite.position.x = command.boundingBox.x * pixels_per_world_unit;
-					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
-					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
-					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
-					sprite.color = data.backgroundColor;
-					sprites::draw_later(sprite);
-					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
+					Rect2f box{};
+					box.min.x = command.boundingBox.x;
+					box.min.y = command.boundingBox.y;
+					box.max.x = command.boundingBox.x + command.boundingBox.width;
+					box.max.y = command.boundingBox.y + command.boundingBox.height;
+					const Rect2f uv{};
+					const Color color = data.backgroundColor;
+					_add_quad_vertices(box, uv, color);
+					_transform_vertices_to_clip_space(dimensions);
+					_update_and_bind_vertex_buffer();
+					graphics::bind_texture(0, graphics::white_texture);
+					graphics::draw(6); // draw 1 quad = 2 tris = 6 verts
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 					// The renderer should draw a colored border inset into the bounding box.
 					__debugbreak(); // TODO
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
+#if 0
 					const Clay_TextRenderData& data = command.renderData.text;
 					text::Text text{};
 					text.position.x = command.boundingBox.x;
@@ -177,29 +209,29 @@ namespace ui {
 					text.anchor = text::TextAnchor::UpperLeft;
 					text::draw_later(text);
 					text::draw_all_now(__FUNCTION__); // TODO: camera is all wrong
+#endif
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
 					const Clay_ImageRenderData& data = command.renderData.image;
 					if (!data.imageData) continue; // DEFENSIVE
 					const Image& image = *(const Image*)data.imageData;
-					sprites::Sprite sprite{};
-					sprite.vertex_shader = _image_vert;
-					sprite.fragment_shader = _image_frag;
-					sprite.texture = image.texture;
-					sprite.position.x = command.boundingBox.x * pixels_per_world_unit;
-					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
-					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
-					sprite.size.y = command.boundingBox.height * pixels_per_world_unit;
-					sprite.tex_position = image.tex_rect_pos;
-					sprite.tex_size = image.tex_rect_size;
+					Rect2f box{};
+					box.min.x = command.boundingBox.x;
+					box.min.y = command.boundingBox.y;
+					box.max.x = command.boundingBox.x + command.boundingBox.width;
+					box.max.y = command.boundingBox.y + command.boundingBox.height;
 					const Vec2f texture_size = graphics::get_texture_size(image.texture);
-					sprite.tex_position /= texture_size;
-					sprite.tex_size /= texture_size;
-					sprite.color = data.backgroundColor;
-					if (sprite.color == Color(0, 0, 0, 0)) // PITFALL: this is the default color
-						sprite.color = Color::WHITE;
-					sprites::draw_later(sprite);
-					sprites::draw_all_now(__FUNCTION__); // TODO: optimize
+					Rect2f uv{};
+					uv.min = (Vec2f)image.tex_rect_pos / texture_size;
+					uv.max = uv.min + (Vec2f)image.tex_rect_size / texture_size;
+					Color color = data.backgroundColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default backgroundColor for images
+						color = Color::WHITE;
+					_add_quad_vertices(box, uv, color);
+					_transform_vertices_to_clip_space(dimensions);
+					_update_and_bind_vertex_buffer();
+					graphics::bind_texture(0, image.texture);
+					graphics::draw(6); // draw 1 quad = 2 tris = 6 verts
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
 					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
@@ -215,5 +247,7 @@ namespace ui {
 				} break;
 			}
 		}
+
+
 	}
 }

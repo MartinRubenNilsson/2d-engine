@@ -372,16 +372,10 @@
     <None Include="shaders\glsl\ui.vert">
       <Filter>engine\graphics\shaders</Filter>
     </None>
-    <None Include="shaders\glsl\ui_image.frag">
+    <None Include="shaders\glsl\ui_clay.frag">
       <Filter>engine\graphics\shaders</Filter>
     </None>
-    <None Include="shaders\glsl\ui_image.vert">
-      <Filter>engine\graphics\shaders</Filter>
-    </None>
-    <None Include="shaders\glsl\ui_rectangle.frag">
-      <Filter>engine\graphics\shaders</Filter>
-    </None>
-    <None Include="shaders\glsl\ui_rectangle.vert">
+    <None Include="shaders\glsl\ui_clay.vert">
       <Filter>engine\graphics\shaders</Filter>
     </None>
   </ItemGroup>
