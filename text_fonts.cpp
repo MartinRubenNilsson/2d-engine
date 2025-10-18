@@ -71,7 +71,7 @@ namespace text {
 	constexpr int ATLAS_TEXTURE_SIZE = 1024;
 
 	FontId load_font(std::string_view path) {
-		const std::string normalized_path = files::get_normalized_path(path);
+		std::string normalized_path = files::get_normalized_path(path);
 		for (uint16_t id = 0; id < _fonts.size(); ++id) {
 			if (_fonts[id].path == normalized_path) {
 				return { id };
@@ -79,14 +79,16 @@ namespace text {
 		}
 
 		Font font{};
-		if (!files::read_binary_file(path, font.data)) {
-			console::log_error("Failed to open font file: " + normalized_path);
+		font.path = std::move(normalized_path);
+
+		if (!files::read_binary_file(font.path, font.data)) {
+			console::log_error("Failed to open font file: " + font.path);
 			return {};
 		}
 
 		stbtt_fontinfo info{};
 		if (!stbtt_InitFont(&font.info, font.data.data(), 0)) {
-			console::log_error("Failed to initialize font: " + normalized_path);
+			console::log_error("Failed to initialize font: " + font.path);
 			return {};
 		}
 
@@ -104,7 +106,7 @@ namespace text {
 		// Setup texture atlas.
 		font.atlas_pixels.resize(ATLAS_TEXTURE_SIZE * ATLAS_TEXTURE_SIZE);
 		font.atlas_texture = graphics::create_texture({
-			.debug_name = normalized_path,
+			.debug_name = font.path,
 			.width = ATLAS_TEXTURE_SIZE,
 			.height = ATLAS_TEXTURE_SIZE,
 			.format = graphics::Format::R8_UNORM });
