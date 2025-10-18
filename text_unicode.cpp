@@ -34,6 +34,19 @@ namespace text {
 		}
 	}
 
+	char32_t to_c32(std::u8string_view& string) {
+		if (string.empty())
+			return 0;
+		char32_t c = 0;
+		std::mbstate_t state{};
+		ConversionResult result = _to_c32(c, string, state);
+		if (result == ConversionResult::Success ||
+			result == ConversionResult::Multibyte) {
+			return c;
+		}
+		return 0;
+	}
+
 	size_t length(std::u8string_view string) {
 		size_t len = 0;
 		std::mbstate_t state{};
@@ -50,18 +63,5 @@ namespace text {
 			break; // Null, Error, Incomplete
 		}
 		return len;
-	}
-
-	char32_t to_c32(std::u8string_view& string) {
-		if (string.empty())
-			return 0;
-		char32_t c = 0;
-		std::mbstate_t state{};
-		ConversionResult result = _to_c32(c, string, state);
-		if (result == ConversionResult::Success ||
-			result == ConversionResult::Multibyte) {
-			return c;
-		}
-		return 0;
 	}
 }

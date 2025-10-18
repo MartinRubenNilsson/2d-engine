@@ -25,7 +25,7 @@ namespace ui {
 		text::Text text{};
 		text.font = { .id = config->fontId };
 		text.font_size = config->fontSize;
-		text.string.assign((const char8_t*)string.chars, string.length);
+		text.string = { string.chars, (size_t)string.length };
 		const Rect2f rect = text::get_bounding_box(text);
 		const Vec2f size = rect.max - rect.min;
 		return { size.x, size.y };
@@ -163,7 +163,7 @@ namespace ui {
 					text.position.y = command.boundingBox.y;
 					text.font.id = data.fontId;
 					text.font_size = (float)data.fontSize;
-					text.string.assign((const char8_t*)data.stringContents.chars, data.stringContents.length);
+					text.string = { data.stringContents.chars, (size_t)data.stringContents.length };
 					text.color = data.textColor;
 					if (text.color == Color(0, 0, 0, 0)) // PITFALL: this is the default color
 						text.color = Color::WHITE;

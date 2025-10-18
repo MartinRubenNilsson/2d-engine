@@ -7,6 +7,10 @@
 #include "graphics_vertices.h"
 
 namespace text {
+    std::u8string_view _to_u8(std::string_view string) {
+        return { (const char8_t*)string.data(), string.size() };
+    }
+
     Vec2f _get_anchor_position(const Vec2f& min, const Vec2f& max, TextAnchor anchor) {
         const Vec2f cen = (min + max) * 0.5f; // center
         switch (anchor) {
@@ -41,7 +45,7 @@ namespace text {
 
         const size_t vertex_count_before = graphics::temp_vertices.size();
 
-        std::u8string_view string = text.string; // This will shink as the codepoints are being decoded.
+        std::u8string_view string = _to_u8(text.string); // This will shink as the codepoints are being decoded.
         while (char32_t codepoint = to_c32(string)) { // Decode the next codepoint.
             if (codepoint == U'\r')
                 continue; // Skip carriage returns.
@@ -181,7 +185,7 @@ namespace text {
             for (const Text& text : _texts) {
                 // In general we will have 6 vertices per non-whitespace glyph.
                 // TODO: Handle whitespaces for a more conservative preallocation.
-                vertex_count += 6 * length(text.string);
+                vertex_count += 6 * length(_to_u8(text.string));
             }
             graphics::temp_vertices.reserve(vertex_count);
         }

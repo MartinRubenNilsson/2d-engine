@@ -110,8 +110,7 @@ namespace ecs {
 				if (type == TerrainType::None)
 					continue;
 
-				const std::string string = std::to_string((int)type);
-				text.string.assign(string.begin(), string.end());
+				text.string = std::to_string((int)type);
 				text.position = coord;
 				text.position += Vec2f(0.5f, 0.5f);
 				text.position *= Vec2f(_terrain_tile_size);
