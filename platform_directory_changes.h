@@ -1,9 +1,12 @@
 #pragma once
 
 namespace platform {
-	void start_watching_directory_changes(const std::wstring& directory_path, bool watch_subdirectories = false);
-	void stop_watching_directory_changes(const std::wstring& directory_path);
-	void update_directory_changes();
+	class DirectoryWatcher;
+
+	Handle<DirectoryWatcher> watch_directory(std::wstring_view directory_path, bool watch_subdirectories = false);
+	void stop_watching_directory(Handle<DirectoryWatcher> watcher);
+	void update_directory_watchers();
+	void shutdown_directory_watchers();
 
 	enum class FileAction {
 		Added, // A file was added to the directory.
@@ -14,10 +17,10 @@ namespace platform {
 	};
 
 	struct DirectoryChange {
-		std::wstring directory_path;
-		std::wstring file_path;
 		FileAction action = FileAction::Added;
+		std::wstring file_path;
 	};
 
-	std::span<const DirectoryChange> get_directory_changes();
+	// Returns all new changes since the last call to update_directory_watchers().
+	std::span<const DirectoryChange> get_directory_changes(Handle<DirectoryWatcher> watcher);
 }

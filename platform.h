@@ -1,9 +1,9 @@
 #pragma once
 
 namespace platform {
-	int system(const char* command);
-	bool set_environment_variable(const char* name, const char* value);
-	bool open(const char* path);
+	int system(const std::string& command);
+	bool set_environment_variable(const std::string& name, const std::string& value);
+	bool open(const std::string& path);
 
-	void shutdown();
+	void shutdown_directory_watchers();
 }

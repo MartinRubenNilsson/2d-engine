@@ -6,10 +6,10 @@ namespace platform {
 		uintptr_t ptr = 0;
 	};
 
-	Library load_library(const char* lib_file_name);
+	Library load_library(const std::string& lib_file_name);
 
 	// An address to an exported library procedure (function).
 	using LibraryProc = const void*;
 
-	LibraryProc get_library_proc(Library lib, const char* proc_name);
+	LibraryProc get_library_proc(Library lib, const std::string& proc_name);
 }

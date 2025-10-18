@@ -3,5 +3,5 @@
 namespace platform {
 	bool is_debugger_present();
 	void debug_break();
-	void output_debug_string(const char* string);
+	void output_debug_string(const std::string& string);
 }

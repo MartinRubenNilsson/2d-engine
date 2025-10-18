@@ -5,6 +5,7 @@
 #include "platform_libraries.h"
 #include "platform_directory_changes.h"
 #include "console.h"
+#include "pool.h"
 
 #include <Windows.h>
 #include <shellapi.h>
@@ -18,12 +19,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 }
 
 namespace platform {
-	int system(const char* command) {
-		return ::system(command);
+	int system(const std::string& command) {
+		return ::system(command.c_str());
 	}
 
-	bool set_environment_variable(const char* name, const char* value) {
-		return SetEnvironmentVariableA(name, value);
+	bool set_environment_variable(const std::string& name, const std::string& value) {
+		return SetEnvironmentVariableA(name.c_str(), value.c_str());
 	}
 
 	bool _shell_execute_succeeded(HINSTANCE result) {
@@ -31,10 +32,14 @@ namespace platform {
 		return (INT_PTR)result > 32;
 	}
 
-	bool open(const char* path) {
-		HINSTANCE result = ShellExecuteA(nullptr, "open", path, nullptr, nullptr, SW_SHOWNORMAL);
+	bool open(const std::string& path) {
+		HINSTANCE result = ShellExecuteA(nullptr, "open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 		return _shell_execute_succeeded(result);
 	}
+
+	////////////////////////////
+	// platform_debugging.cpp //
+	////////////////////////////
 
 	bool is_debugger_present() {
 		return IsDebuggerPresent();
@@ -44,94 +49,27 @@ namespace platform {
 		DebugBreak();
 	}
 
-	void output_debug_string(const char* string) {
-		OutputDebugStringA(string);
+	void output_debug_string(const std::string& string) {
+		OutputDebugStringA(string.c_str());
 	}
 
-	Library load_library(const char* lib_file_name) {
-		return { .ptr = (uintptr_t)LoadLibraryA(lib_file_name) };
+	////////////////////////////
+	// platform_libraries.cpp //
+	////////////////////////////
+
+	Library load_library(const std::string& lib_file_name) {
+		return { .ptr = (uintptr_t)LoadLibraryA(lib_file_name.c_str()) };
 	}
 
-	LibraryProc get_library_proc(Library lib, const char* proc_name) {
-		return GetProcAddress((HMODULE)lib.ptr, proc_name);
+	LibraryProc get_library_proc(Library lib, const std::string& proc_name) {
+		return GetProcAddress((HMODULE)lib.ptr, proc_name.c_str());
 	}
 
-	struct DirectoryChangeContext {
-		std::wstring directory_path;
-		bool watch_subdirectories = false;
-		HANDLE file{};
-		std::unique_ptr<OVERLAPPED> overlapped{}; // needs to have stable memory addres
-		std::vector<uint8_t> buffer;
-	};
+	////////////////////////////////////
+	// platform_directory_changes.cpp //
+	////////////////////////////////////
 
-	std::vector<DirectoryChangeContext> _directory_change_contexts;
-
-	bool _read_directory_changes(DirectoryChangeContext& context) {
-		return ReadDirectoryChangesW(
-			context.file,
-			context.buffer.data(),
-			(DWORD)context.buffer.size(),
-			context.watch_subdirectories,
-			FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE,
-			nullptr,
-			context.overlapped.get(),
-			nullptr);
-	}
-
-	void _clear(DirectoryChangeContext& context) {
-		CloseHandle(context.file);
-		CloseHandle(context.overlapped->hEvent);
-		context = {};
-	}
-
-	void start_watching_directory_changes(const std::wstring& directory_path, bool watch_subdirectories) {
-		// Check if we're already watching this directory. If we are, and we're watching it in the same way,
-		// do nothing. Otherwise if we want to watch it in another way, start watching anew.
-		for (auto it = _directory_change_contexts.begin(); it != _directory_change_contexts.end(); it++) {
-			if (it->directory_path != directory_path)
-				continue; // This is not the directory we want to watch.
-			if (it->watch_subdirectories == watch_subdirectories)
-				return; // We're already watching this directory in the same way.
-			_clear(*it);
-			_directory_change_contexts.erase(it);
-			break;
-		}
-		// PITFALL: Contrary to the name of the function, this just gets a handle to an existing directory.
-		const HANDLE file = CreateFileW(directory_path.c_str(),
-			FILE_LIST_DIRECTORY,
-			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-			nullptr,
-			OPEN_EXISTING,
-			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
-			nullptr);
-		if (file == INVALID_HANDLE_VALUE) {
-			console::log_error("Error 5479629368: Cannot start watching directory changes, failed to open directory.");
-			return;
-		}
-		DirectoryChangeContext context;
-		context.directory_path = directory_path;
-		context.watch_subdirectories = watch_subdirectories;
-		context.file = file;
-		context.overlapped = std::make_unique<OVERLAPPED>();
-		context.overlapped->hEvent = CreateEvent(NULL, FALSE, 0, NULL);
-		context.buffer.resize(1024);
-		if (!_read_directory_changes(context)) {
-			console::log_error("Error 1251671700: Cannot start watching directory changes, failed to read directory changes.");
-			_clear(context);
-			return;
-		}
-		_directory_change_contexts.emplace_back(std::move(context));
-	}
-
-	void stop_watching_directory_changes(const std::wstring& directory_path) {
-		for (auto it = _directory_change_contexts.begin(); it != _directory_change_contexts.end(); it++) {
-			if (it->directory_path != directory_path) continue;
-			_clear(*it);
-			it = _directory_change_contexts.erase(it);
-		}
-	}
-
-	FileAction _get_action(const FILE_NOTIFY_INFORMATION& info) {
+	FileAction _get_file_action(const FILE_NOTIFY_INFORMATION& info) {
 		switch (info.Action) {
 			case FILE_ACTION_ADDED:            return FileAction::Added;
 			case FILE_ACTION_REMOVED:          return FileAction::Removed;
@@ -142,7 +80,7 @@ namespace platform {
 		}
 	}
 
-	std::wstring _get_file_path(const FILE_NOTIFY_INFORMATION& info) {
+	std::wstring _get_file_name(const FILE_NOTIFY_INFORMATION& info) {
 		return { info.FileName, info.FileNameLength / sizeof(wchar_t) };
 	}
 
@@ -154,38 +92,185 @@ namespace platform {
 		return (const FILE_NOTIFY_INFORMATION*)bytes;
 	}
 
-	std::vector<DirectoryChange> _directory_changes;
+	class DirectoryWatcher {
+		std::wstring _directory_path;
+		bool _watch_subdirectories = false;
+		HANDLE _directory_file_handle = INVALID_HANDLE_VALUE;
+		std::unique_ptr<OVERLAPPED> _overlapped{}; // PITFALL: needs to have stable memory address!
+		std::vector<uint8_t> _buffer; // for storing FILE_NOTIFY_INFORMATION:s in
+		std::vector<DirectoryChange> _changes;
 
-	void update_directory_changes() {
-		_directory_changes.clear();
-		for (DirectoryChangeContext& context : _directory_change_contexts) {
-			const DWORD result = WaitForSingleObject(context.overlapped->hEvent, 0);
-			if (result != WAIT_OBJECT_0)
-				continue; // The directory hasn't changed.
-			DWORD num_bytes_transferred = 0;
-			GetOverlappedResult(context.file, context.overlapped.get(), &num_bytes_transferred, FALSE);
-			for (auto info = (const FILE_NOTIFY_INFORMATION*)context.buffer.data(); info; info = _get_next(info)) {
-				std::wstring file_path = _get_file_path(*info);
-				const FileAction action = _get_action(*info);
-				_directory_changes.emplace_back(context.directory_path, std::move(file_path), action);
+	public:
+		DirectoryWatcher(std::wstring_view directory_path, bool watch_subdirectories)
+			: _directory_path(directory_path)
+			, _watch_subdirectories(watch_subdirectories)
+			, _overlapped(std::make_unique<OVERLAPPED>())
+			, _buffer(1024)
+		{
+			_overlapped->hEvent = CreateEvent(NULL, FALSE, 0, NULL);
+		}
+
+		DirectoryWatcher(const DirectoryWatcher&) = delete;
+		DirectoryWatcher& operator=(const DirectoryWatcher&) = delete;
+
+		DirectoryWatcher(DirectoryWatcher&& other) noexcept
+			: _directory_path(std::move(other._directory_path))
+			, _watch_subdirectories(other._watch_subdirectories)
+			, _directory_file_handle(other._directory_file_handle)
+			, _overlapped(std::move(other._overlapped))
+			, _buffer(std::move(other._buffer))
+			, _changes(std::move(other._changes))
+		{
+			other._directory_file_handle = INVALID_HANDLE_VALUE;
+		}
+
+		DirectoryWatcher& operator=(DirectoryWatcher&& other) noexcept {
+			_directory_path = std::move(other._directory_path);
+			_watch_subdirectories = other._watch_subdirectories;
+			_directory_file_handle = other._directory_file_handle;
+			other._directory_file_handle = INVALID_HANDLE_VALUE;
+			_overlapped = std::move(other._overlapped);
+			_buffer = std::move(other._buffer);
+			_changes = std::move(other._changes);
+			return *this;
+		}
+
+		void clear() {
+			_directory_path.clear();
+			if (_directory_file_handle != INVALID_HANDLE_VALUE) {
+				CloseHandle(_directory_file_handle);
+				_directory_file_handle = INVALID_HANDLE_VALUE;
 			}
-			_read_directory_changes(context); // Start watching again.
+			_watch_subdirectories = false;
+			if (_overlapped && _overlapped->hEvent) {
+				CloseHandle(_overlapped->hEvent);
+				_overlapped->hEvent = nullptr;
+			}
+			_overlapped.reset();
+			_buffer.clear();
+			_changes.clear();
+		}
+
+		~DirectoryWatcher() {
+			clear();
+		}
+
+		bool open_directory() {
+			if (_directory_path.empty())
+				return false;
+			if (_directory_file_handle != INVALID_HANDLE_VALUE) {
+				CloseHandle(_directory_file_handle); // DEFENSIVE: in case the handle is already open
+				_directory_file_handle = INVALID_HANDLE_VALUE;
+			}
+			_directory_file_handle = CreateFileW(
+				_directory_path.c_str(),
+				FILE_LIST_DIRECTORY,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+				nullptr,
+				OPEN_EXISTING,
+				FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+				nullptr);
+			return _directory_file_handle != INVALID_HANDLE_VALUE;
+		}
+
+		bool start_watching() {
+			if (_directory_file_handle == INVALID_HANDLE_VALUE)
+				return false;
+			if (_buffer.empty())
+				return false;
+			if (!_overlapped)
+				return false;
+			return ReadDirectoryChangesW(
+				_directory_file_handle,
+				_buffer.data(),
+				(DWORD)_buffer.size(),
+				_watch_subdirectories,
+				FILE_NOTIFY_CHANGE_FILE_NAME |
+				FILE_NOTIFY_CHANGE_DIR_NAME |
+				FILE_NOTIFY_CHANGE_LAST_WRITE,
+				nullptr,
+				_overlapped.get(),
+				nullptr);
+		}
+
+		void clear_changes() {
+			_changes.clear();
+		}
+
+		bool has_new_changes() const {
+			if (!_overlapped) return false;
+			if (!_overlapped->hEvent) return false;
+			const DWORD ret = WaitForSingleObject(_overlapped->hEvent, 0);
+			return ret == WAIT_OBJECT_0;
+		}
+
+		// Returns how many new changes were added.
+		size_t append_new_changes() {
+			if (_directory_file_handle == INVALID_HANDLE_VALUE)
+				return 0;
+			if (!_overlapped)
+				return 0;
+			if (_buffer.empty())
+				return 0;
+			DWORD num_bytes_transferred = 0;
+			GetOverlappedResult(_directory_file_handle, _overlapped.get(), &num_bytes_transferred, FALSE);
+			const size_t num_changes_before = _changes.size();
+			for (auto info = (const FILE_NOTIFY_INFORMATION*)_buffer.data(); info; info = _get_next(info)) {
+				const FileAction action = _get_file_action(*info);
+				std::wstring file_path = _get_file_name(*info);
+				_changes.emplace_back(action, std::move(file_path));
+			}
+			return _changes.size() - num_changes_before;
+		}
+
+		std::span<const DirectoryChange> get_changes() const {
+			return _changes;
+		}
+	};
+
+	Pool<DirectoryWatcher> _directory_watchers;
+
+	Handle<DirectoryWatcher> watch_directory(std::wstring_view directory_path, bool watch_subdirectories) {
+		DirectoryWatcher watcher(directory_path, watch_subdirectories);
+		if (!watcher.open_directory()) {
+			console::log_error("Error 5479629: Failed to watch directory, failed to open directory.");
+			return {};
+		}
+		if (!watcher.start_watching()) {
+			console::log_error("Error 1251671: Failed to watch directory, failed to start watching.");
+			return {};
+		}
+		return _directory_watchers.emplace(std::move(watcher));
+	}
+
+	void stop_watching_directory(Handle<DirectoryWatcher> watcher) {
+		// PITFALL: free() doesn't deconstruct or cleanup pool elements, so we need to do so ourselves.
+		if (DirectoryWatcher* w = _directory_watchers.get(watcher)) {
+			w->clear();
+		}
+		_directory_watchers.free(watcher);
+	}
+
+	void update_directory_watchers() {
+		for (DirectoryWatcher& watcher : _directory_watchers.span()) {
+			// PITFALL: watcher may be invalid here, but I've written the clear_changes() and
+			// has_new_changes() to be able to handle this (the latter should return false).
+			watcher.clear_changes();
+			if (!watcher.has_new_changes())
+				continue;
+			watcher.append_new_changes();
+			watcher.start_watching(); // Necesary to keep watching.
 		}
 	}
 
-	std::span<const DirectoryChange> get_directory_changes() {
-		return _directory_changes;
+	void shutdown_directory_watchers() {
+		_directory_watchers.clear();
 	}
 
-	void _clear_directory_change_contexts() {
-		for (DirectoryChangeContext& context : _directory_change_contexts) {
-			_clear(context);
-		}
-		_directory_change_contexts.clear();
-	}
-
-	void shutdown() {
-		_clear_directory_change_contexts();
+	std::span<const DirectoryChange> get_directory_changes(Handle<DirectoryWatcher> watcher) {
+		DirectoryWatcher* w = _directory_watchers.get(watcher);
+		if (!w) return {};
+		return w->get_changes();
 	}
 }
 

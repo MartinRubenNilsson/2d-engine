@@ -41,6 +41,8 @@ namespace engine {
         }
     }
 
+    Handle<platform::DirectoryWatcher> _watcher{};
+
     void startup(int argc, char* argv[]) {
         setlocale(LC_ALL, "en_US.utf8");
         if (steam::restart_app_if_necessary())
@@ -84,7 +86,7 @@ namespace engine {
         _should_run = true;
         _time = window::get_elapsed_time();
         
-        //platform::start_watching_directory_changes(L"assets", true); // TEST
+        _watcher = platform::watch_directory(L"assets", true); // TEST
     }
 
     void shutdown() {
@@ -98,7 +100,7 @@ namespace engine {
         window::shutdown();
         networking::shutdown();
         steam::shutdown();
-        platform::shutdown();
+        platform::shutdown_directory_watchers();
     }
 
     bool should_run() {
@@ -114,9 +116,9 @@ namespace engine {
     void _update() {
         _update_times();
 
-        platform::update_directory_changes();
+        platform::update_directory_watchers();
 
-        for (const platform::DirectoryChange& change : platform::get_directory_changes()) {
+        for (const platform::DirectoryChange& change : platform::get_directory_changes(_watcher)) {
             std::string string{ change.file_path.begin(), change.file_path.end() };
             console::log(string);
         }

@@ -1,6 +1,8 @@
 #pragma once
 #include "handle.h"
 
+// TODO: make an iterator
+
 template <typename T>
 class Pool {
 public:
@@ -45,7 +47,13 @@ inline Handle<T> Pool<T>::emplace(Args&&... args) {
 		handle.index = _freelist.back();
 		_freelist.pop_back();
 		handle.generation = _generations[handle.index];
-		_data[handle.index] = { std::forward<Args>(args)... };
+		// If T supports move assignment, use it. Otherwise, destroy and reconstruct in place.
+		if constexpr (std::is_move_assignable_v<T>) {
+			_data[handle.index] = T(std::forward<Args>(args)...);
+		} else {
+			_data[handle.index].~T();
+			new (&_data[handle.index]) T(std::forward<Args>(args)...);
+		}
 	}
 	return handle;
 }
@@ -57,6 +65,7 @@ inline T* Pool<T>::get(Handle<T> handle) {
 	return &_data[handle.index];
 }
 
+// PITFALL: Doesn't deconstruct or otherwise cleanup the element! You need to do that yourself if necessary.
 template<typename T>
 inline void Pool<T>::free(Handle<T> handle) {
 	if (handle.index >= _data.size()) return;
