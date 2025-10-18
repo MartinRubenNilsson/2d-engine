@@ -259,7 +259,7 @@ namespace platform {
 			if (!watcher.has_new_changes())
 				continue;
 			watcher.append_new_changes();
-			watcher.start_watching(); // Necesary to keep watching.
+			watcher.start_watching(); // Necessary to keep watching.
 		}
 	}
 
