@@ -167,22 +167,24 @@ namespace ui {
 		graphics::set_primitives(graphics::Primitives::TriangleList);
 		graphics::bind_vertex_shader(_ui_clay_vert);
 		graphics::bind_fragment_shader(_ui_clay_frag);
+		graphics::bind_sampler(0, graphics::nearest_sampler);
 
 		for (const Clay_RenderCommand& command : commands) {
+
+			Rect2f box{};
+			box.min.x = command.boundingBox.x;
+			box.min.y = command.boundingBox.y;
+			box.max.x = command.boundingBox.x + command.boundingBox.width;
+			box.max.y = command.boundingBox.y + command.boundingBox.height;
+
 			switch (command.commandType) {
 				case CLAY_RENDER_COMMAND_TYPE_NONE: {
 					// This command type should be skipped.
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
 					const Clay_RectangleRenderData& data = command.renderData.rectangle;
-					Rect2f box{};
-					box.min.x = command.boundingBox.x;
-					box.min.y = command.boundingBox.y;
-					box.max.x = command.boundingBox.x + command.boundingBox.width;
-					box.max.y = command.boundingBox.y + command.boundingBox.height;
-					const Rect2f uv{};
 					const Color color = data.backgroundColor;
-					_add_quad_vertices(box, uv, color);
+					_add_quad_vertices(box, Rect2f::ZERO, color);
 					_transform_vertices_to_clip_space(dimensions);
 					_update_and_bind_vertex_buffer();
 					graphics::bind_texture(0, graphics::white_texture);
@@ -215,11 +217,6 @@ namespace ui {
 					const Clay_ImageRenderData& data = command.renderData.image;
 					if (!data.imageData) continue; // DEFENSIVE
 					const Image& image = *(const Image*)data.imageData;
-					Rect2f box{};
-					box.min.x = command.boundingBox.x;
-					box.min.y = command.boundingBox.y;
-					box.max.x = command.boundingBox.x + command.boundingBox.width;
-					box.max.y = command.boundingBox.y + command.boundingBox.height;
 					const Vec2f texture_size = graphics::get_texture_size(image.texture);
 					Rect2f uv{};
 					uv.min = (Vec2f)image.tex_rect_pos / texture_size;

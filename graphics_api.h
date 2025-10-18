@@ -18,7 +18,7 @@ namespace api {
 
 	void set_debug_message_callback(DebugMessageCallback callback);
 
-	struct InitializeOptions {
+	struct StartupOptions {
 #ifdef GRAPHICS_API_OPENGL
 		void* (*glad_load_proc)(const char* name) = nullptr;
 #endif
@@ -32,7 +32,7 @@ namespace api {
 #endif
 	};
 
-	bool initialize(const InitializeOptions &options);
+	bool startup(const StartupOptions &options);
 	void shutdown();
 
 	bool is_spirv_supported();
@@ -47,40 +47,40 @@ namespace api {
 	void push_debug_group(std::string_view name);
 	void pop_debug_group();
 
-	struct VertexShaderHandle { uintptr_t object = 0; };
+	struct VertexShaderId { uintptr_t object = 0; };
 
-	VertexShaderHandle create_vertex_shader(const ShaderDesc& desc);
-	void destroy_vertex_shader(VertexShaderHandle shader);
-	void bind_vertex_shader(VertexShaderHandle shader);
+	VertexShaderId create_vertex_shader(const ShaderDesc& desc);
+	void destroy_vertex_shader(VertexShaderId shader);
+	void bind_vertex_shader(VertexShaderId shader);
 
-	struct FragmentShaderHandle { uintptr_t object = 0; };
+	struct FragmentShaderId { uintptr_t object = 0; };
 
-	FragmentShaderHandle create_fragment_shader(const ShaderDesc& desc);
-	void destroy_fragment_shader(FragmentShaderHandle shader);
-	void bind_fragment_shader(FragmentShaderHandle shader);
+	FragmentShaderId create_fragment_shader(const ShaderDesc& desc);
+	void destroy_fragment_shader(FragmentShaderId shader);
+	void bind_fragment_shader(FragmentShaderId shader);
 
-	struct VertexInputHandle { uintptr_t object = 0; };
+	struct VertexInputId { uintptr_t object = 0; };
 
-	VertexInputHandle create_vertex_input(const VertexInputDesc& desc);
-	void destroy_vertex_input(VertexInputHandle vertex_input);
-	void bind_vertex_input(VertexInputHandle vertex_input);
+	VertexInputId create_vertex_input(const VertexInputDesc& desc);
+	void destroy_vertex_input(VertexInputId vertex_input);
+	void bind_vertex_input(VertexInputId vertex_input);
 
-	struct BufferHandle { uintptr_t object = 0; };
+	struct BufferId { uintptr_t object = 0; };
 
-	BufferHandle create_buffer(const BufferDesc& desc);
-	void destroy_buffer(BufferHandle buffer);
-	void update_buffer(BufferHandle buffer, const void* data, unsigned int size, unsigned int offset);
-	void bind_uniform_buffer(unsigned int binding, BufferHandle buffer);
-	void bind_uniform_buffer_range(unsigned int binding, BufferHandle buffer, unsigned int size, unsigned int offset);
-	void bind_vertex_buffer(unsigned int binding, BufferHandle buffer, unsigned int stride, unsigned int offset);
-	void bind_index_buffer(BufferHandle buffer, unsigned int offset = 0);
+	BufferId create_buffer(const BufferDesc& desc);
+	void destroy_buffer(BufferId buffer);
+	void update_buffer(BufferId buffer, const void* data, unsigned int size, unsigned int offset);
+	void bind_uniform_buffer(unsigned int binding, BufferId buffer);
+	void bind_uniform_buffer_range(unsigned int binding, BufferId buffer, unsigned int size, unsigned int offset);
+	void bind_vertex_buffer(unsigned int binding, BufferId buffer, unsigned int stride, unsigned int offset);
+	void bind_index_buffer(BufferId buffer, unsigned int offset = 0);
 
-	struct TextureHandle { uintptr_t object = 0; };
+	struct TextureId { uintptr_t object = 0; };
 
-	TextureHandle create_texture(const TextureDesc& desc);
-	void destroy_texture(TextureHandle texture);
+	TextureId create_texture(const TextureDesc& desc);
+	void destroy_texture(TextureId texture);
 	void update_texture(
-		TextureHandle texture,
+		TextureId texture,
 		unsigned int level,
 		unsigned int x,
 		unsigned int y,
@@ -89,12 +89,12 @@ namespace api {
 		Format pixel_format,
 		const void* pixels);
 	void copy_texture(
-		TextureHandle dst_texture,
+		TextureId dst_texture,
 		unsigned int dst_level,
 		unsigned int dst_x,
 		unsigned int dst_y,
 		unsigned int dst_z,
-		TextureHandle src_texture,
+		TextureId src_texture,
 		unsigned int src_level,
 		unsigned int src_x,
 		unsigned int src_y,
@@ -102,34 +102,34 @@ namespace api {
 		unsigned int src_width,
 		unsigned int src_height,
 		unsigned int src_depth);
-	void bind_texture(unsigned int binding, TextureHandle texture);
+	void bind_texture(unsigned int binding, TextureId texture);
 
-	struct SamplerHandle { uintptr_t object = 0; };
+	struct SamplerId { uintptr_t object = 0; };
 
-	SamplerHandle create_sampler(const SamplerDesc& desc);
-	void destroy_sampler(SamplerHandle sampler);
-	void bind_sampler(unsigned int binding, SamplerHandle sampler);
+	SamplerId create_sampler(const SamplerDesc& desc);
+	void destroy_sampler(SamplerId sampler);
+	void bind_sampler(unsigned int binding, SamplerId sampler);
 
-	struct FramebufferHandle { uintptr_t object = 0; };
+	struct FramebufferId { uintptr_t object = 0; };
 
-	FramebufferHandle get_swap_chain_back_buffer(); // aka the "default framebuffer"
-	FramebufferHandle create_framebuffer(const FramebufferDesc& desc);
-	void destroy_framebuffer(FramebufferHandle framebuffer);
-	bool attach_framebuffer_color_texture(FramebufferHandle framebuffer, unsigned int attachment, TextureHandle texture);
-	void clear_framebuffer_color(FramebufferHandle framebuffer, unsigned int attachment, const float color[4]);
-	void bind_framebuffer(FramebufferHandle framebuffer);
+	FramebufferId get_swap_chain_back_buffer(); // aka the "default framebuffer"
+	FramebufferId create_framebuffer(const FramebufferDesc& desc);
+	void destroy_framebuffer(FramebufferId framebuffer);
+	bool attach_framebuffer_color_texture(FramebufferId framebuffer, unsigned int attachment, TextureId texture);
+	void clear_framebuffer_color(FramebufferId framebuffer, unsigned int attachment, const float color[4]);
+	void bind_framebuffer(FramebufferId framebuffer);
 
-	struct RasterizerStateHandle { uintptr_t object = 0; };
+	struct RasterizerStateId { uintptr_t object = 0; };
 
-	RasterizerStateHandle create_rasterizer_state(const RasterizerDesc& desc);
-	void destroy_rasterizer_state(RasterizerStateHandle state);
-	void bind_rasterizer_state(RasterizerStateHandle state);
+	RasterizerStateId create_rasterizer_state(const RasterizerDesc& desc);
+	void destroy_rasterizer_state(RasterizerStateId state);
+	void bind_rasterizer_state(RasterizerStateId state);
 
-	struct BlendStateHandle { uintptr_t object = 0; };
+	struct BlendStateId { uintptr_t object = 0; };
 
-	BlendStateHandle create_blend_state(const BlendDesc& desc);
-	void destroy_blend_state(BlendStateHandle state);
-	void bind_blend_state(BlendStateHandle state);
+	BlendStateId create_blend_state(const BlendDesc& desc);
+	void destroy_blend_state(BlendStateId state);
+	void bind_blend_state(BlendStateId state);
 
 	void set_viewports(const Viewport* viewports, unsigned int count);
 	void set_scissors(const Rect* scissors, unsigned int count);

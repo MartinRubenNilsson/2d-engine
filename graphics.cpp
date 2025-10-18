@@ -15,24 +15,24 @@ namespace graphics {
 	// IMPORTANT: These structs are internal! Don't move them to graphics.h!
 
 	struct VertexShader {
-		api::VertexShaderHandle api_handle{};
+		api::VertexShaderId api_handle{};
 	};
 
 	struct FragmentShader {
-		api::FragmentShaderHandle api_handle{};
+		api::FragmentShaderId api_handle{};
 	};
 
 	struct VertexInput {
-		api::VertexInputHandle api_handle{};
+		api::VertexInputId api_handle{};
 	};
 
 	struct Buffer {
-		api::BufferHandle api_handle{};
+		api::BufferId api_handle{};
 		BufferDesc desc{};
 	};
 
 	struct Texture {
-		api::TextureHandle api_handle{};
+		api::TextureId api_handle{};
 		// PITFALL: When loading a texture, desc.debug_name is set to the texture path.
 		// To ensure the string_view doesn't get invalidated, the owning string is
 		// moved into _path_to_texture. If this map gets cleared for whatever reason,
@@ -41,24 +41,24 @@ namespace graphics {
 	};
 
 	struct Sampler {
-		api::SamplerHandle api_handle{};
+		api::SamplerId api_handle{};
 		SamplerDesc desc{};
 	};
 
 	struct Framebuffer {
-		api::FramebufferHandle api_handle{};
+		api::FramebufferId api_handle{};
 		FramebufferDesc desc{};
 		Handle<Texture> texture;
 		bool is_swap_chain_back_buffer = false;
 	};
 
 	struct RasterizerState {
-		api::RasterizerStateHandle api_handle{};
+		api::RasterizerStateId api_handle{};
 		RasterizerDesc desc{};
 	};
 
 	struct BlendState {
-		api::BlendStateHandle api_handle{};
+		api::BlendStateId api_handle{};
 		BlendDesc desc{};
 	};
 	
@@ -117,7 +117,7 @@ namespace graphics {
 
 		// INITIALIZE GRAPHICS API
 
-		api::InitializeOptions options{};
+		api::StartupOptions options{};
 #ifdef GRAPHICS_API_OPENGL
 		options.glad_load_proc = window::get_glad_load_proc();
 #endif
@@ -129,7 +129,7 @@ namespace graphics {
 #ifdef GRAPHICS_API_D3D11
 		options.hwnd = window::get_win32_window();
 #endif
-		if (!api::initialize(options)) return false;
+		if (!api::startup(options)) return false;
 
 		// INITIALIZE SWAP CHAIN BACK BUFFER
 
@@ -145,7 +145,7 @@ namespace graphics {
 		for (VertexShader& shader : _vertex_shader_pool.span()) {
 			if (shader.api_handle.object) {
 				api::destroy_vertex_shader(shader.api_handle);
-				shader.api_handle = api::VertexShaderHandle();
+				shader.api_handle = api::VertexShaderId();
 			}
 		}
 		_vertex_shader_pool.clear();
@@ -156,7 +156,7 @@ namespace graphics {
 		for (FragmentShader& shader : _fragment_shader_pool.span()) {
 			if (shader.api_handle.object) {
 				api::destroy_fragment_shader(shader.api_handle);
-				shader.api_handle = api::FragmentShaderHandle();
+				shader.api_handle = api::FragmentShaderId();
 			}
 		}
 		_fragment_shader_pool.clear();
@@ -167,7 +167,7 @@ namespace graphics {
 		for (VertexInput& vertex_input : _vertex_input_pool.span()) {
 			if (vertex_input.api_handle.object) {
 				api::destroy_vertex_input(vertex_input.api_handle);
-				vertex_input.api_handle = api::VertexInputHandle();
+				vertex_input.api_handle = api::VertexInputId();
 			}
 		}
 		_vertex_input_pool.clear();
@@ -177,7 +177,7 @@ namespace graphics {
 		for (Buffer& buffer : _buffer_pool.span()) {
 			if (buffer.api_handle.object) {
 				api::destroy_buffer(buffer.api_handle);
-				buffer.api_handle = api::BufferHandle();
+				buffer.api_handle = api::BufferId();
 			}
 		}
 		_buffer_pool.clear();
@@ -187,7 +187,7 @@ namespace graphics {
 		for (Texture& texture : _texture_pool.span()) {
 			if (texture.api_handle.object) {
 				api::destroy_texture(texture.api_handle);
-				texture.api_handle = api::TextureHandle();
+				texture.api_handle = api::TextureId();
 			}
 		}
 		_texture_pool.clear();
@@ -203,7 +203,7 @@ namespace graphics {
 			if (framebuffer.is_swap_chain_back_buffer) continue;
 			if (framebuffer.api_handle.object) {
 				api::destroy_framebuffer(framebuffer.api_handle);
-				framebuffer.api_handle = api::FramebufferHandle();
+				framebuffer.api_handle = api::FramebufferId();
 			}
 		}
 		_framebuffer_pool.clear();
@@ -213,7 +213,7 @@ namespace graphics {
 		for (Sampler& sampler : _sampler_pool.span()) {
 			if (sampler.api_handle.object) {
 				api::destroy_sampler(sampler.api_handle);
-				sampler.api_handle = api::SamplerHandle();
+				sampler.api_handle = api::SamplerId();
 			}
 		}
 		_sampler_pool.clear();
@@ -223,7 +223,7 @@ namespace graphics {
 		for (RasterizerState& rasterizer_state : _rasterizer_state_pool.span()) {
 			if (rasterizer_state.api_handle.object) {
 				api::destroy_rasterizer_state(rasterizer_state.api_handle);
-				rasterizer_state.api_handle = api::RasterizerStateHandle();
+				rasterizer_state.api_handle = api::RasterizerStateId();
 			}
 		}
 		_rasterizer_state_pool.clear();
@@ -233,7 +233,7 @@ namespace graphics {
 		for (BlendState& blend_state : _blend_state_pool.span()) {
 			if (blend_state.api_handle.object) {
 				api::destroy_blend_state(blend_state.api_handle);
-				blend_state.api_handle = api::BlendStateHandle();
+				blend_state.api_handle = api::BlendStateId();
 			}
 		}
 		_blend_state_pool.clear();
@@ -265,7 +265,7 @@ namespace graphics {
 	}
 
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc) {
-		api::VertexShaderHandle api_handle = api::create_vertex_shader(desc);
+		api::VertexShaderId api_handle = api::create_vertex_shader(desc);
 		if (!api_handle.object) return Handle<VertexShader>();
 		return _vertex_shader_pool.emplace(api_handle);
 	}
@@ -316,14 +316,14 @@ namespace graphics {
 
 	void bind_vertex_shader(Handle<VertexShader> handle) {
 		if (handle == Handle<VertexShader>()) {
-			api::bind_vertex_shader(api::VertexShaderHandle());
+			api::bind_vertex_shader(api::VertexShaderId());
 		} else if (const VertexShader* shader = _vertex_shader_pool.get(handle)) {
 			api::bind_vertex_shader(shader->api_handle);
 		}
 	}
 
 	Handle<FragmentShader> create_fragment_shader(ShaderDesc&& desc) {
-		api::FragmentShaderHandle api_handle = api::create_fragment_shader(desc);
+		api::FragmentShaderId api_handle = api::create_fragment_shader(desc);
 		if (!api_handle.object) return Handle<FragmentShader>();
 		return _fragment_shader_pool.emplace(api_handle);
 	}
@@ -353,28 +353,28 @@ namespace graphics {
 
 	void bind_fragment_shader(Handle<FragmentShader> handle) {
 		if (handle == Handle<FragmentShader>()) {
-			api::bind_fragment_shader(api::FragmentShaderHandle());
+			api::bind_fragment_shader(api::FragmentShaderId());
 		} else if (const FragmentShader* shader = _fragment_shader_pool.get(handle)) {
 			api::bind_fragment_shader(shader->api_handle);
 		}
 	}
 
 	Handle<VertexInput> create_vertex_input(VertexInputDesc&& desc) {
-		api::VertexInputHandle api_handle = api::create_vertex_input(desc);
+		api::VertexInputId api_handle = api::create_vertex_input(desc);
 		if (!api_handle.object) return Handle<VertexInput>();
 		return _vertex_input_pool.emplace(api_handle);
 	}
 
 	void bind_vertex_input(Handle<VertexInput> handle) {
 		if (handle == Handle<VertexInput>()) {
-			api::bind_vertex_input(api::VertexInputHandle());
+			api::bind_vertex_input(api::VertexInputId());
 		} else if (const VertexInput* vertex_input = _vertex_input_pool.get(handle)) {
 			api::bind_vertex_input(vertex_input->api_handle);
 		}
 	}
 
 	Handle<Buffer> create_buffer(BufferDesc&& desc) {
-		api::BufferHandle api_handle = api::create_buffer(desc);
+		api::BufferId api_handle = api::create_buffer(desc);
 		if (!api_handle.object) return Handle<Buffer>();
 		desc.initial_data = nullptr;
 		return _buffer_pool.emplace(api_handle, std::move(desc));
@@ -432,7 +432,7 @@ namespace graphics {
 
 	void bind_vertex_buffer(unsigned int binding, Handle<Buffer> handle, unsigned int stride, unsigned int offset) {
 		if (handle == Handle<Buffer>()) {
-			api::bind_vertex_buffer(binding, api::BufferHandle(), 0, 0);
+			api::bind_vertex_buffer(binding, api::BufferId(), 0, 0);
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
 			api::bind_vertex_buffer(binding, buffer->api_handle, stride, offset);
 		}
@@ -440,7 +440,7 @@ namespace graphics {
 
 	void bind_index_buffer(Handle<Buffer> handle) {
 		if (handle == Handle<Buffer>()) {
-			api::bind_index_buffer(api::BufferHandle());
+			api::bind_index_buffer(api::BufferId());
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
 			api::bind_index_buffer(buffer->api_handle);
 		}
@@ -448,7 +448,7 @@ namespace graphics {
 
 	void bind_uniform_buffer(unsigned int binding, Handle<Buffer> handle) {
 		if (handle == Handle<Buffer>()) {
-			api::bind_uniform_buffer(binding, api::BufferHandle());
+			api::bind_uniform_buffer(binding, api::BufferId());
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
 			api::bind_uniform_buffer(binding, buffer->api_handle);
 		}
@@ -476,7 +476,7 @@ namespace graphics {
 	}
 
 	Handle<Texture> create_texture(TextureDesc&& desc) {
-		api::TextureHandle api_handle = api::create_texture(desc);
+		api::TextureId api_handle = api::create_texture(desc);
 		if (!api_handle.object) return Handle<Texture>();
 		desc.initial_data = nullptr;
 		_total_texture_memory_usage_in_bytes += _get_texture_byte_size(desc);
@@ -580,7 +580,7 @@ namespace graphics {
 
 	void bind_texture(unsigned int binding, Handle<Texture> handle) {
 		if (handle == Handle<Texture>()) {
-			api::bind_texture(binding, api::TextureHandle());
+			api::bind_texture(binding, api::TextureId());
 		} else if (const Texture* texture = _texture_pool.get(handle)) {
 			api::bind_texture(binding, texture->api_handle);
 		}
@@ -615,7 +615,7 @@ namespace graphics {
 	}
 
 	Handle<Framebuffer> create_framebuffer(FramebufferDesc&& desc) {
-		api::FramebufferHandle api_handle = api::create_framebuffer(desc);
+		api::FramebufferId api_handle = api::create_framebuffer(desc);
 		if (!api_handle.object) return Handle<Framebuffer>();
 		return _framebuffer_pool.emplace(api_handle, std::move(desc));
 	}
@@ -672,7 +672,7 @@ namespace graphics {
 
 	void bind_framebuffer(Handle<Framebuffer> handle) {
 		if (handle == Handle<Framebuffer>()) {
-			api::bind_framebuffer(api::FramebufferHandle());
+			api::bind_framebuffer(api::FramebufferId());
 		} else if (const Framebuffer* framebuffer = _framebuffer_pool.get(handle)) {
 			api::bind_framebuffer(framebuffer->api_handle);
 		}
@@ -719,7 +719,7 @@ namespace graphics {
 	}
 
 	Handle<Sampler> create_sampler(SamplerDesc&& desc) {
-		api::SamplerHandle api_handle = api::create_sampler(desc);
+		api::SamplerId api_handle = api::create_sampler(desc);
 		if (!api_handle.object) return Handle<Sampler>();
 		return _sampler_pool.emplace(api_handle, std::move(desc));
 	}
@@ -734,14 +734,14 @@ namespace graphics {
 
 	void bind_sampler(unsigned int binding, Handle<Sampler> handle) {
 		if (handle == Handle<Sampler>()) {
-			api::bind_sampler(binding, api::SamplerHandle());
+			api::bind_sampler(binding, api::SamplerId());
 		} else if (const Sampler* sampler = _sampler_pool.get(handle)) {
 			api::bind_sampler(binding, sampler->api_handle);
 		}
 	}
 
 	Handle<RasterizerState> create_rasterizer_state(RasterizerDesc&& desc) {
-		api::RasterizerStateHandle api_handle = api::create_rasterizer_state(desc);
+		api::RasterizerStateId api_handle = api::create_rasterizer_state(desc);
 		if (!api_handle.object) return Handle<RasterizerState>();
 		return _rasterizer_state_pool.emplace(api_handle, std::move(desc));
 	}
@@ -756,14 +756,14 @@ namespace graphics {
 
 	void bind_rasterizer_state(Handle<RasterizerState> handle) {
 		if (handle == Handle<RasterizerState>()) {
-			api::bind_rasterizer_state(api::RasterizerStateHandle());
+			api::bind_rasterizer_state(api::RasterizerStateId());
 		} else if (const RasterizerState* state = _rasterizer_state_pool.get(handle)) {
 			api::bind_rasterizer_state(state->api_handle);
 		}
 	}
 
 	Handle<BlendState> create_blend_state(BlendDesc&& desc) {
-		api::BlendStateHandle api_handle = api::create_blend_state(desc);
+		api::BlendStateId api_handle = api::create_blend_state(desc);
 		if (!api_handle.object) return Handle<BlendState>();
 		return _blend_state_pool.emplace(api_handle, std::move(desc));
 	}
@@ -778,7 +778,7 @@ namespace graphics {
 
 	void bind_blend_state(Handle<BlendState> handle) {
 		if (handle == Handle<BlendState>()) {
-			api::bind_blend_state(api::BlendStateHandle());
+			api::bind_blend_state(api::BlendStateId());
 		} else if (const BlendState* state = _blend_state_pool.get(handle)) {
 			api::bind_blend_state(state->api_handle);
 		}

@@ -113,7 +113,7 @@ namespace api {
 #endif
 	}
 
-	bool initialize(const InitializeOptions& options) {
+	bool startup(const StartupOptions& options) {
 
 		// INITIALIZE GLAD
 
@@ -243,27 +243,27 @@ namespace api {
 		return program_object;
 	}
 
-	VertexShaderHandle create_vertex_shader(const ShaderDesc& desc) {
-		return VertexShaderHandle{ _create_shader_program(desc, GL_VERTEX_SHADER) };
+	VertexShaderId create_vertex_shader(const ShaderDesc& desc) {
+		return VertexShaderId{ _create_shader_program(desc, GL_VERTEX_SHADER) };
 	}
 
-	void destroy_vertex_shader(VertexShaderHandle shader) {
+	void destroy_vertex_shader(VertexShaderId shader) {
 		glDeleteProgram((GLuint)shader.object);
 	}
 
-	void bind_vertex_shader(VertexShaderHandle shader) {
+	void bind_vertex_shader(VertexShaderId shader) {
 		glUseProgramStages(_program_pipeline_object, GL_VERTEX_SHADER_BIT, (GLuint)shader.object);
 	}
 
-	FragmentShaderHandle create_fragment_shader(const ShaderDesc& desc) {
-		return FragmentShaderHandle{ _create_shader_program(desc, GL_FRAGMENT_SHADER) };
+	FragmentShaderId create_fragment_shader(const ShaderDesc& desc) {
+		return FragmentShaderId{ _create_shader_program(desc, GL_FRAGMENT_SHADER) };
 	}
 
-	void destroy_fragment_shader(FragmentShaderHandle shader) {
+	void destroy_fragment_shader(FragmentShaderId shader) {
 		glDeleteProgram((GLuint)shader.object);
 	}
 
-	void bind_fragment_shader(FragmentShaderHandle shader) {
+	void bind_fragment_shader(FragmentShaderId shader) {
 		glUseProgramStages(_program_pipeline_object, GL_FRAGMENT_SHADER_BIT, (GLuint)shader.object);
 	}
 
@@ -296,7 +296,7 @@ namespace api {
 		}
 	}
 
-	VertexInputHandle create_vertex_input(const VertexInputDesc& desc) {
+	VertexInputId create_vertex_input(const VertexInputDesc& desc) {
 		GLuint vertex_array_object = 0;
 		glCreateVertexArrays(1, &vertex_array_object);
 		_gl_object_label(GL_VERTEX_ARRAY, vertex_array_object, desc.debug_name);
@@ -311,18 +311,18 @@ namespace api {
 				attrib.offset);
 			glVertexArrayAttribBinding(vertex_array_object, i, attrib.binding);
 		}
-		return VertexInputHandle{ vertex_array_object };
+		return VertexInputId{ vertex_array_object };
 	}
 
-	void destroy_vertex_input(VertexInputHandle sprite_vertex_input) {
+	void destroy_vertex_input(VertexInputId sprite_vertex_input) {
 		glDeleteVertexArrays(1, (GLuint*)&sprite_vertex_input.object);
 	}
 
-	void bind_vertex_input(VertexInputHandle sprite_vertex_input) {
+	void bind_vertex_input(VertexInputId sprite_vertex_input) {
 		glBindVertexArray((GLuint)sprite_vertex_input.object);
 	}
 
-	BufferHandle create_buffer(const BufferDesc& desc) {
+	BufferId create_buffer(const BufferDesc& desc) {
 		GLuint buffer_object = 0;
 		glCreateBuffers(1, &buffer_object);
 		_gl_object_label(GL_BUFFER, buffer_object, desc.debug_name);
@@ -331,26 +331,26 @@ namespace api {
 			flags |= GL_DYNAMIC_STORAGE_BIT;
 		}
 		glNamedBufferStorage(buffer_object, desc.size, desc.initial_data, flags);
-		return BufferHandle{ buffer_object };
+		return BufferId{ buffer_object };
 	}
 
-	void destroy_buffer(BufferHandle buffer) {
+	void destroy_buffer(BufferId buffer) {
 		glDeleteBuffers(1, (GLuint*)&buffer);
 	}
 
-	void update_buffer(BufferHandle buffer, const void* data, unsigned int size, unsigned int offset) {
+	void update_buffer(BufferId buffer, const void* data, unsigned int size, unsigned int offset) {
 		glNamedBufferSubData((GLuint)buffer.object, offset, size, data);
 	}
 
-	void bind_uniform_buffer(unsigned int binding, BufferHandle buffer) {
+	void bind_uniform_buffer(unsigned int binding, BufferId buffer) {
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, (GLuint)buffer.object);
 	}
 
-	void bind_uniform_buffer_range(unsigned int binding, BufferHandle buffer, unsigned int size, unsigned int offset) {
+	void bind_uniform_buffer_range(unsigned int binding, BufferId buffer, unsigned int size, unsigned int offset) {
 		glBindBufferRange(GL_UNIFORM_BUFFER, binding, (GLuint)buffer.object, offset, size);
 	}
 
-	void bind_vertex_buffer(unsigned int binding, BufferHandle buffer, unsigned int stride, unsigned int offset) {
+	void bind_vertex_buffer(unsigned int binding, BufferId buffer, unsigned int stride, unsigned int offset) {
 		GLint vertex_array_object = 0;
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vertex_array_object);
 		if (vertex_array_object == 0) {
@@ -360,7 +360,7 @@ namespace api {
 		glVertexArrayVertexBuffer(vertex_array_object, binding, (GLuint)buffer.object, offset, stride);
 	}
 
-	void bind_index_buffer(BufferHandle buffer, unsigned int /*offset*/) {
+	void bind_index_buffer(BufferId buffer, unsigned int /*offset*/) {
 		GLint vertex_array_object = 0;
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vertex_array_object);
 		if (vertex_array_object == 0) {
@@ -390,7 +390,7 @@ namespace api {
 		}
 	}
 
-	TextureHandle create_texture(const TextureDesc& desc) {
+	TextureId create_texture(const TextureDesc& desc) {
 		GLuint texture_object = 0;
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture_object);
 		_gl_object_label(GL_TEXTURE, texture_object, desc.debug_name);
@@ -408,15 +408,15 @@ namespace api {
 				desc.initial_data
 			);
 		}
-		return TextureHandle{ texture_object };
+		return TextureId{ texture_object };
 	}
 
-	void destroy_texture(TextureHandle texture) {
+	void destroy_texture(TextureId texture) {
 		glDeleteTextures(1, (GLuint*)&texture.object);
 	}
 
 	void update_texture(
-		TextureHandle texture,
+		TextureId texture,
 		unsigned int level,
 		unsigned int x,
 		unsigned int y,
@@ -439,12 +439,12 @@ namespace api {
 	}
 
 	void copy_texture(
-		TextureHandle dst_texture,
+		TextureId dst_texture,
 		unsigned int dst_level,
 		unsigned int dst_x,
 		unsigned int dst_y,
 		unsigned int dst_z,
-		TextureHandle src_texture,
+		TextureId src_texture,
 		unsigned int src_level,
 		unsigned int src_x,
 		unsigned int src_y,
@@ -472,7 +472,7 @@ namespace api {
 		);
 	}
 
-	void bind_texture(unsigned int binding, TextureHandle texture) {
+	void bind_texture(unsigned int binding, TextureId texture) {
 		glBindTextureUnit(binding, (GLuint)texture.object);
 	}
 
@@ -495,7 +495,7 @@ namespace api {
 		}
 	}
 
-	SamplerHandle create_sampler(const SamplerDesc& desc) {
+	SamplerId create_sampler(const SamplerDesc& desc) {
 		GLuint sampler_object = 0;
 		glCreateSamplers(1, &sampler_object);
 		_gl_object_label(GL_SAMPLER, sampler_object, desc.debug_name);
@@ -506,52 +506,52 @@ namespace api {
 		glSamplerParameteri(sampler_object, GL_TEXTURE_WRAP_S, gl_wrap);
 		glSamplerParameteri(sampler_object, GL_TEXTURE_WRAP_T, gl_wrap);
 		glSamplerParameterfv(sampler_object, GL_TEXTURE_BORDER_COLOR, desc.border_color);
-		return SamplerHandle{ sampler_object };
+		return SamplerId{ sampler_object };
 	}
 
-	void destroy_sampler(SamplerHandle sampler) {
+	void destroy_sampler(SamplerId sampler) {
 		glDeleteSamplers(1, (GLuint*)&sampler.object);
 	}
 
-	void bind_sampler(unsigned int binding, SamplerHandle sampler) {
+	void bind_sampler(unsigned int binding, SamplerId sampler) {
 		glBindSampler(binding, (GLuint)sampler.object);
 	}
 
-	FramebufferHandle get_swap_chain_back_buffer() {
-		return FramebufferHandle{ 0 };
+	FramebufferId get_swap_chain_back_buffer() {
+		return FramebufferId{ 0 };
 	}
 
-	FramebufferHandle create_framebuffer(const FramebufferDesc& desc) {
+	FramebufferId create_framebuffer(const FramebufferDesc& desc) {
 		GLuint framebuffer_object = 0;
 		glCreateFramebuffers(1, &framebuffer_object);
 		_gl_object_label(GL_FRAMEBUFFER, framebuffer_object, desc.debug_name);
-		return FramebufferHandle{ framebuffer_object };
+		return FramebufferId{ framebuffer_object };
 	}
 
-	void destroy_framebuffer(FramebufferHandle framebuffer_color) {
+	void destroy_framebuffer(FramebufferId framebuffer_color) {
 		glDeleteFramebuffers(1, (GLuint*)&framebuffer_color.object);
 	}
 
-	bool attach_framebuffer_color_texture(FramebufferHandle framebuffer_color, unsigned int attachment, TextureHandle texture) {
+	bool attach_framebuffer_color_texture(FramebufferId framebuffer_color, unsigned int attachment, TextureId texture) {
 		glNamedFramebufferTexture((GLuint)framebuffer_color.object, GL_COLOR_ATTACHMENT0 + attachment, (GLuint)texture.object, 0);
 		return glCheckNamedFramebufferStatus((GLuint)framebuffer_color.object, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 	}
 
-	void clear_framebuffer_color(FramebufferHandle framebuffer_color, unsigned int attachment, const float color[4]) {
+	void clear_framebuffer_color(FramebufferId framebuffer_color, unsigned int attachment, const float color[4]) {
 		glClearNamedFramebufferfv((GLuint)framebuffer_color.object, GL_COLOR, attachment, color);
 	}
 
-	void bind_framebuffer(FramebufferHandle framebuffer_color) {
+	void bind_framebuffer(FramebufferId framebuffer_color) {
 		glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)framebuffer_color.object);
 	}
 
-	RasterizerStateHandle create_rasterizer_state(const RasterizerDesc& desc) {
+	RasterizerStateId create_rasterizer_state(const RasterizerDesc& desc) {
 		RasterizerDesc* impl = new RasterizerDesc(desc);
 		impl->debug_name = {};
-		return RasterizerStateHandle{ .object = (uintptr_t)impl };
+		return RasterizerStateId{ .object = (uintptr_t)impl };
 	}
 
-	void destroy_rasterizer_state(RasterizerStateHandle state) {
+	void destroy_rasterizer_state(RasterizerStateId state) {
 		if (!state.object) return;
 		RasterizerDesc* impl = (RasterizerDesc*)state.object;
 		delete impl;
@@ -565,7 +565,7 @@ namespace api {
 		}
 	}
 
-	void bind_rasterizer_state(RasterizerStateHandle state) {
+	void bind_rasterizer_state(RasterizerStateId state) {
 		if (!state.object) return; // TODO: default state
 		RasterizerDesc* impl = (RasterizerDesc*)state.object;
 		glPolygonMode(GL_FRONT_AND_BACK, _polygon_mode_to_gl_polygon_mode(impl->polygon_mode));
@@ -605,19 +605,19 @@ namespace api {
 		}
 	}
 
-	BlendStateHandle create_blend_state(const BlendDesc& desc) {
+	BlendStateId create_blend_state(const BlendDesc& desc) {
 		BlendDesc* impl = new BlendDesc(desc);
 		impl->debug_name = {};
-		return BlendStateHandle{ .object = (uintptr_t)impl };
+		return BlendStateId{ .object = (uintptr_t)impl };
 	}
 
-	void destroy_blend_state(BlendStateHandle state) {
+	void destroy_blend_state(BlendStateId state) {
 		if (!state.object) return;
 		BlendDesc* impl = (BlendDesc*)state.object;
 		delete impl;
 	}
 
-	void bind_blend_state(BlendStateHandle state) {
+	void bind_blend_state(BlendStateId state) {
 		if (!state.object) return; // TODO: default state
 		BlendDesc* impl = (BlendDesc*)state.object;
 		for (GLuint i = 0; i < impl->attachments.size(); ++i) {
