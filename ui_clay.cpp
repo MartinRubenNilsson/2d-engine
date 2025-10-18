@@ -25,6 +25,7 @@ namespace ui {
 		text::Text text{};
 		text.font = { .id = config->fontId };
 		text.font_size = config->fontSize;
+		// TODO: copying the string like this is baaaaad!!!
 		text.string = { string.chars, (size_t)string.length };
 		const Rect2f rect = text::get_bounding_box(text);
 		const Vec2f size = rect.max - rect.min;
@@ -48,10 +49,14 @@ namespace ui {
 		_clay_arena_memory = {};
 	}
 
-	Handle<graphics::VertexShader> _image_vert{};
-	Handle<graphics::FragmentShader> _image_frag{};
+	Handle<graphics::VertexShader> _rectangle_vert;
+	Handle<graphics::FragmentShader> _rectangle_frag;
+	Handle<graphics::VertexShader> _image_vert;
+	Handle<graphics::FragmentShader> _image_frag;
 
 	void _load_shaders() {
+		_rectangle_vert = graphics::load_vertex_shader("assets/shaders/ui_rectangle.vert");
+		_rectangle_frag = graphics::load_fragment_shader("assets/shaders/ui_rectangle.frag");
 		_image_vert = graphics::load_vertex_shader("assets/shaders/ui_image.vert");
 		_image_frag = graphics::load_fragment_shader("assets/shaders/ui_image.frag");
 	}
@@ -59,7 +64,7 @@ namespace ui {
 	void startup() {
 		_startup_clay();
 		_load_shaders();
-		hud::startup(); // TODO: move somewhere else
+		hud::startup(); // TODO: move somewh
 	}
 
 	void shutdown() {
@@ -142,8 +147,8 @@ namespace ui {
 				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
 					const Clay_RectangleRenderData& data = command.renderData.rectangle;
 					sprites::Sprite sprite{};
-					sprite.vertex_shader = graphics::ui_rectangle_vert;
-					sprite.fragment_shader = graphics::ui_rectangle_frag;
+					sprite.vertex_shader = _rectangle_vert;
+					sprite.fragment_shader = _rectangle_frag;
 					sprite.position.x = command.boundingBox.x * pixels_per_world_unit;
 					sprite.position.y = command.boundingBox.y * pixels_per_world_unit;
 					sprite.size.x = command.boundingBox.width * pixels_per_world_unit;
@@ -163,6 +168,7 @@ namespace ui {
 					text.position.y = command.boundingBox.y;
 					text.font.id = data.fontId;
 					text.font_size = (float)data.fontSize;
+					// TODO: don't copy the string
 					text.string = { data.stringContents.chars, (size_t)data.stringContents.length };
 					text.color = data.textColor;
 					if (text.color == Color(0, 0, 0, 0)) // PITFALL: this is the default color

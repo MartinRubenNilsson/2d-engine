@@ -61,6 +61,10 @@ namespace text {
 		return id < _fonts.size();
 	}
 
+	void startup_fonts() {
+		// TODO: load default font
+	}
+
 	void shutdown_fonts() {
 		for (Font& font : _fonts) {
 			stbtt_PackEnd(&font.pack_context);

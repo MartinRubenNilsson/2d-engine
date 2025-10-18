@@ -4,6 +4,7 @@
 namespace text {
 	struct Font;
 
+	void startup_fonts();
 	void shutdown_fonts();
 
 	FontId load_font(std::string_view path);

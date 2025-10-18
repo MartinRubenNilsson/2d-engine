@@ -40,8 +40,6 @@ namespace graphics {
 	extern Handle<FragmentShader> text_frag;
 	extern Handle<VertexShader> ui_vert;
 	extern Handle<FragmentShader> ui_frag;
-	extern Handle<VertexShader> ui_rectangle_vert;
-	extern Handle<FragmentShader> ui_rectangle_frag;
 	extern Handle<FragmentShader> player_outfit_frag;
 
 	// VERTEX INPUTS

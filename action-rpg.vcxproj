@@ -91,12 +91,14 @@
       <AdditionalDependencies>GraphicsAPI_Debug.lib;TiledLoader_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>set SRC=$(ProjectDir)shaders\glsl
+set DST=$(ProjectDir)output\assets\shaders
+del "%DST%\*.*" /Q
+xcopy "%SRC%\*.frag" "%DST%\" /Y /I /Q
+xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>Copying shaders to assets...</Message>
     </PostBuildEvent>
     <CustomBuildStep>
       <Outputs>
@@ -132,12 +134,14 @@
       <AdditionalDependencies>GraphicsAPI_Release.lib;TiledLoader_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>set SRC=$(ProjectDir)shaders\glsl
+set DST=$(ProjectDir)output\assets\shaders
+del "%DST%\*.*" /Q
+xcopy "%SRC%\*.frag" "%DST%\" /Y /I /Q
+xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>Copying shaders to assets...</Message>
     </PostBuildEvent>
     <CustomBuildStep>
       <Outputs>
@@ -257,6 +261,27 @@
   <ItemGroup>
     <None Include="output\assets\scripts\camtest.script" />
     <None Include="output\assets\scripts\martin_debug.script" />
+    <None Include="shaders\glsl\darkness.frag" />
+    <None Include="shaders\glsl\fullscreen.frag" />
+    <None Include="shaders\glsl\fullscreen.vert" />
+    <None Include="shaders\glsl\fullscreen_flip.vert" />
+    <None Include="shaders\glsl\gaussian_blur_hor.frag" />
+    <None Include="shaders\glsl\gaussian_blur_ver.frag" />
+    <None Include="shaders\glsl\grass.vert" />
+    <None Include="shaders\glsl\player_outfit.frag" />
+    <None Include="shaders\glsl\screen_transition.frag" />
+    <None Include="shaders\glsl\shape.frag" />
+    <None Include="shaders\glsl\shape.vert" />
+    <None Include="shaders\glsl\shockwave.frag" />
+    <None Include="shaders\glsl\sprite.frag" />
+    <None Include="shaders\glsl\sprite.vert" />
+    <None Include="shaders\glsl\text.frag" />
+    <None Include="shaders\glsl\ui.frag" />
+    <None Include="shaders\glsl\ui.vert" />
+    <None Include="shaders\glsl\ui_image.frag" />
+    <None Include="shaders\glsl\ui_image.vert" />
+    <None Include="shaders\glsl\ui_rectangle.frag" />
+    <None Include="shaders\glsl\ui_rectangle.vert" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>

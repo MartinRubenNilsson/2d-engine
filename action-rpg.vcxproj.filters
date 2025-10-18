@@ -321,6 +321,69 @@
     <None Include="output\assets\scripts\martin_debug.script">
       <Filter>engine\console\scripts</Filter>
     </None>
+    <None Include="shaders\glsl\darkness.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\fullscreen.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\fullscreen.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\fullscreen_flip.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\gaussian_blur_hor.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\gaussian_blur_ver.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\grass.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\player_outfit.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\screen_transition.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\shape.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\shape.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\shockwave.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\sprite.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\sprite.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\text.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui_image.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui_image.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui_rectangle.frag">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
+    <None Include="shaders\glsl\ui_rectangle.vert">
+      <Filter>engine\graphics\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui.h">
