@@ -309,6 +309,9 @@
     <ClCompile Include="platform_windows.cpp">
       <Filter>engine\platform\implementations</Filter>
     </ClCompile>
+    <ClCompile Include="engine_fps_counter.cpp">
+      <Filter>engine\fps_counter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -617,6 +620,9 @@
     <ClInclude Include="platform_directory_changes.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="engine_fps_counter.h">
+      <Filter>engine\fps_counter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -783,6 +789,9 @@
     </Filter>
     <Filter Include="engine\platform\implementations">
       <UniqueIdentifier>{33198917-b645-4219-87a3-b6ba634d07c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\fps_counter">
+      <UniqueIdentifier>{6cca2ef6-c7f9-4d9c-8c30-4a61303d8732}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

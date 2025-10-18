@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "engine_fps_counter.h"
 #include "steam.h"
 #include "files.h"
 #include "networking.h"
@@ -32,16 +33,12 @@ namespace engine {
     double _game_time = 0.f;
     double _game_delta_time = 0.f;
 
-    bool debug_stats = false;
-
     void _load_all_audio_banks() {
         for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
             if (file.format != files::FileFormat::FmodStudioBank) continue;
             audio::load_bank_from_file(file.path);
         }
     }
-
-    Handle<platform::DirectoryWatcher> _watcher{};
 
     void startup(int argc, char* argv[]) {
         setlocale(LC_ALL, "en_US.utf8");
@@ -85,8 +82,6 @@ namespace engine {
 
         _should_run = true;
         _time = window::get_elapsed_time();
-        
-        _watcher = platform::watch_directory(L"assets", true); // TEST
     }
 
     void shutdown() {
@@ -116,13 +111,8 @@ namespace engine {
     void _update() {
         _update_times();
 
+        engine::update_fps_counter(_delta_time);
         platform::update_directory_watchers();
-
-        for (const platform::DirectoryChange& change : platform::get_directory_changes(_watcher)) {
-            std::string string{ change.file_path.begin(), change.file_path.end() };
-            console::log(string);
-        }
-
         steam::run_message_loop();
         window::update_events();
         imgui_impl::new_frame();
@@ -142,9 +132,7 @@ namespace engine {
                         graphics::resize_final_framebuffer(ev.size.width, ev.size.height);
                     }
                 } else if (ev.type == window::EventType::KeyPress) {
-                    if (ev.key.code == window::Key::F1) {
-                        debug_stats = !debug_stats;
-                    } else if (ev.key.code == window::Key::F6) {
+                    if (ev.key.code == window::Key::F6) {
                         ui::debug = !ui::debug;
                     } else if (ev.key.code == window::Key::F7) {
                         map::debug = !map::debug;
@@ -183,9 +171,10 @@ namespace engine {
 
         audio::update();
         console::update(_delta_time);
-        background::update(_delta_time); // TODO: this doesn't belong in engine.cpp
         ui::update_rmlui(_delta_time);
-        map::update(_delta_time);
+
+        background::update(_delta_time); // TODO: this doesn't belong in engine.cpp
+        map::update(_delta_time); // TODO: this doesn't belong in engine.cpp
 
         double game_delta_time = _delta_time;
         if (steam::is_overlay_active()) {
@@ -202,28 +191,6 @@ namespace engine {
 
         ecs::update(game_delta_time);
         postprocessing::update(game_delta_time);
-    }
-
-    void _show_debug_stats_imgui() {
-        static float smoothed_dt = 0.f;
-        static float smoothed_fps = 0.f;
-        static float dt_buffer[256] = { 0.f };
-        static float fps_buffer[256] = { 0.f };
-        static int buffer_offset = 0;
-        dt_buffer[buffer_offset] = _delta_time;
-        fps_buffer[buffer_offset] = 1.f / _delta_time;
-        buffer_offset = (buffer_offset + 1) % 256;
-        constexpr float SMOOTHING_FACTOR = 0.99f;
-        smoothed_dt = SMOOTHING_FACTOR * smoothed_dt + (1.f - SMOOTHING_FACTOR) * _delta_time;
-        smoothed_fps = SMOOTHING_FACTOR * smoothed_fps + (1.f - SMOOTHING_FACTOR) / _delta_time;
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::Begin("Stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
-        char overlay_text[64];
-        sprintf(overlay_text, "%.f us", smoothed_dt * 1'000'000.f);
-        ImGui::PlotLines("##dt", dt_buffer, 256, buffer_offset, overlay_text, 0.f, 0.01f, ImVec2(0, 80));
-        sprintf(overlay_text, "%.f FPS", smoothed_fps);
-        ImGui::PlotLines("##fps", fps_buffer, 256, buffer_offset, overlay_text, 0.f, 600.f, ImVec2(0, 80));
-        ImGui::End();
     }
 
     void _render_copy_final_framebuffer_to_back_buffer() {
@@ -346,8 +313,8 @@ namespace engine {
 
         _render_copy_final_framebuffer_to_back_buffer();
 
-        if (debug_stats) {
-            _show_debug_stats_imgui();
+        if (should_show_fps_counter) {
+            show_fps_counter_imgui();
         }
 
         // PITFALL: ImGui uses its own shaders and such, so we need to render it

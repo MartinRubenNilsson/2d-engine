@@ -1,3 +1,4 @@
+bind f1 toggle_fps_counter
 bind f2 toggle_debug_physics
 bind f3 toggle_debug_states
 bind f4 toggle_debug_tasks

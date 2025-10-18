@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "console_commands.h"
 #include "console.h"
+#include "engine_fps_counter.h"
 //#include "window.h"
 #include "audio.h"
 #include "map.h"
@@ -112,6 +113,14 @@ namespace console {
 			.callback = _execute_toggle_command
 			});
 #endif
+
+		// ENGINE
+
+		register_command({
+			.name = "toggle_fps_counter",
+			.desc = "Toggles whether the FPS counter is visible or hidden.",
+			.callback = [](Args) { engine::should_show_fps_counter = !engine::should_show_fps_counter; }
+			});
 
 		// SHADERS
 
