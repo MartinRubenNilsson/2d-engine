@@ -226,7 +226,11 @@ namespace ui {
 						Rect2f& box = text_shape.glyph_bounding_boxes[g];
 						box.min += translation;
 						box.max += translation;
-						const Rect2f& rect = text_shape.glyph_texture_rects[g];
+						Rect2f& rect = text_shape.glyph_texture_rects[g];
+						// HACK: We use negative texture coordinates to indicate that the texture is grayscale
+						// (only has one channel), as for example is the case for font atlas textures.
+						rect.min = -rect.min;
+						rect.max = -rect.max;
 						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
 						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
 						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
