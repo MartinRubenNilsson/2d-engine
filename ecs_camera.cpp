@@ -81,6 +81,8 @@ namespace ecs {
 			Vec2f shaky_center = camera.center + camera.shake_offset;
 			shaky_center = _confine_camera_center(shaky_center, camera.size, camera.confines_min, camera.confines_max);
 			camera.shake_offset = shaky_center - camera.center;
+
+			camera.center = round(camera.center); // Snap to pixels
 		}
 
 		// Update the active camera view.

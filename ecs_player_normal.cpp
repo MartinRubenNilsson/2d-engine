@@ -90,13 +90,8 @@ namespace ecs {
 			} break;
 		}
 
-		// Update tile flip flags.
-		if (dir == Direction::E) {
-			tile.flipped_horizontally = false; // Never flip if we're facing east (right).
-		} else if (dir == Direction::W) {
-			tile.flipped_horizontally = true;  // Always flip if we're facing west (left).
-		} else if (anim.looped()) {
-			// Flip tile when facing north/south (up/down) and animation loops to get proper walk cycles.
+		// Flip tile when facing north/south (up/down) and animation loops to get proper walk cycles.
+		if (anim.looped()) {
 			tile.flipped_horizontally = !tile.flipped_horizontally;
 		}
 
