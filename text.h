@@ -20,13 +20,15 @@ namespace text {
 	};
 
 	struct Text {
-		FontId font{};
-		float font_size = 8.f; // In world units (NOT screen coordinates!)
-		std::string string; // UTF-8 string (even through we're using a regular std::string and not std:u8string).
-		Vec2f position; // In world units (NOT screen coordinates!)
-		TextAnchor anchor = TextAnchor::Default;
+		std::string string; // UTF-8 string (even through we're using a regular std::string and not std::u8string).
+		Vec2f position{}; // In world units.
+		Vec2f shadow_offset{}; // In world units.
 		Color color = Color::WHITE;
-		bool linear_sampling = true; // otherwise uses nearest sampling
+		Color shadow_color = Color::BLACK;
+		float font_size = 8.f; // In world units.
+		FontId font{};
+		TextAnchor anchor = TextAnchor::Default;
+		bool linear_sampling = true; // Otherwise uses nearest sampling.
 	};
 
 	Rect2f get_bounding_box(const Text& text);
