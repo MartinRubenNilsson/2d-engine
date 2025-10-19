@@ -235,6 +235,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="steam_client.cpp" />
     <ClCompile Include="steam_server.cpp" />
     <ClCompile Include="text.cpp" />
+    <ClCompile Include="text_shaping.cpp" />
     <ClCompile Include="text_stb_truetype.cpp" />
     <ClCompile Include="text_unicode.cpp" />
     <ClCompile Include="timer.cpp" />
@@ -342,6 +343,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="renderdoc.h" />
     <ClInclude Include="text.h" />
     <ClInclude Include="text_ids.h" />
+    <ClInclude Include="text_shaping.h" />
     <ClInclude Include="text_stb_truetype.h" />
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />

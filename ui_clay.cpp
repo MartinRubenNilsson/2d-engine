@@ -7,6 +7,8 @@
 #include "graphics_debugging.h"
 
 #include "text.h"
+#include "text_fonts.h"
+#include "text_shaping.h"
 #include "ui_hud.h" // TODO: don't put this here
 
 #pragma warning(push)
@@ -17,19 +19,22 @@
 
 namespace ui {
 	void _handle_clay_error(Clay_ErrorData error_data) {
-		std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
+		const std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
 		console::log_error(text);
 	}
 
-	Clay_Dimensions _measure_text(Clay_StringSlice string, Clay_TextElementConfig* config, void* userData) {
-		text::Text text{};
-		text.font = { .id = config->fontId };
-		text.font_size = config->fontSize;
-		// TODO: copying the string like this is baaaaad!!!
-		text.string = { string.chars, (size_t)string.length };
-		const Rect2f rect = text::get_bounding_box(text);
-		const Vec2f size = rect.max - rect.min;
-		return { size.x, size.y };
+	Clay_Dimensions _measure_text(Clay_StringSlice text, Clay_TextElementConfig* config, void* userData) {
+		const std::string_view string{ text.chars, (size_t)text.length };
+		const text::FontId font_id{ .id = config->fontId };
+		if (!font_id)
+			return { 0.f, 0.f }; // Invalid font ID.
+		text::Font& font = text::get_font(font_id);
+		text::TextShape shape{};
+		text::shape_text(shape, string, font, config->fontSize, 0.f, false, false);
+		if (shape.glyph_count == 0)
+			return { 0.f, 0.f }; // No nonempty glyphs (i.e. nothing is visible).
+		const Vec2f box_size = shape.bounding_box.max - shape.bounding_box.min;
+		return { box_size.x, box_size.y };
 	}
 
 	std::vector<uint8_t> _clay_arena_memory;
@@ -173,7 +178,7 @@ namespace ui {
 					continue;
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
-#if 1
+#if 0
 					const Clay_TextRenderData& data = command.renderData.text;
 					text::Text text{};
 					text.position.x = command.boundingBox.x;

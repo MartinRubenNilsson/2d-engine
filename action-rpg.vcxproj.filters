@@ -312,6 +312,9 @@
     <ClCompile Include="engine_fps_counter.cpp">
       <Filter>engine\fps_counter</Filter>
     </ClCompile>
+    <ClCompile Include="text_shaping.cpp">
+      <Filter>engine\graphics\text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -682,6 +685,9 @@
     </ClInclude>
     <ClInclude Include="graphics_debugging.h">
       <Filter>engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="text_shaping.h">
+      <Filter>engine\graphics\text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
