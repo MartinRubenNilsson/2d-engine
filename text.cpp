@@ -59,8 +59,8 @@ namespace text {
     struct Batch {
         Handle<graphics::Texture> texture{};
         Handle<graphics::Sampler> sampler{};
-        unsigned int vertex_offset = 0;
-        unsigned int vertex_count = 0;
+        unsigned int vertices_begin = 0;
+        unsigned int vertices_end = 0; // one-past-the-end
     };
 
     std::vector<Batch> _batches;
@@ -98,7 +98,6 @@ namespace text {
                 const Vec2f translation = text.position - anchor_pos;
 
                 // Create vertices for the glyphs.
-                const unsigned int vertex_count_before = (unsigned int)graphics::temp_vertices.size();
                 for (size_t g = 0; g < shape.glyph_count; ++g) {
                     Rect2f& box = shape.glyph_bounding_boxes[g];
                     box.min += translation;
@@ -111,20 +110,25 @@ namespace text {
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), text.color, Vec2f(rect.max.x, rect.min.y));
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), text.color, Vec2f(rect.max.x, rect.max.y));
                 }
-                const unsigned int vertex_count_after = (unsigned int)graphics::temp_vertices.size();
-                const unsigned int vertex_count = vertex_count_after - vertex_count_before;
+                const unsigned int vertices_end = (unsigned int)graphics::temp_vertices.size(); // one-past-the-end
 
                 const Handle<graphics::Sampler> sampler = text.linear_sampling ?
                     graphics::linear_sampler : graphics::nearest_sampler;
-
+                
                 if (_batches.empty()) {
-                    _batches.emplace_back(texture, sampler, 0, vertex_count); // Create the first batch.
-                } else if (_batches.back().texture == texture || _batches.back().sampler == sampler) {
-                    _batches.back().vertex_count += vertex_count; // Continue the current batch.
-                } else {
-                    const unsigned int vertex_offset = _batches.back().vertex_offset + _batches.back().vertex_count;
-                    _batches.emplace_back(texture, sampler, vertex_offset, vertex_count); // Create the next batch.
+                    // Start the first batch.
+                    _batches.emplace_back(texture, sampler, 0, vertices_end);
+                    continue;
                 }
+                Batch& current_batch = _batches.back();
+                if (current_batch.texture == texture &&
+                    current_batch.sampler == sampler) {
+                    // Continue the current batch.
+                    current_batch.vertices_end = vertices_end;
+                    continue;
+                }
+                // Start the next batch.
+                _batches.emplace_back(texture, sampler, current_batch.vertices_end, vertices_end);
             }
         }
 
@@ -163,7 +167,9 @@ namespace text {
                     graphics::bind_sampler(0, batch.sampler);
                     prev_sampler = batch.sampler;
                 }
-                graphics::draw(batch.vertex_count, batch.vertex_offset);
+                const unsigned int vertex_count = batch.vertices_end - batch.vertices_begin;
+                const unsigned int vertex_offset = batch.vertices_begin;
+                graphics::draw(vertex_count, vertex_offset);
             }
         }
 
