@@ -227,9 +227,6 @@
     <ClCompile Include="ecs_grass.cpp">
       <Filter>game\ecs\game\environment\grass</Filter>
     </ClCompile>
-    <ClCompile Include="ecs_game.cpp">
-      <Filter>game\ecs\game</Filter>
-    </ClCompile>
     <ClCompile Include="text.cpp">
       <Filter>engine\graphics\text</Filter>
     </ClCompile>
@@ -278,9 +275,6 @@
     <ClCompile Include="ecs_player_alive.cpp">
       <Filter>game\ecs\game\players\states</Filter>
     </ClCompile>
-    <ClCompile Include="ui_hud.cpp">
-      <Filter>game\ui</Filter>
-    </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -317,6 +311,12 @@
     </ClCompile>
     <ClCompile Include="ui_game.cpp">
       <Filter>game\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_hud.cpp">
+      <Filter>game\ui\hud</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_shared.cpp">
+      <Filter>game\ui\shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -620,9 +620,6 @@
     <ClInclude Include="ecs_grass.h">
       <Filter>game\ecs\game\environment\grass</Filter>
     </ClInclude>
-    <ClInclude Include="ecs_game.h">
-      <Filter>game\ecs\game</Filter>
-    </ClInclude>
     <ClInclude Include="text.h">
       <Filter>engine\graphics\text</Filter>
     </ClInclude>
@@ -649,9 +646,6 @@
     </ClInclude>
     <ClInclude Include="ecs_player_states.h">
       <Filter>game\ecs\game\players</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_hud.h">
-      <Filter>game\ui</Filter>
     </ClInclude>
     <ClInclude Include="input.h">
       <Filter>engine\input</Filter>
@@ -697,6 +691,15 @@
     </ClInclude>
     <ClInclude Include="ui_game.h">
       <Filter>game\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_hud.h">
+      <Filter>game\ui\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_shared.h">
+      <Filter>game\ui\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_pause_menu.h">
+      <Filter>game\ui\menus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -870,6 +873,12 @@
     </Filter>
     <Filter Include="game\ui\menus">
       <UniqueIdentifier>{0865a393-2715-41e4-ab93-343c85debf5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\hud">
+      <UniqueIdentifier>{48986206-abe3-4a23-bb2a-5fa350e789c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\shared">
+      <UniqueIdentifier>{20260a9d-b727-48af-bb00-3b8ce4d95cc0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

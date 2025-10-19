@@ -156,7 +156,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />
     <ClCompile Include="ecs_debugging.cpp" />
-    <ClCompile Include="ecs_game.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
     <ClCompile Include="ecs_pathfinding.cpp" />
     <ClCompile Include="ecs_physics_debugging.cpp" />
@@ -241,6 +240,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="easings.cpp" />
     <ClCompile Include="ui_game.cpp" />
+    <ClCompile Include="ui_shared.cpp" />
     <ClCompile Include="ui_rmlui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
@@ -289,7 +289,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ecs_audio.h" />
     <ClInclude Include="ecs_cloning.h" />
     <ClInclude Include="ecs_debugging.h" />
-    <ClInclude Include="ecs_game.h" />
     <ClInclude Include="ecs_patch.h" />
     <ClInclude Include="ecs_pathfinding.h" />
     <ClInclude Include="ecs_physics_events.h" />
@@ -350,6 +349,8 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="tile_ids.h" />
     <ClInclude Include="ui.h" />
     <ClInclude Include="ui_game.h" />
+    <ClInclude Include="ui_pause_menu.h" />
+    <ClInclude Include="ui_shared.h" />
     <ClInclude Include="ui_rmlui_system_interface.h" />
     <ClInclude Include="ui_types.h" />
     <ClInclude Include="vec2.h" />

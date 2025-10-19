@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ui_hud.h"
 #include "ui_types.h"
+#include "ui_shared.h"
 #include "graphics.h"
 #include "text_fonts.h"
 
@@ -13,14 +14,11 @@ namespace hud {
 	unsigned int arrows = 0;
 	unsigned int bombs = 0;
 
-	text::FontId _font{};
-	TextData _text_data{ .shadow_offset = { 0.5f, 0.5f } };
 	Handle<graphics::Texture> _spritesheet{};
 	ImageData _filled_heart_image{};
 	ImageData _empty_heart_image{};
 
 	void startup() {
-		_font = text::load_font("assets/fonts/Mozart NBP.ttf");
 		_spritesheet = graphics::load_texture("assets/ui/hud.png");
 		_filled_heart_image.texture = _spritesheet;
 		_filled_heart_image.rect_position = { 16, 16 };
@@ -66,7 +64,7 @@ namespace hud {
 	}
 
 	void _layout_text(std::string_view string) {
-		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG({ .userData = &_text_data, .fontId = _font.id, .fontSize = 13 }));
+		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG(shared::text_config));
 	}
 
 	void layout() {
