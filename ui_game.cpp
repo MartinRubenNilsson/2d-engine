@@ -25,5 +25,5 @@ namespace game {
 		}
 	}
 
-} // namepace ui
-} // namespace game
+} // namepace game
+} // namespace ui
