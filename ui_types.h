@@ -7,15 +7,9 @@ namespace ui {
 		Vec2u rect_size{}; // texture rect size *in pixels*
 	};
 
-	// Optional extra text layout info that can be passed through .userData
+	// Optional extra text layout info that can be passed to .userData.
 	struct TextData {
 		Vec2f shadow_offset{};
 		Color shadow_color = Color::BLACK;
 	};
-
-	void startup();
-	void shutdown();
-	void update(float dt);
-	void layout();
-	void render();
 }

@@ -1,406 +1,395 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "ui.h"
-#include "ui_rmlui_system_interface.h"
-#include "ui_rmlui_render_interface.h"
-#include "ui_bindings.h"
-#include "ui_menus.h"
-#include "ui_hud.h"
-#include "ui_textbox.h"
-#include "console.h"
-#include "audio.h"
-#include "window.h"
+#include "ui_types.h"
 #include "window_events.h"
-#include "files.h"
+#include "text_fonts.h"
+#include "text_shaping.h"
+#include "graphics.h"
+#include "graphics_globals.h"
+#include "graphics_debugging.h"
+#include "console.h"
+#include "ui_hud.h" // TODO: don't put this here
 
-#ifdef _DEBUG_UI
-#include <RmlUi/Debugger.h>
-#endif
-
-#include "ui_clay.h"
+#pragma warning(push)
+#pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
+#define CLAY_IMPLEMENTATION
+#include <clay/clay.h>
+#pragma warning(pop)
 
 namespace ui {
-	// All documents share this event listener.
-	struct CommonEventListener : Rml::EventListener {
-		void ProcessEvent(Rml::Event& ev) override {
-			switch (ev.GetId()) {
-			case Rml::EventId::Mouseover:
-			{
-				if (ev.GetTargetElement()->IsClassSet("menu-button")) {
-					audio::create_event({ .path = "event:/ui/snd_button_hover" });
-				}
-			} break;
-			case Rml::EventId::Click:
-			{
-				if (ev.GetTargetElement()->IsClassSet("menu-button")) {
-					audio::create_event({ .path = "event:/ui/snd_button_click" });
-				}
-			} break;
+	void _handle_clay_error(Clay_ErrorData error_data) {
+		const std::string_view text{ error_data.errorText.chars, (size_t)error_data.errorText.length };
+		console::log_error(text);
+	}
+
+	Clay_Dimensions _measure_text(Clay_StringSlice text, Clay_TextElementConfig* config, void* userData) {
+		const std::string_view string{ text.chars, (size_t)text.length };
+		const text::FontId font_id{ .id = config->fontId };
+		if (!font_id)
+			return { 0.f, 0.f }; // Invalid font ID.
+		text::Font& font = text::get_font(font_id);
+		text::TextShape shape{};
+		text::shape_text(shape, string, font, config->fontSize, 0.f, false, false);
+		if (shape.glyph_count == 0)
+			return { 0.f, 0.f }; // No nonempty glyphs (i.e. nothing is visible).
+		if (config->userData) {
+			const TextData& data = *(const TextData*)config->userData;
+			shape.bounding_box = sweep(shape.bounding_box, data.shadow_offset); // grow the box to account for shadows
+		}
+		const Vec2f box_size = shape.bounding_box.max - shape.bounding_box.min;
+		return { box_size.x, box_size.y };
+	}
+
+	std::vector<uint8_t> _clay_arena_memory;
+	Clay_Arena _clay_arena{};
+
+	void _startup_clay() {
+		_clay_arena_memory.resize(Clay_MinMemorySize());
+		_clay_arena = Clay_CreateArenaWithCapacityAndMemory(_clay_arena_memory.size(), _clay_arena_memory.data());
+		const Clay_Dimensions dimensions{ .width = GAME_FRAMEBUFFER_WIDTH, .height = GAME_FRAMEBUFFER_HEIGHT };
+		const Clay_ErrorHandler error_handler{ .errorHandlerFunction = _handle_clay_error };
+		Clay_Initialize(_clay_arena, dimensions, error_handler);
+		Clay_SetMeasureTextFunction(_measure_text, nullptr);
+	}
+
+	void _shutdown_clay() {
+		_clay_arena = {};
+		_clay_arena_memory = {};
+	}
+
+	Handle<graphics::VertexShader> _ui_clay_vert;
+	Handle<graphics::FragmentShader> _ui_clay_frag;
+
+	void _load_shaders() {
+		_ui_clay_vert = graphics::load_vertex_shader("assets/shaders/ui_clay.vert");
+		_ui_clay_frag = graphics::load_fragment_shader("assets/shaders/ui_clay.frag");
+	}
+
+	void startup() {
+		_startup_clay();
+		_load_shaders();
+		hud::startup();
+	}
+
+	void shutdown() {
+		_shutdown_clay();
+	}
+
+	void update(float dt) {
+		static Clay_Vector2 mouse_pos{};
+		static bool mouse_is_down = false;
+
+		for (const window::Event& ev : window::get_events()) {
+			switch (ev.type) {
+#if 0
+				case window::EventType::FramebufferSize: {
+					// TODO: If in the future we render the game world to a smaller viewport, then
+					// we should probably still pass the gameworld size here???
+					const Clay_Dimensions dimensions{
+						.width = (float)ev.size.width,
+						.height = (float)ev.size.height };
+					Clay_SetLayoutDimensions(dimensions);
+				} break;
+#endif
+				case window::EventType::MouseMove: {
+					mouse_pos.x = (float)ev.mouse_move.x;
+					mouse_pos.y = (float)ev.mouse_move.y;
+				} break;
+				case window::EventType::MouseButtonPress: {
+					if (ev.mouse_button.button == window::MouseButton::Left) {
+						mouse_is_down = true;
+					}
+				} break;
+				case window::EventType::MouseButtonRelease: {
+					if (ev.mouse_button.button == window::MouseButton::Left) {
+						mouse_is_down = false;
+					}
+				} break;
+				case window::EventType::MouseScroll: {
+					const Clay_Vector2 scoll_delta{
+						.x = (float)ev.mouse_scroll.delta_x,
+						.y = (float)ev.mouse_scroll.delta_y };
+					Clay_UpdateScrollContainers(false, scoll_delta, dt);
+				} break;
 			}
 		}
+
+		if (ImGui::GetIO().WantCaptureMouse)
+			mouse_is_down = false;
+
+		Clay_SetPointerState(mouse_pos, mouse_is_down);
+
+		hud::update(dt); // TODO: move to like game_ui.h or someting
+	}
+
+	Clay_RenderCommandArray _clay_render_commands{};
+
+	void layout() {
+		_clay_render_commands = {};
+		Clay_BeginLayout();
+		hud::layout(); // TODO: move to like game_ui.h or someting
+		_clay_render_commands = Clay_EndLayout();
+	}
+
+	struct Batch {
+		Handle<graphics::Texture> texture{};
+		unsigned int vertices_begin = 0;
+		unsigned int vertices_end = 0; // one-past-the-end
 	};
 
-	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
-	float _dt_accumulator = 0.f;
-	bool debug = false;
-	RmlUiSystemInterface _system_interface;
-	RmlUiRenderInterface _render_interface;
-	Rml::Context* _context = nullptr;
-#ifdef _DEBUG_UI
-	Rml::Context* _debugger_context = nullptr; // The debugger needs its own context to render at the right size.
-#endif
-	CommonEventListener _common_event_listener;
-	std::vector<Event> _events;
+	std::vector<Batch> _batches;
+	std::vector<text::FontId> _fonts_to_update; // fonts whose atlas texture needs updating
 
-	void _on_escape_key_pressed() {
-		MenuType current_menu = get_top_menu();
-		if (current_menu == MenuType::Count) // no menus are open
-			push_menu(MenuType::Pause);
-		else if (current_menu != MenuType::Main) // don't pop main menu
-			pop_menu();
-	}
-
-	namespace bindings {
-		void on_click_play() {
-			pop_all_menus();
-			hud::show = true;
-			_events.push_back({ EventType::PlayGame });
-		}
-
-		void on_click_settings() {
-			push_menu(MenuType::Settings);
-		}
-
-		void on_click_credits() {
-			push_menu(MenuType::Credits);
-		}
-
-		void on_click_quit() {
-			_events.push_back({ EventType::QuitApp });
-		}
-
-		void on_click_back() {
-			pop_menu();
-		}
-
-		void on_click_resume() {
-			pop_menu();
-		}
-
-		void on_click_restart() {
-			pop_menu();
-			_events.push_back({ EventType::RestartMap });
-		}
-
-		void on_click_main_menu() {
-			hud::show = false;
-			pop_all_menus();
-			push_menu(MenuType::Main);
-			_events.push_back({ EventType::GoToMainMenu });
-		}
-	}
-
-	void startup_rmlui() {
-		Rml::SetSystemInterface(&_system_interface);
-		Rml::SetRenderInterface(&_render_interface);
-		Rml::Initialise();
-		_context = Rml::CreateContext("main", Rml::Vector2i());
-#ifdef _DEBUG_UI
-		_debugger_context = Rml::CreateContext("debugger", Rml::Vector2i());
-		Rml::Debugger::Initialise(_debugger_context);
-		Rml::Debugger::SetContext(_context);
-#endif
-		create_bindings();
-		create_textbox_presets();
-	}
-
-	void shutdown_rmlui() {
-		Rml::Shutdown();
-		_context = nullptr;
-#ifdef _DEBUG_UI
-		_debugger_context = nullptr;
-#endif
-	}
-
-	Rml::Input::KeyIdentifier _translate_key_identifier_to_rml(window::Key key) {
-		switch (key) {
-		case window::Key::A:         return Rml::Input::KI_A;
-		case window::Key::B:         return Rml::Input::KI_B;
-		case window::Key::C:         return Rml::Input::KI_C;
-		case window::Key::D:         return Rml::Input::KI_D;
-		case window::Key::E:         return Rml::Input::KI_E;
-		case window::Key::F:         return Rml::Input::KI_F;
-		case window::Key::G:         return Rml::Input::KI_G;
-		case window::Key::H:         return Rml::Input::KI_H;
-		case window::Key::I:         return Rml::Input::KI_I;
-		case window::Key::J:         return Rml::Input::KI_J;
-		case window::Key::K:         return Rml::Input::KI_K;
-		case window::Key::L:         return Rml::Input::KI_L;
-		case window::Key::M:         return Rml::Input::KI_M;
-		case window::Key::N:         return Rml::Input::KI_N;
-		case window::Key::O:         return Rml::Input::KI_O;
-		case window::Key::P:         return Rml::Input::KI_P;
-		case window::Key::Q:         return Rml::Input::KI_Q;
-		case window::Key::R:         return Rml::Input::KI_R;
-		case window::Key::S:         return Rml::Input::KI_S;
-		case window::Key::T:         return Rml::Input::KI_T;
-		case window::Key::U:         return Rml::Input::KI_U;
-		case window::Key::V:         return Rml::Input::KI_V;
-		case window::Key::W:         return Rml::Input::KI_W;
-		case window::Key::X:         return Rml::Input::KI_X;
-		case window::Key::Y:         return Rml::Input::KI_Y;
-		case window::Key::Z:         return Rml::Input::KI_Z;
-		case window::Key::Num0:      return Rml::Input::KI_0;
-		case window::Key::Num1:      return Rml::Input::KI_1;
-		case window::Key::Num2:      return Rml::Input::KI_2;
-		case window::Key::Num3:      return Rml::Input::KI_3;
-		case window::Key::Num4:      return Rml::Input::KI_4;
-		case window::Key::Num5:      return Rml::Input::KI_5;
-		case window::Key::Num6:      return Rml::Input::KI_6;
-		case window::Key::Num7:      return Rml::Input::KI_7;
-		case window::Key::Num8:      return Rml::Input::KI_8;
-		case window::Key::Num9:      return Rml::Input::KI_9;
-		case window::Key::Numpad0:   return Rml::Input::KI_NUMPAD0;
-		case window::Key::Numpad1:   return Rml::Input::KI_NUMPAD1;
-		case window::Key::Numpad2:   return Rml::Input::KI_NUMPAD2;
-		case window::Key::Numpad3:   return Rml::Input::KI_NUMPAD3;
-		case window::Key::Numpad4:   return Rml::Input::KI_NUMPAD4;
-		case window::Key::Numpad5:   return Rml::Input::KI_NUMPAD5;
-		case window::Key::Numpad6:   return Rml::Input::KI_NUMPAD6;
-		case window::Key::Numpad7:   return Rml::Input::KI_NUMPAD7;
-		case window::Key::Numpad8:   return Rml::Input::KI_NUMPAD8;
-		case window::Key::Numpad9:   return Rml::Input::KI_NUMPAD9;
-		case window::Key::Left:      return Rml::Input::KI_LEFT;
-		case window::Key::Right:     return Rml::Input::KI_RIGHT;
-		case window::Key::Up:        return Rml::Input::KI_UP;
-		case window::Key::Down:      return Rml::Input::KI_DOWN;
-			//case window::Key::Add:       return Rml::Input::KI_ADD;
-		case window::Key::Backspace: return Rml::Input::KI_BACK;
-		case window::Key::Delete:    return Rml::Input::KI_DELETE;
-			//case window::Key::Divide:    return Rml::Input::KI_DIVIDE;
-		case window::Key::End:       return Rml::Input::KI_END;
-		case window::Key::Escape:    return Rml::Input::KI_ESCAPE;
-		case window::Key::F1:        return Rml::Input::KI_F1;
-		case window::Key::F2:        return Rml::Input::KI_F2;
-		case window::Key::F3:        return Rml::Input::KI_F3;
-		case window::Key::F4:        return Rml::Input::KI_F4;
-		case window::Key::F5:        return Rml::Input::KI_F5;
-		case window::Key::F6:        return Rml::Input::KI_F6;
-		case window::Key::F7:        return Rml::Input::KI_F7;
-		case window::Key::F8:        return Rml::Input::KI_F8;
-		case window::Key::F9:        return Rml::Input::KI_F9;
-		case window::Key::F10:       return Rml::Input::KI_F10;
-		case window::Key::F11:       return Rml::Input::KI_F11;
-		case window::Key::F12:       return Rml::Input::KI_F12;
-		case window::Key::F13:       return Rml::Input::KI_F13;
-		case window::Key::F14:       return Rml::Input::KI_F14;
-		case window::Key::F15:       return Rml::Input::KI_F15;
-		case window::Key::Home:      return Rml::Input::KI_HOME;
-		case window::Key::Insert:    return Rml::Input::KI_INSERT;
-		case window::Key::LControl:  return Rml::Input::KI_LCONTROL;
-		case window::Key::LShift:    return Rml::Input::KI_LSHIFT;
-			//case window::Key::Multiply:  return Rml::Input::KI_MULTIPLY;
-		case window::Key::Pause:     return Rml::Input::KI_PAUSE;
-		case window::Key::RControl:  return Rml::Input::KI_RCONTROL;
-			//case window::Key::Return:    return Rml::Input::KI_RETURN;
-		case window::Key::RShift:    return Rml::Input::KI_RSHIFT;
-		case window::Key::Space:     return Rml::Input::KI_SPACE;
-			//case window::Key::Subtract:  return Rml::Input::KI_SUBTRACT;
-		case window::Key::Tab:       return Rml::Input::KI_TAB;
-		default:                     return Rml::Input::KI_UNKNOWN;
-		}
-	}
-
-	int _translate_key_modifier_flags_to_rml(int key_modifier_flags) {
-		int rml_key_modifiers = 0;
-		if (key_modifier_flags & window::MODIFIER_KEY_CONTROL)   rml_key_modifiers |= Rml::Input::KM_CTRL;
-		if (key_modifier_flags & window::MODIFIER_KEY_SHIFT)     rml_key_modifiers |= Rml::Input::KM_SHIFT;
-		if (key_modifier_flags & window::MODIFIER_KEY_ALT)       rml_key_modifiers |= Rml::Input::KM_ALT;
-		//if (key_modifier_flags & window::MODIFIER_KEY_SUPER)    rml_key_modifiers |= Rml::Input::KM_META; // Not sure if this is correct
-		if (key_modifier_flags & window::MODIFIER_KEY_CAPS_LOCK) rml_key_modifiers |= Rml::Input::KM_CAPSLOCK;
-		if (key_modifier_flags & window::MODIFIER_KEY_NUM_LOCK)  rml_key_modifiers |= Rml::Input::KM_NUMLOCK;
-		//if (key_modifier_flags & window::MODIFIER_KEY_SCROLL_LOCK) rml_key_modifiers |= Rml::Input::KM_SCROLLLOCK; // We don't have KEY_SCROLL_LOCK
-		return rml_key_modifiers;
-	}
-
-	double _mouse_position_x = 0;
-	double _mouse_position_y = 0;
-	bool _mouse_is_down = false;
-	float _scroll_delta_x = 0.f;
-
-	void handle_window_event_for_rmlui(const window::Event& ev) {
-		switch (ev.type) {
-		case window::EventType::FramebufferSize:
-		{
-			set_viewport(ev.size.width, ev.size.height);
-			_context->SetDimensions(Rml::Vector2i(ev.size.width, ev.size.height));
-#ifdef _DEBUG_UI
-			_debugger_context->SetDimensions(Rml::Vector2i(ev.size.width, ev.size.height));
-#endif
-			float dp_ratio_x = (float)ev.size.width / GAME_FRAMEBUFFER_WIDTH;
-			float dp_ratio_y = (float)ev.size.height / GAME_FRAMEBUFFER_HEIGHT;
-			float dp_ratio = std::min(dp_ratio_x, dp_ratio_y);
-			_context->SetDensityIndependentPixelRatio(dp_ratio);
-			// Don't set density independent pixel ratio for the debugger context!
-			// It should always be 1.0, so that it remains the same size.
-
-		} break;
-		case window::EventType::KeyPress:
-		{
-			if (ev.key.code == window::Key::Escape) {
-				_on_escape_key_pressed();
-			}
-			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
-			_context->ProcessKeyDown(key_identifier, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessKeyDown(key_identifier, key_modifier_flags);
-#endif
-		} break;
-		case window::EventType::KeyRelease:
-		{
-			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
-			_context->ProcessKeyUp(key_identifier, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessKeyUp(key_identifier, key_modifier_flags);
-#endif
-		} break;
-		case window::EventType::MouseMove:
-		{
-			// CRITICAL: We get big frame drops when calling ProcessMouseMove() a lot,
-			// since it invokes a heavy update hover chain call. This happens when for example
-			// when we move the mouse around a lot. I dropped from 350 FPS to 230 FPS!
-			// Hence, let's only call ProcessMouseMove() when we're in a menu,
-			// since it's only then that we're using the mouse position (to press buttons).
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			if (debug || get_top_menu() != MenuType::Count) {
-				_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
-			}
-#ifdef _DEBUG_UI
-			if (debug) {
-				_debugger_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
-			}
-#endif
-			_mouse_position_x = (int)ev.mouse_move.x;
-			_mouse_position_y = (int)ev.mouse_move.y;
-
-		} break;
-		case window::EventType::MouseButtonPress:
-		{
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			_context->ProcessMouseButtonDown((int)ev.mouse_button.button, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessMouseButtonDown((int)ev.mouse_button.button, key_modifier_flags);
-#endif
-			_mouse_is_down = true;
-		} break;
-		case window::EventType::MouseButtonRelease:
-		{
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			_context->ProcessMouseButtonUp((int)ev.mouse_button.button, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessMouseButtonUp((int)ev.mouse_button.button, key_modifier_flags);
-#endif
-			_mouse_is_down = false;
-		} break;
-#if 0
-		case sf::Event::MouseWheelMoved:
-		{
-			_context->ProcessMouseWheel(float(-ev.mouseWheel.delta), key_modifier_flags);
-			_debugger_context->ProcessMouseWheel(float(-ev.mouseWheel.delta), key_modifier_flags);
-		} break;
-		case sf::Event::MouseLeft:
-		{
-			_context->ProcessMouseLeave();
-			_debugger_context->ProcessMouseLeave();
-		} break;
-		case sf::Event::TextEntered:
-		{
-			Rml::Outfit c = Rml::Outfit(ev.text.unicode);
-			if (c == Rml::Outfit('\r')) {
-				c = Rml::Outfit('\n');
-			}
-			if (ev.text.unicode >= 32 || c == Rml::Outfit('\n')) {
-				_context->ProcessTextInput(c);
-				_debugger_context->ProcessTextInput(c);
-			}
-		} break;
-#endif
-		}
-	}
-
-	void update_rmlui(float dt) {
-		// As an optimization, update the UI at a lower FPS than the game.
-		_dt_accumulator += dt;
-		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
-
-		update_textbox(_dt_accumulator);
-		dirty_all_variables();
-		_context->Update();
-#ifdef _DEBUG_UI
-		if (debug != Rml::Debugger::IsVisible()) {
-			Rml::Debugger::SetVisible(debug);
-		}
-		_debugger_context->Update();
-#endif
-
-		_dt_accumulator = 0.0f;
-	}
-
-	void render_rmlui() {
-		prepare_render_state();
-		_context->Render();
-#ifdef _DEBUG_UI
-		_debugger_context->Render();
-#endif
-		restore_render_state();
-	}
-
-	void load_font_from_file(const std::string& path) {
-		Rml::LoadFontFace(path);
-	}
-
-	void load_document_from_file(const std::string& path) {
-		Rml::ElementDocument* doc = _context->LoadDocument(path);
-		if (!doc) {
-			console::log_error("Failed to load RmlUi document: " + path);
+	void render() {
+		if (!_clay_render_commands.length)
 			return;
+
+		GRAPHICS_DEBUG_GROUP;
+
+		const graphics::Viewport& viewport = graphics::get_viewport();
+		const Clay_Dimensions dimensions = Clay_GetCurrentContext()->layoutDimensions;
+		// How many pixels we're rendering to per layout unit.
+		const float pixels_per_unit = viewport.height / dimensions.height;
+
+		const std::span<const Clay_RenderCommand> commands{ // This is just to make it easier to debug.
+			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
+
+		graphics::temp_vertices.clear();
+		_batches.clear();
+		_fonts_to_update.clear();
+		
+		// Create batches.
+
+		text::TextShape text_shape{}; // Stored outside the loop so we can reuse the memory.
+		for (const Clay_RenderCommand& command : commands) {
+
+			Rect2f box{}; // Bounding box.
+			box.min.x = command.boundingBox.x;
+			box.min.y = command.boundingBox.y;
+			box.max.x = command.boundingBox.x + command.boundingBox.width;
+			box.max.y = command.boundingBox.y + command.boundingBox.height;
+
+			Handle<graphics::Texture> texture = graphics::white_texture;
+
+			switch (command.commandType) {
+				case CLAY_RENDER_COMMAND_TYPE_NONE: {
+
+					// This command type should be skipped.
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
+
+					const Clay_RectangleRenderData& data = command.renderData.rectangle;
+
+					Color color = data.backgroundColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					// Add vertices for the quad.
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f::ZERO);
+
+					// TODO: corner radius
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
+
+					// The renderer should draw a colored border inset into the bounding box.
+					console::log_error("CLAY_RENDER_COMMAND_TYPE_BORDER is not supported"); // TODO
+					continue;
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
+
+					const Clay_TextRenderData& data = command.renderData.text;
+					const std::string_view string{ data.stringContents.chars, (size_t)data.stringContents.length };
+					if (string.empty())
+						continue; // Nothing to render.
+
+					const text::FontId font_id{ .id = data.fontId };
+					if (!font_id)
+						continue; // Invalid font.
+
+					Color color = data.textColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					text::Font& font = text::get_font(font_id);
+					texture = text::get_atlas_texture(font);
+
+					text::shape_text(text_shape, string, font, data.fontSize, pixels_per_unit, true, true);
+
+					// How much the text needs to be translated for the UI bounding box and text bounding box to conincide.
+					const Vec2f translation = box.min - text_shape.bounding_box.min;
+
+					Vec2f shadow_offset{};
+					Color shadow_color{};
+					if (command.userData) {
+						const TextData& text_data = *(const TextData*)command.userData;
+						shadow_offset = text_data.shadow_offset;
+						shadow_color = text_data.shadow_color;
+					}
+
+					// PITFALL: There's no need to sweep the box to account for the shadow offset, because _measure_text()
+					// will already have done so. If we sweep it here we will double-sweep. So translation is correct as-is.
+
+					// Create vertices for the glyphs.
+					for (size_t g = 0; g < text_shape.glyph_count; ++g) {
+
+						Rect2f& box = text_shape.glyph_bounding_boxes[g];
+						box.min += translation;
+						box.max += translation;
+
+						Rect2f& rect = text_shape.glyph_texture_rects[g];
+						// HACK: We use negative texture coordinates to indicate that the texture is grayscale
+						// (only has one channel), as for example is the case for font atlas textures.
+						rect.min = -rect.min;
+						rect.max = -rect.max;
+
+						// If the text has shadow, add vertices for the shadow glyph first so it renders under the normal glyph.
+						if (shadow_offset != Vec2f::ZERO) {
+							const Rect2f& shadow_box = translate(box, shadow_offset);
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.min.y), shadow_color, Vec2f(rect.min.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.max.y), shadow_color, Vec2f(rect.max.x, rect.max.y));
+						}
+
+						// Add vertices for the normal glyph.
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+					}
+
+					// Check if font atlas texture needs to be updated.
+					if (text::atlas_texture_needs_updating(font)) {
+						bool already_in_fonts_to_update = false;
+						for (const text::FontId font_to_update : _fonts_to_update) {
+							if (font_to_update == font_id) {
+								already_in_fonts_to_update = true;
+								break;
+							}
+						}
+						if (!already_in_fonts_to_update) {
+							_fonts_to_update.push_back(font_id);
+						}
+					}
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
+
+					const Clay_ImageRenderData& data = command.renderData.image;
+					if (!data.imageData) continue; // DEFENSIVE
+
+					const ImageData& image_data = *(const ImageData*)data.imageData;
+					texture = image_data.texture;
+
+					const Vec2f texture_size = graphics::get_texture_size(image_data.texture);
+
+					Rect2f rect{}; // texture rect in UV-space (normalized coordinates)
+					rect.min = (Vec2f)image_data.rect_position / texture_size;
+					rect.max = rect.min + (Vec2f)image_data.rect_size / texture_size;
+
+					Color color = data.backgroundColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					// Create vertices for the image.
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
+
+					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
+					console::log_error("CLAY_RENDER_COMMAND_TYPE_SCISSOR_START is not supported"); // TODO
+					continue;
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END: {
+
+					// The renderer should finish any previously active clipping, and begin rendering elements in full again.
+					console::log_error("CLAY_RENDER_COMMAND_TYPE_SCISSOR_END is not supported"); // TODO
+					continue;
+
+				} break;
+				case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
+
+					// The renderer should provide a custom implementation for handling this render command based on its .customData
+					console::log_error("CLAY_RENDER_COMMAND_TYPE_CUSTOM is not supported"); // TODO
+					continue;
+
+				} break;
+			}
+
+			const unsigned vertices_end = (unsigned int)graphics::temp_vertices.size(); // one-past-the-end
+
+			if (_batches.empty()) {
+				// Start the first batch.
+				_batches.emplace_back(texture, 0, vertices_end);
+				continue;
+			}
+			Batch& current_batch = _batches.back();
+			if (current_batch.texture == texture) {
+				// Continue the current batch.
+				current_batch.vertices_end = vertices_end;
+				continue;
+			}
+			// Start the next batch.
+			_batches.emplace_back(texture, current_batch.vertices_end, vertices_end);
 		}
-		doc->SetId(files::get_stem(path));
-	}
 
-	void add_event_listeners() {
-		// Add common event listener to all documents.
-		for (int i = 0; i < _context->GetNumDocuments(); ++i) {
-			Rml::ElementDocument* doc = _context->GetDocument(i);
-			doc->AddEventListener(Rml::EventId::Mouseover, &_common_event_listener);
-			doc->AddEventListener(Rml::EventId::Click, &_common_event_listener);
+		// Transform all vertices to clip space.
+		for (graphics::Vertex& v : graphics::temp_vertices) {
+			v.position.x /= dimensions.width;
+			v.position.y /= dimensions.height;
+			v.position.x = v.position.x * 2.f - 1.f;
+			v.position.y = v.position.y * 2.f - 1.f;
 		}
 
-		add_menu_event_listeners();
-		add_textbox_event_listeners();
-	}
+		// Update and bind the vertex buffer.
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
+			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
 
-	void reload_styles() {
-		for (int i = 0; i < _context->GetNumDocuments(); ++i) {
-			_context->GetDocument(i)->ReloadStyleSheet();
+		// At this point we're done with the temp vertex buffer.
+		graphics::temp_vertices.clear();
+
+		// Update all font atlas textures that need to be updated.
+		for (const text::FontId font_id : _fonts_to_update) {
+			text::Font& font = text::get_font(font_id);
+			text::update_atlas_texture(font);
 		}
-	}
 
-	void show_document(const std::string& name) {
-		if (Rml::ElementDocument* doc = _context->GetDocument(name)) {
-			doc->Show();
+		// At this point we're done updating the font atlas textures.
+		_fonts_to_update.clear();
+
+		// Draw all batches.
+		graphics::set_primitives(graphics::Primitives::TriangleList);
+		graphics::bind_vertex_shader(_ui_clay_vert);
+		graphics::bind_fragment_shader(_ui_clay_frag);
+		graphics::bind_sampler(0, graphics::nearest_sampler);
+		for (const Batch& batch : _batches) {
+			graphics::bind_texture(0, batch.texture);
+			const unsigned int vertex_count = batch.vertices_end - batch.vertices_begin;
+			const unsigned int vertex_offset = batch.vertices_begin;
+			graphics::draw(vertex_count, vertex_offset);
 		}
-	}
 
-	bool get_next_event(Event& ev) {
-		if (_events.empty()) return false;
-		ev = _events.back();
-		_events.pop_back();
-		return true;
-	}
-
-	bool is_menu_or_textbox_visible() {
-		return (get_top_menu() != MenuType::Count) || is_textbox_open();
+		// At this point we're done with the batches.
+		_batches.clear();
 	}
 }

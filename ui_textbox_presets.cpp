@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ui_textbox.h"
-#include "ui.h"
+#include "ui_rmlui.h"
 
 namespace ui
 {

@@ -1,10 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ui.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_bindings.cpp">
+    <ClCompile Include="ui_rmlui.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="map.cpp">
@@ -22,12 +19,6 @@
     <ClCompile Include="ecs.cpp">
       <Filter>game\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_textbox_presets.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_physics.cpp">
       <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
@@ -36,9 +27,6 @@
     </ClCompile>
     <ClCompile Include="postprocessing.cpp">
       <Filter>engine\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_menus.cpp">
-      <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player.cpp">
       <Filter>game\ecs\game\players</Filter>
@@ -140,7 +128,7 @@
     <ClCompile Include="imgui_impl.cpp">
       <Filter>engine\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_clay.cpp">
+    <ClCompile Include="ui.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
     <ClCompile Include="kdtree.cpp">
@@ -315,6 +303,18 @@
     <ClCompile Include="text_shaping.cpp">
       <Filter>engine\graphics\text</Filter>
     </ClCompile>
+    <ClCompile Include="ui_textbox_presets.cpp">
+      <Filter>game\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_menus.cpp">
+      <Filter>game\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_textbox.cpp">
+      <Filter>game\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_bindings.cpp">
+      <Filter>game\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -383,10 +383,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ui.h">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_bindings.h">
+    <ClInclude Include="ui_rmlui.h">
       <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="map.h">
@@ -404,9 +401,6 @@
     <ClInclude Include="ecs.h">
       <Filter>game\ecs</Filter>
     </ClInclude>
-    <ClInclude Include="ui_textbox.h">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
     <ClInclude Include="ecs_physics.h">
       <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
@@ -415,9 +409,6 @@
     </ClInclude>
     <ClInclude Include="postprocessing.h">
       <Filter>engine\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_menus.h">
-      <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player.h">
       <Filter>game\ecs\game\players</Filter>
@@ -539,7 +530,7 @@
     <ClInclude Include="graphics_vertices.h">
       <Filter>engine\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ui_clay.h">
+    <ClInclude Include="ui.h">
       <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="kdtree.h">
@@ -688,6 +679,18 @@
     </ClInclude>
     <ClInclude Include="text_shaping.h">
       <Filter>engine\graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_menus.h">
+      <Filter>game\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_textbox.h">
+      <Filter>game\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_bindings.h">
+      <Filter>game\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_types.h">
+      <Filter>engine\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -844,9 +847,6 @@
     <Filter Include="engine\ui">
       <UniqueIdentifier>{c3167945-45a3-4c9c-ad21-9950dd64fdfc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\ui\rmlui_interfaces">
-      <UniqueIdentifier>{cb12366d-8c11-48b4-a752-e5b39ec96b0e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{fda23f39-2e34-4c02-b91d-10ef539bed08}</UniqueIdentifier>
     </Filter>
@@ -858,6 +858,9 @@
     </Filter>
     <Filter Include="engine\fps_counter">
       <UniqueIdentifier>{6cca2ef6-c7f9-4d9c-8c30-4a61303d8732}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\ui\rmlui_interfaces">
+      <UniqueIdentifier>{cb12366d-8c11-48b4-a752-e5b39ec96b0e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

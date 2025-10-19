@@ -240,10 +240,10 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="text_unicode.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="easings.cpp" />
-    <ClCompile Include="ui.cpp" />
+    <ClCompile Include="ui_rmlui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
-    <ClCompile Include="ui_clay.cpp" />
+    <ClCompile Include="ui.cpp" />
     <ClCompile Include="ui_rmlui_render_interface.cpp" />
     <ClCompile Include="ui_bindings.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -347,8 +347,9 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="text_stb_truetype.h" />
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />
-    <ClInclude Include="ui_clay.h" />
+    <ClInclude Include="ui.h" />
     <ClInclude Include="ui_rmlui_system_interface.h" />
+    <ClInclude Include="ui_types.h" />
     <ClInclude Include="vec2.h" />
     <ClInclude Include="window_events.h" />
     <ClInclude Include="shapes.h" />
@@ -376,7 +377,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="steam_server.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="easings.h" />
-    <ClInclude Include="ui.h" />
+    <ClInclude Include="ui_rmlui.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="ui_rmlui_render_interface.h" />
     <ClInclude Include="ui_bindings.h" />
