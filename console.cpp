@@ -4,26 +4,40 @@
 #include "window_events.h"
 #include "files.h"
 #include <deque> // TODO: use a ringbuffer instead
+#include <iostream>
 
 namespace console {
-	const Color _COLOR_COMMAND = Color(230, 230, 230, 255);
-	const Color _COLOR_LOG = Color(252, 191, 73, 255);
-	const Color _COLOR_LOG_ERROR = Color(220, 50, 47, 255);
 	const size_t _MAX_HISTORY = 512;
 
 	bool _visible = false;
 	bool _has_focus = false;
 	bool _reclaim_focus = false;
 	float _sleep_timer = 0.f;
-	std::stringstream _cout_stream;
-	std::stringstream _cerr_stream;
-	std::string _command_line;
 	std::deque<std::string> _command_queue; // TODO: use a ringbuffer instead
 	std::deque<std::string> _command_history; // TODO: use a ringbuffer instead
 	std::deque<std::string>::iterator _command_history_it = _command_history.end(); // TODO: use a ringbuffer instead
-	std::deque<std::pair<std::string, Color>> _history; // TODO: use a ringbuffer instead
+
+	struct HistoryEntry {
+		std::string message;
+		Color color = Color::WHITE;
+		unsigned int repeat = 0;
+	};
+
+	std::deque<HistoryEntry> _history; // TODO: use a ringbuffer instead
+
+	std::stringstream _cout_stream;
+	std::stringstream _cerr_stream;
+
+	void startup() {
+		// Redirect cout and cerr to stringstreams so we can capture
+		// anything that gets written to them.
+		std::cout.rdbuf(_cout_stream.rdbuf());
+		std::cerr.rdbuf(_cerr_stream.rdbuf());
+		register_commands();
+	}
 
 	int _input_text_callback(ImGuiInputTextCallbackData* data) {
+
 		// COMPLETE COMMANDS
 
 		if (data->EventFlag == ImGuiInputTextFlags_CallbackCompletion) {
@@ -62,19 +76,6 @@ namespace console {
 		}
 
 		return 0;
-	}
-
-	void startup() {
-#if 0
-		// REDIRECT COUT AND CERR
-
-		std::cout.rdbuf(_cout_stream.rdbuf());
-		std::cerr.rdbuf(_cerr_stream.rdbuf());
-#endif
-
-		// REGISTER COMMANDS
-
-		register_commands();
 	}
 
 	void update(float dt) {
@@ -125,40 +126,43 @@ namespace console {
 			ImGuiWindowFlags_NoSavedSettings;
 
 		if (ImGui::Begin("Console", &_visible, window_flags)) {
+
 			// HISTORY
+
+			const float reserved_height = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+			if (ImGui::BeginChild("History", ImVec2(0, -reserved_height), // Leave room for 1 separator + 1 input text
+				false, ImGuiWindowFlags_HorizontalScrollbar))
 			{
-				float reserved_height = ImGui::GetStyle().ItemSpacing.y +
-					ImGui::GetFrameHeightWithSpacing();
-				if (ImGui::BeginChild(
-					"History",
-					ImVec2(0, -reserved_height), // Leave room for 1 separator + 1 input text
-					false,
-					ImGuiWindowFlags_HorizontalScrollbar)) {
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-					for (const auto& [line, color] : _history)
-						ImGui::TextColored(ImColor(color.r, color.g, color.b, color.a), line.c_str());
-					ImGui::PopStyleVar();
-					if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-						ImGui::SetScrollHereY(1.0f); // Scroll to bottom
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+				for (const auto& [line, color, repeat] : _history) {
+					const ImColor col(color.r, color.g, color.b, color.a);
+					if (repeat == 0) {
+						ImGui::TextColored(col, line.c_str());
+					} else {
+						ImGui::TextColored(col, "%s (%u)", line.c_str(), repeat + 1);
+					}
 				}
-				ImGui::EndChild();
+				ImGui::PopStyleVar();
+				if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+					ImGui::SetScrollHereY(1.0f); // Scroll to bottom
 			}
+			ImGui::EndChild();
 
 			ImGui::Separator();
 
 			// COMMAND LINE
 
+			static std::string command_line;
 			ImGui::PushItemWidth(-1); // Use all available width
-			if (ImGui::InputText(
-				"##CommandLine",
-				&_command_line,
+			if (ImGui::InputText("##CommandLine", &command_line,
 				ImGuiInputTextFlags_EnterReturnsTrue |
 				ImGuiInputTextFlags_CallbackCompletion |
 				ImGuiInputTextFlags_CallbackHistory |
 				ImGuiInputTextFlags_EscapeClearsAll,
-				_input_text_callback)) {
-				execute(_command_line);
-				_command_line.clear();
+				_input_text_callback))
+			{
+				execute(command_line);
+				command_line.clear();
 				_reclaim_focus = true;
 			}
 			ImGui::PopItemWidth();
@@ -224,18 +228,29 @@ namespace console {
 		_sleep_timer = std::max(0.f, seconds);
 	}
 
-	void log(std::string_view message) {
-		_history.emplace_back(message, _COLOR_LOG);
+	void _add_to_history(std::string_view message, Color color) {
+		if (_history.empty()) {
+			_history.emplace_back(std::string(message), color);
+			return;
+		}
+		if (!_history.empty() && _history.back().message == message) {
+			_history.back().repeat++;
+			return;
+		}
+		_history.emplace_back(std::string(message), color);
 		if (_history.size() > _MAX_HISTORY) {
 			_history.pop_front();
 		}
 	}
 
+	void log(std::string_view message) {
+		constexpr Color color(252, 191, 73, 255);
+		_add_to_history(message, color);
+	}
+
 	void log_error(std::string_view message, bool show_console) {
-		_history.emplace_back(message, _COLOR_LOG_ERROR);
-		if (_history.size() > _MAX_HISTORY) {
-			_history.pop_front();
-		}
+		constexpr Color color(220, 50, 47, 255);
+		_add_to_history(message, color);
 		if (show_console) {
 			_visible = true;
 		}
@@ -252,10 +267,8 @@ namespace console {
 			_command_history.pop_front();
 		}
 		_command_history_it = _command_history.end();
-		_history.emplace_back(command_line, _COLOR_COMMAND);
-		if (_history.size() > _MAX_HISTORY) {
-			_history.pop_front();
-		}
+		const Color color(230, 230, 230, 255);
+		_add_to_history(command_line, color);
 		parse_and_execute_command(command_line);
 	}
 
