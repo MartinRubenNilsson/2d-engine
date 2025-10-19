@@ -133,9 +133,7 @@ namespace engine {
                         graphics::resize_final_framebuffer(ev.size.width, ev.size.height);
                     }
                 } else if (ev.type == window::EventType::KeyPress) {
-                    if (ev.key.code == window::Key::F6) {
-                        ui::debug = !ui::debug;
-                    } else if (ev.key.code == window::Key::F7) {
+                    if (ev.key.code == window::Key::F7) {
                         map::debug = !map::debug;
                     }
                 }

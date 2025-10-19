@@ -76,6 +76,8 @@ namespace ui {
 		_shutdown_clay();
 	}
 
+	bool debug = false;
+
 	void update(float dt) {
 		static Clay_Vector2 mouse_pos{};
 		static bool mouse_is_down = false;
@@ -119,6 +121,7 @@ namespace ui {
 			mouse_is_down = false;
 
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
+		Clay_SetDebugModeEnabled(debug);
 
 		game::update(dt);
 	}

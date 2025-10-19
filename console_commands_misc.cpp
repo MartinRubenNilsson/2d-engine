@@ -7,6 +7,7 @@
 #include "map.h"
 //#include "ui_rmlui.h"
 //#include "shaders.h"
+#include "ui.h"
 #include "ecs.h"
 #include "ecs_player.h"
 #include "ecs_lifetime.h"
@@ -143,6 +144,14 @@ namespace console {
 			.callback = [](Args args) {
 				audio::create_event({ .path = get_string(args[0]) });
 			}
+			});
+
+		// UI
+
+		register_command({
+			.name = "toggle_debug_ui",
+			.desc = "Toggles the UI debug window.",
+			.callback = [](Args) { ui::debug = !ui::debug; }
 			});
 
 		// MAP

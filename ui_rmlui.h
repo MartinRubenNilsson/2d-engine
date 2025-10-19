@@ -27,7 +27,7 @@ namespace ui {
 		void on_click_main_menu();
 	}
 
-	extern bool debug;
+	extern bool debug_rmlui;
 
 	void startup_rmlui();
 	void shutdown_rmlui();

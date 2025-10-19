@@ -4,19 +4,15 @@
 #include "ui_rmlui_render_interface.h"
 #include "ui_bindings.h"
 #include "ui_menus.h"
-#include "ui_hud.h"
 #include "ui_textbox.h"
 #include "console.h"
 #include "audio.h"
-#include "window.h"
 #include "window_events.h"
 #include "files.h"
 
 #ifdef _DEBUG_UI
 #include <RmlUi/Debugger.h>
 #endif
-
-#include "ui.h"
 
 namespace ui {
 	// All documents share this event listener.
@@ -41,7 +37,7 @@ namespace ui {
 
 	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
 	float _dt_accumulator = 0.f;
-	bool debug = false;
+	bool debug_rmlui = false;
 	RmlUiSystemInterface _system_interface;
 	RmlUiRenderInterface _render_interface;
 	Rml::Context* _context = nullptr;
@@ -62,7 +58,6 @@ namespace ui {
 	namespace bindings {
 		void on_click_play() {
 			pop_all_menus();
-			hud::show = true;
 			_events.push_back({ EventType::PlayGame });
 		}
 
@@ -92,7 +87,6 @@ namespace ui {
 		}
 
 		void on_click_main_menu() {
-			hud::show = false;
 			pop_all_menus();
 			push_menu(MenuType::Main);
 			_events.push_back({ EventType::GoToMainMenu });
@@ -273,11 +267,11 @@ namespace ui {
 			// Hence, let's only call ProcessMouseMove() when we're in a menu,
 			// since it's only then that we're using the mouse position (to press buttons).
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			if (debug || get_top_menu() != MenuType::Count) {
+			if (debug_rmlui || get_top_menu() != MenuType::Count) {
 				_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
 			}
 #ifdef _DEBUG_UI
-			if (debug) {
+			if (debug_rmlui) {
 				_debugger_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
 			}
 #endif
@@ -338,8 +332,8 @@ namespace ui {
 		dirty_all_variables();
 		_context->Update();
 #ifdef _DEBUG_UI
-		if (debug != Rml::Debugger::IsVisible()) {
-			Rml::Debugger::SetVisible(debug);
+		if (debug_rmlui != Rml::Debugger::IsVisible()) {
+			Rml::Debugger::SetVisible(debug_rmlui);
 		}
 		_debugger_context->Update();
 #endif
