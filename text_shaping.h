@@ -5,7 +5,7 @@ namespace text {
 
 	struct TextShape {
 		size_t glyph_count = 0; // Number of *nonempty* glyphs (i.e. not including whitespaces).
-		Rect2f bounding_box; // Bounding box for the whole text. This is always computed.
+		Rect2f bounding_box; // Bounding box for the whole *nonempty* text. This is always computed.
 		std::vector<Rect2f> glyph_bounding_boxes; // either empty *or* size = glyph_count
 		std::vector<Rect2f> glyph_texture_rects; // either empty *or* size = glyph_count
 	};

@@ -318,6 +318,9 @@
     <ClCompile Include="ui_shared.cpp">
       <Filter>game\ui\shared</Filter>
     </ClCompile>
+    <ClCompile Include="ui_pause_menu.cpp">
+      <Filter>game\ui\menus\pause_menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -699,7 +702,7 @@
       <Filter>game\ui\shared</Filter>
     </ClInclude>
     <ClInclude Include="ui_pause_menu.h">
-      <Filter>game\ui\menus</Filter>
+      <Filter>game\ui\menus\pause_menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -879,6 +882,9 @@
     </Filter>
     <Filter Include="game\ui\shared">
       <UniqueIdentifier>{20260a9d-b727-48af-bb00-3b8ce4d95cc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\menus\pause_menu">
+      <UniqueIdentifier>{b805aec3-20fd-41f1-8232-3b3b123eb349}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

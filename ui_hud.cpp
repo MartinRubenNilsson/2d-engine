@@ -3,7 +3,6 @@
 #include "ui_types.h"
 #include "ui_shared.h"
 #include "graphics.h"
-#include "text_fonts.h"
 
 namespace ui {
 namespace hud {
@@ -40,7 +39,7 @@ namespace hud {
 
 	void _layout_heart(unsigned int index, bool filled) {
 		ImageData* heart_image = filled ? &_filled_heart_image : &_empty_heart_image;
-		CLAY(CLAY_IDI("HudHeart", index), { .layout = {
+		CLAY(CLAY_IDI("hud_heart", index), { .layout = {
 			.sizing = {
 				.width = CLAY_SIZING_FIXED(16),
 				.height = CLAY_SIZING_FIXED(16) } },
@@ -50,28 +49,23 @@ namespace hud {
 	}
 
 	void _layout_health() {
-		CLAY(CLAY_ID("HudHealth"), { .layout = {
-			.childGap = 3 } })
-		{
+		CLAY(CLAY_ID("hud_health"), { .layout = { .childGap = 3 } }) {
 			for (unsigned int i = 0; i < max_health; ++i) {
 				_layout_heart(i, i < health);
 			}
 		}
 	}
 
-	Clay_String _to_clay_string(std::string_view string) {
-		return { false, (int32_t)string.size(), string.data() };
-	}
-
 	void _layout_text(std::string_view string) {
-		CLAY_TEXT(_to_clay_string(string), CLAY_TEXT_CONFIG(shared::text_config));
+		CLAY_TEXT(shared::to_clay(string), &shared::text_config);
 	}
 
 	void layout() {
-		CLAY(CLAY_ID("HudContainer"), { .layout = {
+		CLAY(CLAY_ID("hud"), { .layout = {
 			.padding = CLAY_PADDING_ALL(3),
 			.childGap = 3,
-			.layoutDirection = CLAY_TOP_TO_BOTTOM } })
+			.layoutDirection = CLAY_TOP_TO_BOTTOM },
+			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{
 			_layout_health();
 			_layout_text(_rupees_string);

@@ -18,6 +18,9 @@ namespace text {
         shape.glyph_texture_rects.clear();
         shape.bounding_box = Rect2f::EMPTY;
 
+        if (string.empty())
+            return;
+
         // The texel resolution (in number of texels from ascender to descender) the glyphs will have.
         // This will usually be much larger than font_size since there are many pixels on screen per
         // world-space length unit.

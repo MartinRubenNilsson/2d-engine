@@ -2,7 +2,6 @@
 #include "text.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
-#include "text_unicode.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
@@ -12,6 +11,7 @@ namespace text {
     Vec2f _get_anchor_position(const Rect2f& box, TextAnchor anchor) {
         const Vec2f box_cen = (box.min + box.max) * 0.5f; // center
         switch (anchor) {
+            default: [[fallthrough]]; // Should never happen.
             case TextAnchor::UpperLeft:    return { box.min.x, box.max.y };
             case TextAnchor::UpperCenter:  return { box_cen.x, box.max.y };
             case TextAnchor::UpperRight:   return { box.max.y, box.max.y };
@@ -21,7 +21,6 @@ namespace text {
             case TextAnchor::LowerLeft:    return { box.min.x, box.min.y };
             case TextAnchor::LowerCenter:  return { box_cen.x, box.min.y };
             case TextAnchor::LowerRight:   return { box.max.y, box.min.y };
-            default: return box_cen; // Should never happen.
         }
     }
 

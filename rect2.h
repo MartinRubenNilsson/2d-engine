@@ -69,6 +69,14 @@ Rect2<T> intersection(const Rect2<T>& r1, const Rect2<T>& r2) {
 			 { std::min(r1.max.x, r2.max.x), std::min(r1.max.y, r2.max.y) } };
 }
 
+// Returns the smallest rect that contains both r and p. This is usually called the "union"
+// of the two rects, but that keyword is reserved by C++.
+template <typename T>
+Rect2<T> join(const Rect2<T>& r, const Vec2<T>& p) {
+	return { { std::min(r.min.x, p.x), std::min(r.min.y, p.y) },
+			 { std::max(r.max.x, p.x), std::max(r.max.y, p.y) } };
+}
+
 // Returns the smallest rect that contains both r1 and r2. This is usually called the "union"
 // of the two rects, but that keyword is reserved by C++.
 template <typename T>

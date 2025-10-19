@@ -2,6 +2,7 @@
 #include "ui.h"
 #include "ui_types.h"
 #include "ui_game.h"
+#include "window.h"
 #include "window_events.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
@@ -28,10 +29,18 @@ namespace ui {
 		if (!font_id)
 			return { 0.f, 0.f }; // Invalid font ID.
 		text::Font& font = text::get_font(font_id);
+		// PITFALL: Clay calls this function with parts of the user-provided string (for example,
+		// it measures whitespaces separately) and uses the result to build the bounding box.
+		// Since shape_text() returns an empty bounding box for a text consisting of only white-
+		// space, we must detect this case and handle it manually. This may lead to bugs later
+		// down the line if shape_text() changes. Too bad!
+		if (text.length == 1 && text.chars[0] == ' ') {
+			const int advance = text::get_whitespace_advance(font);
+			const float width = advance * text::get_scale_for_font_size(font, config->fontSize);
+			return { width, 0.f };
+		}
 		text::TextShape shape{};
-		text::shape_text(shape, string, font, config->fontSize, 0.f, false, false);
-		if (shape.glyph_count == 0)
-			return { 0.f, 0.f }; // No nonempty glyphs (i.e. nothing is visible).
+		text::shape_text(shape, string, font, config->fontSize, 0.f, true, false);
 		if (config->userData) {
 			const TextData& data = *(const TextData*)config->userData;
 			shape.bounding_box = sweep(shape.bounding_box, data.shadow_offset); // grow the box to account for shadows
@@ -82,6 +91,8 @@ namespace ui {
 		static Clay_Vector2 mouse_pos{};
 		static bool mouse_is_down = false;
 
+		
+
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
 #if 0
@@ -95,8 +106,13 @@ namespace ui {
 				} break;
 #endif
 				case window::EventType::MouseMove: {
-					mouse_pos.x = (float)ev.mouse_move.x;
-					mouse_pos.y = (float)ev.mouse_move.y;
+					// The window size will generally be much bigger than the layout size,
+					// so we need to transform the mouse position to match the layout.
+					const Vec2i window_size = window::get_size();
+					if (window_size.x == 0 || window_size.y == 0)
+						break;
+					mouse_pos.x = ((float)ev.mouse_move.x / window_size.x) * GAME_FRAMEBUFFER_WIDTH;
+					mouse_pos.y = ((float)ev.mouse_move.y / window_size.y) * GAME_FRAMEBUFFER_HEIGHT;
 				} break;
 				case window::EventType::MouseButtonPress: {
 					if (ev.mouse_button.button == window::MouseButton::Left) {
@@ -117,8 +133,12 @@ namespace ui {
 			}
 		}
 
-		if (ImGui::GetIO().WantCaptureMouse)
+		// Make sure Clay doesn't capture the mouse if ImGui is already doing so.
+		if (ImGui::GetIO().WantCaptureMouse) {
+			mouse_pos.x = -1.f;
+			mouse_pos.y = -1.f;
 			mouse_is_down = false;
+		}
 
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
 
