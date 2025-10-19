@@ -31,6 +31,10 @@ namespace ui {
 		text::shape_text(shape, string, font, config->fontSize, 0.f, false, false);
 		if (shape.glyph_count == 0)
 			return { 0.f, 0.f }; // No nonempty glyphs (i.e. nothing is visible).
+		if (config->userData) {
+			const TextData& data = *(const TextData*)config->userData;
+			shape.bounding_box = sweep(shape.bounding_box, data.shadow_offset); // grow the box to account for shadows
+		}
 		const Vec2f box_size = shape.bounding_box.max - shape.bounding_box.min;
 		return { box_size.x, box_size.y };
 	}
@@ -221,16 +225,42 @@ namespace ui {
 					// How much the text needs to be translated for the UI bounding box and text bounding box to conincide.
 					const Vec2f translation = box.min - text_shape.bounding_box.min;
 
+					Vec2f shadow_offset{};
+					Color shadow_color{};
+					if (command.userData) {
+						const TextData& text_data = *(const TextData*)command.userData;
+						shadow_offset = text_data.shadow_offset;
+						shadow_color = text_data.shadow_color;
+					}
+
+					// PITFALL: There's no need to sweep the box to account for the shadow offset, because _measure_text()
+					// will already have done so. If we sweep it here we will double-sweep. So translation is correct as-is.
+
 					// Create vertices for the glyphs.
 					for (size_t g = 0; g < text_shape.glyph_count; ++g) {
+
 						Rect2f& box = text_shape.glyph_bounding_boxes[g];
 						box.min += translation;
 						box.max += translation;
+
 						Rect2f& rect = text_shape.glyph_texture_rects[g];
 						// HACK: We use negative texture coordinates to indicate that the texture is grayscale
 						// (only has one channel), as for example is the case for font atlas textures.
 						rect.min = -rect.min;
 						rect.max = -rect.max;
+
+						// If the text has shadow, add vertices for the shadow glyph first so it renders under the normal glyph.
+						if (shadow_offset != Vec2f::ZERO) {
+							const Rect2f& shadow_box = translate(box, shadow_offset);
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.min.y), shadow_color, Vec2f(rect.min.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
+							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.max.y), shadow_color, Vec2f(rect.max.x, rect.max.y));
+						}
+
+						// Add vertices for the normal glyph.
 						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
 						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
 						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
