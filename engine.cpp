@@ -57,6 +57,7 @@ namespace engine {
         console::startup();
         audio::startup();
         _load_all_audio_banks();
+        text::startup_fonts();
         ui::startup();
         ui::startup_rmlui(); // TODO: remove
         ecs::startup();

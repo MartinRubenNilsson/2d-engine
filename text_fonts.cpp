@@ -62,7 +62,8 @@ namespace text {
 	}
 
 	void startup_fonts() {
-		// TODO: load default font
+		// Load the default font.
+		load_font("assets/fonts/Helvetica.ttf");
 	}
 
 	void shutdown_fonts() {
