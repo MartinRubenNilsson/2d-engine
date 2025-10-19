@@ -65,42 +65,21 @@ namespace text {
 
     std::vector<Batch> _batches;
 
-    void _add_to_batches(Handle<graphics::Texture> texture, Handle<graphics::Sampler> sampler, unsigned int vertex_count) {
-        if (_batches.empty()) {
-            _batches.emplace_back(texture, sampler, 0, vertex_count); // Create the first batch.
-        } else if (_batches.back().texture == texture || _batches.back().sampler == sampler) {
-            _batches.back().vertex_count += vertex_count; // Continue the current batch.
-        } else {
-            const unsigned int vertex_offset = _batches.back().vertex_offset + _batches.back().vertex_count;
-            _batches.emplace_back(texture, sampler, vertex_offset, vertex_count); // Create the next batch.
-        }
-    }
-
     void draw_all_now() {
         if (_texts.empty())
             return;
 
         GRAPHICS_DEBUG_GROUP;
 
-        // Find out how many pixels per world unit we're rendering to.
-        const graphics::Viewport& viewport = graphics::get_viewport();
-        const float pixels_per_world_unit = viewport.height / GAME_FRAMEBUFFER_HEIGHT;
-
-        // Preallocate storage for the vertices.
         graphics::temp_vertices.clear();
-        {
-            size_t vertex_count = 0;
-            for (const Text& text : _texts) {
-                // In general we will have 6 vertices per non-whitespace glyph.
-                // TODO: Handle whitespaces for a more conservative preallocation.
-                vertex_count += 6 * length({ (const char8_t*)text.string.data(), text.string.size() });
-            }
-            graphics::temp_vertices.reserve(vertex_count);
-        }
+        _batches.clear(); // DEFENSIVE
 
         // Create batches.
-        _batches.clear();
         {
+            // Find out how many pixels per world unit we're rendering to.
+            const graphics::Viewport& viewport = graphics::get_viewport();
+            const float pixels_per_world_unit = viewport.height / GAME_FRAMEBUFFER_HEIGHT;
+
             TextShape shape{}; // Stored outside the loop to reuse memory.
             for (const Text& text : _texts) {
                 if (text.string.empty())
@@ -133,11 +112,19 @@ namespace text {
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), text.color, Vec2f(rect.max.x, rect.max.y));
                 }
                 const unsigned int vertex_count_after = (unsigned int)graphics::temp_vertices.size();
+                const unsigned int vertex_count = vertex_count_after - vertex_count_before;
 
                 const Handle<graphics::Sampler> sampler = text.linear_sampling ?
                     graphics::linear_sampler : graphics::nearest_sampler;
 
-                _add_to_batches(texture, sampler, vertex_count_after - vertex_count_before);
+                if (_batches.empty()) {
+                    _batches.emplace_back(texture, sampler, 0, vertex_count); // Create the first batch.
+                } else if (_batches.back().texture == texture || _batches.back().sampler == sampler) {
+                    _batches.back().vertex_count += vertex_count; // Continue the current batch.
+                } else {
+                    const unsigned int vertex_offset = _batches.back().vertex_offset + _batches.back().vertex_count;
+                    _batches.emplace_back(texture, sampler, vertex_offset, vertex_count); // Create the next batch.
+                }
             }
         }
 
@@ -148,12 +135,16 @@ namespace text {
                 update_atlas_texture(font);
             }
         }
-        _texts.clear(); // At this point we don't need the texts anymore.
+
+        // At this point we don't need the texts anymore.
+        _texts.clear();
 
         // Update vertex buffer.
         graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
             (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
-        graphics::temp_vertices.clear(); // At this point we don't need the temp buffer anymore.
+
+        // At this point we don't need the temp vertex buffer anymore.
+        graphics::temp_vertices.clear();
 
         // Draw all batches.
         graphics::set_primitives(graphics::Primitives::TriangleList);
@@ -175,6 +166,8 @@ namespace text {
                 graphics::draw(batch.vertex_count, batch.vertex_offset);
             }
         }
-        _batches.clear(); // At this point we're done with the batches.
+
+        // At this point we're done with the batches.
+        _batches.clear();
     }
 }
