@@ -33,9 +33,11 @@ namespace text {
         text::shape_text(shape, text.string, font, text.font_size, 0.f, false, false);
         if (shape.glyph_count == 0)
             return Rect2f::EMPTY; // No nonempty glyphs (i.e. nothing is visible).
+        shape.bounding_box = sweep(shape.bounding_box, text.shadow_offset);
         const Vec2f anchor_pos = _get_anchor_position(shape.bounding_box, text.anchor);
         const Vec2f translation = text.position - anchor_pos;
-        return { shape.bounding_box.min + translation, shape.bounding_box.max + translation };
+        shape.bounding_box = translate(shape.bounding_box, translation);
+        return shape.bounding_box;
     }
 
     std::vector<Text> _texts;
@@ -99,10 +101,25 @@ namespace text {
 
                 // Create vertices for the glyphs.
                 for (size_t g = 0; g < shape.glyph_count; ++g) {
+
                     Rect2f& box = shape.glyph_bounding_boxes[g];
                     box.min += translation;
                     box.max += translation;
+
                     const Rect2f& rect = shape.glyph_texture_rects[g];
+
+                    // If the text has shadow, add vertices for the shadow glyph first so it renders under the normal glyph.
+                    if (text.shadow_offset != Vec2f::ZERO) {
+                        const Rect2f& shadow_box = translate(box, text.shadow_offset);
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.min.y), text.shadow_color, Vec2f(rect.min.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), text.shadow_color, Vec2f(rect.max.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), text.shadow_color, Vec2f(rect.min.x, rect.max.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), text.shadow_color, Vec2f(rect.min.x, rect.max.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), text.shadow_color, Vec2f(rect.max.x, rect.min.y));
+                        graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.max.y), text.shadow_color, Vec2f(rect.max.x, rect.max.y));
+                    }
+
+                    // Add vertices for the normal glyph.
                     graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), text.color, Vec2f(rect.min.x, rect.min.y));
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), text.color, Vec2f(rect.max.x, rect.min.y));
                     graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), text.color, Vec2f(rect.min.x, rect.max.y));
@@ -110,6 +127,7 @@ namespace text {
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), text.color, Vec2f(rect.max.x, rect.min.y));
                     graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), text.color, Vec2f(rect.max.x, rect.max.y));
                 }
+
                 const unsigned int vertices_end = (unsigned int)graphics::temp_vertices.size(); // one-past-the-end
 
                 const Handle<graphics::Sampler> sampler = text.linear_sampling ?

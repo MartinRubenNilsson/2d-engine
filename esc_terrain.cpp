@@ -116,6 +116,7 @@ namespace ecs {
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");
 		text.font_size = 8.f;
 		text.anchor = text::TextAnchor::MiddleCenter;
+		text.shadow_offset = { 0.2f, 0.2f }; // make the text easier to see
 
 		for (unsigned int y = min.y; y <= max.y; ++y) {
 			for (unsigned int x = min.x; x <= max.x; ++x) {

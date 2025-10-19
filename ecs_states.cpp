@@ -204,14 +204,15 @@ namespace ecs {
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 6.f;
 		text.anchor = text::TextAnchor::UpperCenter;
+		text.shadow_offset = { 0.2f, 0.2f }; // make the text easier to see
 
 		for (auto [entity, sm, body] : _registry.view<StateMachine, b2BodyId>().each()) {
-			std::string string;
+			std::string_view string;
 			if (State* current_state = _get_state(sm, sm.current_state)) {
-				string += current_state->name;
+				string = current_state->name;
 			}
 			if (string.empty()) continue;
-			text.string.assign(string.begin(), string.end());
+			text.string = string;
 			text.position = b2Body_GetWorldCenterOfMass(body);
 			text.position.y += 8.f;
 			text::draw_later(text);

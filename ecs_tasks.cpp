@@ -103,11 +103,12 @@ namespace ecs {
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 6.f;
 		text.anchor = text::TextAnchor::UpperCenter;
+		text.shadow_offset = { 0.2f, 0.2f }; // make the text easier to see
 
 		for (auto [entity, body, task] : _registry.view<const b2BodyId, const Task>().each()) {
 			if (task.name.empty())
 				continue;
-			text.string.assign(task.name.begin(), task.name.end());
+			text.string = task.name;
 			text.position = b2Body_GetWorldCenterOfMass(body);
 			text.position.y += 8.f;
 			text::draw_later(text);
