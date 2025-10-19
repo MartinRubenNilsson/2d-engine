@@ -1,14 +1,12 @@
 #include "stdafx.h"
 #include "ui_clay.h"
 #include "window_events.h"
+#include "text_fonts.h"
+#include "text_shaping.h"
 #include "console.h"
 #include "graphics.h"
 #include "graphics_globals.h" // TODO: don't put this here
 #include "graphics_debugging.h"
-
-#include "text.h"
-#include "text_fonts.h"
-#include "text_shaping.h"
 #include "ui_hud.h" // TODO: don't put this here
 
 #pragma warning(push)
@@ -135,6 +133,7 @@ namespace ui {
 	};
 
 	std::vector<Batch> _batches;
+	std::vector<text::FontId> _fonts_to_update; // fonts whose atlas texture needs updating
 
 	void render() {
 		if (!_clay_render_commands.length)
@@ -152,6 +151,7 @@ namespace ui {
 
 		graphics::temp_vertices.clear();
 		_batches.clear();
+		_fonts_to_update.clear();
 		
 		// Create batches.
 
@@ -200,16 +200,54 @@ namespace ui {
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
 
-#if 0
 					const Clay_TextRenderData& data = command.renderData.text;
 					const std::string_view string{ data.stringContents.chars, (size_t)data.stringContents.length };
+					if (string.empty())
+						continue; // Nothing to render.
+
 					const text::FontId font_id{ .id = data.fontId };
 					if (!font_id)
 						continue; // Invalid font.
+
+					Color color = data.textColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
 					text::Font& font = text::get_font(font_id);
+					texture = text::get_atlas_texture(font);
+
 					text::shape_text(text_shape, string, font, data.fontSize, pixels_per_unit, true, true);
-					// TODO: create vertices
-#endif
+
+					// How much the text needs to be translated for the UI bounding box and text bounding box to conincide.
+					const Vec2f translation = box.min - text_shape.bounding_box.min;
+
+					// Create vertices for the glyphs.
+					for (size_t g = 0; g < text_shape.glyph_count; ++g) {
+						Rect2f& box = text_shape.glyph_bounding_boxes[g];
+						box.min += translation;
+						box.max += translation;
+						const Rect2f& rect = text_shape.glyph_texture_rects[g];
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+					}
+
+					// Check if font atlas texture needs to be updated.
+					if (text::atlas_texture_needs_updating(font)) {
+						bool already_in_fonts_to_update = false;
+						for (const text::FontId font_to_update : _fonts_to_update) {
+							if (font_to_update == font_id) {
+								already_in_fonts_to_update = true;
+								break;
+							}
+						}
+						if (!already_in_fonts_to_update) {
+							_fonts_to_update.push_back(font_id);
+						}
+					}
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
@@ -218,6 +256,8 @@ namespace ui {
 					if (!data.imageData) continue; // DEFENSIVE
 
 					const ImageData& image_data = *(const ImageData*)data.imageData;
+					texture = image_data.texture;
+
 					const Vec2f texture_size = graphics::get_texture_size(image_data.texture);
 
 					Rect2f rect{}; // texture rect in UV-space (normalized coordinates)
@@ -228,14 +268,13 @@ namespace ui {
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
 						color = Color::WHITE;
 
+					// Create vertices for the image.
 					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
 					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
 					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
 					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
 					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
 					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
-
-					texture = image_data.texture;
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
@@ -293,6 +332,15 @@ namespace ui {
 
 		// At this point we're done with the temp vertex buffer.
 		graphics::temp_vertices.clear();
+
+		// Update all font atlas textures that need to be updated.
+		for (const text::FontId font_id : _fonts_to_update) {
+			text::Font& font = text::get_font(font_id);
+			text::update_atlas_texture(font);
+		}
+
+		// At this point we're done updating the font atlas textures.
+		_fonts_to_update.clear();
 
 		// Draw all batches.
 		graphics::set_primitives(graphics::Primitives::TriangleList);
