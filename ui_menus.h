@@ -1,9 +1,7 @@
 #pragma once
 
-namespace ui
-{
-	enum class MenuType
-	{
+namespace ui {
+	enum class MenuType {
 		Main,
 		Pause,
 		Settings,

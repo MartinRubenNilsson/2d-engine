@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ui.h"
 #include "ui_types.h"
+#include "ui_game.h"
 #include "window_events.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
@@ -8,7 +9,6 @@
 #include "graphics_globals.h"
 #include "graphics_debugging.h"
 #include "console.h"
-#include "ui_hud.h" // TODO: don't put this here
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
@@ -68,10 +68,11 @@ namespace ui {
 	void startup() {
 		_startup_clay();
 		_load_shaders();
-		hud::startup();
+		game::startup();
 	}
 
 	void shutdown() {
+		game::shutdown();
 		_shutdown_clay();
 	}
 
@@ -119,7 +120,7 @@ namespace ui {
 
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
 
-		hud::update(dt); // TODO: move to like game_ui.h or someting
+		game::update(dt);
 	}
 
 	Clay_RenderCommandArray _clay_render_commands{};
@@ -127,7 +128,7 @@ namespace ui {
 	void layout() {
 		_clay_render_commands = {};
 		Clay_BeginLayout();
-		hud::layout(); // TODO: move to like game_ui.h or someting
+		game::layout();
 		_clay_render_commands = Clay_EndLayout();
 	}
 

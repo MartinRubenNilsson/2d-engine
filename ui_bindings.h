@@ -1,12 +1,7 @@
 #pragma once
 
-namespace ui
-{
-	namespace bindings
-	{
-
-		// TEXTBOX
-
+namespace ui {
+	namespace bindings {
 		extern std::string textbox_text; // RML
 		extern bool textbox_has_sprite;
 		extern std::string textbox_sprite;
@@ -19,4 +14,3 @@ namespace ui
 	void dirty_all_variables();
 	void create_bindings();
 }
-

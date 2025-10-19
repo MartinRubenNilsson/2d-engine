@@ -240,6 +240,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="text_unicode.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="easings.cpp" />
+    <ClCompile Include="ui_game.cpp" />
     <ClCompile Include="ui_rmlui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
@@ -348,6 +349,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />
     <ClInclude Include="ui.h" />
+    <ClInclude Include="ui_game.h" />
     <ClInclude Include="ui_rmlui_system_interface.h" />
     <ClInclude Include="ui_types.h" />
     <ClInclude Include="vec2.h" />
