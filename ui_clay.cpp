@@ -128,6 +128,14 @@ namespace ui {
 		_clay_render_commands = Clay_EndLayout();
 	}
 
+	struct Batch {
+		Handle<graphics::Texture> texture{};
+		unsigned int vertices_begin = 0;
+		unsigned int vertices_end = 0; // one-past-the-end
+	};
+
+	std::vector<Batch> _batches;
+
 	void render() {
 		if (!_clay_render_commands.length)
 			return;
@@ -143,111 +151,162 @@ namespace ui {
 			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
 
 		graphics::temp_vertices.clear();
+		_batches.clear();
+		
+		// Create batches.
 
-		graphics::set_primitives(graphics::Primitives::TriangleList);
-		graphics::bind_vertex_shader(_ui_clay_vert);
-		graphics::bind_fragment_shader(_ui_clay_frag);
-		graphics::bind_sampler(0, graphics::nearest_sampler);
-
+		text::TextShape text_shape{}; // Stored outside the loop so we can reuse the memory.
 		for (const Clay_RenderCommand& command : commands) {
 
-			Rect2f box{};
+			Rect2f box{}; // Bounding box.
 			box.min.x = command.boundingBox.x;
 			box.min.y = command.boundingBox.y;
 			box.max.x = command.boundingBox.x + command.boundingBox.width;
 			box.max.y = command.boundingBox.y + command.boundingBox.height;
 
-			Color color = Color::WHITE;
-
-			Rect2f uv{}; // texture rect in UV space (normalized texture coordinates)
-
 			Handle<graphics::Texture> texture = graphics::white_texture;
 
 			switch (command.commandType) {
 				case CLAY_RENDER_COMMAND_TYPE_NONE: {
+
 					// This command type should be skipped.
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
+
 					const Clay_RectangleRenderData& data = command.renderData.rectangle;
-					color = data.backgroundColor;
+
+					Color color = data.backgroundColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					// Add vertices for the quad.
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f::ZERO);
+
 					// TODO: corner radius
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
+
 					// The renderer should draw a colored border inset into the bounding box.
 					console::log_error("CLAY_RENDER_COMMAND_TYPE_BORDER is not supported"); // TODO
 					continue;
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
+
 #if 0
 					const Clay_TextRenderData& data = command.renderData.text;
-					text::Text text{};
-					text.position.x = command.boundingBox.x;
-					text.position.y = command.boundingBox.y;
-					text.font.id = data.fontId;
-					text.font_size = (float)data.fontSize;
-					// TODO: don't copy the string
-					text.string = { data.stringContents.chars, (size_t)data.stringContents.length };
-					text.color = data.textColor;
-					text.linear_sampling = false;
-					text.anchor = text::TextAnchor::UpperLeft;
-					text::draw_later(text);
-					text::draw_all_now(); // TODO: camera is all wrong
+					const std::string_view string{ data.stringContents.chars, (size_t)data.stringContents.length };
+					const text::FontId font_id{ .id = data.fontId };
+					if (!font_id)
+						continue; // Invalid font.
+					text::Font& font = text::get_font(font_id);
+					text::shape_text(text_shape, string, font, data.fontSize, pixels_per_unit, true, true);
+					// TODO: create vertices
 #endif
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
+
 					const Clay_ImageRenderData& data = command.renderData.image;
 					if (!data.imageData) continue; // DEFENSIVE
-					const ImageData& image = *(const ImageData*)data.imageData;
-					const Vec2f texture_size = graphics::get_texture_size(image.texture);
-					uv.min = (Vec2f)image.rect_position / texture_size;
-					uv.max = uv.min + (Vec2f)image.rect_size / texture_size;
-					color = data.backgroundColor;
-					texture = image.texture;
+
+					const ImageData& image_data = *(const ImageData*)data.imageData;
+					const Vec2f texture_size = graphics::get_texture_size(image_data.texture);
+
+					Rect2f rect{}; // texture rect in UV-space (normalized coordinates)
+					rect.min = (Vec2f)image_data.rect_position / texture_size;
+					rect.max = rect.min + (Vec2f)image_data.rect_size / texture_size;
+
+					Color color = data.backgroundColor;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
+					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+
+					texture = image_data.texture;
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
+
 					// The renderer should begin clipping all future draw commands, only rendering content that falls within the provided boundingBox.
 					console::log_error("CLAY_RENDER_COMMAND_TYPE_SCISSOR_START is not supported"); // TODO
 					continue;
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END: {
+
 					// The renderer should finish any previously active clipping, and begin rendering elements in full again.
 					console::log_error("CLAY_RENDER_COMMAND_TYPE_SCISSOR_END is not supported"); // TODO
 					continue;
+
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
+
 					// The renderer should provide a custom implementation for handling this render command based on its .customData
 					console::log_error("CLAY_RENDER_COMMAND_TYPE_CUSTOM is not supported"); // TODO
 					continue;
+
 				} break;
 			}
 
-			if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
-				color = Color::WHITE;
+			const unsigned vertices_end = (unsigned int)graphics::temp_vertices.size(); // one-past-the-end
 
-			// Add vertices for the quad.
-			graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(uv.min.x, uv.min.y));
-			graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(uv.max.x, uv.min.y));
-			graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(uv.min.x, uv.max.y));
-			graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(uv.min.x, uv.max.y));
-			graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(uv.max.x, uv.min.y));
-			graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(uv.max.x, uv.max.y));
-
-			// Transform to clip space.
-			for (graphics::Vertex& v : graphics::temp_vertices) {
-				v.position.x /= dimensions.width;
-				v.position.y /= dimensions.height;
-				v.position.x = v.position.x * 2.f - 1.f;
-				v.position.y = v.position.y * 2.f - 1.f;
+			if (_batches.empty()) {
+				// Start the first batch.
+				_batches.emplace_back(texture, 0, vertices_end);
+				continue;
 			}
-
-			graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
-				(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
-			graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
-			graphics::temp_vertices.clear();
-
-			graphics::bind_texture(0, texture);
-
-			graphics::draw(6); // draw 1 quad = 2 tris = 6 verts
+			Batch& current_batch = _batches.back();
+			if (current_batch.texture == texture) {
+				// Continue the current batch.
+				current_batch.vertices_end = vertices_end;
+				continue;
+			}
+			// Start the next batch.
+			_batches.emplace_back(texture, current_batch.vertices_end, vertices_end);
 		}
+
+		// Transform all vertices to clip space.
+		for (graphics::Vertex& v : graphics::temp_vertices) {
+			v.position.x /= dimensions.width;
+			v.position.y /= dimensions.height;
+			v.position.x = v.position.x * 2.f - 1.f;
+			v.position.y = v.position.y * 2.f - 1.f;
+		}
+
+		// Update and bind the vertex buffer.
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
+			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+
+		// At this point we're done with the temp vertex buffer.
+		graphics::temp_vertices.clear();
+
+		// Draw all batches.
+		graphics::set_primitives(graphics::Primitives::TriangleList);
+		graphics::bind_vertex_shader(_ui_clay_vert);
+		graphics::bind_fragment_shader(_ui_clay_frag);
+		graphics::bind_sampler(0, graphics::nearest_sampler);
+		for (const Batch& batch : _batches) {
+			graphics::bind_texture(0, batch.texture);
+			const unsigned int vertex_count = batch.vertices_end - batch.vertices_begin;
+			const unsigned int vertex_offset = batch.vertices_begin;
+			graphics::draw(vertex_count, vertex_offset);
+		}
+
+		// At this point we're done with the batches.
+		_batches.clear();
 	}
 }
