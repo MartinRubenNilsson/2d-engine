@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "background.h"
 #include "graphics.h"
+#include "graphics_debugging.h"
 #include "sprites.h"
 
 namespace background {
@@ -56,6 +57,8 @@ namespace background {
 	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
 		if (_type == Type::None) return;
 
+		GRAPHICS_DEBUG_GROUP;
+
 		sprites::Sprite sprite{};
 		for (const Layer& layer : _layers) {
 			if (layer.texture == Handle<graphics::Texture>()) continue;
@@ -69,6 +72,6 @@ namespace background {
 		}
 
 		// We don't have to sort before drawing, since the sprites were added in draw order.
-		sprites::draw_all_now(__FUNCTION__);
+		sprites::draw_all_now();
 	}
 }

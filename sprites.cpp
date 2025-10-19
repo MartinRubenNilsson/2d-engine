@@ -3,6 +3,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
+#include "graphics_debugging.h"
 
 namespace sprites {
 	bool operator<(const Sprite& left, const Sprite& right) {
@@ -77,10 +78,10 @@ namespace sprites {
 		eastl::tim_sort_buffer(_sprites.begin(), _sprites.end(), _sprites.end());
 	}
 
-	void draw_all_now(std::string_view debug_group_name) {
+	void draw_all_now() {
 		if (_sprites.empty()) return;
 
-		const graphics::ScopedDebugGroup debug_group(debug_group_name);
+		GRAPHICS_DEBUG_GROUP;
 
 		// Sprites sharing the same state (shader, texture, etc.) are batched together to reduce draw calls.
 		// This is done by creating a triangle strip for each batch and drawing it only when the state changes.

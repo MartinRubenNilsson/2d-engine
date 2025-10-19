@@ -1,10 +1,10 @@
 #pragma once
 
 namespace ui {
-	struct Image {
+	struct ImageData {
 		Handle<graphics::Texture> texture{};
-		Vec2u tex_rect_pos{}; // texture rect top left corner position in pixels
-		Vec2u tex_rect_size{}; // texture rect size in pixels
+		Vec2u rect_position{}; // texture rect top left corner *in pixels*
+		Vec2u rect_size{}; // texture rect size *in pixels*
 	};
 
 	void startup();

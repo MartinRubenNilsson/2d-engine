@@ -4,6 +4,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
+#include "graphics_debugging.h"
 
 namespace shapes {
 	struct ViewBounds {
@@ -238,9 +239,7 @@ namespace shapes {
 		}
 	}
 
-	void _draw_all_batches(std::string_view debug_group_name) {
-		graphics::ScopedDebugGroup debug_group(debug_group_name);
-
+	void _draw_all_batches() {
 		const unsigned int vertices_byte_size = (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex);
 		if (vertices_byte_size <= graphics::get_buffer_size(graphics::dynamic_vertex_buffer)) {
 			graphics::update_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(), vertices_byte_size);
@@ -258,7 +257,7 @@ namespace shapes {
 		}
 	}
 
-	void draw_all_now(std::string_view debug_group_name, const Vec2f& camera_min, const Vec2f& camera_max) {
+	void draw_all_now(const Vec2f& camera_min, const Vec2f& camera_max) {
 
 		_last_calculated_view_bounds.min_x = camera_min.x;
 		_last_calculated_view_bounds.min_y = camera_min.y;
@@ -277,7 +276,9 @@ namespace shapes {
 		if (_batches.empty())
 			return; // nothing to draw
 
-		_draw_all_batches(debug_group_name);
+		GRAPHICS_DEBUG_GROUP;
+
+		_draw_all_batches();
 
 		_batches.clear();
 		graphics::temp_vertices.clear();

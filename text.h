@@ -22,7 +22,7 @@ namespace text {
 	struct Text {
 		FontId font{};
 		float font_size = 8.f; // In world units (NOT screen coordinates!)
-		std::string string; // UTF-8 string, through we're using a regular std::string and not std:u8string.
+		std::string string; // UTF-8 string (even through we're using a regular std::string and not std:u8string).
 		Vec2f position; // In world units (NOT screen coordinates!)
 		TextAnchor anchor = TextAnchor::Default;
 		Color color = Color::WHITE;
@@ -30,7 +30,8 @@ namespace text {
 	};
 
 	Rect2f get_bounding_box(const Text& text);
+
 	void draw_later(const Text& text);
 	void sort_all(); // Sorts all texts by draw order.
-	void draw_all_now(std::string_view debug_group_name);
+	void draw_all_now();
 }

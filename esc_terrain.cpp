@@ -3,6 +3,7 @@
 #include "ecs_tiled.h"
 #include "text.h"
 #include "text_fonts.h"
+#include "graphics_debugging.h"
 
 namespace ecs {
 	std::string_view to_string(TerrainType type) {
@@ -104,6 +105,8 @@ namespace ecs {
 		if (_terrain_size.x == 0 || _terrain_size.y == 0)
 			return;
 
+		GRAPHICS_DEBUG_GROUP;
+
 		Vec2u min = _position_to_terrain_tile_coord(view.min);
 		Vec2u max = _position_to_terrain_tile_coord(view.max);
 		max = ::min(max, _terrain_size - Vec2u(1, 1));
@@ -133,6 +136,6 @@ namespace ecs {
 			}
 		}
 
-		text::draw_all_now(__FUNCTION__);
+		text::draw_all_now();
 	}
 }

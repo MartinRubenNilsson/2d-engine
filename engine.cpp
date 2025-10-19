@@ -17,6 +17,7 @@
 #include "settings.h"
 #include "graphics.h"
 #include "graphics_globals.h"
+#include "graphics_debugging.h"
 #include "shapes.h"
 #include "sprites.h"
 #include "renderdoc.h"
@@ -194,7 +195,7 @@ namespace engine {
     }
 
     void _render_copy_final_framebuffer_to_back_buffer() {
-        const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
+        GRAPHICS_DEBUG_GROUP;
         const Handle<graphics::Framebuffer> back_buffer = graphics::get_swap_chain_back_buffer();
         graphics::clear_framebuffer(back_buffer);
         graphics::bind_framebuffer(back_buffer);
@@ -284,7 +285,7 @@ namespace engine {
         // UPSCALE GAME FRAMEBUFFER TO FINAL FRAMEBUFFER
 
         if (!window::minimized()) {
-            graphics::ScopedDebugGroup debug_group("Upscale to final framebuffer");
+            const graphics::ScopedDebugGroup debug_group("Upscale to final framebuffer");
             graphics::clear_framebuffer(graphics::final_framebuffer);
             graphics::bind_framebuffer(graphics::final_framebuffer);
             graphics::bind_vertex_shader(graphics::fullscreen_vert);
@@ -300,7 +301,7 @@ namespace engine {
 
         // RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
-        shapes::draw_all_now("shapes::draw_all() [ECS debug]", camera_min, camera_max);
+        shapes::draw_all_now(camera_min, camera_max);
         shapes::update_lifetimes(_game_delta_time);
 #endif
 

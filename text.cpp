@@ -5,6 +5,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
+#include "graphics_debugging.h"
 
 namespace text {
     std::u8string_view _to_u8(std::string_view string) {
@@ -168,11 +169,11 @@ namespace text {
         }
     }
 
-    void draw_all_now(std::string_view debug_group_name) {
+    void draw_all_now() {
         if (_texts.empty())
             return;
 
-        const graphics::ScopedDebugGroup debug_group(debug_group_name);
+        GRAPHICS_DEBUG_GROUP;
 
         // Find out how many pixels per world unit we're rendering to.
         const graphics::Viewport& viewport = graphics::get_viewport();

@@ -4,6 +4,7 @@
 #include "ecs_uniform_block.h"
 #include "graphics.h"
 #include "graphics_globals.h"
+#include "graphics_debugging.h"
 #include "sprites.h"
 #include "random.h"
 
@@ -102,6 +103,7 @@ namespace ecs {
 	}
 
 	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
+		GRAPHICS_DEBUG_GROUP;
 
 		_blink_sprites_before_drawing();
 		_shake_sprites_before_drawing();
@@ -130,13 +132,12 @@ namespace ecs {
 		}
 
 		if (!blocks.empty()) {
-			const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
 			graphics::update_buffer(graphics::sprite_uniform_buffer,
 				blocks.data(), (unsigned int)blocks.size() * sizeof(UniformBlock));
 		}
 
 		sprites::sort_all();
-		sprites::draw_all_now(__FUNCTION__);
+		sprites::draw_all_now();
 
 		_unblink_sprites_after_drawing();
 		_unshake_sprites_after_drawing();

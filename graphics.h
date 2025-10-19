@@ -4,7 +4,6 @@
 #include <string_view>
 
 namespace graphics {
-
 	struct VertexShader;
 	struct FragmentShader;
 	struct VertexInput;
@@ -19,14 +18,6 @@ namespace graphics {
 	void shutdown();
 
 	bool is_spirv_supported(); // TODO: remove from public api, this should be internal
-
-	void push_debug_group(std::string_view name);
-	void pop_debug_group();
-
-	struct ScopedDebugGroup {
-		ScopedDebugGroup(std::string_view name) { push_debug_group(name); }
-		~ScopedDebugGroup() { pop_debug_group(); }
-	};
 
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc);
 	Handle<VertexShader> load_vertex_shader(std::string_view path); // TODO: reload vertex shader

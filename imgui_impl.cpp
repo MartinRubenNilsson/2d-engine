@@ -3,6 +3,7 @@
 #include "window.h"
 #include "graphics.h"
 #include "graphics_api.h"
+#include "graphics_debugging.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -135,7 +136,7 @@ namespace imgui_impl {
 	}
 
 	void render() {
-		const graphics::ScopedDebugGroup debug_group(__FUNCTION__);
+		GRAPHICS_DEBUG_GROUP;
 		ImGui::Render();
 #ifdef GRAPHICS_API_OPENGL
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

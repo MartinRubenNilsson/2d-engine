@@ -2,6 +2,7 @@
 #include "ecs_states.h"
 #include "text.h"
 #include "text_fonts.h"
+#include "graphics_debugging.h"
 
 namespace ecs {
 	struct StateMachine {
@@ -197,6 +198,7 @@ namespace ecs {
 	}
 
 	void debug_draw_state_machines() {
+		GRAPHICS_DEBUG_GROUP;
 
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
@@ -215,6 +217,6 @@ namespace ecs {
 			text::draw_later(text);
 		}
 
-		text::draw_all_now("ecs::debug_draw_state_machines()");
+		text::draw_all_now();
 	}
 }

@@ -680,6 +680,9 @@
     <ClInclude Include="engine_fps_counter.h">
       <Filter>engine\fps_counter</Filter>
     </ClInclude>
+    <ClInclude Include="graphics_debugging.h">
+      <Filter>engine\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

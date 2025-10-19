@@ -3,6 +3,7 @@
 #include "ecs_tasks.h"
 #include "text.h"
 #include "text_fonts.h"
+#include "graphics_debugging.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -96,6 +97,8 @@ namespace ecs {
 	}
 
 	void _debug_draw_task_names() {
+		GRAPHICS_DEBUG_GROUP;
+
 		text::Text text{};
 		text.font = text::load_font("assets/fonts/Helvetica.ttf");;
 		text.font_size = 6.f;
@@ -110,7 +113,7 @@ namespace ecs {
 			text::draw_later(text);
 		}
 
-		text::draw_all_now("ecs::_debug_draw_task_names()");
+		text::draw_all_now();
 	}
 
 	void debug_draw_tasks() {

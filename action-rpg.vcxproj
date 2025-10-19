@@ -321,6 +321,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="engine.h" />
     <ClInclude Include="engine_fps_counter.h" />
     <ClInclude Include="files.h" />
+    <ClInclude Include="graphics_debugging.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="platform_debugging.h" />
     <ClInclude Include="platform_directory_changes.h" />

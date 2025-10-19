@@ -61,7 +61,7 @@ namespace sprites {
 	// Sorts all added sprites by draw order.
 	void sort_all();
 	// Draws all added sprites and removes them.
-	void draw_all_now(std::string_view debug_group_name);
+	void draw_all_now();
 
 	void clear_statistics();
 	unsigned int get_num_sprites_drawn();
