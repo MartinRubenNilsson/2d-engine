@@ -12,12 +12,7 @@ namespace ecs {
 		_registry.remove<b2BodyId>(entity); // Stop running physics.
 		TileId& tile = _registry.get<TileId>(entity);
 		const Direction dir = _registry.get<Direction>(entity);
-		switch (dir) {
-			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
-			case Direction::N: replace(tile, PLAYER_TILE_ID_DYING_NE); break;
-			case Direction::S: replace(tile, PLAYER_TILE_ID_DYING_SE); break;
-		}
+		replace(tile, dir, PLAYER_TILE_ID_DYING_SE, PLAYER_TILE_ID_DYING_NE, PLAYER_TILE_ID_DYING_SE);
 		audio::create_event({ .path = "event:/player/die" });
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);

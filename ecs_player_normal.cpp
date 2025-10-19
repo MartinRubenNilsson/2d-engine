@@ -17,8 +17,8 @@ namespace ecs {
 	float _get_desired_speed(PlayerMotion motion) {
 		switch (motion) {
 			default: return 0.f;
-			case PlayerMotion::Walking: return 60.f;
-			case PlayerMotion::Running: return 136.f;
+			case PlayerMotion::Walking: return 80.f;
+			case PlayerMotion::Running: return 160.f;
 			case PlayerMotion::Sneaking: return 36.f;
 			case PlayerMotion::Pushing: return 16.f;
 		}
@@ -39,7 +39,7 @@ namespace ecs {
 		const Vec2f input_dir = input::get_dir();
 
 		// Update direction.
-		if (input::get_dir() != Vec2f::ZERO) {
+		if (input_dir != Vec2f::ZERO) {
 			dir = to_cardinal(input_dir);
 		}
 
@@ -74,39 +74,19 @@ namespace ecs {
 		// This means we sometimes have to flip the tile horizontally to cover all cases.
 		switch (player.motion) {
 			case PlayerMotion::Motionless: {
-				switch (dir) {
-					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, PLAYER_TILE_ID_IDLE_E); break;
-					case Direction::N: replace(tile, PLAYER_TILE_ID_IDLE_N); break;
-					case Direction::S: replace(tile, PLAYER_TILE_ID_IDLE_S); break;
-				}
+				replace(tile, dir, PLAYER_TILE_ID_IDLE_E, PLAYER_TILE_ID_IDLE_N, PLAYER_TILE_ID_IDLE_S);
 			} break;
 			case PlayerMotion::Walking: {
-				switch (dir) {
-					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, PLAYER_TILE_ID_WALK_E); break;
-					case Direction::N: replace(tile, PLAYER_TILE_ID_WALK_N); break;
-					case Direction::S: replace(tile, PLAYER_TILE_ID_WALK_S); break;
-				}
+				replace(tile, dir, PLAYER_TILE_ID_WALK_E, PLAYER_TILE_ID_WALK_N, PLAYER_TILE_ID_WALK_S);
 			} break;
 			case PlayerMotion::Running: {
-				switch (dir) {
-					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, PLAYER_TILE_ID_RUN_E); break;
-					case Direction::N: replace(tile, PLAYER_TILE_ID_RUN_N); break;
-					case Direction::S: replace(tile, PLAYER_TILE_ID_RUN_S); break;
-				}
+				replace(tile, dir, PLAYER_TILE_ID_RUN_E, PLAYER_TILE_ID_RUN_N, PLAYER_TILE_ID_RUN_S);
 			} break;
 			case PlayerMotion::Sneaking: {
 				// TODO
 			} break;
 			case PlayerMotion::Pushing: {
-				switch (dir) {
-					case Direction::W: [[fallthrough]];
-					case Direction::E: replace(tile, PLAYER_TILE_ID_PUSH_E); break;
-					case Direction::N: replace(tile, PLAYER_TILE_ID_PUSH_N); break;
-					case Direction::S: replace(tile, PLAYER_TILE_ID_PUSH_S); break;
-				}
+				replace(tile, dir, PLAYER_TILE_ID_PUSH_E, PLAYER_TILE_ID_PUSH_N, PLAYER_TILE_ID_PUSH_S);
 			} break;
 		}
 

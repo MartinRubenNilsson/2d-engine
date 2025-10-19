@@ -14,12 +14,7 @@ namespace ecs {
 		b2Body_SetLinearVelocity(_registry.get<b2BodyId>(entity), Vec2f::ZERO); // stop moving
 		const Direction dir = _registry.get<Direction>(entity);
 		TileId& tile = _registry.get<TileId>(entity);
-		switch (dir) {
-			case Direction::W: [[fallthrough]];
-			case Direction::E: replace(tile, PLAYER_TILE_ID_SLASH_E); break;
-			case Direction::N: replace(tile, PLAYER_TILE_ID_SLASH_N); break;
-			case Direction::S: replace(tile, PLAYER_TILE_ID_SLASH_S); break;
-		}
+		replace(tile, dir, PLAYER_TILE_ID_SLASH_E, PLAYER_TILE_ID_SLASH_N, PLAYER_TILE_ID_SLASH_S);
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);
 		anim.set_loop(false);

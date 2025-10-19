@@ -22,6 +22,20 @@
 
 namespace ecs {
 
+	void replace(TileId& tile, Direction dir, int east_tile_id, int north_tile_id, int south_tile_id) {
+		switch (dir) {
+			case Direction::W: [[fallthrough]];
+			case Direction::E: replace(tile, east_tile_id); break;
+			case Direction::N: replace(tile, north_tile_id); break;
+			case Direction::S: replace(tile, south_tile_id); break;
+		}
+		if (dir == Direction::E) {
+			tile.flipped_horizontally = false; // Never flip if we're facing east (right).
+		} else if (dir == Direction::W) {
+			tile.flipped_horizontally = true;  // Always flip if we're facing west (left).
+		}
+	}
+
 	extern entt::registry _registry;
 
 	void _player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
@@ -145,8 +159,7 @@ namespace ecs {
 	}
 
 	void update_players(float dt) {
-
-		// Update hud. TODO: put in ecs_ui_hud.h or something
+		// Update hud.
 		for (auto [entity, player] : _registry.view<Player>().each()) {
 			ui::hud::health = player.health;
 			ui::hud::arrows = player.arrows;

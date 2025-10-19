@@ -33,6 +33,8 @@ namespace ecs {
 		PLAYER_TILE_ID_HURT_S = 244,
 	};
 
+	void replace(TileId& tile, Direction dir, int east_tile_id, int north_tile_id, int south_tile_id);
+
 	// These all happen in the "normal" state.
 	enum class PlayerMotion {
 		Motionless,
@@ -47,7 +49,7 @@ namespace ecs {
 
 		int max_health = 3;
 		int health = 3;
-		int arrows = 10;
+		int arrows = 100;
 		int bombs = 5;
 		int rupees = 10;
 
