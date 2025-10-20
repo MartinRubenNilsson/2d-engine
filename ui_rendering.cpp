@@ -60,7 +60,7 @@ namespace ui {
 				box.max += offset;
 			}
 
-			Handle<graphics::Texture> texture = graphics::white_texture;
+			Handle<graphics::Texture> texture = graphics::white_texture; // 1x1 white texture
 
 			switch (command.commandType) {
 				case CLAY_RENDER_COMMAND_TYPE_NONE: {
