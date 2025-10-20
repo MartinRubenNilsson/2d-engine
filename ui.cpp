@@ -204,6 +204,16 @@ namespace ui {
 			box.max.x = command.boundingBox.x + command.boundingBox.width;
 			box.max.y = command.boundingBox.y + command.boundingBox.height;
 
+			// Snap to pixels.
+			// PITFALL: This may cause slight discrepancies between the visual bounding box and the
+			// bounding box used for input (mouse hover, etc.), but this shouldn't be a big problem.
+			{
+				const Vec2f new_min = round(box.min);
+				const Vec2f offset = new_min - box.min;
+				box.min = new_min;
+				box.max += offset;
+			}
+
 			Handle<graphics::Texture> texture = graphics::white_texture;
 
 			switch (command.commandType) {
