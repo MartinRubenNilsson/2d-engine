@@ -25,6 +25,15 @@ namespace ui {
 	std::vector<Batch> _batches;
 	std::vector<text::FontId> _fonts_to_update; // fonts whose atlas texture needs updating
 
+	void _add_quad_vertices(const Rect2f& box, Color color, const Rect2f& tex_box) {
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(tex_box.min.x, tex_box.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_box.max.x, tex_box.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_box.min.x, tex_box.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_box.min.x, tex_box.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_box.max.x, tex_box.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(tex_box.max.x, tex_box.max.y));
+	}
+
 	void _render_clay(const Clay_Dimensions& dimensions, std::span<const Clay_RenderCommand> commands) {
 		if (dimensions.width <= 0.f || dimensions.height <= 0.f)
 			return; // DEFENSIVE
@@ -76,13 +85,7 @@ namespace ui {
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
 						color = Color::WHITE;
 
-					// Add vertices for the quad.
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f::ZERO);
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f::ZERO);
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f::ZERO);
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f::ZERO);
+					_add_quad_vertices(box, color, Rect2f::ZERO);
 
 					// TODO: corner radius
 
@@ -145,21 +148,11 @@ namespace ui {
 						// If the text has shadow, add vertices for the shadow glyph first so it renders under the normal glyph.
 						if (shadow_offset != Vec2f::ZERO) {
 							const Rect2f& shadow_box = translate(box, shadow_offset);
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.min.y), shadow_color, Vec2f(rect.min.x, rect.min.y));
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.min.x, shadow_box.max.y), shadow_color, Vec2f(rect.min.x, rect.max.y));
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.min.y), shadow_color, Vec2f(rect.max.x, rect.min.y));
-							graphics::temp_vertices.emplace_back(Vec2f(shadow_box.max.x, shadow_box.max.y), shadow_color, Vec2f(rect.max.x, rect.max.y));
+							_add_quad_vertices(shadow_box, shadow_color, rect);
 						}
 
 						// Add vertices for the normal glyph.
-						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
-						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
-						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
-						graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
-						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
-						graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+						_add_quad_vertices(box, color, rect);
 					}
 
 					// Check if font atlas texture needs to be updated.
@@ -195,13 +188,7 @@ namespace ui {
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
 						color = Color::WHITE;
 
-					// Create vertices for the image.
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(rect.min.x, rect.min.y));
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
-					graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(rect.min.x, rect.max.y));
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(rect.max.x, rect.min.y));
-					graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(rect.max.x, rect.max.y));
+					_add_quad_vertices(box, color, rect);
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
