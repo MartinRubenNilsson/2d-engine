@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ui_menus.h"
 #include "settings.h"
+#include "ui_pause_menu.h"
 
 namespace ui {
 	Rml::ElementDocument* _get_menu_document(MenuType type); // Forward declaration
@@ -70,6 +71,11 @@ namespace ui {
 	}
 
 	void _set_menu_visible(MenuType type, bool visible) {
+		switch (type) {
+			case MenuType::Pause: {
+				ui::pause_menu::show = visible;
+			} return;
+		}
 		if (Rml::ElementDocument* doc = _get_menu_document(type))
 			visible ? doc->Show() : doc->Hide();
 	}

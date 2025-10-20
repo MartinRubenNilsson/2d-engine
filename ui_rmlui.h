@@ -39,9 +39,6 @@ namespace ui {
 	void load_document_from_file(const std::string& path);
 	void add_event_listeners();
 
-	// Reloads all documents' style sheets from <style> tags
-	// and external style sheets, but not inline "style" attributes.
-	void reload_styles();
 	void show_document(const std::string& name);
 
 	bool get_next_event(Event& ev);

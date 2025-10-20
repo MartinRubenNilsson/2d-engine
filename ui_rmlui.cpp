@@ -238,6 +238,7 @@ namespace ui {
 			// It should always be 1.0, so that it remains the same size.
 
 		} break;
+#if 1
 		case window::EventType::KeyPress:
 		{
 			if (ev.key.code == window::Key::Escape) {
@@ -259,6 +260,7 @@ namespace ui {
 			_debugger_context->ProcessKeyUp(key_identifier, key_modifier_flags);
 #endif
 		} break;
+#endif
 		case window::EventType::MouseMove:
 		{
 			// CRITICAL: We get big frame drops when calling ProcessMouseMove() a lot,
@@ -375,11 +377,15 @@ namespace ui {
 		add_textbox_event_listeners();
 	}
 
+#if 0
+	// Reloads all documents' style sheets from <style> tags
+	// and external style sheets, but not inline "style" attributes.
 	void reload_styles() {
 		for (int i = 0; i < _context->GetNumDocuments(); ++i) {
 			_context->GetDocument(i)->ReloadStyleSheet();
 		}
 	}
+#endif
 
 	void show_document(const std::string& name) {
 		if (Rml::ElementDocument* doc = _context->GetDocument(name)) {
