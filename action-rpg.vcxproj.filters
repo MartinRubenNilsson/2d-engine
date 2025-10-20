@@ -321,6 +321,9 @@
     <ClCompile Include="ui_pause_menu.cpp">
       <Filter>game\ui\menus\pause_menu</Filter>
     </ClCompile>
+    <ClCompile Include="ui_rendering.cpp">
+      <Filter>engine\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

@@ -241,6 +241,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="easings.cpp" />
     <ClCompile Include="ui_game.cpp" />
     <ClCompile Include="ui_pause_menu.cpp" />
+    <ClCompile Include="ui_rendering.cpp" />
     <ClCompile Include="ui_shared.cpp" />
     <ClCompile Include="ui_rmlui.cpp" />
     <ClCompile Include="main.cpp" />
