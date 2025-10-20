@@ -42,7 +42,6 @@ namespace ui {
 		_fonts_to_update.clear();
 
 		// Create batches.
-
 		for (const Clay_RenderCommand& command : commands) {
 
 			Rect2f box{}; // Bounding box.
