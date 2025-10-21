@@ -25,13 +25,20 @@ namespace ui {
 	std::vector<Batch> _batches;
 	std::vector<text::FontId> _fonts_to_update; // fonts whose atlas texture needs updating
 
-	void _add_quad_vertices(const Rect2f& box, Color color, const Rect2f& tex_box) {
-		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(tex_box.min.x, tex_box.min.y));
-		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_box.max.x, tex_box.min.y));
-		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_box.min.x, tex_box.max.y));
-		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_box.min.x, tex_box.max.y));
-		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_box.max.x, tex_box.min.y));
-		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(tex_box.max.x, tex_box.max.y));
+	void _add_rectangle_vertices(const Rect2f& box, Color color, const Rect2f& tex_rect = Rect2f::ZERO) {
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.min.y), color, Vec2f(tex_rect.min.x, tex_rect.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_rect.max.x, tex_rect.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_rect.min.x, tex_rect.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.min.x, box.max.y), color, Vec2f(tex_rect.min.x, tex_rect.max.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.min.y), color, Vec2f(tex_rect.max.x, tex_rect.min.y));
+		graphics::temp_vertices.emplace_back(Vec2f(box.max.x, box.max.y), color, Vec2f(tex_rect.max.x, tex_rect.max.y));
+	}
+
+	void _add_border_vertices(const Rect2f& box, Color color, float left, float right, float top, float bottom) {
+		_add_rectangle_vertices({ box.min, { box.min.x + left, box.max.y } }, color); // left border
+		_add_rectangle_vertices({ { box.max.x - right, box.min.y }, box.max}, color); // right border
+		_add_rectangle_vertices({ { box.min.x + left, box.min.y }, { box.max.x - right, box.min.y + top } }, color); // top border
+		_add_rectangle_vertices({ { box.min.x + left, box.max.y - bottom }, { box.max.x - right, box.max.y } }, color); // bottom border
 	}
 
 	void _render_clay(const Clay_Dimensions& dimensions, std::span<const Clay_RenderCommand> commands) {
@@ -85,16 +92,18 @@ namespace ui {
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
 						color = Color::WHITE;
 
-					_add_quad_vertices(box, color, Rect2f::ZERO);
+					_add_rectangle_vertices(box, color);
 
 					// TODO: corner radius
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_BORDER: {
 
-					// The renderer should draw a colored border inset into the bounding box.
-					//console::log_error("CLAY_RENDER_COMMAND_TYPE_BORDER is not supported"); // TODO
-					continue;
+					const Clay_BorderRenderData& data = command.renderData.border;
+
+					_add_border_vertices(box, data.color, data.width.left, data.width.right, data.width.top, data.width.bottom);
+
+					// TODO: corner radius
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_TEXT: {
@@ -148,11 +157,11 @@ namespace ui {
 						// If the text has shadow, add vertices for the shadow glyph first so it renders under the normal glyph.
 						if (shadow_offset != Vec2f::ZERO) {
 							const Rect2f& shadow_box = translate(box, shadow_offset);
-							_add_quad_vertices(shadow_box, shadow_color, rect);
+							_add_rectangle_vertices(shadow_box, shadow_color, rect);
 						}
 
 						// Add vertices for the normal glyph.
-						_add_quad_vertices(box, color, rect);
+						_add_rectangle_vertices(box, color, rect);
 					}
 
 					// Check if font atlas texture needs to be updated.
@@ -188,7 +197,7 @@ namespace ui {
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
 						color = Color::WHITE;
 
-					_add_quad_vertices(box, color, rect);
+					_add_rectangle_vertices(box, color, rect);
 
 				} break;
 				case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
