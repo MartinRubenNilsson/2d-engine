@@ -48,14 +48,8 @@ namespace ui {
 
 	Rml::ElementDocument* _get_menu_document(MenuType type) {
 		switch (type) {
-			case MenuType::Main:
-				return _context->GetDocument("main_menu");
-			case MenuType::Pause:
-				return _context->GetDocument("pause_menu");
 			case MenuType::Settings:
 				return _context->GetDocument("settings_menu");
-			case MenuType::Credits:
-				return _context->GetDocument("credits_menu");
 			default:
 				return nullptr;
 		}
