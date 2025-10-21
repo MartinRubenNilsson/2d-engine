@@ -8,13 +8,6 @@ namespace ui {
 	namespace credits_menu {
 		bool show = false;
 
-		void _layout_names() {
-			CLAY(CLAY_ID("credits_names")) {
-				shared::layout_text("Gameplay Programmer - Tim White");
-				shared::layout_text("Engine Programmer - Martin Nilsson");
-			}
-		}
-
 		void layout() {
 			CLAY(CLAY_ID("credits_menu"), shared::menu_with_gray_bg_element) {
 				shared::layout_text("Gameplay Programmer - Tim White");
