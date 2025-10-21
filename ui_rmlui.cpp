@@ -15,26 +15,6 @@
 #endif
 
 namespace ui {
-	// All documents share this event listener.
-	struct CommonEventListener : Rml::EventListener {
-		void ProcessEvent(Rml::Event& ev) override {
-			switch (ev.GetId()) {
-			case Rml::EventId::Mouseover:
-			{
-				if (ev.GetTargetElement()->IsClassSet("menu-button")) {
-					audio::create_event({ .path = "event:/ui/snd_button_hover" });
-				}
-			} break;
-			case Rml::EventId::Click:
-			{
-				if (ev.GetTargetElement()->IsClassSet("menu-button")) {
-					audio::create_event({ .path = "event:/ui/snd_button_click" });
-				}
-			} break;
-			}
-		}
-	};
-
 	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
 	float _dt_accumulator = 0.f;
 	bool debug_rmlui = false;
@@ -44,7 +24,6 @@ namespace ui {
 #ifdef _DEBUG_UI
 	Rml::Context* _debugger_context = nullptr; // The debugger needs its own context to render at the right size.
 #endif
-	CommonEventListener _common_event_listener;
 	std::vector<Event> _events;
 
 	void _on_escape_key_pressed() {
@@ -357,13 +336,6 @@ namespace ui {
 	}
 
 	void add_event_listeners() {
-		// Add common event listener to all documents.
-		for (int i = 0; i < _context->GetNumDocuments(); ++i) {
-			Rml::ElementDocument* doc = _context->GetDocument(i);
-			doc->AddEventListener(Rml::EventId::Mouseover, &_common_event_listener);
-			doc->AddEventListener(Rml::EventId::Click, &_common_event_listener);
-		}
-
 		add_menu_event_listeners();
 		add_textbox_event_listeners();
 	}

@@ -212,9 +212,6 @@
     <ClCompile Include="ecs_cloning.cpp">
       <Filter>game\ecs\engine\cloning</Filter>
     </ClCompile>
-    <ClCompile Include="background.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_pushable.cpp">
       <Filter>game\ecs\game\pushables</Filter>
     </ClCompile>
@@ -265,9 +262,6 @@
     </ClCompile>
     <ClCompile Include="ecs_player_slashing.cpp">
       <Filter>game\ecs\game\players\states</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs_debugging.cpp">
-      <Filter>game\ecs</Filter>
     </ClCompile>
     <ClCompile Include="ecs_player_normal.cpp">
       <Filter>game\ecs\game\players\states</Filter>
@@ -329,6 +323,12 @@
     </ClCompile>
     <ClCompile Include="ui_credits_menu.cpp">
       <Filter>game\ui\menus\credits_menu</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_debugging.cpp">
+      <Filter>game\ecs\debugging</Filter>
+    </ClCompile>
+    <ClCompile Include="background.cpp">
+      <Filter>game\background</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -617,9 +617,6 @@
     <ClInclude Include="ecs_cloning.h">
       <Filter>game\ecs\engine\cloning</Filter>
     </ClInclude>
-    <ClInclude Include="background.h">
-      <Filter>game</Filter>
-    </ClInclude>
     <ClInclude Include="ecs_pushable.h">
       <Filter>game\ecs\game\pushables</Filter>
     </ClInclude>
@@ -652,9 +649,6 @@
     </ClInclude>
     <ClInclude Include="rect2.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs_debugging.h">
-      <Filter>game\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs_player_states.h">
       <Filter>game\ecs\game\players</Filter>
@@ -718,6 +712,12 @@
     </ClInclude>
     <ClInclude Include="ui_credits_menu.h">
       <Filter>game\ui\menus\credits_menu</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs_debugging.h">
+      <Filter>game\ecs\debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="background.h">
+      <Filter>game\background</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -909,6 +909,12 @@
     </Filter>
     <Filter Include="game\ui\menus\credits_menu">
       <UniqueIdentifier>{781d6ddc-3b15-4954-a686-1412d97e9b39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\debugging">
+      <UniqueIdentifier>{86a62c84-9a56-4aad-872e-e4afecb53821}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\background">
+      <UniqueIdentifier>{367c609f-1358-448b-aec2-9f6065058a97}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
