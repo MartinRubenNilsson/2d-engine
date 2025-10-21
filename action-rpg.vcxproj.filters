@@ -297,13 +297,7 @@
     <ClCompile Include="text_shaping.cpp">
       <Filter>engine\graphics\text</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox_presets.cpp">
-      <Filter>game\ui</Filter>
-    </ClCompile>
     <ClCompile Include="ui_menus.cpp">
-      <Filter>game\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_textbox.cpp">
       <Filter>game\ui</Filter>
     </ClCompile>
     <ClCompile Include="ui_bindings.cpp">
@@ -323,6 +317,15 @@
     </ClCompile>
     <ClCompile Include="ui_rendering.cpp">
       <Filter>engine\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_main_menu.cpp">
+      <Filter>game\ui\menus\pause_menu</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_textbox_presets.cpp">
+      <Filter>game\ui\textbox</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_textbox.cpp">
+      <Filter>game\ui\textbox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -686,9 +689,6 @@
     <ClInclude Include="ui_menus.h">
       <Filter>game\ui</Filter>
     </ClInclude>
-    <ClInclude Include="ui_textbox.h">
-      <Filter>game\ui</Filter>
-    </ClInclude>
     <ClInclude Include="ui_bindings.h">
       <Filter>game\ui</Filter>
     </ClInclude>
@@ -706,6 +706,12 @@
     </ClInclude>
     <ClInclude Include="ui_pause_menu.h">
       <Filter>game\ui\menus\pause_menu</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_main_menu.h">
+      <Filter>game\ui\menus\pause_menu</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_textbox.h">
+      <Filter>game\ui\textbox</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -888,6 +894,9 @@
     </Filter>
     <Filter Include="game\ui\menus\pause_menu">
       <UniqueIdentifier>{b805aec3-20fd-41f1-8232-3b3b123eb349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\textbox">
+      <UniqueIdentifier>{ac7a0399-cf30-4e68-a1c2-f73af1767c74}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -23,8 +23,14 @@ namespace ui {
 	Clay_Dimensions _measure_text(Clay_StringSlice text, Clay_TextElementConfig* config, void* userData) {
 		const std::string_view string{ text.chars, (size_t)text.length };
 		const text::FontId font_id{ .id = config->fontId };
-		if (!font_id)
-			return { 0.f, 0.f }; // Invalid font ID.
+		if (!font_id) {
+			console::log_error("UI error: Invalid font ID = " + std::to_string(font_id.id) + ". Text = " + std::string(string));
+			return { 0.f, 0.f };
+		}
+		if (config->fontSize <= 0.f) {
+			console::log_error("UI error: Invalid font size. Text = " + std::string(string));
+			return { 0.f, 0.f };
+		}
 		text::Font& font = text::get_font(font_id);
 		// PITFALL: Clay calls this function with parts of the user-provided string (for example,
 		// it measures whitespaces separately) and uses the result to build the bounding box.

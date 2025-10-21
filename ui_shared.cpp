@@ -3,7 +3,6 @@
 #include "ui_data.h"
 #include "text_fonts.h"
 #include "audio.h"
-#include "console.h"
 
 namespace ui {
 namespace shared {
@@ -11,24 +10,38 @@ namespace shared {
 	text::FontId _font{};
 	TextData _text_data{};
 
-	Clay_TextElementConfig text_config{};
-	Clay_TextElementConfig _normal_menu_button_text_config{};
-	Clay_TextElementConfig _hovered_menu_button_text_config{};
+	Clay_TextElementConfig default_text{};
+	Clay_TextElementConfig _default_menu_button_text{};
+	Clay_TextElementConfig _hovered_menu_button_text{};
+
+	Clay_ElementDeclaration menu_element{};
+	Clay_ElementDeclaration menu_with_gray_bg_element{};
 
 	void startup() {
 		_font = text::load_font("assets/fonts/Mozart NBP.ttf");
 
 		_text_data.shadow_offset = { 0.5f, 0.5f };
 
-		text_config.fontId = _font.id;
-		text_config.fontSize = 13; // PITFALL: Not a power of 2 - not a problem, but maybe unexpected since it is a pixel font.
-		text_config.userData = &_text_data;
+		default_text.fontId = _font.id;
+		default_text.fontSize = 13; // PITFALL: Not a power of 2 - not a problem, but maybe unexpected since it is a pixel font.
+		default_text.userData = &_text_data;
 
-		_normal_menu_button_text_config = text_config;
-		_normal_menu_button_text_config.textAlignment = CLAY_TEXT_ALIGN_CENTER;
+		_default_menu_button_text = default_text;
+		_default_menu_button_text.textAlignment = CLAY_TEXT_ALIGN_CENTER;
 
-		_hovered_menu_button_text_config = _normal_menu_button_text_config;
-		_hovered_menu_button_text_config.textColor = Color::SILVER;
+		_hovered_menu_button_text = _default_menu_button_text;
+		_hovered_menu_button_text.textColor = Color::SILVER;
+
+		menu_element.layout.sizing.width = CLAY_SIZING_GROW(0);
+		menu_element.layout.sizing.height = CLAY_SIZING_GROW(0);
+		menu_element.layout.childGap = 6;
+		menu_element.layout.childAlignment.x = CLAY_ALIGN_X_CENTER;
+		menu_element.layout.childAlignment.y = CLAY_ALIGN_Y_CENTER;
+		menu_element.layout.layoutDirection = CLAY_TOP_TO_BOTTOM;
+		menu_element.floating.attachTo = CLAY_ATTACH_TO_ROOT;
+
+		menu_with_gray_bg_element = menu_element;
+		menu_with_gray_bg_element.backgroundColor = Color(64, 64, 64, 76);
 	}
 
 	Clay_String to_clay(std::string_view string) {
@@ -61,11 +74,9 @@ namespace shared {
 			if (started_hovering) {
 				audio::create_event({ .path = "event:/ui/snd_button_hover" });
 			}
-			CLAY_TEXT(CLAY_STRING("Hello"), CLAY_TEXT_CONFIG({ .userData = &_hovered_menu_button_text_config }));
-			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text_config : &_normal_menu_button_text_config);
+			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text : &_default_menu_button_text);
 			Clay_OnHover(_on_hover_menu_button, (uintptr_t)on_click);
 		}
 	}
-
-} // namespace shared
-} // namespace ui
+}
+}

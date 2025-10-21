@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ui_menus.h"
 #include "settings.h"
+#include "ui_main_menu.h"
 #include "ui_pause_menu.h"
 
 namespace ui {
@@ -72,6 +73,9 @@ namespace ui {
 
 	void _set_menu_visible(MenuType type, bool visible) {
 		switch (type) {
+			case MenuType::Main: {
+				ui::main_menu::show = visible;
+			} return;
 			case MenuType::Pause: {
 				ui::pause_menu::show = visible;
 			} return;

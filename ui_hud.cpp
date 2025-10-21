@@ -18,10 +18,12 @@ namespace hud {
 	ImageData _empty_heart_image{};
 
 	void startup() {
-		_spritesheet = graphics::load_texture("assets/ui/hud.png");
+		_spritesheet = graphics::load_texture("assets/textures/ui/hud.png");
+
 		_filled_heart_image.texture = _spritesheet;
 		_filled_heart_image.rect_position = { 16, 16 };
 		_filled_heart_image.rect_size = { 16, 16 };
+
 		_empty_heart_image.texture = _spritesheet;
 		_empty_heart_image.rect_position = { 16 * 4, 16 };
 		_empty_heart_image.rect_size = { 16, 16 };
@@ -38,13 +40,13 @@ namespace hud {
 	}
 
 	void _layout_heart(unsigned int index, bool filled) {
-		ImageData* heart_image = filled ? &_filled_heart_image : &_empty_heart_image;
+		ImageData& heart_image = filled ? _filled_heart_image : _empty_heart_image;
 		CLAY(CLAY_IDI("hud_heart", index), { .layout = {
 			.sizing = {
-				.width = CLAY_SIZING_FIXED(16),
-				.height = CLAY_SIZING_FIXED(16) } },
+				.width = (float)heart_image.rect_size.x,
+				.height = (float)heart_image.rect_size.y } },
 			.image = {
-				.imageData = heart_image } })
+				.imageData = &heart_image } })
 		{}
 	}
 
@@ -57,7 +59,7 @@ namespace hud {
 	}
 
 	void _layout_text(std::string_view string) {
-		CLAY_TEXT(shared::to_clay(string), &shared::text_config);
+		CLAY_TEXT(shared::to_clay(string), &shared::default_text);
 	}
 
 	void layout() {
