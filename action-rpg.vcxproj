@@ -354,7 +354,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ui_pause_menu.h" />
     <ClInclude Include="ui_shared.h" />
     <ClInclude Include="ui_rmlui_system_interface.h" />
-    <ClInclude Include="ui_types.h" />
+    <ClInclude Include="ui_data.h" />
     <ClInclude Include="vec2.h" />
     <ClInclude Include="window_events.h" />
     <ClInclude Include="shapes.h" />

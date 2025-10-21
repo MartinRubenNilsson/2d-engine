@@ -1,5 +1,5 @@
 #pragma once
-#include "ui_types.h"
+#include "ui_data.h"
 
 // The stuff in this file is meant to be shared between multiple UI .cpp files.
 

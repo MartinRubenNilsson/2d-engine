@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ui_shared.h"
-#include "ui_types.h"
+#include "ui_data.h"
 #include "text_fonts.h"
 #include "audio.h"
 #include "console.h"
@@ -61,6 +61,7 @@ namespace shared {
 			if (started_hovering) {
 				audio::create_event({ .path = "event:/ui/snd_button_hover" });
 			}
+			CLAY_TEXT(CLAY_STRING("Hello"), CLAY_TEXT_CONFIG({ .userData = &_hovered_menu_button_text_config }));
 			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text_config : &_normal_menu_button_text_config);
 			Clay_OnHover(_on_hover_menu_button, (uintptr_t)on_click);
 		}

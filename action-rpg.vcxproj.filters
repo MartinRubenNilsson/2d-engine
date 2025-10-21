@@ -692,7 +692,7 @@
     <ClInclude Include="ui_bindings.h">
       <Filter>game\ui</Filter>
     </ClInclude>
-    <ClInclude Include="ui_types.h">
+    <ClInclude Include="ui_data.h">
       <Filter>engine\ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_game.h">

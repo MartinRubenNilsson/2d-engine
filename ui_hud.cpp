@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ui_hud.h"
-#include "ui_types.h"
+#include "ui_data.h"
 #include "ui_shared.h"
 #include "graphics.h"
 

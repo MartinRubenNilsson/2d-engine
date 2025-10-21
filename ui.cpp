@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ui.h"
-#include "ui_types.h"
+#include "ui_data.h"
 #include "ui_game.h"
 #include "window.h"
 #include "window_events.h"
