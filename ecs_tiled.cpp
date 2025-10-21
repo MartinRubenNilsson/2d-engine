@@ -181,13 +181,13 @@ namespace ecs {
 		return { ts.tile_width, ts.tile_height };
 	}
 
-	TextureRect get_texture_rect(TileId tile) {
+	Rect2u get_texture_rect(TileId tile) {
 		const tiled::Tileset& ts = _get_tileset(get_tileset(tile));
-		TextureRect rect{};
-		rect.x = (tile.id % ts.width) * (ts.tile_width + ts.spacing) + ts.margin;
-		rect.y = (tile.id / ts.width) * (ts.tile_height + ts.spacing) + ts.margin;
-		rect.w = ts.tile_width;
-		rect.h = ts.tile_height;
+		Rect2u rect{};
+		rect.min.x = (tile.id % ts.width) * (ts.tile_width + ts.spacing) + ts.margin;
+		rect.min.y = (tile.id / ts.width) * (ts.tile_height + ts.spacing) + ts.margin;
+		rect.max.x = rect.min.x + ts.tile_width;
+		rect.max.y = rect.min.y + ts.tile_height;
 		return rect;
 	}
 

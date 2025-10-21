@@ -8,9 +8,9 @@ namespace ecs {
 
 	void setup_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture) {
 		if (!tile) return;
-		const TextureRect rect = get_texture_rect(tile);
-		sprite.tex_position = { (float)rect.x, (float)rect.y };
-		sprite.tex_size = { (float)rect.w, (float)rect.h };
+		const Rect2u rect = get_texture_rect(tile);
+		sprite.tex_position = rect.min;
+		sprite.tex_size = rect.max - rect.min;
 		sprite.size = sprite.tex_size;
 		const TilesetId tileset = get_tileset(tile); // tileset is valid if tile is
 		const Vec2u tileset_size = get_size_in_pixels(tileset);

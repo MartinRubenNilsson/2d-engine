@@ -38,21 +38,13 @@ namespace ecs {
 		uint16_t layer = 0;
 	};
 
-	// TODO: replace with Rect2u
-	struct TextureRect {
-		unsigned int x = 0; // in pixels
-		unsigned int y = 0; // in pixels
-		unsigned int w = 0; // in pixels
-		unsigned int h = 0; // in pixels
-	};
-
 	constexpr size_t MAX_TERRAINS_PER_TILE = 8;
 
 	TilesetId get_tileset(TileId tile);
 	std::string_view get_class(TileId tile);
 	std::span<const ObjectId> get_objects(TileId tile);
 	Vec2u get_size(TileId tile); // in pixels
-	TextureRect get_texture_rect(TileId tile);
+	Rect2u get_texture_rect(TileId tile); // returns texture rect *in pixel coordinates*
 	bool animated(TileId tile);
 	unsigned int get_animation_duration_ms(TileId tile); // in milliseconds
 	float get_animation_duration(TileId tile); // in seconds
