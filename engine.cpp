@@ -175,7 +175,7 @@ namespace engine {
         if (steam::is_overlay_active()) {
             game_delta_time = 0.0;
         }
-        if (ui::is_menu_or_textbox_visible()) { // TODO: this doesn't belong in engine.cpp
+        if (ui::is_menu_or_visible()) { // TODO: this doesn't belong in engine.cpp
             game_delta_time = 0.0;
         }
         if (map::get_transition_progress() != 0.f) {

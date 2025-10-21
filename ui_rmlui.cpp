@@ -74,7 +74,7 @@ namespace ui {
 		Rml::Debugger::SetContext(_context);
 #endif
 		create_bindings();
-		create_textbox_presets();
+		textbox::create_presets();
 	}
 
 	void shutdown_rmlui() {
@@ -300,7 +300,7 @@ namespace ui {
 		_dt_accumulator += dt;
 		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
 
-		update_textbox(_dt_accumulator);
+		textbox::update(_dt_accumulator);
 		dirty_all_variables();
 		_context->Update();
 #ifdef _DEBUG_UI
@@ -337,7 +337,7 @@ namespace ui {
 
 	void add_event_listeners() {
 		add_menu_event_listeners();
-		add_textbox_event_listeners();
+		textbox::add_event_listeners();
 	}
 
 	void show_document(const std::string& name) {
@@ -353,7 +353,7 @@ namespace ui {
 		return true;
 	}
 
-	bool is_menu_or_textbox_visible() {
-		return (get_top_menu() != MenuType::Count) || is_textbox_open();
+	bool is_menu_or_visible() {
+		return (get_top_menu() != MenuType::Count) || textbox::is_open();
 	}
 }

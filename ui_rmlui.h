@@ -38,5 +38,5 @@ namespace ui {
 	void show_document(const std::string& name);
 
 	bool get_next_event(Event& ev);
-	bool is_menu_or_textbox_visible();
+	bool is_menu_or_visible();
 }

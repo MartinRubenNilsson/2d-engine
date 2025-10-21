@@ -1,13 +1,14 @@
 #pragma once
 
 namespace ui {
+namespace textbox {
 	enum class TextboxSprite {
 		None,
 		Skull,
 		GoldenKey,
 	};
 
-	const char* get_textbox_sprite_name(TextboxSprite sprite);
+	const char* get_sprite_name(TextboxSprite sprite);
 
 	struct Textbox {
 		static const std::string OPENING_SOUND_ITEM_FANFARE;
@@ -23,40 +24,41 @@ namespace ui {
 		void (*options_callback)(const std::string& option) = nullptr;
 	};
 
-	void add_textbox_event_listeners();
-	void create_textbox_presets();
-	void update_textbox(float dt);
+	void add_event_listeners();
+	void create_presets();
+	void update(float dt);
 
-	bool is_textbox_open();
-	bool is_textbox_typing();
-	void skip_textbox_typing();
+	bool is_open();
+	bool is_typing();
+	void skip_typing();
 
 	// In addition to the current textbox (which may or may not be closed/empty), we store a queue of textboxes.
 	// This is useful for sequencing textboxes, e.g. for a conversation. The interface works as follows:
 	// 
-	// - open_textbox(): immediately opens a new textbox, closing the current one if necessary.
-	// - enqueue_textbox(): appends a textbox to the queue without affecting the current textbox.
-	// - open_or_enqueue_textbox(): opens the textbox immediately if there is no current textbox, otherwise enqueues it.
-	// - open_next_textbox_in_queue(): opens the next textbox in the queue, if any.
-	// - close_textbox(): closes the current textbox without affecting the queue.
-	// - close_textbox_and_clear_queue(): closes the current textbox and clears the queue.
+	// - open(): immediately opens a new textbox, closing the current one if necessary.
+	// - enqueue(): appends a textbox to the queue without affecting the current textbox.
+	// - open_or_enqueue(): opens the textbox immediately if there is no current textbox, otherwise enqueues it.
+	// - open_next_in_queue(): opens the next textbox in the queue, if any.
+	// - close(): closes the current textbox without affecting the queue.
+	// - close_and_clear_queue(): closes the current textbox and clears the queue.
 
-	void open_textbox(const Textbox& textbox);
-	void enqueue_textbox(const Textbox& textbox);
-	void open_or_enqueue_textbox(const Textbox& textbox);
-	bool open_next_textbox_in_queue();
-	void close_textbox();
-	void close_textbox_and_clear_queue();
+	void open(const Textbox& textbox);
+	void enqueue(const Textbox& textbox);
+	void open_or_enqueue(const Textbox& textbox);
+	bool open_next_in_queue();
+	void close();
+	void close_and_clear_queue();
 
 	// PRESETS
 
 	// Returns a list of all textbox presets, sorted lexicographically by Textbox::path.
-	std::span<const Textbox> get_textbox_presets();
+	std::span<const Textbox> get_presets();
 	// Returns a list of all textbox presets whose path starts with the given path.
-	std::span<const Textbox> get_textbox_presets(const std::string& path);
-	void open_or_enqueue_textbox_presets(const std::string& path);
+	std::span<const Textbox> get_presets(const std::string& path);
+	void open_or_enqueue_presets(const std::string& path);
 
 	// DEBUGGING
 
-	void show_textbox_debug_window();
+	void show_debug_window();
+}
 }
