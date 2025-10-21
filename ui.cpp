@@ -82,8 +82,6 @@ namespace ui {
 		static Clay_Vector2 mouse_pos{};
 		static bool mouse_is_down = false;
 
-		
-
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
 #if 0
@@ -133,7 +131,7 @@ namespace ui {
 
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
 
-#if 0
+#if 1
 		Clay_SetDebugModeEnabled(debug);
 #endif
 

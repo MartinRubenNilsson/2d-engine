@@ -46,8 +46,21 @@ namespace shared {
 	}
 
 	void layout_menu_button(std::string_view text, void(*on_click)()) {
-		CLAY(CLAY_SID_LOCAL(to_clay(text))) {
-			//audio::create_event({ .path = "event:/ui/snd_button_hover" }); // TODO: how to fix?
+		const Clay_ElementId id = CLAY_SID_LOCAL(to_clay(text));
+		CLAY(id) {
+			const bool hovering = Clay_Hovered();
+			bool started_hovering = false;
+			static Clay_ElementId last_hovered_id{};
+			if (hovering && last_hovered_id.id != id.id) {
+				started_hovering = true;
+				last_hovered_id = id;
+			}
+			if (!hovering && last_hovered_id.id == id.id) {
+				last_hovered_id = {};
+			}
+			if (started_hovering) {
+				audio::create_event({ .path = "event:/ui/snd_button_hover" });
+			}
 			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text_config : &_normal_menu_button_text_config);
 			Clay_OnHover(_on_hover_menu_button, (uintptr_t)on_click);
 		}
