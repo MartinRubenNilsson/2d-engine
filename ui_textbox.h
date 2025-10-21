@@ -9,7 +9,7 @@ namespace textbox {
 		GoldenKey,
 	};
 
-	const char* get_sprite_name(TextboxSprite sprite);
+	std::string_view get_sprite_name(TextboxSprite sprite);
 
 	struct Textbox {
 		static const std::string_view OPENING_SOUND_ITEM_FANFARE;

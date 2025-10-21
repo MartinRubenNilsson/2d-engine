@@ -6,7 +6,7 @@
 
 namespace ui {
 namespace textbox {
-	const char* get_sprite_name(TextboxSprite sprite) {
+	std::string_view get_sprite_name(TextboxSprite sprite) {
 		switch (sprite) {
 			case TextboxSprite::None:      return "";
 			case TextboxSprite::Skull:     return "icon-skull";
