@@ -38,6 +38,7 @@ namespace ecs {
 		uint16_t layer = 0;
 	};
 
+	// TODO: replace with Rect2u
 	struct TextureRect {
 		unsigned int x = 0; // in pixels
 		unsigned int y = 0; // in pixels
@@ -55,8 +56,14 @@ namespace ecs {
 	bool animated(TileId tile);
 	unsigned int get_animation_duration_ms(TileId tile); // in milliseconds
 	float get_animation_duration(TileId tile); // in seconds
+
+	struct TileAnimationFrame {
+		unsigned int index = UINT_MAX;
+		TileId tile{};
+	};
+
 	// preserves the flip flags of the input tile
-	TileId get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
+	TileAnimationFrame get_animation_frame(TileId tile, unsigned int time_ms); // time in milliseconds
 	void replace(TileId& tile, unsigned int id); // preserves flip flags
 	void replace_step(TileId& tile, int step_x, int step_y); // preserves flip flags
 	// Returns the names of the terrains in the different parts of tile. (Only looks at the first terrain set.)

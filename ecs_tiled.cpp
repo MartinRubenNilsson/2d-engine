@@ -198,8 +198,8 @@ namespace ecs {
 	unsigned int get_animation_duration_ms(TileId tile) {
 		const auto& animation = _get_tile(tile).animation;
 		unsigned int duration_ms = 0; // in milliseconds
-		for (const tiled::Frame& frame : animation) {
-			duration_ms += frame.duration_ms;
+		for (const tiled::Frame& f : animation) {
+			duration_ms += f.duration_ms;
 		}
 		return duration_ms;
 	}
@@ -208,17 +208,20 @@ namespace ecs {
 		return get_animation_duration_ms(tile) / 1000.f;
 	}
 
-	TileId get_animation_frame(TileId tile, unsigned int time_ms) {
+	TileAnimationFrame get_animation_frame(TileId tile, unsigned int time_ms) {
+		TileAnimationFrame frame{ UINT_MAX, tile };
 		const auto& animation = _get_tile(tile).animation;
 		if (animation.empty())
-			return tile;
-		for (const tiled::Frame& frame : animation) {
-			tile.id = frame.tile_id;
-			if (time_ms < frame.duration_ms)
+			return frame;
+		for (unsigned int i = 0; i < animation.size(); ++i) {
+			const tiled::Frame& f = animation[i];
+			frame.index = i;
+			frame.tile.id = f.tile_id;
+			if (time_ms < f.duration_ms)
 				break;
-			time_ms -= frame.duration_ms;
+			time_ms -= f.duration_ms;
 		}
-		return tile;
+		return frame;
 	}
 
 	void replace(TileId& tile, unsigned int id) {

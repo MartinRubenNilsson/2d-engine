@@ -34,7 +34,7 @@ namespace ecs {
 		const TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		// Check if the animation just arrived at the "release" frame.
 		if (!anim.frame_changed()) return;
-		const TileId frame = anim.get_frame();
+		const TileId frame = anim.get_tile();
 		if (frame.id != PLAYER_TILE_ID_BOW_RELEASE_E &&
 			frame.id != PLAYER_TILE_ID_BOW_RELEASE_N &&
 			frame.id != PLAYER_TILE_ID_BOW_RELEASE_S) {

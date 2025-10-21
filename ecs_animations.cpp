@@ -8,8 +8,12 @@
 namespace ecs {
 	extern entt::registry _registry;
 
-	TileId TileAnimation::get_frame() const {
+	unsigned int TileAnimation::get_frame() const {
 		return _frame;
+	}
+
+	TileId TileAnimation::get_tile() const {
+		return _tile;
 	}
 
 	void TileAnimation::set_progress(float progress) {
@@ -49,6 +53,10 @@ namespace ecs {
 		return _frame_changed;
 	}
 
+	bool TileAnimation::tile_changed() const {
+		return _tile_changed;
+	}
+
 	TileAnimation& emplace_tile_animation(entt::entity entity) {
 		return _registry.emplace_or_replace<TileAnimation>(entity);
 	}
@@ -68,10 +76,13 @@ namespace ecs {
 
 			if (!tile) continue;
 
-			const TileId old_frame = animation._frame;
-			animation._frame = tile; // in case the tile isn't animated
-			animation._frame_changed = (animation._frame != old_frame);
 			animation._looped = false;
+			const unsigned int prev_anim_frame = animation._frame;
+			animation._frame = UINT_MAX; // in case the tile isn't animated
+			animation._frame_changed = (animation._frame != prev_anim_frame);
+			const TileId prev_anim_tile = animation._tile;
+			animation._tile = tile; // in case the tile isn't animated
+			animation._tile_changed = (animation._tile != prev_anim_tile);
 
 			if (!animated(tile))
 				continue;
@@ -93,19 +104,22 @@ namespace ecs {
 				}
 			}
 
-			unsigned int time_ms = (unsigned int)(animation._progress * duration_ms);
-			animation._frame = get_animation_frame(tile, time_ms);
-			animation._frame_changed = (animation._frame != old_frame);
+			const unsigned int time_ms = (unsigned int)(animation._progress * duration_ms);
+			const TileAnimationFrame frame = get_animation_frame(tile, time_ms);
+			animation._frame = frame.index;
+			animation._frame_changed = (animation._frame != prev_anim_frame);
+			animation._tile = frame.tile;
+			animation._tile_changed = (animation._tile != prev_anim_tile);
 		}
 	}
 
 	void _update_tile_animated_sprites(float dt) {
 		for (auto [entity, sprite, animation] : _registry.view<sprites::Sprite, const TileAnimation>().each()) {
-			if (!animation._frame_changed)
+			if (!animation._tile_changed)
 				continue; // No need to update the sprite if the frame hasn't changed.
-			if (!animation._frame)
+			if (!animation._tile)
 				continue;
-			setup_sprite(sprite, animation._frame, false);
+			setup_sprite(sprite, animation._tile, false);
 		}
 	}
 
