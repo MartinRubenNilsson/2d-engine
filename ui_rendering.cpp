@@ -101,7 +101,11 @@ namespace ui {
 
 					const Clay_BorderRenderData& data = command.renderData.border;
 
-					_add_border_vertices(box, data.color, data.width.left, data.width.right, data.width.top, data.width.bottom);
+					Color color = data.color;
+					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands
+						color = Color::WHITE;
+
+					_add_border_vertices(box, color, data.width.left, data.width.right, data.width.top, data.width.bottom);
 
 					// TODO: corner radius
 
