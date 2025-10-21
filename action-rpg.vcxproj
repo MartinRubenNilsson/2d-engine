@@ -398,6 +398,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="window.h" />
     <ClInclude Include="window_graphics.h" />
     <ClInclude Include="window_keys.h" />
+    <ClInclude Include="window_settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

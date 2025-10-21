@@ -719,6 +719,9 @@
     <ClInclude Include="background.h">
       <Filter>game\background</Filter>
     </ClInclude>
+    <ClInclude Include="window_settings.h">
+      <Filter>engine\window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
