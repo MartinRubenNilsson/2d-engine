@@ -107,7 +107,7 @@ namespace ecs {
 
 		// Play footstep sounds.
 		const std::string terrain(to_string(get_terrain_at(pos)));
-		if (anim.frame_changed() && anim.get_frame() < UINT_MAX && anim.get_frame() % 3 == 0) { // TODO: need to also play sound halfway though left and right run anims
+		if (anim.frame_changed() && anim.get_frame() < UINT_MAX && anim.get_frame() % 3 == 0) {
 			Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
 			audio::set_event_parameter_label(ev, "terrain", terrain);
 		}
