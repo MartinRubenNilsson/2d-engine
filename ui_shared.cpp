@@ -58,6 +58,10 @@ namespace shared {
 		}
 	}
 
+	void layout_text(std::string_view text) {
+		CLAY_TEXT(to_clay(text), &default_text);
+	}
+
 	void layout_menu_button(std::string_view text, void(*on_click)()) {
 		const Clay_ElementId id = CLAY_SID_LOCAL(to_clay(text));
 		CLAY(id) {

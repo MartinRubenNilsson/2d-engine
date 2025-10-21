@@ -318,14 +318,17 @@
     <ClCompile Include="ui_rendering.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_main_menu.cpp">
-      <Filter>game\ui\menus\pause_menu</Filter>
-    </ClCompile>
     <ClCompile Include="ui_textbox_presets.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
     <ClCompile Include="ui_textbox.cpp">
       <Filter>game\ui\textbox</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_main_menu.cpp">
+      <Filter>game\ui\menus\main_menu</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_credits_menu.cpp">
+      <Filter>game\ui\menus\credits_menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -707,11 +710,14 @@
     <ClInclude Include="ui_pause_menu.h">
       <Filter>game\ui\menus\pause_menu</Filter>
     </ClInclude>
-    <ClInclude Include="ui_main_menu.h">
-      <Filter>game\ui\menus\pause_menu</Filter>
-    </ClInclude>
     <ClInclude Include="ui_textbox.h">
       <Filter>game\ui\textbox</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_main_menu.h">
+      <Filter>game\ui\menus\main_menu</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_credits_menu.h">
+      <Filter>game\ui\menus\credits_menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -897,6 +903,12 @@
     </Filter>
     <Filter Include="game\ui\textbox">
       <UniqueIdentifier>{ac7a0399-cf30-4e68-a1c2-f73af1767c74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\menus\main_menu">
+      <UniqueIdentifier>{b1d3f038-069c-49a7-a859-5385d6e72e02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\menus\credits_menu">
+      <UniqueIdentifier>{781d6ddc-3b15-4954-a686-1412d97e9b39}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

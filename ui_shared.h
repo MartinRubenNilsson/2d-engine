@@ -14,7 +14,7 @@ namespace shared {
 
 	Clay_String to_clay(std::string_view string);
 
+	void layout_text(std::string_view text);
 	void layout_menu_button(std::string_view text, void(*on_click)());
-
 }
 }

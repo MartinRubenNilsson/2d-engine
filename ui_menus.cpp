@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "ui_main_menu.h"
 #include "ui_pause_menu.h"
+#include "ui_credits_menu.h"
 
 namespace ui {
 	Rml::ElementDocument* _get_menu_document(MenuType type); // Forward declaration
@@ -75,6 +76,9 @@ namespace ui {
 		switch (type) {
 			case MenuType::Main: {
 				ui::main_menu::show = visible;
+			} return;
+			case MenuType::Credits: {
+				ui::credits_menu::show = visible;
 			} return;
 			case MenuType::Pause: {
 				ui::pause_menu::show = visible;

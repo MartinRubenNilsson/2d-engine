@@ -239,6 +239,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="text_unicode.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="easings.cpp" />
+    <ClCompile Include="ui_credits_menu.cpp" />
     <ClCompile Include="ui_game.cpp" />
     <ClCompile Include="ui_main_menu.cpp" />
     <ClCompile Include="ui_pause_menu.cpp" />
@@ -351,6 +352,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="text_unicode.h" />
     <ClInclude Include="tile_ids.h" />
     <ClInclude Include="ui.h" />
+    <ClInclude Include="ui_credits_menu.h" />
     <ClInclude Include="ui_game.h" />
     <ClInclude Include="ui_main_menu.h" />
     <ClInclude Include="ui_pause_menu.h" />
