@@ -70,9 +70,9 @@ namespace hud {
 			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{
 			_layout_health();
-			_layout_text(_rupees_string);
-			_layout_text(_arrows_string);
-			_layout_text(_bombs_string);
+			shared::layout_text(_rupees_string);
+			shared::layout_text(_arrows_string);
+			shared::layout_text(_bombs_string);
 		}
 	}
 }
