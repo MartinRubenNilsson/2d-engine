@@ -51,10 +51,8 @@ namespace ui {
 		data_model.BindEventCallback("on_click_play", _wrap<bindings::on_click_play>());
 		data_model.BindEventCallback("on_click_settings", _wrap<bindings::on_click_settings>());
 		data_model.BindEventCallback("on_click_credits", _wrap<bindings::on_click_credits>());
-		data_model.BindEventCallback("on_click_quit", _wrap<bindings::on_click_quit>());
 		data_model.BindEventCallback("on_click_back", _wrap<bindings::on_click_back>());
 		data_model.BindEventCallback("on_click_resume", _wrap<bindings::on_click_resume>());
-		data_model.BindEventCallback("on_click_restart", _wrap<bindings::on_click_restart>());
 		data_model.BindEventCallback("on_click_main_menu", _wrap<bindings::on_click_main_menu>());
 	}
 }

@@ -69,21 +69,12 @@ namespace ui {
 			push_menu(MenuType::Credits);
 		}
 
-		void on_click_quit() {
-			_events.push_back({ EventType::QuitApp });
-		}
-
 		void on_click_back() {
 			pop_menu();
 		}
 
 		void on_click_resume() {
 			pop_menu();
-		}
-
-		void on_click_restart() {
-			pop_menu();
-			_events.push_back({ EventType::RestartMap });
 		}
 
 		void on_click_main_menu() {

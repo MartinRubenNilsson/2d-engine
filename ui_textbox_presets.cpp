@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ui_textbox.h"
-#include "ui_rmlui.h"
+#include "map.h"
+
+
+#include "ui_rmlui.h" // TODO: remove
 
 namespace ui
 {
@@ -52,7 +55,7 @@ namespace ui
 			tb.options = { "Yes", "No" };
 			tb.options_callback = [](const std::string& option) {
 				if (option == "Yes") {
-					bindings::on_click_restart();
+					map::reset();
 				} else if (option == "No") {
 					bindings::on_click_main_menu();
 				}

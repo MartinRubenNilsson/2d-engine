@@ -2,6 +2,7 @@
 #include "ui_main_menu.h"
 #include "ui_shared.h"
 #include "graphics.h"
+#include "window.h"
 #include "ui_rmlui.h"
 
 namespace ui {
@@ -51,7 +52,7 @@ namespace main_menu {
 			shared::layout_menu_button("Play", bindings::on_click_play);
 			shared::layout_menu_button("Settings", bindings::on_click_settings);
 			shared::layout_menu_button("Credits", bindings::on_click_credits);
-			shared::layout_menu_button("Quit", bindings::on_click_quit);
+			shared::layout_menu_button("Quit", []{ window::set_should_close(true); });
 		}
 	}
 }

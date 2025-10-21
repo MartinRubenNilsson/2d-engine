@@ -7,8 +7,6 @@ namespace window {
 namespace ui {
 	enum class EventType {
 		PlayGame,
-		RestartMap,
-		QuitApp,
 		GoToMainMenu,
 	};
 
@@ -20,10 +18,8 @@ namespace ui {
 		void on_click_play();
 		void on_click_settings();
 		void on_click_credits();
-		void on_click_quit();
 		void on_click_back();
 		void on_click_resume();
-		void on_click_restart();
 		void on_click_main_menu();
 	}
 

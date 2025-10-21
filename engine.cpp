@@ -153,16 +153,11 @@ namespace engine {
                         background::set_type(background::Type::None);
                         map::open("summer_forest_00");
                     } break;
-                    case ui::EventType::RestartMap: {
-                        map::reset();
-                    } break;
                     case ui::EventType::GoToMainMenu: {
                         background::set_type(background::Type::MountainDusk);
                         map::close(0.f);
                     } break;
-                    case ui::EventType::QuitApp: {
-                        window::set_should_close(true);
-                    } break;
+ 
                 }
             }
         }
