@@ -58,10 +58,6 @@ namespace hud {
 		}
 	}
 
-	void _layout_text(std::string_view string) {
-		CLAY_TEXT(shared::to_clay(string), &shared::default_text);
-	}
-
 	void layout() {
 		CLAY(CLAY_ID("hud"), { .layout = {
 			.padding = CLAY_PADDING_ALL(3),
