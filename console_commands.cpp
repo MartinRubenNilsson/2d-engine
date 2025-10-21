@@ -98,23 +98,23 @@ namespace console {
 	}
 
 	std::span<const Command> find_commands_whose_name_starts_with(std::string_view prefix) {
-		const size_t prefix_size = prefix.size();
 		auto [begin, end] = std::equal_range(_commands.begin(), _commands.end(), Command{ prefix },
-			[prefix_size](const Command& left, const Command& right) {
-			return strncmp(left.name.data(), right.name.data(), prefix_size) < 0;
-		});
+			[](const Command& left, const Command& right) {
+				const size_t size = std::min(left.name.size(), right.name.size());
+				return strncmp(left.name.data(), right.name.data(), size) < 0;
+			});
 		return { begin, end };
 	}
 
 	Arg _get_default_arg_for_param_type(ParamType type) {
 		switch (type) {
-		case ParamType::None:     return std::monostate{};
-		case ParamType::Bool:     return false;
-		case ParamType::Int:      return 0;
-		case ParamType::Float:    return 0.f;
-		case ParamType::String:   return std::string{};
-		case ParamType::Vec2f: return Vec2f{};
-		default:                  return std::monostate{};
+			default: [[fallthrough]]; // Should never happen.
+			case ParamType::None:   return std::monostate{};
+			case ParamType::Bool:   return false;
+			case ParamType::Int:    return 0;
+			case ParamType::Float:  return 0.f;
+			case ParamType::String: return std::string{};
+			case ParamType::Vec2f:  return Vec2f{};
 		}
 	}
 

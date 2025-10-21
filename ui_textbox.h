@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 
 namespace ui {
 namespace textbox {
@@ -11,17 +12,17 @@ namespace textbox {
 	const char* get_sprite_name(TextboxSprite sprite);
 
 	struct Textbox {
-		static const std::string OPENING_SOUND_ITEM_FANFARE;
-		static const std::string DEFAULT_TYPING_SOUND;
+		static const std::string_view OPENING_SOUND_ITEM_FANFARE;
+		static const std::string_view DEFAULT_TYPING_SOUND;
 
-		std::string path;
-		std::string text; // RML
+		std::string_view path;
+		std::string_view text; // RML
 		TextboxSprite sprite = TextboxSprite::None;
-		std::string opening_sound; // name of sound event
-		std::string typing_sound = DEFAULT_TYPING_SOUND;
+		std::string_view opening_sound; // name of sound event
+		std::string_view typing_sound = DEFAULT_TYPING_SOUND;
 		float typing_speed = 25.f; // in chars per second, 0 = instant
-		std::vector<std::string> options;
-		void (*options_callback)(const std::string& option) = nullptr;
+		std::vector<std::string_view> options;
+		void (*options_callback)(std::string_view option) = nullptr;
 	};
 
 	void add_event_listeners();
@@ -54,8 +55,8 @@ namespace textbox {
 	// Returns a list of all textbox presets, sorted lexicographically by Textbox::path.
 	std::span<const Textbox> get_presets();
 	// Returns a list of all textbox presets whose path starts with the given path.
-	std::span<const Textbox> get_presets(const std::string& path);
-	void open_or_enqueue_presets(const std::string& path);
+	std::span<const Textbox> get_presets(std::string_view path);
+	void open_or_enqueue_presets(std::string_view path);
 
 	// DEBUGGING
 

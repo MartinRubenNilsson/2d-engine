@@ -60,7 +60,7 @@ namespace textbox {
 			skip_typing();
 		} else if (_textbox->options_callback &&
 			bindings::textbox_selected_option < bindings::textbox_options.size()) {
-			const std::string& option = bindings::textbox_options[bindings::textbox_selected_option];
+			const std::string_view option = bindings::textbox_options[bindings::textbox_selected_option];
 			_textbox->options_callback(option);
 			audio::create_event({ .path = "event:/ui/snd_button_click" });
 		} else {
@@ -84,7 +84,7 @@ namespace textbox {
 
 	// Returns true if the character at pos is plain text,
 	// defined as a character that is not part of an RML tag.
-	bool _is_plain(const std::string& rml, size_t pos) {
+	bool _is_plain(std::string_view rml, size_t pos) {
 		for (size_t i = pos; i < rml.size(); ++i) {
 			if (rml[i] == '<') return i != pos;
 			if (rml[i] == '>') return false;
@@ -93,7 +93,7 @@ namespace textbox {
 	}
 
 	// Counts the number of plain text characters in the string.
-	size_t _get_plain_count(const std::string& rml) {
+	size_t _get_plain_count(std::string_view rml) {
 		size_t count = 0;
 		for (size_t i = 0; i < rml.size(); ++i) {
 			if (_is_plain(rml, i)) {
@@ -104,7 +104,7 @@ namespace textbox {
 	}
 
 	// Returns the nth plain text character if n < _get_plain_length(rml), or '\0' otherwise.
-	char _get_nth_plain(const std::string& rml, size_t n) {
+	char _get_nth_plain(std::string_view rml, size_t n) {
 		size_t count = 0;
 		for (size_t i = 0; i < rml.size(); ++i) {
 			if (_is_plain(rml, i)) {
@@ -117,7 +117,7 @@ namespace textbox {
 
 	// Replaces graphical plain text with non-breaking spaces, starting at offset.
 	// This is used to prevent the text from jumping around when being typed out.
-	std::string _replace_graphical_plain_with_nbsp(const std::string& rml, size_t offset) {
+	std::string _replace_graphical_plain_with_nbsp(std::string_view rml, size_t offset) {
 		std::string ret;
 		size_t count = 0;
 		for (size_t i = 0; i < rml.size(); ++i) {
@@ -153,7 +153,7 @@ namespace textbox {
 			if (_typing_time >= seconds_per_char) {
 				_typing_time -= seconds_per_char;
 				if (isgraph(_get_nth_plain(_textbox->text, _typing_counter))) {
-					std::string path = "event:/" + _textbox->typing_sound;
+					const std::string path(_textbox->typing_sound);
 					audio::create_event({ .path = path.c_str() });
 				}
 				++_typing_counter;
@@ -170,7 +170,11 @@ namespace textbox {
 		bindings::textbox_sprite = get_sprite_name(_textbox->sprite);
 		if (finished_typing) {
 			bindings::textbox_has_options = !_textbox->options.empty();
-			bindings::textbox_options = _textbox->options;
+			bindings::textbox_options.resize(_textbox->options.size());
+			for (size_t i = 0; i < _textbox->options.size(); ++i) {
+				bindings::textbox_options[i] = _textbox->options[i];
+			}
+
 		} else {
 			bindings::textbox_has_options = false;
 			bindings::textbox_options.clear();
@@ -203,7 +207,7 @@ namespace textbox {
 		_typing_time = 0.f;
 		_typing_counter = 0;
 		if (!_textbox->opening_sound.empty()) {
-			std::string path = "event:/" + _textbox->opening_sound;
+			const std::string path(_textbox->opening_sound);
 			audio::create_event({ .path = path.c_str() });
 		}
 		_set_document_visible(true);
@@ -242,13 +246,14 @@ namespace textbox {
 		_queue.clear();
 	}
 
-	void open_or_enqueue_presets(const std::string& path) {
+	void open_or_enqueue_presets(std::string_view path) {
 		for (const Textbox& textbox : get_presets(path)) {
 			open_or_enqueue(textbox);
 		}
 	}
 
 	void show_debug_window() {
+#if 0
 		ImGui::Begin("Textbox");
 		for (const Textbox& textbox : get_presets()) {
 			if (ImGui::Button(textbox.path.c_str())) {
@@ -256,6 +261,7 @@ namespace textbox {
 			}
 		}
 		ImGui::End();
+#endif
 	}
 }
 }

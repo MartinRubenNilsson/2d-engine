@@ -35,7 +35,7 @@ namespace ui {
 
 		// REGISTER TYPES
 
-		data_model.RegisterArray<std::vector<std::string>>();
+		data_model.RegisterArray<std::vector<std::string>>(); // GET RID OF THIS!!!
 
 		// BIND VARIABLES
 

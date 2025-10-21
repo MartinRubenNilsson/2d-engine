@@ -16,8 +16,8 @@ namespace textbox {
 	}
 
 	//TODO: replace with enum and getter
-	const std::string Textbox::OPENING_SOUND_ITEM_FANFARE = "snd_item_fanfare";
-	const std::string Textbox::DEFAULT_TYPING_SOUND = "snd_txt1";
+	const std::string_view Textbox::OPENING_SOUND_ITEM_FANFARE = "event:/snd_item_fanfare";
+	const std::string_view Textbox::DEFAULT_TYPING_SOUND = "event:/snd_txt1";
 
 	std::vector<Textbox> _presets;
 
@@ -25,12 +25,12 @@ namespace textbox {
 		return _presets;
 	}
 
-	std::span<const Textbox> get_presets(const std::string& path) {
-		const size_t path_size = path.size();
+	std::span<const Textbox> get_presets(std::string_view path) {
 		auto [first, last] = std::equal_range(_presets.begin(), _presets.end(), Textbox{ path },
-			[path_size](const Textbox& left, const Textbox& right) {
-			return strncmp(left.path.c_str(), right.path.c_str(), path_size) < 0;
-		});
+			[](const Textbox& left, const Textbox& right) {
+				const size_t size = std::min(left.path.size(), right.path.size());
+				return strncmp(left.path.data(), right.path.data(), size) < 0;
+			});
 		return { first, last };
 	}
 
@@ -48,7 +48,7 @@ namespace textbox {
 			tb.path = "player/die/1";
 			tb.text = "Would you like to try again?";
 			tb.options = { "Yes", "No" };
-			tb.options_callback = [](const std::string& option) {
+			tb.options_callback = [](std::string_view option) {
 				if (option == "Yes") {
 					map::reset();
 				} else if (option == "No") {
