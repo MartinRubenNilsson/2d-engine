@@ -144,6 +144,9 @@ namespace ui {
 
 					// PITFALL: There's no need to sweep the box to account for the shadow offset, because _measure_text()
 					// will already have done so. If we sweep it here we will double-sweep. So translation is correct as-is.
+					// PITFALL 2: Having the bounding box account for the shadow caused problems with pixel alignments, so
+					// I've turned it off in _measure_text(). As long as the shadow has a small offset this shouldn't cause
+					// any problems.
 
 					// Create vertices for the glyphs.
 					for (size_t g = 0; g < shape.glyph_count; ++g) {

@@ -44,10 +44,12 @@ namespace ui {
 		}
 		text::TextShape shape{};
 		text::shape_text(shape, string, font, config->fontSize, 0.f, true, false);
+#if 0 // Grow the box to account for shadows. This is causing problems with pixel alignments, so I've turned it off.
 		if (config->userData) {
 			const TextData& data = *(const TextData*)config->userData;
-			shape.bounding_box = sweep(shape.bounding_box, data.shadow_offset); // grow the box to account for shadows
+			shape.bounding_box = sweep(shape.bounding_box, data.shadow_offset); 
 		}
+#endif
 		const Vec2f box_size = shape.bounding_box.max - shape.bounding_box.min;
 		return { box_size.x, box_size.y };
 	}
