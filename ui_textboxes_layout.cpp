@@ -42,6 +42,9 @@ namespace textboxes {
 	extern ImageData _skull_image;
 
 	void _layout_textbox() {
+		const Textbox* textbox = get_current_textbox();
+		if (!textbox) return;
+
 		constexpr uint16_t SPACING = 5;
 		constexpr float MIN_WIDTH = 16 * 16.f; // 16 tiles wide
 		CLAY(CLAY_ID_LOCAL("textbox"), { .layout = {
@@ -52,10 +55,10 @@ namespace textboxes {
 			.backgroundColor = Color::BLACK })
 		{
 			_layout_textbox_border();
-			if (&_skull_image) {
-				_layout_textbox_image(&_skull_image);
+			if (textbox->image) {
+				_layout_textbox_image(textbox->image);
 			}
-			_layout_textbox_text("Hello, world! This is Martin speaking\nindeed. I'm fine thank you.\nAnd another line, yahoo!!");
+			_layout_textbox_text(get_current_typed_text()); // TODO
 		}
 	}
 

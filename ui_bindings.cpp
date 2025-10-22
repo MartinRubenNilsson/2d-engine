@@ -5,8 +5,6 @@
 namespace ui {
 	namespace bindings {
 		std::string textbox_text; // RML
-		bool textbox_has_sprite = false;
-		std::string textbox_sprite;
 		bool textbox_has_options = false;
 		std::vector<std::string> textbox_options;
 		size_t textbox_selected_option = 0;
@@ -40,8 +38,6 @@ namespace ui {
 		// BIND VARIABLES
 
 		data_model.Bind("textbox_text", &bindings::textbox_text);
-		data_model.Bind("textbox_has_sprite", &bindings::textbox_has_sprite);
-		data_model.Bind("textbox_sprite", &bindings::textbox_sprite);
 		data_model.Bind("textbox_has_options", &bindings::textbox_has_options);
 		data_model.Bind("textbox_options", &bindings::textbox_options);
 		data_model.Bind("textbox_selected_option", &bindings::textbox_selected_option);

@@ -242,7 +242,7 @@ namespace ui {
 
 	void render_rmlui() {
 		prepare_render_state();
-		_context->Render();
+		//_context->Render();
 		restore_render_state();
 	}
 

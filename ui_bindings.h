@@ -3,8 +3,6 @@
 namespace ui {
 	namespace bindings {
 		extern std::string textbox_text; // RML
-		extern bool textbox_has_sprite;
-		extern std::string textbox_sprite;
 		extern bool textbox_has_options;
 		extern std::vector<std::string> textbox_options;
 		extern size_t textbox_selected_option;

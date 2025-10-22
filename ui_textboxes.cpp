@@ -9,8 +9,6 @@ namespace ui {
 	namespace bindings {
 		void _clear_bindings() {
 			textbox_text.clear();
-			textbox_has_sprite = false;
-			textbox_sprite.clear();
 			textbox_has_options = false;
 			textbox_options.clear();
 			textbox_selected_option = 0;
@@ -73,9 +71,9 @@ namespace textboxes {
 		return '\0';
 	}
 
-	// Replaces graphical plain text with non-breaking spaces, starting at offset.
+	// Replaces graphical plain text with whitespace, starting at offset.
 	// This is used to prevent the text from jumping around when being typed out.
-	std::string _replace_graphical_plain_with_nbsp(std::string_view rml, size_t offset) {
+	std::string _replace_graphical_plain_with_whitespace(std::string_view rml, size_t offset) {
 		std::string ret;
 		size_t count = 0;
 		for (size_t i = 0; i < rml.size(); ++i) {
@@ -86,7 +84,7 @@ namespace textboxes {
 				}
 				++count;
 			}
-			ret += replace ? "&nbsp;" : rml.substr(i, 1);
+			ret += replace ? " " : rml.substr(i, 1);
 		}
 		return ret;
 	}
@@ -104,6 +102,16 @@ namespace textboxes {
 	std::optional<Textbox> _textbox;
 	float _typing_time = 0.f; // time since last character was typed
 	size_t _typing_counter = 0; // number of characters typed
+
+	const Textbox* get_current_textbox() {
+		if (_textbox.has_value())
+			return &*_textbox;
+		return nullptr;
+	}
+
+	std::string_view get_current_typed_text() {
+		return bindings::textbox_text;
+	}
 
 	bool is_open() {
 		return _textbox.has_value();
@@ -242,9 +250,7 @@ namespace textboxes {
 
 		const bool finished_typing = (_typing_counter == plain_count);
 
-		bindings::textbox_text = _replace_graphical_plain_with_nbsp(_textbox->text, _typing_counter);
-		bindings::textbox_has_sprite = (_textbox->sprite_DEPRECATED != TextboxSprite::None);
-		bindings::textbox_sprite = get_sprite_name(_textbox->sprite_DEPRECATED);
+		bindings::textbox_text = _replace_graphical_plain_with_whitespace(_textbox->text, _typing_counter);
 		if (finished_typing) {
 			bindings::textbox_has_options = !_textbox->options.empty();
 			bindings::textbox_options.resize(_textbox->options.size());
