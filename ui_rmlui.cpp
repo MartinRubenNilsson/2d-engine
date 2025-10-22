@@ -12,7 +12,6 @@
 namespace ui {
 	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
 	float _dt_accumulator = 0.f;
-	bool debug_rmlui = false;
 	RmlUiSystemInterface _system_interface;
 	RmlUiRenderInterface _render_interface;
 	Rml::Context* _context = nullptr;
@@ -213,9 +212,6 @@ namespace ui {
 			// Hence, let's only call ProcessMouseMove() when we're in a menu,
 			// since it's only then that we're using the mouse position (to press buttons).
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			if (debug_rmlui || get_top_menu() != MenuType::Count) {
-				_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
-			}
 			_mouse_position_x = (int)ev.mouse_move.x;
 			_mouse_position_y = (int)ev.mouse_move.y;
 

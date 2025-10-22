@@ -23,8 +23,6 @@ namespace ui {
 		void on_click_main_menu();
 	}
 
-	extern bool debug_rmlui;
-
 	void startup_rmlui();
 	void shutdown_rmlui();
 	void handle_window_event_for_rmlui(const window::Event& ev);
