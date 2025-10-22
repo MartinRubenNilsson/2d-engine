@@ -22,9 +22,10 @@ namespace shared {
 
 		_text_data.shadow_offset = { 0.5f, 0.5f };
 
+		default_text.userData = &_text_data;
 		default_text.fontId = _font.id;
 		default_text.fontSize = 13; // PITFALL: Not a power of 2 - not a problem, but maybe unexpected since it is a pixel font.
-		default_text.userData = &_text_data;
+		default_text.lineHeight = 12;
 
 		_default_menu_button_text = default_text;
 		_default_menu_button_text.textAlignment = CLAY_TEXT_ALIGN_CENTER;

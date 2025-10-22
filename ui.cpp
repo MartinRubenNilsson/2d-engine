@@ -21,6 +21,9 @@ namespace ui {
 	}
 
 	Clay_Dimensions _measure_text(Clay_StringSlice text, Clay_TextElementConfig* config, void* userData) {
+		// PITFALL: Clay calls this function with parts of the user-provided string (for example, it measures
+		// whitespaces separately) and uses the result to build the bounding box. It has proven quite hard to
+		// make the result match the bounding box produced by text::shape_text(), which measures a whole text.
 		const std::string_view string{ text.chars, (size_t)text.length };
 		const text::FontId font_id{ .id = config->fontId };
 		if (!font_id) {
@@ -32,16 +35,6 @@ namespace ui {
 			return { 0.f, 0.f };
 		}
 		text::Font& font = text::get_font(font_id);
-		// PITFALL: Clay calls this function with parts of the user-provided string (for example,
-		// it measures whitespaces separately) and uses the result to build the bounding box.
-		// Since shape_text() returns an empty bounding box for a text consisting of only white-
-		// space, we must detect this case and handle it manually. This may lead to bugs later
-		// down the line if shape_text() changes. Too bad!
-		if (text.length == 1 && text.chars[0] == ' ') {
-			const int advance = text::get_whitespace_advance(font);
-			const float width = advance * text::get_scale_for_font_size(font, config->fontSize);
-			return { width, 0.f };
-		}
 		text::TextShape shape{};
 		text::shape_text(shape, string, font, config->fontSize, 0.f, true, false);
 #if 0 // Grow the box to account for shadows. This is causing problems with pixel alignments, so I've turned it off.

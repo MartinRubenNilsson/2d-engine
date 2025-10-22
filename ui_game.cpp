@@ -40,6 +40,7 @@ namespace game {
 		if (pause_menu::show) {
 			pause_menu::layout();
 		}
+		textboxes::layout();
 	}
 }
 }

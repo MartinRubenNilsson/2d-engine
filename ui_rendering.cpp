@@ -35,10 +35,18 @@ namespace ui {
 	}
 
 	void _add_border_vertices(const Rect2f& box, Color color, float left, float right, float top, float bottom) {
-		_add_rectangle_vertices({ box.min, { box.min.x + left, box.max.y } }, color); // left border
-		_add_rectangle_vertices({ { box.max.x - right, box.min.y }, box.max}, color); // right border
-		_add_rectangle_vertices({ { box.min.x + left, box.min.y }, { box.max.x - right, box.min.y + top } }, color); // top border
-		_add_rectangle_vertices({ { box.min.x + left, box.max.y - bottom }, { box.max.x - right, box.max.y } }, color); // bottom border
+		if (left > 0.f) { // left border
+			_add_rectangle_vertices({ box.min, { box.min.x + left, box.max.y } }, color);
+		}
+		if (right > 0.f) { // right border
+			_add_rectangle_vertices({ { box.max.x - right, box.min.y }, box.max}, color);
+		}
+		if (top > 0.f) { // top border
+			_add_rectangle_vertices({ { box.min.x + left, box.min.y }, { box.max.x - right, box.min.y + top } }, color);
+		}
+		if (bottom > 0.f) { // bottom border
+			_add_rectangle_vertices({ { box.min.x + left, box.max.y - bottom }, { box.max.x - right, box.max.y } }, color);
+		}
 	}
 
 	void _render_clay(const Clay_Dimensions& dimensions, std::span<const Clay_RenderCommand> commands) {
@@ -144,6 +152,7 @@ namespace ui {
 
 					// PITFALL: There's no need to sweep the box to account for the shadow offset, because _measure_text()
 					// will already have done so. If we sweep it here we will double-sweep. So translation is correct as-is.
+					
 					// PITFALL 2: Having the bounding box account for the shadow caused problems with pixel alignments, so
 					// I've turned it off in _measure_text(). As long as the shadow has a small offset this shouldn't cause
 					// any problems.

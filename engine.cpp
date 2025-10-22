@@ -42,8 +42,8 @@ namespace engine {
         graphics::startup();
         graphics::startup_globals();
         imgui_impl::startup();
-        postprocessing::startup();
         console::startup();
+        postprocessing::startup();
         audio::startup();
         text::startup_fonts();
         ui::startup();
@@ -67,9 +67,7 @@ namespace engine {
         settings::apply(settings::app_settings);
 
         window::set_visible(true);
-
         console::execute(argc, argv);
-
         _should_run = true;
     }
 
@@ -120,9 +118,7 @@ namespace engine {
         // PROCESS WINDOW EVENTS
         {
             for (const window::Event& ev : window::get_events()) {
-                if (ev.type == window::EventType::WindowClose) {
-                    window::set_should_close(true);
-                } else if (ev.type == window::EventType::FramebufferSize) {
+                if (ev.type == window::EventType::FramebufferSize) {
                     // When the window is minimized, an event is sent with size 0, 0,
                     // which we must therefore ignore.
                     if (ev.size.width && ev.size.height) {
@@ -141,7 +137,7 @@ namespace engine {
 
         // PROCESS UI EVENTS
         {
-            // TODO: move
+            // TODO: get rid of this!!!!!!
             ui::Event ev;
             while (ui::get_next_event(ev)) {
                 switch (ev.type) {
@@ -157,8 +153,6 @@ namespace engine {
                 }
             }
         }
-
-        // UPDATE
 
         audio::update();
         console::update((float)_delta_time);
@@ -181,6 +175,7 @@ namespace engine {
         _game_time += game_delta_time;
 
         ecs::update((float)game_delta_time);
+        ui::update((float)_delta_time);
         postprocessing::update((float)game_delta_time);
     }
 
@@ -297,7 +292,6 @@ namespace engine {
 
         // RENDER UI TO FINAL FRAMEBUFFER
 
-        ui::update((float)_delta_time);
         ui::layout();
         ui::render();
         ui::render_rmlui(); // TODO: remove

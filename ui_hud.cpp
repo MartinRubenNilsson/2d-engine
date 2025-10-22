@@ -61,7 +61,7 @@ namespace hud {
 	void layout() {
 		CLAY(CLAY_ID("hud"), { .layout = {
 			.padding = CLAY_PADDING_ALL(3),
-			.childGap = 3,
+			.childGap = 2,
 			.layoutDirection = CLAY_TOP_TO_BOTTOM },
 			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{

@@ -121,5 +121,13 @@ namespace window {
 		glfwPollEvents(); // Will add events to the *back buffer*.
 		std::swap(_events_front_buffer, _events_back_buffer);
 		_events_back_buffer.clear();
+
+#if 1
+		for (const window::Event& ev : get_events()) {
+			if (ev.type == window::EventType::WindowClose) {
+				glfwSetWindowShouldClose(_window, GLFW_TRUE);
+			}
+		}
+#endif
 	}
 }

@@ -3,7 +3,6 @@
 #include "window.h"
 #include "window_events.h"
 #include "console.h"
-#include "ui_rmlui.h"
 
 namespace input {
 	constexpr size_t KEY_COUNT = (size_t)Key::Last - (size_t)Key::First + 1;
