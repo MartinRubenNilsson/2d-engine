@@ -151,7 +151,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
     <ClCompile Include="console_commands_ecs.cpp" />
-    <ClCompile Include="console_commands_registration.cpp" />
+    <ClCompile Include="console_commands_creation.cpp" />
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />
@@ -260,7 +260,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ui_menus.cpp" />
     <ClCompile Include="ui_rmlui_system_interface.cpp" />
     <ClCompile Include="ui_textbox.cpp" />
-    <ClCompile Include="ui_textbox_presets.cpp" />
+    <ClCompile Include="ui_textbox_creation.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="window_events.cpp" />
   </ItemGroup>

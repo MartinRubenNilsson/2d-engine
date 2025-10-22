@@ -44,12 +44,12 @@ namespace console {
 
 	std::string get_command_help_message(const Command& command);
 	
-	void register_command(const Command&& command);
+	void create_command(const Command&& command);
 
 	const Command* find_command_with_name(std::string_view name);
 	std::span<const Command> find_commands_whose_name_starts_with(std::string_view prefix);
 
 	void parse_and_execute_command(std::string_view command_line);
 	
-	void register_commands(); // Call once at engine startup.
+	void create_commands(); // Call once at engine startup.
 }

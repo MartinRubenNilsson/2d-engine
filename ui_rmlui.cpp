@@ -6,7 +6,6 @@
 #include "ui_menus.h"
 #include "ui_textbox.h"
 #include "console.h"
-#include "audio.h"
 #include "window_events.h"
 #include "files.h"
 
@@ -74,7 +73,6 @@ namespace ui {
 		Rml::Debugger::SetContext(_context);
 #endif
 		create_bindings();
-		textbox::create_presets();
 	}
 
 	void shutdown_rmlui() {
@@ -299,8 +297,6 @@ namespace ui {
 		// As an optimization, update the UI at a lower FPS than the game.
 		_dt_accumulator += dt;
 		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
-
-		textbox::update(_dt_accumulator);
 		dirty_all_variables();
 		_context->Update();
 #ifdef _DEBUG_UI
@@ -337,7 +333,6 @@ namespace ui {
 
 	void add_event_listeners() {
 		add_menu_event_listeners();
-		textbox::add_event_listeners();
 	}
 
 	void show_document(const std::string& name) {

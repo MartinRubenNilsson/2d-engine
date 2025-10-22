@@ -33,7 +33,7 @@ namespace console {
 		// anything that gets written to them.
 		std::cout.rdbuf(_cout_stream.rdbuf());
 		std::cerr.rdbuf(_cerr_stream.rdbuf());
-		register_commands();
+		create_commands();
 	}
 
 	int _input_text_callback(ImGuiInputTextCallbackData* data) {

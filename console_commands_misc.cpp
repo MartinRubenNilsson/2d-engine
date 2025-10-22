@@ -46,52 +46,52 @@ namespace console {
 	}
 #endif
 
-	void _register_misc_commands() {
+	void _create_misc_commands() {
 
 		// CONSOLE
 
-		register_command({
+		create_command({
 			.name = "help",
 			.desc = "Shows help for a command",
 			.params = { { ParamType::String, "command", "The command to show help for" } },
 			.callback = _execute_help_command,
 			});
-		register_command({
+		create_command({
 			.name = "clear",
 			.desc = "Clears the console",
 			.callback = [](Args args) { clear(); }
 			});
-		register_command({
+		create_command({
 			.name = "sleep",
 			.desc = "Defers incoming commands, executing them later",
 			.params = { { ParamType::Float, "seconds", "The number of seconds to sleep" } },
 			.callback = [](Args args) { sleep(get_float(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "log",
 			.desc = "Logs a message to the console",
 			.params = { { ParamType::String, "message", "The message to log" } },
 			.callback = [](Args args) { log(get_string(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "log_error",
 			.desc = "Logs an error message to the console",
 			.params = { { ParamType::String, "message", "The message to log" } },
 			.callback = [](Args args) { log_error(get_string(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "execute",
 			.desc = "Executes a console command",
 			.params = { { ParamType::String, "command_line", "The command to execute" } },
 			.callback = [](Args args) { execute(get_string(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "execute_script",
 			.desc = "Executes a console script",
 			.params = { { ParamType::String, "script_name", "The name of the script" } },
 			.callback = [](Args args) { execute_script_from_file(get_string(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "bind",
 			.desc = "Binds a console command to a key",
 			.params = {
@@ -100,7 +100,7 @@ namespace console {
 				},
 			.callback = [](Args args) { console::bind(get_string(args[0]), get_string(args[1])); }
 			});
-		register_command({
+		create_command({
 			.name = "unbind",
 			.desc = "Unbinds a key",
 			.params = { { ParamType::String, "key", "The key to unbind" } },
@@ -117,7 +117,7 @@ namespace console {
 
 		// ENGINE
 
-		register_command({
+		create_command({
 			.name = "toggle_fps_counter",
 			.desc = "Toggles whether the FPS counter is visible or hidden.",
 			.callback = [](Args) { engine::should_show_fps_counter = !engine::should_show_fps_counter; }
@@ -137,7 +137,7 @@ namespace console {
 
 		// AUDIO
 
-		register_command({
+		create_command({
 			.name = "audio_play",
 			.desc = "Plays an audio event",
 			.params = { { ParamType::String, "event_path", "The full path of the event" } },
@@ -148,7 +148,7 @@ namespace console {
 
 		// UI
 
-		register_command({
+		create_command({
 			.name = "toggle_debug_ui",
 			.desc = "Toggles the UI debug window.",
 			.callback = [](Args) { ui::debug = !ui::debug; }
@@ -156,18 +156,18 @@ namespace console {
 
 		// MAP
 
-		register_command({
+		create_command({
 			.name = "map_open",
 			.desc = "Opens a map",
 			.params = { { ParamType::String, "name", "The name of the map" } },
 			.callback = [](Args args) { map::open(get_string(args[0])); }
 			});
-		register_command({
+		create_command({
 			.name = "map_close",
 			.desc = "Closes the current map",
 			.callback = [](Args) { map::close(); }
 			});
-		register_command({
+		create_command({
 			.name = "map_reset",
 			.desc = "Resets the current map",
 			.callback = [](Args) { map::reset(); }
@@ -175,7 +175,7 @@ namespace console {
 
 		// GAME
 
-		register_command({
+		create_command({
 			.name = "destroy",
 			.desc = "Destroy an entity",
 			.params = {

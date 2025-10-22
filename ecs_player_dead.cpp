@@ -16,7 +16,7 @@ namespace ecs {
 		detach_camera(entity);
 		audio::stop_all_in_bus();
 		audio::create_event({ .path = "event:/music/death_jingle" });
-		ui::textbox::open_or_enqueue_presets("player/die");
+		ui::textbox::open_next("player/die");
 	}
 
 	StateId add_player_dead_state(StateMachine& sm) {

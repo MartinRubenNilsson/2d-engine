@@ -40,7 +40,7 @@ namespace ecs {
 
         switch (chest->type) {
         case ChestType::Normal: {
-            ui::textbox::open({ .text = "You open the chest and find... nothing!" });
+            ui::textbox::open_now({ .text = "You open the chest and find... nothing!" });
             get_patch().chests_to_open.insert(entity);
         } break;
         case ChestType::Bomb: {

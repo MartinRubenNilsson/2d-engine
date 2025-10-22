@@ -236,7 +236,7 @@
     <ClCompile Include="text_stb_truetype.cpp">
       <Filter>engine\graphics\text</Filter>
     </ClCompile>
-    <ClCompile Include="console_commands_registration.cpp">
+    <ClCompile Include="console_commands_creation.cpp">
       <Filter>engine\console\commands</Filter>
     </ClCompile>
     <ClCompile Include="console_commands_steam.cpp">
@@ -312,7 +312,7 @@
     <ClCompile Include="ui_rendering.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox_presets.cpp">
+    <ClCompile Include="ui_textbox_creation.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
     <ClCompile Include="ui_textbox.cpp">

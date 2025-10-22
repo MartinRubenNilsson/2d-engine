@@ -118,8 +118,8 @@ namespace engine {
         steam::run_message_loop();
         window::update_events();
         imgui_impl::new_frame();
-        input::handle_window_events();
         console::handle_window_events();
+        input::handle_window_events();
 
         // PROCESS WINDOW EVENTS
         {

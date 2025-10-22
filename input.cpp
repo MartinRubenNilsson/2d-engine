@@ -47,8 +47,8 @@ namespace input {
 			return false;
 		if (console::has_focus())
 			return false;
-		if (ui::is_menu_or_visible()) // TODO: this should be "ui::has_focus()" or something!!!
-			return false;
+		//if (ui::is_menu_or_visible()) // TODO: this should be "ui::has_focus()" or something!!!
+		//	return false;
 		return true;
 	}
 

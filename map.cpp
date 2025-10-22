@@ -93,7 +93,7 @@ namespace map {
 
 		if (current_map) {
 			audio::stop_all_in_bus(audio::BUS_SOUND);
-			ui::textbox::close_and_clear_queue();
+			ui::textbox::close_all();
 		}
 
 		// OPEN NEXT MAP

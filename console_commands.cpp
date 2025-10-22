@@ -80,7 +80,7 @@ namespace console {
 
 	std::vector<Command> _commands; // Sorted by name
 
-	void register_command(const Command&& command) {
+	void create_command(const Command&& command) {
 		_commands.emplace_back(command);
 	}
 
@@ -171,11 +171,11 @@ namespace console {
 		command->callback(args); // Execute the command
 	}
 
-	void _register_commands(); // console_commands_registration.cpp
+	void _create_commands(); // console_commands_creation.cpp
 
-	void register_commands() {
+	void create_commands() {
 		_commands.clear();
-		_register_commands();
+		_create_commands();
 		std::sort(_commands.begin(), _commands.end()); // Sort by name
 	}
 }
