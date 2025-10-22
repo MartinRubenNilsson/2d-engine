@@ -31,4 +31,5 @@ struct Color {
     static const Color CYAN;
     static const Color SILVER;
     static const Color GRAY;
+    static const Color DIM_GRAY;
 };

@@ -14,7 +14,7 @@ namespace game {
 		main_menu::startup();
 		hud::startup();
 		textboxes::startup();
-		//hud::show = true;
+		hud::show = true;
 	}
 
 	void shutdown() {

@@ -8,7 +8,7 @@ namespace ui {
 namespace shared {
 
 	text::FontId _font{};
-	TextData _text_data{};
+	TextData _default_text_data{};
 
 	Clay_TextElementConfig default_text{};
 	Clay_TextElementConfig _default_menu_button_text{};
@@ -20,9 +20,10 @@ namespace shared {
 	void startup() {
 		_font = text::load_font("assets/fonts/Mozart NBP.ttf");
 
-		_text_data.shadow_offset = { 0.5f, 0.5f };
+		_default_text_data.shadow_offset = { 0.5f, 0.5f };
+		//_default_text_data.shadow_color = Color::DIM_GRAY;
 
-		default_text.userData = &_text_data;
+		default_text.userData = &_default_text_data;
 		default_text.fontId = _font.id;
 		default_text.fontSize = 13; // PITFALL: Not a power of 2 - not a problem, but maybe unexpected since it is a pixel font.
 		default_text.lineHeight = 11;
