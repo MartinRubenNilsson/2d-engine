@@ -32,5 +32,6 @@ namespace window {
 	void from_json(Settings& settings, const rapidjson::Document& doc) {
 		settings = {};
 		settings.scale = _clamp_scale(settings.scale);
+		// TODO
 	}
 }

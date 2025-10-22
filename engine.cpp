@@ -29,17 +29,6 @@
 
 namespace engine {
     bool _should_run = false;
-    double _time = 0.f; // since engine startup
-    double _delta_time = 0.f; // since last call to run()
-    double _game_time = 0.f;
-    double _game_delta_time = 0.f;
-
-    void _load_all_audio_banks() {
-        for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
-            if (file.format != files::FileFormat::FmodStudioBank) continue;
-            audio::load_bank_from_file(file.path);
-        }
-    }
 
     void startup(int argc, char* argv[]) {
         setlocale(LC_ALL, "en_US.utf8");
@@ -56,7 +45,6 @@ namespace engine {
         postprocessing::startup();
         console::startup();
         audio::startup();
-        _load_all_audio_banks();
         text::startup_fonts();
         ui::startup();
         ui::startup_rmlui(); // TODO: remove
@@ -83,7 +71,6 @@ namespace engine {
         console::execute(argc, argv);
 
         _should_run = true;
-        _time = window::get_elapsed_time();
     }
 
     void shutdown() {
@@ -101,25 +88,34 @@ namespace engine {
     }
 
     bool should_run() {
-        return _should_run && !window::should_close();
+        return _should_run;
     }
 
+    double _time = 0.0; // total time since engine startup
+    double _delta_time = 0.0; // time since last call to run()
+    double _game_time = 0.0;
+    double _game_delta_time = 0.0;
+
     void _update_times() {
-        const double new_elapsed_time = window::get_elapsed_time();
-        _delta_time = new_elapsed_time - _time;
-        _time = new_elapsed_time;
+        const double prev_time = _time;
+        _time = window::get_elapsed_time();
+        if (prev_time == 0.0) return; // Avoid big delta time right after startup().
+        _delta_time = _time - prev_time;
     }
 
     void _update() {
         _update_times();
-
-        engine::update_fps_counter(_delta_time);
+        engine::update_fps_counter((float)_delta_time);
         platform::update_directory_watchers();
         steam::run_message_loop();
         window::update_events();
         imgui_impl::new_frame();
         console::handle_window_events();
         input::handle_window_events();
+
+        if (window::should_close()) {
+            _should_run = false;
+        }
 
         // PROCESS WINDOW EVENTS
         {
@@ -165,11 +161,11 @@ namespace engine {
         // UPDATE
 
         audio::update();
-        console::update(_delta_time);
-        ui::update_rmlui(_delta_time);
+        console::update((float)_delta_time);
+        ui::update_rmlui((float)_delta_time);
 
-        background::update(_delta_time); // TODO: this doesn't belong in engine.cpp
-        map::update(_delta_time); // TODO: this doesn't belong in engine.cpp
+        background::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
+        map::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
 
         double game_delta_time = _delta_time;
         if (steam::is_overlay_active()) {
@@ -184,8 +180,8 @@ namespace engine {
 
         _game_time += game_delta_time;
 
-        ecs::update(game_delta_time);
-        postprocessing::update(game_delta_time);
+        ecs::update((float)game_delta_time);
+        postprocessing::update((float)game_delta_time);
     }
 
     void _render_copy_final_framebuffer_to_back_buffer() {
@@ -223,7 +219,7 @@ namespace engine {
         const Vec2f camera_center = (camera_min + camera_max) / 2.f;
         const Vec2f camera_size = camera_max - camera_min;
 
-        // Update frame uniform buffer
+        // Update frame uniform buffer. TODO: put in ecs or something!
         {
             // PITFALL: We use an unusual clip space coordinate system where y is down.
             // This makes it easier to handle some differences between OpenGL and D3D11.
@@ -239,8 +235,8 @@ namespace engine {
                 c, d, 0.f, 1.f
             };
             graphics::FrameUniformBlock frame_ub{};
-            frame_ub.engine_time = _time;
-            frame_ub.game_time = _game_time;
+            frame_ub.engine_time = (float)_time;
+            frame_ub.game_time = (float)_game_time;
             frame_ub.window_framebuffer_width = (float)window_framebuffer_size.x;
             frame_ub.window_framebuffer_height = (float)window_framebuffer_size.y;
             memcpy(frame_ub.view_proj_matrix, view_proj_matrix, sizeof(view_proj_matrix));
@@ -296,12 +292,12 @@ namespace engine {
         // RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
         shapes::draw_all_now(camera_min, camera_max);
-        shapes::update_lifetimes(_game_delta_time);
+        shapes::update_lifetimes((float)_game_delta_time);
 #endif
 
         // RENDER UI TO FINAL FRAMEBUFFER
 
-        ui::update(_delta_time);
+        ui::update((float)_delta_time);
         ui::layout();
         ui::render();
         ui::render_rmlui(); // TODO: remove

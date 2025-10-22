@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "audio.h"
+#include "files.h"
 #include "pool.h"
 #include "console.h"
 #include <fmod/fmod_studio.h>
@@ -95,6 +96,13 @@ namespace audio {
 		return ev->instance;
 	}
 
+	void _load_all_banks() {
+		for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
+			if (file.format != files::FileFormat::FmodStudioBank) continue;
+			audio::load_bank(file.path);
+		}
+	}
+
 	void startup() {
 		FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
 		assert(result == FMOD_OK);
@@ -109,6 +117,8 @@ namespace audio {
 			FMOD_INIT_NORMAL,
 			nullptr);
 		assert(result == FMOD_OK);
+
+		_load_all_banks();
 	}
 
 	void shutdown() {
@@ -121,7 +131,7 @@ namespace audio {
 		_events_played_this_frame.clear();
 	}
 
-	void load_bank_from_file(const std::string& path) {
+	void load_bank(const std::string& path) {
 		FMOD_STUDIO_BANK* bank = nullptr;
 		FMOD_RESULT result = FMOD_Studio_System_LoadBankFile(
 			_system, path.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);

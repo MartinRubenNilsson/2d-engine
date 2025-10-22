@@ -1,9 +1,6 @@
 #pragma once
 
-namespace audio
-{
-	struct Event;
-
+namespace audio {
 	extern const std::string BUS_MASTER;
 	extern const std::string BUS_SOUND;
 	extern const std::string BUS_MUSIC;
@@ -13,22 +10,17 @@ namespace audio
 	void startup();
 	void shutdown();
 	void update();
-	void load_bank_from_file(const std::string& path);
 
-	// LISTENERS
+	void load_bank(const std::string& path);
 
 	void set_listener_position(const Vec2f& position);
 	Vec2f get_listener_position();
-
-	// GLOBAL PARAMETERS
 
 	bool set_parameter(const std::string& name, float value);
 	bool get_parameter(const std::string& name, float& value);
 	// TODO: this doesn't work?
 	bool set_parameter_label(const std::string& name, const std::string& label);
 	bool get_parameter_label(const std::string& name, std::string& label);
-
-	// EVENTS
 
 	bool is_any_playing(const std::string &event_path);
 
@@ -40,6 +32,8 @@ namespace audio
 		bool release = true;
 	};
 
+	struct Event;
+
 	Handle<Event> create_event(const EventDesc&& desc);
 	void stop_event(Handle<Event> handle);
 	void set_event_volume(Handle<Event> handle, float volume);
@@ -47,8 +41,6 @@ namespace audio
 	void set_event_position(Handle<Event> handle, const Vec2f& position);
 	Vec2f get_event_position(Handle<Event> handle);
 	void set_event_parameter_label(Handle<Event> handle, const std::string& name, const std::string& label);
-
-	// BUSES
 
 	bool set_bus_volume(const std::string& bus_path, float volume);
 	bool get_bus_volume(const std::string& bus_path, float& volume);
