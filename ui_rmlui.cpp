@@ -20,9 +20,6 @@ namespace ui {
 	RmlUiSystemInterface _system_interface;
 	RmlUiRenderInterface _render_interface;
 	Rml::Context* _context = nullptr;
-#ifdef _DEBUG_UI
-	Rml::Context* _debugger_context = nullptr; // The debugger needs its own context to render at the right size.
-#endif
 	std::vector<Event> _events;
 
 	void _on_escape_key_pressed() {
@@ -67,20 +64,12 @@ namespace ui {
 		Rml::SetRenderInterface(&_render_interface);
 		Rml::Initialise();
 		_context = Rml::CreateContext("main", Rml::Vector2i());
-#ifdef _DEBUG_UI
-		_debugger_context = Rml::CreateContext("debugger", Rml::Vector2i());
-		Rml::Debugger::Initialise(_debugger_context);
-		Rml::Debugger::SetContext(_context);
-#endif
 		create_bindings();
 	}
 
 	void shutdown_rmlui() {
 		Rml::Shutdown();
 		_context = nullptr;
-#ifdef _DEBUG_UI
-		_debugger_context = nullptr;
-#endif
 	}
 
 	Rml::Input::KeyIdentifier _translate_key_identifier_to_rml(window::Key key) {
@@ -195,9 +184,6 @@ namespace ui {
 		{
 			set_viewport(ev.size.width, ev.size.height);
 			_context->SetDimensions(Rml::Vector2i(ev.size.width, ev.size.height));
-#ifdef _DEBUG_UI
-			_debugger_context->SetDimensions(Rml::Vector2i(ev.size.width, ev.size.height));
-#endif
 			float dp_ratio_x = (float)ev.size.width / GAME_FRAMEBUFFER_WIDTH;
 			float dp_ratio_y = (float)ev.size.height / GAME_FRAMEBUFFER_HEIGHT;
 			float dp_ratio = std::min(dp_ratio_x, dp_ratio_y);
@@ -215,18 +201,12 @@ namespace ui {
 			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
 			_context->ProcessKeyDown(key_identifier, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessKeyDown(key_identifier, key_modifier_flags);
-#endif
 		} break;
 		case window::EventType::KeyRelease:
 		{
 			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
 			_context->ProcessKeyUp(key_identifier, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessKeyUp(key_identifier, key_modifier_flags);
-#endif
 		} break;
 #endif
 		case window::EventType::MouseMove:
@@ -240,11 +220,6 @@ namespace ui {
 			if (debug_rmlui || get_top_menu() != MenuType::Count) {
 				_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
 			}
-#ifdef _DEBUG_UI
-			if (debug_rmlui) {
-				_debugger_context->ProcessMouseMove((int)ev.mouse_move.x, (int)ev.mouse_move.y, key_modifier_flags);
-			}
-#endif
 			_mouse_position_x = (int)ev.mouse_move.x;
 			_mouse_position_y = (int)ev.mouse_move.y;
 
@@ -253,43 +228,14 @@ namespace ui {
 		{
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
 			_context->ProcessMouseButtonDown((int)ev.mouse_button.button, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessMouseButtonDown((int)ev.mouse_button.button, key_modifier_flags);
-#endif
 			_mouse_is_down = true;
 		} break;
 		case window::EventType::MouseButtonRelease:
 		{
 			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
 			_context->ProcessMouseButtonUp((int)ev.mouse_button.button, key_modifier_flags);
-#ifdef _DEBUG_UI
-			_debugger_context->ProcessMouseButtonUp((int)ev.mouse_button.button, key_modifier_flags);
-#endif
 			_mouse_is_down = false;
 		} break;
-#if 0
-		case sf::Event::MouseWheelMoved:
-		{
-			_context->ProcessMouseWheel(float(-ev.mouseWheel.delta), key_modifier_flags);
-			_debugger_context->ProcessMouseWheel(float(-ev.mouseWheel.delta), key_modifier_flags);
-		} break;
-		case sf::Event::MouseLeft:
-		{
-			_context->ProcessMouseLeave();
-			_debugger_context->ProcessMouseLeave();
-		} break;
-		case sf::Event::TextEntered:
-		{
-			Rml::Outfit c = Rml::Outfit(ev.text.unicode);
-			if (c == Rml::Outfit('\r')) {
-				c = Rml::Outfit('\n');
-			}
-			if (ev.text.unicode >= 32 || c == Rml::Outfit('\n')) {
-				_context->ProcessTextInput(c);
-				_debugger_context->ProcessTextInput(c);
-			}
-		} break;
-#endif
 		}
 	}
 
@@ -299,22 +245,12 @@ namespace ui {
 		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
 		dirty_all_variables();
 		_context->Update();
-#ifdef _DEBUG_UI
-		if (debug_rmlui != Rml::Debugger::IsVisible()) {
-			Rml::Debugger::SetVisible(debug_rmlui);
-		}
-		_debugger_context->Update();
-#endif
-
 		_dt_accumulator = 0.0f;
 	}
 
 	void render_rmlui() {
 		prepare_render_state();
 		_context->Render();
-#ifdef _DEBUG_UI
-		_debugger_context->Render();
-#endif
 		restore_render_state();
 	}
 

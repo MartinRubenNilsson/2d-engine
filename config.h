@@ -18,5 +18,4 @@
 #ifdef _DEBUG
 #define _DEBUG_RENDERDOC
 #define _DEBUG_GRAPHICS
-#define _DEBUG_UI
 #endif
