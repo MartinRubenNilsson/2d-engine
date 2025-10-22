@@ -264,6 +264,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ui_textboxes_layout.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="window_events.cpp" />
+    <ClCompile Include="window_settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="output\assets\scripts\camtest.script" />

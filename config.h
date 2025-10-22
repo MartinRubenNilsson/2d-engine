@@ -9,6 +9,8 @@
 #define PLATFORM_WINDOWS
 #endif
 
+#define EASTL_USER_DEFINED_ALLOCATOR
+
 #define APPLICATION_NAME "Action RPG"
 #define ENGINE_NAME "No Engine"
 #define WINDOW_TITLE "Action RPG"

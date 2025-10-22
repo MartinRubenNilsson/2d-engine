@@ -143,7 +143,7 @@ namespace window {
 	}
 
 	void set_fullscreen(bool fullscreen) {
-		if (fullscreen == is_fullscreen()) return;
+		if (fullscreen == get_fullscreen()) return;
 		static int last_windowed_xpos = 0;
 		static int last_windowed_ypos = 0;
 		static int last_windowed_width = 0;
@@ -164,7 +164,7 @@ namespace window {
 		}
 	}
 
-	bool is_fullscreen() {
+	bool get_fullscreen() {
 		return glfwGetWindowMonitor(_window) != nullptr;
 	}
 

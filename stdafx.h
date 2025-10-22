@@ -12,22 +12,17 @@
 #include <variant>
 #include <vector>
 
-#define EASTL_USER_DEFINED_ALLOCATOR
-
 #include <EASTL/algorithm.h>
 #include <EASTL/sort.h>
 #include <EASTL/vector.h>
-
-using namespace std::literals::string_literals;
-
-#include <entt/entity/registry.hpp>
-#include <box2d/box2d.h>
-#include <RmlUi/Core.h> // TODO: get rid of this crap!!!
-#include <clay/clay.h>
+#include <magic_enum/magic_enum.hpp>
+#include <rapidjson/fwd.h>
 #include <imgui.h>
 #include <imgui_stdlib.h>
-
-#include <magic_enum/magic_enum.hpp>
+#include <clay/clay.h>
+#include <entt/entity/registry.hpp>
+#include <box2d/box2d.h>
+#include <RmlUi/Core.h> // TODO: get rid of this crap!!
 
 #include "fwd.h"
 #include "handle.h"
@@ -36,6 +31,5 @@ using namespace std::literals::string_literals;
 #include "color.h"
 #include "math.h"
 #include "direction.h"
-
 #include "text_ids.h"
 #include "ecs_tiled_ids.h"
