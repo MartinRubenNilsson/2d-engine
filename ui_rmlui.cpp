@@ -9,10 +9,6 @@
 #include "window_events.h"
 #include "files.h"
 
-#ifdef _DEBUG_UI
-#include <RmlUi/Debugger.h>
-#endif
-
 namespace ui {
 	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
 	float _dt_accumulator = 0.f;
