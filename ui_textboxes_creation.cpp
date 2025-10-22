@@ -25,7 +25,7 @@ namespace textboxes {
 	void _create_images() {
 		_icons_texture = graphics::load_texture("assets/textures/ui/icons.png");
 
-		constexpr Vec2u size = { 16, 16 };
+		constexpr Vec2u size = { 32, 32 };
 
 		_skull_image.texture = _icons_texture;
 		_skull_image.position = size * Vec2u(0, 9);

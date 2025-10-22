@@ -9,43 +9,66 @@ namespace textboxes {
 		CLAY(CLAY_ID_LOCAL("textbox_border"), { .layout = {
 			.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, // Grow to fit whole parent.
 			.floating = { .attachTo = CLAY_ATTACH_TO_PARENT }, // Attach to parent top left corner.
-			.border = { .color = Color::WHITE, .width = { 1, 1, 1, 1 } } }) {} // White border, one pixel thick.
+			.border = { .color = Color::WHITE, .width = { .left = 1, .right = 1, .top = 1, .bottom = 1 } } }) {} // White border, one pixel thick.
 	}
 
 	void _layout_textbox_text(std::string_view text) {
-		constexpr uint16_t PADDING = 4;
-		CLAY(CLAY_ID_LOCAL("textbox_text"), { .layout = { .padding = { PADDING + 1, PADDING, PADDING, PADDING } } }) {
+		CLAY(CLAY_ID_LOCAL("textbox_text"), { .layout = {
+			.sizing = { .height = CLAY_SIZING_FIXED(34.f) }, // Fixed height equal to image/portrait size plus padding.
+			.padding = { .left = 2, .right = 1, .bottom = 2 } } }) // Extra padding to compensate for (visually) uneven bounding box.
+		{
 			shared::layout_text(text);
 		}
 	}
 
-	void layout_textbox() {
-		constexpr float MIN_WIDTH = 16 * 16.f; // 16 tiles wide
-		constexpr float MIN_HEIGHT = 3 * 16.f; // 3 tiles tall
-		CLAY(CLAY_ID_LOCAL("textbox"), { .layout = {
-			.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f), .height = CLAY_SIZING_FIT(MIN_HEIGHT, 0.f) },
-			.padding = CLAY_PADDING_ALL(1) },
-			.backgroundColor = Color::BLACK })
-		{
-			_layout_textbox_border();
-			_layout_textbox_text("Hello, world! This is Martin speaking\nindeed. I'm fine thank you.\nAnd anotha line for u.");
+	void _layout_textbox_image(ImageData* image) {
+		if (!image) return; // DEFENSIVE
+		CLAY(CLAY_ID("textbox_image_container"), { .layout = {
+			.sizing = {
+				.width = CLAY_SIZING_FIXED(34.f), // Two extra pixels at top and bottom to align better with text
+				.height = CLAY_SIZING_FIXED(34.f) } },
+				//.backgroundColor = Color::RED // for debugging
+			}) {
+			CLAY(CLAY_ID("textbox_image"), { .layout = {
+				.sizing = {
+					.width = (float)image->size.x,
+					.height = (float)image->size.y },
+					.childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER } },
+					.image = { .imageData = image }
+				}) {}
 		}
 	}
 
-	void _layout_textbox(const Textbox& textbox) {
-		// TODO
+	extern ImageData _skull_image;
+
+	void _layout_textbox() {
+		constexpr uint16_t SPACING = 5;
+		constexpr float MIN_WIDTH = 16 * 16.f; // 16 tiles wide
+		CLAY(CLAY_ID_LOCAL("textbox"), { .layout = {
+			.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f) },
+			.padding = CLAY_PADDING_ALL(SPACING + 1), // One extra pixel of padding to include border.
+			.childGap = SPACING,
+			.layoutDirection = CLAY_LEFT_TO_RIGHT },
+			.backgroundColor = Color::BLACK })
+		{
+			_layout_textbox_border();
+			if (&_skull_image) {
+				_layout_textbox_image(&_skull_image);
+			}
+			_layout_textbox_text("Hello, world! This is Martin speaking\nindeed. I'm fine thank you.\nAnd another line, yahoo!!");
+		}
 	}
 
 	void layout() {
 		CLAY(CLAY_ID("textboxes"), { .layout = {
 			.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
 			.padding = CLAY_PADDING_ALL(8),
-			.childGap = 3,
-			.childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+			//.childGap = 3,
+			.childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_BOTTOM },
 			.layoutDirection = CLAY_TOP_TO_BOTTOM },
 			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{
-			layout_textbox();
+			_layout_textbox();
 		}
 	}
 }
