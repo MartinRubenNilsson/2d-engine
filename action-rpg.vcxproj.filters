@@ -312,10 +312,10 @@
     <ClCompile Include="ui_rendering.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox_creation.cpp">
+    <ClCompile Include="ui_texboxes_creation.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox.cpp">
+    <ClCompile Include="ui_textboxes.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
     <ClCompile Include="ui_main_menu.cpp">
@@ -330,7 +330,7 @@
     <ClCompile Include="background.cpp">
       <Filter>game\background</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textbox_layout.cpp">
+    <ClCompile Include="ui_textboxes_layout.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
   </ItemGroup>
@@ -707,7 +707,7 @@
     <ClInclude Include="ui_pause_menu.h">
       <Filter>game\ui\menus\pause_menu</Filter>
     </ClInclude>
-    <ClInclude Include="ui_textbox.h">
+    <ClInclude Include="ui_textboxes.h">
       <Filter>game\ui\textbox</Filter>
     </ClInclude>
     <ClInclude Include="ui_main_menu.h">

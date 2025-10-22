@@ -6,7 +6,7 @@
 #include "ecs_sprites.h"
 #include "ecs_interactions.h"
 #include "ecs_patch.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 #include "ecs_tags.h"
 #include "audio.h"
 
@@ -40,7 +40,7 @@ namespace ecs {
 
         switch (chest->type) {
         case ChestType::Normal: {
-            ui::textbox::open_now({ .text = "You open the chest and find... nothing!" });
+            ui::textboxes::open_now({ .text = "You open the chest and find... nothing!" });
             get_patch().chests_to_open.insert(entity);
         } break;
         case ChestType::Bomb: {

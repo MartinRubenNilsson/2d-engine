@@ -3,7 +3,7 @@
 #include "ecs_states.h"
 #include "ecs_tiled.h"
 #include "ecs_camera.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 #include "audio.h"
 
 namespace ecs {
@@ -16,7 +16,7 @@ namespace ecs {
 		detach_camera(entity);
 		audio::stop_all_in_bus();
 		audio::create_event({ .path = "event:/music/death_jingle" });
-		ui::textbox::open_next("player/die");
+		ui::textboxes::open_next("player/die");
 	}
 
 	StateId add_player_dead_state(StateMachine& sm) {

@@ -4,7 +4,7 @@
 #include "ui_credits_menu.h"
 #include "ui_pause_menu.h"
 #include "ui_hud.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 
 namespace ui {
 namespace game {
@@ -13,7 +13,7 @@ namespace game {
 		shared::startup();
 		main_menu::startup();
 		hud::startup();
-		textbox::startup();
+		textboxes::startup();
 		hud::show = true;
 	}
 
@@ -24,7 +24,7 @@ namespace game {
 	void update(float dt) {
 		main_menu::update(dt);
 		hud::update(dt);
-		textbox::update(dt);
+		textboxes::update(dt);
 	}
 
 	void layout() {

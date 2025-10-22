@@ -4,7 +4,7 @@
 namespace ui {
 	struct ImageData;
 
-namespace textbox {
+namespace textboxes {
 	enum class TextboxSprite { // TODO: remove
 		None,
 		Skull,

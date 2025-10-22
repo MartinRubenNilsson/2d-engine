@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 #include "ui_bindings.h"
 #include "input.h"
 #include "audio.h"
@@ -19,7 +19,7 @@ namespace ui {
 
 	extern Rml::Context* _context;
 
-namespace textbox {
+namespace textboxes {
 
 	std::vector<Textbox> _textboxes; // Sorted by Textbox::path.
 

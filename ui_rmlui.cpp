@@ -4,7 +4,7 @@
 #include "ui_rmlui_render_interface.h"
 #include "ui_bindings.h"
 #include "ui_menus.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 #include "console.h"
 #include "window_events.h"
 #include "files.h"
@@ -349,6 +349,6 @@ namespace ui {
 	}
 
 	bool is_menu_or_visible() {
-		return (get_top_menu() != MenuType::Count) || textbox::is_open();
+		return (get_top_menu() != MenuType::Count) || textboxes::is_open();
 	}
 }

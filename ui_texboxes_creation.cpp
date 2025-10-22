@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 #include "ui_data.h"
 #include "graphics.h"
 #include "map.h"
@@ -7,7 +7,7 @@
 #include "ui_rmlui.h" // TODO: remove
 
 namespace ui {
-namespace textbox {
+namespace textboxes {
 	std::string_view get_sprite_name(TextboxSprite sprite) { // TODO: remove
 		switch (sprite) {
 			case TextboxSprite::None:      return "";

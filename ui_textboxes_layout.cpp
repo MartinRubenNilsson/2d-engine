@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "ui_textbox.h"
+#include "ui_textboxes.h"
 
 namespace ui {
-namespace textbox {
+namespace textboxes {
 
 	void _layout_textbox(const Textbox& textbox) {
 		// TODO

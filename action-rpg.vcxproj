@@ -259,9 +259,9 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ui_hud.cpp" />
     <ClCompile Include="ui_menus.cpp" />
     <ClCompile Include="ui_rmlui_system_interface.cpp" />
-    <ClCompile Include="ui_textbox.cpp" />
-    <ClCompile Include="ui_textbox_creation.cpp" />
-    <ClCompile Include="ui_textbox_layout.cpp" />
+    <ClCompile Include="ui_textboxes.cpp" />
+    <ClCompile Include="ui_texboxes_creation.cpp" />
+    <ClCompile Include="ui_textboxes_layout.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="window_events.cpp" />
   </ItemGroup>
@@ -395,7 +395,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ecs_animations.h" />
     <ClInclude Include="ui_hud.h" />
     <ClInclude Include="ui_menus.h" />
-    <ClInclude Include="ui_textbox.h" />
+    <ClInclude Include="ui_textboxes.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="window_graphics.h" />
     <ClInclude Include="window_keys.h" />
