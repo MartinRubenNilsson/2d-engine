@@ -330,6 +330,9 @@
     <ClCompile Include="background.cpp">
       <Filter>game\background</Filter>
     </ClCompile>
+    <ClCompile Include="ui_textbox_layout.cpp">
+      <Filter>game\ui\textbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

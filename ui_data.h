@@ -7,8 +7,8 @@ namespace ui {
 	//
 	struct ImageData {
 		Handle<graphics::Texture> texture{};
-		Vec2u rect_position{}; // Texture rect top left corner in pixels.
-		Vec2u rect_size{}; // Texture rect size in pixels.
+		Vec2u position{}; // Sprite texture rect top left corner in pixels.
+		Vec2u size{}; // Sprite texture rect size in pixels.
 	};
 
 	// How to use:

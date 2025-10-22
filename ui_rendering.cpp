@@ -194,8 +194,8 @@ namespace ui {
 					const Vec2f texture_size = graphics::get_texture_size(image_data.texture);
 
 					Rect2f rect{}; // texture rect in UV-space (normalized coordinates)
-					rect.min = (Vec2f)image_data.rect_position / texture_size;
-					rect.max = rect.min + (Vec2f)image_data.rect_size / texture_size;
+					rect.min = (Vec2f)image_data.position / texture_size;
+					rect.max = rect.min + (Vec2f)image_data.size / texture_size;
 
 					Color color = data.backgroundColor;
 					if (color == Color(0, 0, 0, 0)) // PITFALL: this is the default color for some commands

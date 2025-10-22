@@ -183,10 +183,10 @@ namespace textbox {
 	void _on_pressed_confirm() {
 		if (is_typing()) {
 			skip_typing();
-		} else if (_textbox->options_callback &&
+		} else if (_textbox->on_option_selected &&
 			bindings::textbox_selected_option < bindings::textbox_options.size()) {
 			const std::string_view option = bindings::textbox_options[bindings::textbox_selected_option];
-			_textbox->options_callback(option);
+			_textbox->on_option_selected(option);
 			audio::create_event({ .path = "event:/ui/snd_button_click" });
 		} else {
 			proceed();
@@ -212,6 +212,7 @@ namespace textbox {
 		if (!_textbox) return;
 
 		if (input::pressed(window::Key::C)) {
+			// TODO: If interaction opens a textbox, this immediately closes it!
 			_on_pressed_confirm();
 		}
 		if (input::pressed(window::Key::Up)) {
@@ -242,8 +243,8 @@ namespace textbox {
 		const bool finished_typing = (_typing_counter == plain_count);
 
 		bindings::textbox_text = _replace_graphical_plain_with_nbsp(_textbox->text, _typing_counter);
-		bindings::textbox_has_sprite = (_textbox->sprite != TextboxSprite::None);
-		bindings::textbox_sprite = get_sprite_name(_textbox->sprite);
+		bindings::textbox_has_sprite = (_textbox->sprite_DEPRECATED != TextboxSprite::None);
+		bindings::textbox_sprite = get_sprite_name(_textbox->sprite_DEPRECATED);
 		if (finished_typing) {
 			bindings::textbox_has_options = !_textbox->options.empty();
 			bindings::textbox_options.resize(_textbox->options.size());

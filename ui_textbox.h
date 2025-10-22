@@ -2,6 +2,8 @@
 #include <string_view>
 
 namespace ui {
+	struct ImageData;
+
 namespace textbox {
 	enum class TextboxSprite { // TODO: remove
 		None,
@@ -11,17 +13,21 @@ namespace textbox {
 
 	std::string_view get_sprite_name(TextboxSprite sprite); // TODO: remove
 
-	extern const std::string_view DEFAULT_TYPING_SOUND;
-
 	struct Textbox {
+		// The path uniquely identifies the textbox and also groups related textboxes together,
+		// much like putting different files in the same directory groups them together. Example:
+		//  player/die/0
+		//  player/die/1
+		//  ...
 		std::string_view path;
-		std::string_view text;
-		TextboxSprite sprite = TextboxSprite::None;
-		std::string_view opening_sound; // name of sound event
-		std::string_view typing_sound = DEFAULT_TYPING_SOUND;
-		float typing_speed = 25.f; // in chars per second, 0 = instant
+		std::string_view text; // UTF-8
+		std::string_view opening_sound; // Path to FMOD audio event.
+		std::string_view typing_sound = "event:/snd_txt1"; // Path to FMOD audio event.
+		float typing_speed = 25.f; // In chars per second. Set to 0.f to show all text instantly.
+		TextboxSprite sprite_DEPRECATED = TextboxSprite::None;
+		ImageData* image = nullptr;
 		std::vector<std::string_view> options;
-		void (*options_callback)(std::string_view option) = nullptr;
+		void (*on_option_selected)(std::string_view option) = nullptr;
 	};
 
 	// Creates a textbox, i.e. adds it to an internal list of registered textbox presets.
@@ -55,5 +61,6 @@ namespace textbox {
 
 	void startup();
 	void update(float dt);
+	void layout();
 }
 }

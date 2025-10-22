@@ -21,12 +21,12 @@ namespace hud {
 		_spritesheet = graphics::load_texture("assets/textures/ui/hud.png");
 
 		_filled_heart_image.texture = _spritesheet;
-		_filled_heart_image.rect_position = { 16, 16 };
-		_filled_heart_image.rect_size = { 16, 16 };
+		_filled_heart_image.position = { 16, 16 };
+		_filled_heart_image.size = { 16, 16 };
 
 		_empty_heart_image.texture = _spritesheet;
-		_empty_heart_image.rect_position = { 16 * 4, 16 };
-		_empty_heart_image.rect_size = { 16, 16 };
+		_empty_heart_image.position = { 4 * 16, 16 };
+		_empty_heart_image.size = { 16, 16 };
 	}
 
 	std::string _rupees_string;
@@ -43,8 +43,8 @@ namespace hud {
 		ImageData& heart_image = filled ? _filled_heart_image : _empty_heart_image;
 		CLAY(CLAY_IDI("hud_heart", index), { .layout = {
 			.sizing = {
-				.width = (float)heart_image.rect_size.x,
-				.height = (float)heart_image.rect_size.y } },
+				.width = (float)heart_image.size.x,
+				.height = (float)heart_image.size.y } },
 			.image = {
 				.imageData = &heart_image } })
 		{}

@@ -13,7 +13,7 @@ namespace main_menu {
 
 	void startup() {
 		_game_logo_image.texture = graphics::load_texture("assets/textures/ui/game_logo.png");
-		_game_logo_image.rect_size = graphics::get_texture_size(_game_logo_image.texture);
+		_game_logo_image.size = graphics::get_texture_size(_game_logo_image.texture);
 	}
 
 	float _hover_angle = 0.f; // in radians
@@ -27,8 +27,8 @@ namespace main_menu {
 	void _layout_game_logo_image() {
 		CLAY(CLAY_ID("game_logo_image"), { .layout = {
 			.sizing = {
-				.width = (float)_game_logo_image.rect_size.x,
-				.height = (float)_game_logo_image.rect_size.y } },
+				.width = (float)_game_logo_image.size.x,
+				.height = (float)_game_logo_image.size.y } },
 			.image = { .imageData = &_game_logo_image } } ) {
 		}
 	}

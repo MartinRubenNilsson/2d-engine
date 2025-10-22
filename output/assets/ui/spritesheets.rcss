@@ -1,11 +1,5 @@
 @spritesheet 
 {
-	src: game_logo.png;
-	game-logo: 0px 0px 302px 110px;
-}
-
-@spritesheet 
-{
 	src: hud.png;
 	hud-heart-full: 16px 16px 16px 16px;
 	hud-heart-empty: 64px 16px 16px 16px;
