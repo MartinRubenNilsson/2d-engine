@@ -1,22 +1,10 @@
 #include "stdafx.h"
 #include "ui_textboxes.h"
-#include "ui_bindings.h"
 #include "input.h"
 #include "audio.h"
 #include <deque>
 
 namespace ui {
-	namespace bindings {
-		void _clear_bindings() {
-			textbox_text.clear();
-			textbox_has_options = false;
-			textbox_options.clear();
-			textbox_selected_option = 0;
-		}
-	}
-
-	extern Rml::Context* _context;
-
 namespace textboxes {
 
 	std::vector<Textbox> _textboxes; // Sorted by Textbox::path.
@@ -38,65 +26,55 @@ namespace textboxes {
 		return { first, last };
 	}
 
-	// Returns true if the character at pos is plain text,
-	// defined as a character that is not part of an RML tag.
-	bool _is_plain(std::string_view rml, size_t pos) {
-		for (size_t i = pos; i < rml.size(); ++i) {
-			if (rml[i] == '<') return i != pos;
-			if (rml[i] == '>') return false;
+	// Returns true if the character at pos is plain text, defined as a character that is not part of a <...> tag.
+	bool _is_plain(std::string_view string, size_t pos) {
+		for (size_t i = pos; i < string.size(); ++i) {
+			if (string[i] == '<') return i != pos;
+			if (string[i] == '>') return false;
 		}
 		return true;
 	}
 
 	// Counts the number of plain text characters in the string.
-	size_t _get_plain_count(std::string_view rml) {
+	size_t _get_plain_count(std::string_view string) {
 		size_t count = 0;
-		for (size_t i = 0; i < rml.size(); ++i) {
-			if (_is_plain(rml, i)) {
+		for (size_t i = 0; i < string.size(); ++i) {
+			if (_is_plain(string, i)) {
 				++count;
 			}
 		}
 		return count;
 	}
 
-	// Returns the nth plain text character if n < _get_plain_length(rml), or '\0' otherwise.
-	char _get_nth_plain(std::string_view rml, size_t n) {
+	// Returns the nth plain text character if n < _get_plain_length(string), or '\0' otherwise.
+	char _get_nth_plain(std::string_view string, size_t n) {
 		size_t count = 0;
-		for (size_t i = 0; i < rml.size(); ++i) {
-			if (_is_plain(rml, i)) {
-				if (count == n) return rml[i];
+		for (size_t i = 0; i < string.size(); ++i) {
+			if (_is_plain(string, i)) {
+				if (count == n) return string[i];
 				++count;
 			}
 		}
 		return '\0';
 	}
 
-	// Replaces graphical plain text with whitespace, starting at offset.
+	// Replaces graphical plain text with no-break spaces, starting at offset.
 	// This is used to prevent the text from jumping around when being typed out.
-	std::string _replace_graphical_plain_with_whitespace(std::string_view rml, size_t offset) {
+	std::string _replace_graphical_plain_with_nbsp(std::string_view string, size_t offset) {
+		constexpr char NBSP[] = { 0xC2, 0xA0 }; // UTF-8
 		std::string ret;
 		size_t count = 0;
-		for (size_t i = 0; i < rml.size(); ++i) {
+		for (size_t i = 0; i < string.size(); ++i) {
 			bool replace = false;
-			if (_is_plain(rml, i)) {
-				if (count >= offset && isgraph(rml[i])) {
+			if (_is_plain(string, i)) {
+				if (count >= offset && isgraph(string[i])) {
 					replace = true;
 				}
 				++count;
 			}
-			ret += replace ? " " : rml.substr(i, 1);
+			ret += replace ? NBSP : string.substr(i, 1);
 		}
 		return ret;
-	}
-
-	Rml::ElementDocument* _get_document() {
-		return _context->GetDocument("textbox");
-	}
-
-	void _set_document_visible(bool visible) {
-		if (Rml::ElementDocument* doc = _get_document()) {
-			visible ? doc->Show() : doc->Hide();
-		}
 	}
 
 	std::optional<Textbox> _textbox;
@@ -109,8 +87,10 @@ namespace textboxes {
 		return nullptr;
 	}
 
+	std::string _text;
+
 	std::string_view get_current_typed_text() {
-		return bindings::textbox_text;
+		return _text;
 	}
 
 	bool is_open() {
@@ -132,10 +112,8 @@ namespace textboxes {
 		_typing_time = 0.f;
 		_typing_counter = 0;
 		if (!_textbox->opening_sound.empty()) {
-			const std::string path(_textbox->opening_sound);
-			audio::create_event({ .path = path.c_str() });
+			audio::create_event(_textbox->opening_sound);
 		}
-		_set_document_visible(true);
 	}
 
 	std::deque<Textbox> _queue;
@@ -160,8 +138,7 @@ namespace textboxes {
 
 	void close_now() {
 		_textbox.reset();
-		bindings::_clear_bindings();
-		_set_document_visible(false);
+		_text.clear();
 	}
 
 	void close_all() {
@@ -188,30 +165,31 @@ namespace textboxes {
 			return a.path < b.path; });
 	}
 
+	size_t _selected_option = SIZE_MAX;
+
 	void _on_pressed_confirm() {
 		if (is_typing()) {
 			skip_typing();
-		} else if (_textbox->on_option_selected &&
-			bindings::textbox_selected_option < bindings::textbox_options.size()) {
-			const std::string_view option = bindings::textbox_options[bindings::textbox_selected_option];
+		} else if (_textbox->on_option_selected && _selected_option < _textbox->options.size()) {
+			const std::string_view option = _textbox->options[_selected_option];
 			_textbox->on_option_selected(option);
-			audio::create_event({ .path = "event:/ui/snd_button_click" });
+			audio::create_event("event:/ui/snd_button_click");
 		} else {
 			proceed();
 		}
 	}
 
 	void _on_pressed_up() {
-		if (bindings::textbox_selected_option > 0) {
-			bindings::textbox_selected_option--;
-			audio::create_event({ .path = "event:/ui/snd_button_hover" });
+		if (_selected_option > 0) {
+			_selected_option--;
+			audio::create_event("event:/ui/snd_button_hover");
 		}
 	}
 
 	void _on_pressed_down() {
-		if (bindings::textbox_selected_option + 1 < bindings::textbox_options.size()) {
-			bindings::textbox_selected_option++;
-			audio::create_event({ .path = "event:/ui/snd_button_hover" });
+		if (_selected_option + 1 < _textbox->options.size()) {
+			_selected_option++;
+			audio::create_event("event:/ui/snd_button_hover");
 		}
 	}
 
@@ -239,8 +217,7 @@ namespace textboxes {
 			if (_typing_time >= seconds_per_char) {
 				_typing_time -= seconds_per_char;
 				if (isgraph(_get_nth_plain(_textbox->text, _typing_counter))) {
-					const std::string path(_textbox->typing_sound);
-					audio::create_event({ .path = path.c_str() });
+					audio::create_event( _textbox->typing_sound);
 				}
 				++_typing_counter;
 			}
@@ -248,20 +225,7 @@ namespace textboxes {
 			_typing_counter = plain_count;
 		}
 
-		const bool finished_typing = (_typing_counter == plain_count);
-
-		bindings::textbox_text = _replace_graphical_plain_with_whitespace(_textbox->text, _typing_counter);
-		if (finished_typing) {
-			bindings::textbox_has_options = !_textbox->options.empty();
-			bindings::textbox_options.resize(_textbox->options.size());
-			for (size_t i = 0; i < _textbox->options.size(); ++i) {
-				bindings::textbox_options[i] = _textbox->options[i];
-			}
-		} else {
-			bindings::textbox_has_options = false;
-			bindings::textbox_options.clear();
-			bindings::textbox_selected_option = 0;
-		}
+		_text = _replace_graphical_plain_with_nbsp(_textbox->text, _typing_counter);
 	}
 }
 }

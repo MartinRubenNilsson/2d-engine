@@ -51,7 +51,7 @@ namespace ecs {
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
 		set_touch_event_handler(entity, _arrow_handle_touch);
-		audio::create_event({ .path = "event:/snd_fire_arrow", .position = position });
+		audio::create_event("event:/snd_fire_arrow", { .position = position });
 		return entity;
 	}
 }

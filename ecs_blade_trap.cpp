@@ -55,7 +55,7 @@ namespace ecs {
 		// Start moving in direction.
 		b2Body_SetLinearVelocity(body, trap.direction * _BLADE_TRAP_EXTEND_SPEED);
 		// Start playing extension sound.
-		trap.audio_event = audio::create_event({ .path = "event:/blade_trap/extend" });
+		trap.audio_event = audio::create_event("event:/blade_trap/extend");
 	}
 
 	void _stop_extending_blade_trap(entt::entity entity) {
@@ -72,9 +72,7 @@ namespace ecs {
 			.magnitude = 7.f,
 			.exponent = 3.f });
 		// Play impact sound.
-		audio::create_event({
-			.path = "event:/blade_trap/impact",
-			.position = b2Body_GetWorldCenterOfMass(body) });
+		audio::create_event("event:/blade_trap/impact", { .position = b2Body_GetWorldCenterOfMass(body) });
 		// Start retracting in 0.4 seconds.
 		transition_to_state_later(entity, "retracting", 0.4f);
 	}
@@ -82,7 +80,7 @@ namespace ecs {
 	void _start_retracting_blade_trap(entt::entity entity) {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		// Start playing retraction sound.
-		trap.audio_event = audio::create_event({ .path = "event:/blade_trap/retract" });
+		trap.audio_event = audio::create_event("event:/blade_trap/retract");
 	}
 
 	void _update_retracting_blade_trap(entt::entity entity, float dt) {
@@ -115,9 +113,7 @@ namespace ecs {
 		// Stop playing retraction sound.
 		audio::stop_event(trap.audio_event);
 		// Play reset sound.
-		audio::create_event({
-			.path = "event:/blade_trap/reset",
-			.position = trap.start_position });
+		audio::create_event("event:/blade_trap/reset", { .position = trap.start_position });
 	}
 
 	void _handle_physics_for_blade_trap(const TouchEvent& ev) {

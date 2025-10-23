@@ -108,7 +108,7 @@ namespace ecs {
 		// Play footstep sounds.
 		const std::string terrain(to_string(get_terrain_at(pos)));
 		if (anim.frame_changed() && anim.get_frame() < UINT_MAX && anim.get_frame() % 3 == 0) {
-			Handle<audio::Event> ev = audio::create_event({ .path = "event:/snd_footstep" });
+			Handle<audio::Event> ev = audio::create_event("event:/snd_footstep");
 			audio::set_event_parameter_label(ev, "terrain", terrain);
 		}
 
@@ -140,9 +140,9 @@ namespace ecs {
 			const Vec2f bomb_pos = pos + to_unit(dir) * 16.f;
 			if (create_bomb_at(bomb_pos) != entt::null) {
 				player.bombs--;
-				audio::create_event({ .path = "event:/player/place_bomb" });
+				audio::create_event("event:/player/place_bomb");
 			} else { // Failed to place bomb.
-				audio::create_event({ .path = "event:/player/error" });
+				audio::create_event("event:/player/error");
 			}
 		}
 	}

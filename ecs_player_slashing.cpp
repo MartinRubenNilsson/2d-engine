@@ -18,7 +18,7 @@ namespace ecs {
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);
 		anim.set_loop(false);
-		audio::create_event({ .path = "event:/snd_sword_attack" });
+		audio::create_event("event:/snd_sword_attack");
 		const float anim_duration = get_animation_duration(tile);
 		transition_to_state_later(entity, "normal", anim_duration);
 	}

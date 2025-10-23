@@ -42,7 +42,7 @@ namespace ecs {
             add_trauma_to_active_camera(0.8f);
             create_vfx(VfxType::Explosion, center);
             destroy_later(entity);
-            audio::create_event({ .path = "event:/snd_bomb_explosion", .position = center });
+            audio::create_event("event:/snd_bomb_explosion", { .position = center });
             audio::stop_event(bomb.fuse_sound);
             postprocessing::add_shockwave(center);
         }
@@ -95,7 +95,7 @@ namespace ecs {
         if (bomb->ignited) return;
         bomb->ignited = true;
         bomb->explosion_timer.start();
-        bomb->fuse_sound = audio::create_event({ .path = "event:/snd_bomb_fuse" });
+        bomb->fuse_sound = audio::create_event("event:/snd_bomb_fuse");
     }
 
     bool apply_damage_to_bomb(entt::entity entity, const DamageEvent& ev) {

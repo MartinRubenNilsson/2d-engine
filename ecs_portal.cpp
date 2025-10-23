@@ -26,7 +26,7 @@ namespace ecs {
 		if (!map) return;
 		if (!map::open(portal->map)) return;
 		get_patch(map).portal_to_exit = portal->portal;
-		audio::create_event({ .path = "event:/snd_map_transition" });
+		audio::create_event("event:/snd_map_transition");
 	}
 
 	void _portal_handle_touch(const TouchEvent& ev) {

@@ -142,7 +142,7 @@ namespace console {
 			.desc = "Plays an audio event",
 			.params = { { ParamType::String, "event_path", "The full path of the event" } },
 			.callback = [](Args args) {
-				audio::create_event({ .path = get_string(args[0]) });
+				audio::create_event(get_string(args[0]));
 			}
 			});
 

@@ -10,7 +10,7 @@ namespace ecs {
 	void _player_start_hurt(entt::entity entity) {
 		b2Body_SetLinearVelocity(_registry.get<b2BodyId>(entity), Vec2f::ZERO); // Stop moving
 		replace(_registry.get<TileId>(entity), PLAYER_TILE_ID_HURT_S);
-		audio::create_event({ .path = "event:/player/hurt" });
+		audio::create_event("event:/player/hurt");
 		Player& player = _registry.get<Player>(entity);
 		if (player.health > 0) {
 			transition_to_state_later(entity, "normal", 0.2f);

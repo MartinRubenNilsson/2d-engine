@@ -13,7 +13,7 @@ namespace ecs {
 		TileId& tile = _registry.get<TileId>(entity);
 		const Direction dir = _registry.get<Direction>(entity);
 		replace(tile, dir, PLAYER_TILE_ID_DYING_SE, PLAYER_TILE_ID_DYING_NE, PLAYER_TILE_ID_DYING_SE);
-		audio::create_event({ .path = "event:/player/die" });
+		audio::create_event("event:/player/die");
 		TileAnimation& anim = _registry.get<TileAnimation>(entity);
 		anim.set_progress(0.f);
 		anim.set_loop(false);

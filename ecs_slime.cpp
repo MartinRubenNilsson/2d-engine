@@ -14,7 +14,7 @@ namespace ecs {
     extern entt::registry _registry;
 
     bool _handle_damage_for_slime(entt::entity entity, const DamageEvent& ev) {
-        audio::create_event({ .path = "event:/snd_slime_dying" });
+        audio::create_event("event:/snd_slime_dying");
         destroy_later(entity);
         return true;
     }

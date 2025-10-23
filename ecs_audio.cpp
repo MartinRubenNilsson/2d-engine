@@ -25,9 +25,7 @@ namespace ecs {
 		for (auto [entity, object] : _registry.view<Type<Tag::AudioSource>, ObjectId>().each()) {
 			std::string_view event = get_string(object, "event");
 			if (!event.empty()) {
-				audio::create_event({
-					.path = event.data(),
-					.position = get_position(object) });
+				audio::create_event(event, { .position = get_position(object) });
 			}
 		}
 	}

@@ -110,7 +110,7 @@ namespace map {
 		if (!music_event_path.empty()) {
 			if (!audio::is_any_playing(music_event_path)) {
 				audio::stop_all_in_bus(audio::BUS_MUSIC);
-				audio::create_event({ .path = music_event_path });
+				audio::create_event(music_event_path);
 			}
 		}
 	}

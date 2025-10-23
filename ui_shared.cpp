@@ -55,7 +55,7 @@ namespace shared {
 		const OnClick on_click = (OnClick)user_data;
 		if (!on_click) return;
 		if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-			audio::create_event({ .path = "event:/ui/snd_button_click" });
+			audio::create_event("event:/ui/snd_button_click");
 			on_click();
 		}
 	}
@@ -78,7 +78,7 @@ namespace shared {
 				last_hovered_id = {};
 			}
 			if (started_hovering) {
-				audio::create_event({ .path = "event:/ui/snd_button_hover" });
+				audio::create_event("event:/ui/snd_button_hover");
 			}
 			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text : &_default_menu_button_text);
 			Clay_OnHover(_on_hover_menu_button, (uintptr_t)on_click);

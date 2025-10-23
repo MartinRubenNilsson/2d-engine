@@ -46,15 +46,15 @@ namespace ecs {
 		switch (type) {
 			case PickupType::Arrow: {
 				player->arrows++;
-				audio::create_event({ .path = "event:/snd_pickup" });
+				audio::create_event("event:/snd_pickup");
 			} break;
 			case PickupType::Rupee: {
 				player->rupees++;
-				audio::create_event({ .path = "event:/snd_pickup_rupee" });
+				audio::create_event("event:/snd_pickup_rupee");
 			} break;
 			case PickupType::Bomb: {
 				player->bombs++;
-				audio::create_event({ .path = "event:/snd_pickup" });
+				audio::create_event("event:/snd_pickup");
 			} break;
 			case PickupType::Heart: {
 				if (player->health < player->max_health) {

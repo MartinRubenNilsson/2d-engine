@@ -46,6 +46,7 @@ namespace text {
             pen.x += kerning_advance; // May move the pen either right or left.
 
             switch (codepoint) {
+                case 0x000000A0: [[fallthrough]]; // Non-breaking space.
                 case U' ': {
                     pen.x += whitespace_advance;
                 } break;

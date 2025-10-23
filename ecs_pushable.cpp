@@ -18,7 +18,7 @@ namespace ecs {
 		PushableBlock& pushable = _registry.get<PushableBlock>(ev.entity);
 		if (ev.type == TouchEventType::ContactBegin) {
 			audio::stop_event(pushable.stone_sliding_sound); // defensive
-			pushable.stone_sliding_sound = audio::create_event({ .path = "event:/props/stone_slide" });
+			pushable.stone_sliding_sound = audio::create_event("event:/props/stone_slide");
 		}
 		if (ev.type == TouchEventType::ContactEnd) {
 			b2Body_SetLinearVelocity(ev.body, Vec2f::ZERO);

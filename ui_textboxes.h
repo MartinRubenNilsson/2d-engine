@@ -36,7 +36,7 @@ namespace textboxes {
 	std::string_view get_current_typed_text();
 
 	// In addition to a current textbox (which may or may not be closed/empty), we store a queue of textboxes.
-	// This is useful for sequencing textboxes, e.g. for a conversation. The API works as follows:
+	// This is useful for sequencing them, e.g. for a conversation. The API works as follows:
 	// 
 	// - open_now(): Immediately opens a new textbox, closing any currently open textbox.
 	// - open_later(): Appends a textbox to the end of the queue without affecting the current textbox.

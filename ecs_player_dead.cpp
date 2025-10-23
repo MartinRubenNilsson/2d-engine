@@ -15,7 +15,7 @@ namespace ecs {
 		replace(tile, dir, PLAYER_TILE_ID_DEAD_SE, PLAYER_TILE_ID_DEAD_NE, PLAYER_TILE_ID_DEAD_SE);
 		detach_camera(entity);
 		audio::stop_all_in_bus();
-		audio::create_event({ .path = "event:/music/death_jingle" });
+		audio::create_event("event:/music/death_jingle");
 		ui::textboxes::open_next("player/die");
 	}
 

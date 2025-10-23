@@ -51,7 +51,7 @@ namespace ecs {
         }
 
         // Play opening sound.
-        audio::create_event({ .path = "event:/props/chest/open" });
+        audio::create_event("event:/props/chest/open");
     }
 
     void _handle_interaction_with_chest(entt::entity entity) {
