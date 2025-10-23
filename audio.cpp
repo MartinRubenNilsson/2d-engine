@@ -58,15 +58,16 @@ namespace audio {
 
 	const char* _c_str(std::string_view string) {
 		static char buffer[256];
-		assert(string.size() + 1 < std::size(buffer));
-		memcpy(buffer, string.data(), string.size());
-		buffer[string.size()] = '\0';
+		const size_t size = string.size();
+		assert(size + 1 <= std::size(buffer)); // +1 to include null terminator
+		memcpy(buffer, string.data(), size);
+		buffer[size] = '\0';
 		return buffer;
 	}
 
 	FMOD_STUDIO_BUS* _get_bus(std::string_view path) {
 		FMOD_STUDIO_BUS* bus = nullptr;
-		FMOD_RESULT result = FMOD_Studio_System_GetBus(_system, _c_str(path), &bus);
+		const FMOD_RESULT result = FMOD_Studio_System_GetBus(_system, _c_str(path), &bus);
 		if (result != FMOD_OK && log_errors) {
 			console::log_error("Could not find audio bus: " + std::string(path));
 		}
@@ -75,7 +76,7 @@ namespace audio {
 
 	FMOD_STUDIO_EVENTDESCRIPTION* _get_event_description(std::string_view path) {
 		FMOD_STUDIO_EVENTDESCRIPTION* desc = nullptr;
-		FMOD_RESULT result = FMOD_Studio_System_GetEvent(_system, _c_str(path), &desc);
+		const FMOD_RESULT result = FMOD_Studio_System_GetEvent(_system, _c_str(path), &desc);
 		if (result != FMOD_OK && log_errors) {
 			console::log_error("Could not find audio event: " + std::string(path));
 		}
@@ -84,7 +85,7 @@ namespace audio {
 
 	FMOD_STUDIO_EVENTINSTANCE* _create_event_instance(FMOD_STUDIO_EVENTDESCRIPTION* desc) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = nullptr;
-		FMOD_RESULT result = FMOD_Studio_EventDescription_CreateInstance(desc, &instance);
+		const FMOD_RESULT result = FMOD_Studio_EventDescription_CreateInstance(desc, &instance);
 		if (result != FMOD_OK && log_errors) {
 			console::log_error("Failed to create audio event");
 		}
