@@ -13,7 +13,7 @@ namespace textboxes {
 	Handle<graphics::Texture> _icons_texture{};
 	ImageData _skull_image{};
 
-	void _create_images() {
+	void _startup_images() {
 		_icons_texture = graphics::load_texture("assets/textures/ui/icons.png");
 
 		constexpr Vec2u size = { 32, 32 };
@@ -23,15 +23,15 @@ namespace textboxes {
 		_skull_image.size = size;
 	}
 
-	void _create_textboxes() {
-		_create_images();
+	void _startup_presets() {
+		_startup_images();
 
-		create_textbox({
+		add_preset({
 			.path = "player/die/0",
 			.text = "You are deader than dead! Oh, what a pity that your adventure should end here, and so soon...",
 			.image = &_skull_image
 			});
-		create_textbox({
+		add_preset({
 			.path = "player/die/1",
 			.text = "Would you like to try again?",
 			.image = &_skull_image,

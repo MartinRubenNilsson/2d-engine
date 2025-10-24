@@ -235,7 +235,6 @@ namespace ui {
 		// As an optimization, update the UI at a lower FPS than the game.
 		_dt_accumulator += dt;
 		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
-		dirty_all_variables();
 		_context->Update();
 		_dt_accumulator = 0.0f;
 	}
@@ -277,6 +276,6 @@ namespace ui {
 	}
 
 	bool is_menu_or_visible() {
-		return (get_top_menu() != MenuType::Count) || textboxes::is_open();
+		return (get_top_menu() != MenuType::Count) || !textboxes::closed();
 	}
 }

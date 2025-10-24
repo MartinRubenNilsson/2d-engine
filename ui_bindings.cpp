@@ -6,14 +6,6 @@ namespace ui {
 	extern Rml::Context* _context;
 	Rml::DataModelHandle _data_model_handle;
 
-	bool is_variable_dirty(const std::string& name) {
-		return _data_model_handle.IsVariableDirty(name);
-	}
-
-	void dirty_all_variables() {
-		_data_model_handle.DirtyAllVariables();
-	}
-
 	template <void (*Func)()>
 	Rml::DataEventFunc _wrap() {
 		return [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Func(); };

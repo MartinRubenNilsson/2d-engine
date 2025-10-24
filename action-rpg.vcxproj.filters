@@ -312,7 +312,7 @@
     <ClCompile Include="ui_rendering.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_textboxes_creation.cpp">
+    <ClCompile Include="ui_textboxes_presets.cpp">
       <Filter>game\ui\textbox</Filter>
     </ClCompile>
     <ClCompile Include="ui_textboxes.cpp">

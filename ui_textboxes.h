@@ -1,5 +1,4 @@
 #pragma once
-#include <string_view>
 
 namespace ui {
 	struct ImageData;
@@ -7,50 +6,51 @@ namespace ui {
 namespace textboxes {
 	struct Textbox {
 		// The path uniquely identifies the textbox and also groups related textboxes together,
-		// much like putting different files in the same directory groups them together. Example:
-		//  player/die/0
-		//  player/die/1
-		//  ...
+		// much like you would put related files in the same directory. Example:
+		// 
+		//	 player/die/0
+		//   player/die/1
+		//   ...
+		//
+		// Note however that this is just a imaginary path (i.e. does not correspond to a file).
+		//
 		std::string_view path;
 		std::string_view text; // UTF-8
-		std::string_view opening_sound; // Path to FMOD audio event.
-		std::string_view typing_sound = "event:/snd_txt1"; // Path to FMOD audio event.
-		float typing_speed = 25.f; // In chars per second. Set to 0.f to show all text instantly.
+		std::string_view opening_sound; // Audio event path.
+		std::string_view typing_sound = "event:/snd_txt1"; // Audio event path.
+		float typing_speed = 25.f; // In chars per second. Set to 0.f to reveal all text instantly.
 		ImageData* image = nullptr;
 		std::vector<std::string_view> options;
 		void (*on_option_selected)(std::string_view option) = nullptr;
 	};
 
-	// Creates a textbox, i.e. adds it to an internal list of registered textbox presets.
-	void create_textbox(Textbox&& textbox);
-	// Returns a sorted list of all textboxes, sorted lexicographically by Textbox::path.
-	std::span<const Textbox> get_textboxes();
+	// Adds a textbox to the list of textbox presets.
+	void add_preset(Textbox&& textbox);
+	// Returns a sorted list of all textbox presets, sorted by Textbox::path.
+	std::span<const Textbox> get_presets();
 	// Returns a sorted list of all textbox whose path starts with the given path.
-	std::span<const Textbox> get_textboxes(std::string_view path);
+	std::span<const Textbox> get_presets_starting_with(std::string_view path);
 
-	bool is_open();
+	bool closed(); // Is the textbox currently closed?
+	const Textbox& get_textbox(); // Returns the current textbox. May be empty.
+	std::string_view get_typed_text(); // Up to how much have been typed.
 	bool is_typing();
 	void skip_typing();
 
-	const Textbox* get_current_textbox();
-	std::string_view get_current_typed_text();
-
-	// In addition to a current textbox (which may or may not be closed/empty), we store a queue of textboxes.
-	// This is useful for sequencing them, e.g. for a conversation. The API works as follows:
+	// In addition to the current textbox (which may or may not be open), we store a queue of textboxes.
+	// This is useful for sequencing them, e.g. for a monologue. The API works as follows:
 	// 
-	// - open_now(): Immediately opens a new textbox, closing any currently open textbox.
-	// - open_later(): Appends a textbox to the end of the queue without affecting the current textbox.
-	// - open_next(): Opens the textbox immediately if there is no current textbox open, otherwise enqueues it.
-	// - close_now(): Closes the current textbox without affecting the queue.
+	// - close(): Closes the current textbox without affecting the queue.
 	// - close_all(): Closes the current textbox and clears the queue.
+	// - open(): Immediately opens a new textbox, replacing any currently open textbox.
+	// - open_next(): Opens the textbox immediately if there is no textbox open, otherwise enqueues it.
 	// - proceed(): Closes the current textbox (if any) and opens the next textbox in the queue (if any).
 
-	void open_now(const Textbox& textbox);
-	void open_later(const Textbox& textbox);
+	void close();
+	void close_all();
+	void open(const Textbox& textbox);
 	void open_next(const Textbox& textbox);
 	void open_next(std::string_view path);
-	void close_now();
-	void close_all();
 	bool proceed(); // Returns true if there was a next textbox to open.
 
 	void startup();
