@@ -21,7 +21,14 @@ namespace text {
         if (string.empty())
             return;
 
-        shape.bounding_box = Rect2f::ZERO;
+        // Initialize the bounding box with the font's ascent and descent. This is important so the
+        // bounding box doesn't jump around if say the text is being revealed gradually.
+        // PITFALL: The glyphs use a local coordinate system with positive y up, while our game world uses a
+        // coordinate system with positive y down, so we need to flip the signs and be careful with min/max.
+        shape.bounding_box.min.x = 0.f;
+        shape.bounding_box.min.y = -(float)get_ascent(font);
+        shape.bounding_box.max.x = 0.f;
+        shape.bounding_box.max.y = -(float)get_descent(font);
 
         // The texel resolution (in number of texels from ascender to descender) the glyphs will have.
         // This will usually be much larger than font_size since there are many pixels on screen per

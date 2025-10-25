@@ -72,7 +72,7 @@ namespace textboxes {
 				}
 				++count;
 			}
-			ret += replace ? NBSP : string.substr(i, 1);
+			ret += replace ? "." : string.substr(i, 1);
 		}
 		return ret;
 	}
