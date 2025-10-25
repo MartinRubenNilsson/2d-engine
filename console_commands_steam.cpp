@@ -6,7 +6,7 @@
 #include "steam_client.h"
 
 namespace console {
-	void _create_steam_commands() {
+	void _create_commands_steam() {
 		create_command({
 			.name = "steam_id",
 			.desc = "Prints the Steam ID of the current user",

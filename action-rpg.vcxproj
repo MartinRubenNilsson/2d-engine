@@ -150,8 +150,10 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="console_commands_console.cpp" />
     <ClCompile Include="console_commands_ecs.cpp" />
     <ClCompile Include="console_commands_creation.cpp" />
+    <ClCompile Include="console_commands_ui.cpp" />
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />

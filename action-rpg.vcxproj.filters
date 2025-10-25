@@ -333,6 +333,12 @@
     <ClCompile Include="window_settings.cpp">
       <Filter>engine\window</Filter>
     </ClCompile>
+    <ClCompile Include="console_commands_ui.cpp">
+      <Filter>engine\console\commands\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="console_commands_console.cpp">
+      <Filter>engine\console\commands\implementations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

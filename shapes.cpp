@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#ifdef _DEBUG
 #include "shapes.h"
 #include "graphics.h"
 #include "graphics_globals.h"
@@ -7,13 +6,6 @@
 #include "graphics_debugging.h"
 
 namespace shapes {
-	struct ViewBounds {
-		float min_x = 0.f;
-		float min_y = 0.f;
-		float max_x = 0.f;
-		float max_y = 0.f;
-	};
-
 	struct Point {
 		Vec2f position;
 		Color color = Color::WHITE;
@@ -54,9 +46,6 @@ namespace shapes {
 		unsigned int vertex_offset = 0;
 	};
 
-	// Culling will use the view bounds from last render call,
-	// leading to one frame of lag, but it's not a big deal.
-	ViewBounds _last_calculated_view_bounds{};
 	eastl::vector<Point> _points;
 	eastl::vector<Line> _lines;
 	eastl::vector<Box> _boxes;
@@ -64,31 +53,32 @@ namespace shapes {
 	eastl::vector<Circle> _circles;
 	eastl::vector<Batch> _batches;
 
-	bool _cull_point(const ViewBounds& bounds, const Vec2f& position) {
-		if (position.x < bounds.min_x) return true;
-		if (position.x > bounds.max_x) return true;
-		if (position.y < bounds.min_y) return true;
-		if (position.y > bounds.max_y) return true;
+
+	bool _cull_point(const Rect2f& view, const Vec2f& position) {
+		if (position.x < view.min.x) return true;
+		if (position.x > view.max.x) return true;
+		if (position.y < view.min.y) return true;
+		if (position.y > view.max.y) return true;
 		return false;
 	}
 
-	bool _cull_line(const ViewBounds& bounds, const Vec2f& p1, const Vec2f& p2) {
-		if (p1.x < bounds.min_x && p2.x < bounds.min_x) return true;
-		if (p1.x > bounds.max_x && p2.x > bounds.max_x) return true;
-		if (p1.y < bounds.min_y && p2.y < bounds.min_y) return true;
-		if (p1.y > bounds.max_y && p2.y > bounds.max_y) return true;
+	bool _cull_line(const Rect2f& view, const Vec2f& p1, const Vec2f& p2) {
+		if (p1.x < view.min.x && p2.x < view.min.x) return true;
+		if (p1.x > view.max.x && p2.x > view.max.x) return true;
+		if (p1.y < view.min.y && p2.y < view.min.y) return true;
+		if (p1.y > view.max.y && p2.y > view.max.y) return true;
 		return false;
 	}
 
-	bool _cull_box(const ViewBounds& bounds, const Vec2f& min, const Vec2f& max) {
-		if (max.x < bounds.min_x) return true;
-		if (min.x > bounds.max_x) return true;
-		if (max.y < bounds.min_y) return true;
-		if (min.y > bounds.max_y) return true;
+	bool _cull_box(const Rect2f& view, const Vec2f& min, const Vec2f& max) {
+		if (max.x < view.min.x) return true;
+		if (min.x > view.max.x) return true;
+		if (max.y < view.min.y) return true;
+		if (min.y > view.max.y) return true;
 		return false;
 	}
 
-	bool _cull_polygon(const ViewBounds& bounds, const Vec2f* points, size_t count) {
+	bool _cull_polygon(const Rect2f& view, const Vec2f* points, size_t count) {
 		if (count < 3) return true;
 		Vec2f min = points[0];
 		Vec2f max = points[0];
@@ -98,36 +88,36 @@ namespace shapes {
 			max.x = std::max(max.x, points[i].x);
 			max.y = std::max(max.y, points[i].y);
 		}
-		return _cull_box(bounds, min, max);
+		return _cull_box(view, min, max);
 	}
 
-	bool _cull_circle(const ViewBounds& bounds, const Vec2f& center, float radius) {
-		if (center.x + radius < bounds.min_x) return true;
-		if (center.x - radius > bounds.max_x) return true;
-		if (center.y + radius < bounds.min_y) return true;
-		if (center.y - radius > bounds.max_y) return true;
+	bool _cull_circle(const Rect2f& view, const Vec2f& center, float radius) {
+		if (center.x + radius < view.min.x) return true;
+		if (center.x - radius > view.max.x) return true;
+		if (center.y + radius < view.min.y) return true;
+		if (center.y - radius > view.max.y) return true;
 		return false;
 	}
 
 	void draw_point_later(const Vec2f& point, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_point(_last_calculated_view_bounds, point)) return;
+		if (lifetime < 0.f) return;
 		_points.emplace_back(point, color, lifetime);
 	}
 
 	void draw_line_later(const Vec2f& p1, const Vec2f& p2, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_line(_last_calculated_view_bounds, p1, p2)) return;
+		if (lifetime < 0.f) return;
 		_lines.emplace_back(p1, p2, color, lifetime);
 	}
 
 	void draw_box_later(const Vec2f& min, const Vec2f& max, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_box(_last_calculated_view_bounds, min, max)) return;
+		if (lifetime < 0.f) return;
 		_boxes.emplace_back(min, max, color, lifetime);
 	}
 
 	void draw_polygon_later(const Vec2f* points, unsigned int count, const Color& color, float lifetime) {
 		count = std::min(count, MAX_POLYGON_VERTICES);
 		if (count < 3) return;
-		if (lifetime <= 0.f && _cull_polygon(_last_calculated_view_bounds, points, count)) return;
+		if (lifetime < 0.f) return;
 		Polygon& polygon = _polygons.emplace_back();
 		memcpy(polygon.points, points, count * sizeof(Vec2f));
 		polygon.count = count;
@@ -136,7 +126,7 @@ namespace shapes {
 	}
 
 	void draw_circle_later(const Vec2f& center, float radius, const Color& color, float lifetime) {
-		if (lifetime <= 0.f && _cull_circle(_last_calculated_view_bounds, center, radius)) return;
+		if (lifetime < 0.f) return;
 		_circles.emplace_back(center, radius, color, lifetime);
 	}
 
@@ -166,26 +156,24 @@ namespace shapes {
 	}
 
 	void _create_point_batch() {
-		if (_points.empty()) return;
+		if (_points.empty())
+			return;
 		Batch& batch = _batches.emplace_back();
 		batch.primitive = graphics::Primitives::PointList;
 		batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
 		for (const Point& point : _points) {
-			if (_cull_point(_last_calculated_view_bounds, point.position))
-				continue;
 			graphics::temp_vertices.emplace_back(point.position, point.color);
 			batch.vertex_count += 1;
 		}
 	}
 
 	void _create_line_batch() {
-		if (_lines.empty()) return;
+		if (_lines.empty())
+			return;
 		Batch& batch = _batches.emplace_back();
 		batch.primitive = graphics::Primitives::LineList;
 		batch.vertex_offset = (unsigned int)graphics::temp_vertices.size();
 		for (const Line& line : _lines) {
-			if (_cull_line(_last_calculated_view_bounds, line.p1, line.p2))
-				continue;
 			graphics::temp_vertices.emplace_back(line.p1, line.color);
 			graphics::temp_vertices.emplace_back(line.p2, line.color);
 			batch.vertex_count += 2;
@@ -194,7 +182,6 @@ namespace shapes {
 
 	void _create_box_batches() {
 		for (const Box& box : _boxes) {
-			if (_cull_box(_last_calculated_view_bounds, box.min, box.max)) continue;
 			Batch& draw = _batches.emplace_back();
 			draw.primitive = graphics::Primitives::LineStrip;
 			draw.vertex_count = 5;
@@ -209,7 +196,6 @@ namespace shapes {
 
 	void _create_polygon_batches() {
 		for (const Polygon& polygon : _polygons) {
-			if (_cull_polygon(_last_calculated_view_bounds, polygon.points, polygon.count)) continue;
 			Batch& draw = _batches.emplace_back();
 			draw.primitive = graphics::Primitives::LineStrip;
 			draw.vertex_count = polygon.count + 1;
@@ -225,7 +211,6 @@ namespace shapes {
 		for (const Circle& circle : _circles) {
 			constexpr unsigned int SUBDIVISIONS = 32;
 			constexpr float ANGLE_STEP = 6.283185307f / SUBDIVISIONS;
-			if (_cull_circle(_last_calculated_view_bounds, circle.center, circle.radius)) continue;
 			Batch& draw = _batches.emplace_back();
 			draw.primitive = graphics::Primitives::LineStrip;
 			draw.vertex_count = SUBDIVISIONS + 1;
@@ -239,31 +224,7 @@ namespace shapes {
 		}
 	}
 
-	void _draw_all_batches() {
-		const unsigned int vertices_byte_size = (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex);
-		if (vertices_byte_size <= graphics::get_buffer_size(graphics::dynamic_vertex_buffer)) {
-			graphics::update_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(), vertices_byte_size);
-		} else {
-			graphics::recreate_buffer(graphics::dynamic_vertex_buffer, vertices_byte_size, graphics::temp_vertices.data());
-		}
-
-		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
-		graphics::bind_vertex_shader(graphics::shape_vert);
-		graphics::bind_fragment_shader(graphics::shape_frag);
-
-		for (const Batch& draw : _batches) {
-			graphics::set_primitives(draw.primitive);
-			graphics::draw(draw.vertex_count, draw.vertex_offset);
-		}
-	}
-
-	void draw_all_now(const Vec2f& camera_min, const Vec2f& camera_max) {
-
-		_last_calculated_view_bounds.min_x = camera_min.x;
-		_last_calculated_view_bounds.min_y = camera_min.y;
-		_last_calculated_view_bounds.max_x = camera_max.x;
-		_last_calculated_view_bounds.max_y = camera_max.y;
-
+	void draw_all_now() {
 		_batches.clear();
 		graphics::temp_vertices.clear();
 
@@ -278,11 +239,17 @@ namespace shapes {
 
 		GRAPHICS_DEBUG_GROUP;
 
-		_draw_all_batches();
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
+			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+		graphics::bind_vertex_shader(graphics::shape_vert);
+		graphics::bind_fragment_shader(graphics::shape_frag);
+		for (const Batch& draw : _batches) {
+			graphics::set_primitives(draw.primitive);
+			graphics::draw(draw.vertex_count, draw.vertex_offset);
+		}
 
 		_batches.clear();
 		graphics::temp_vertices.clear();
 	}
 }
-
-#endif // _DEBUG

@@ -86,7 +86,8 @@ namespace ui {
 		return false;
 	}
 
-	bool debug = false;
+	bool debug_layout = false;
+	bool debug_bounding_boxes = false;
 
 	enum class MouseState {
 		Released,
@@ -102,7 +103,7 @@ namespace ui {
 
 	void update(float dt) {
 #if 1
-		Clay_SetDebugModeEnabled(debug);
+		Clay_SetDebugModeEnabled(debug_layout);
 #endif
 
 		static Clay_Vector2 mouse_pos{};
@@ -201,7 +202,7 @@ namespace ui {
 		_clay_render_commands = {};
 		Clay_BeginLayout();
 		game::layout();
-		if (debug) {
+		if (debug_layout) {
 #if 0
 			static Clay_CustomRenderData _DEBUG_START_CUSTOM_DATA{};
 			// HACK: Use the custom render command as a separator between the "normal" commands

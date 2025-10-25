@@ -55,7 +55,7 @@ namespace textboxes {
 		constexpr float MIN_WIDTH = 16 * 16.f; // 16 tiles wide
 
 		CLAY(CLAY_ID_LOCAL("textbox"), { .layout = {
-			.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f) },
+			//.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f) },
 			.padding = CLAY_PADDING_ALL(SPACING + 1), // One extra pixel of padding to include border.
 			.childGap = SPACING,
 			.layoutDirection = CLAY_LEFT_TO_RIGHT },

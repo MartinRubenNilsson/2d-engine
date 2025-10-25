@@ -7,8 +7,8 @@ namespace graphics {
 	struct FrameUniformBlock {
 		float engine_time = 0.f;
 		float game_time = 0.f;
-		float window_framebuffer_width = 0.f;
-		float window_framebuffer_height = 0.f;
+		float viewport_width = 0.f;
+		float viewport_height = 0.f;
 
 		float view_proj_matrix[16] = {};
 	};

@@ -1,10 +1,13 @@
 #include "stdafx.h"
+#include "ui.h"
 #include "ui_data.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_debugging.h"
+#include "shapes.h"
+#include "random.h"
 #include <clay/clay.h>
 
 namespace ui {
@@ -66,13 +69,18 @@ namespace ui {
 		_fonts_to_update.clear();
 
 		// Create batches.
-		for (const Clay_RenderCommand& command : commands) {
+		for (unsigned int c = 0; c < commands.size(); ++c) {
+			const Clay_RenderCommand& command = commands[c];
 
 			Rect2f box{}; // Bounding box.
 			box.min.x = command.boundingBox.x;
 			box.min.y = command.boundingBox.y;
 			box.max.x = command.boundingBox.x + command.boundingBox.width;
 			box.max.y = command.boundingBox.y + command.boundingBox.height;
+
+			if (debug_bounding_boxes) {
+				shapes::draw_box_later(box.min, box.max, random::color(c));
+			}
 
 			// Snap to pixels.
 			// PITFALL: This may cause slight discrepancies between the visual bounding box and the
@@ -294,5 +302,10 @@ namespace ui {
 
 		// At this point we're done with the batches.
 		_batches.clear();
+
+		// Debug draw bounding boxes if desired.
+		if (debug_bounding_boxes) {
+			shapes::draw_all_now();
+		}
 	}
 }

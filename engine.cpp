@@ -200,12 +200,46 @@ namespace engine {
         graphics::draw(3); // draw a fullscreen-covering triangle
     }
 
+    void _update_frame_uniform_block(const Rect2f& view) {
+        GRAPHICS_DEBUG_GROUP;
+
+        graphics::FrameUniformBlock block{};
+        block.engine_time = (float)_time;
+        block.game_time = (float)_game_time;
+        {
+            const graphics::Viewport& viewport = graphics::get_viewport();
+            block.viewport_width = viewport.width;
+            block.viewport_height = viewport.height;
+        }
+        {
+            const Vec2f view_center = (view.min + view.max) * 0.5f;
+            const Vec2f view_size = view.max - view.min;
+            // PITFALL: We use an unusual clip space coordinate system where y is down.
+            // This makes it easier to handle some differences between OpenGL and D3D11.
+            // Moreover, it means the shader coordinate axes point the same as the game world.
+            const float a = 2.f / view_size.x;
+            const float b = 2.f / view_size.y;
+            const float c = -a * view_center.x;
+            const float d = -b * view_center.y;
+            const float view_proj_matrix[16] = {
+                a, 0.f, 0.f, 0.f,
+                0.f, b, 0.f, 0.f,
+                0.f, 0.f, 1.f, 0.f,
+                c, d, 0.f, 1.f
+            };
+            memcpy(block.view_proj_matrix, view_proj_matrix, sizeof(view_proj_matrix));
+        }
+
+        graphics::update_buffer(graphics::frame_uniform_buffer, &block, sizeof(block));
+    }
+
     void _render() {
         const Vec2i window_framebuffer_size = window::get_framebuffer_size();
         const graphics::Viewport viewport = {
             .width = (float)window_framebuffer_size.x,
             .height = (float)window_framebuffer_size.y };
 
+        Rect2f view{}; // The current camera view in world-space.
         Vec2f camera_min = { 0.f, 0.f };
         Vec2f camera_max = window_framebuffer_size;
         if (map::is_open()) {
@@ -214,35 +248,13 @@ namespace engine {
         const Vec2f camera_center = (camera_min + camera_max) / 2.f;
         const Vec2f camera_size = camera_max - camera_min;
 
-        // Update frame uniform buffer. TODO: put in ecs or something!
-        {
-            // PITFALL: We use an unusual clip space coordinate system where y is down.
-            // This makes it easier to handle some differences between OpenGL and D3D11.
-            // Moreover, it means the shader coordinate axes point the same as the game world.
-            const float a = 2.f / camera_size.x;
-            const float b = 2.f / camera_size.y;
-            const float c = -a * camera_center.x;
-            const float d = -b * camera_center.y;
-            const float view_proj_matrix[16] = {
-                a, 0.f, 0.f, 0.f,
-                0.f, b, 0.f, 0.f,
-                0.f, 0.f, 1.f, 0.f,
-                c, d, 0.f, 1.f
-            };
-            graphics::FrameUniformBlock frame_ub{};
-            frame_ub.engine_time = (float)_time;
-            frame_ub.game_time = (float)_game_time;
-            frame_ub.window_framebuffer_width = (float)window_framebuffer_size.x;
-            frame_ub.window_framebuffer_height = (float)window_framebuffer_size.y;
-            memcpy(frame_ub.view_proj_matrix, view_proj_matrix, sizeof(view_proj_matrix));
-            graphics::update_buffer(graphics::frame_uniform_buffer, &frame_ub, sizeof(frame_ub));
-        }
-
         graphics::clear_framebuffer(graphics::game_ping_framebuffer);
         // Try to ensure game_ping_framebuffer is unbound as input before binding it as output
         graphics::bind_texture(0, Handle<graphics::Texture>());
         graphics::bind_framebuffer(graphics::game_ping_framebuffer);
         graphics::set_viewport({ .width = camera_size.x, .height = camera_size.y });
+
+        _update_frame_uniform_block({ camera_min, camera_max });
 
         // RENDER SPRITES TO GAME FRAMEBUFFER
 
@@ -281,16 +293,16 @@ namespace engine {
             graphics::draw(3); // draw a fullscreen-covering triangle
         }
 
-#ifdef _DEBUG
         ecs::debug_draw({ camera_min, camera_max });
 
         // RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
 
-        shapes::draw_all_now(camera_min, camera_max);
+        shapes::draw_all_now();
         shapes::update_lifetimes((float)_game_delta_time);
-#endif
 
         // RENDER UI TO FINAL FRAMEBUFFER
+
+        _update_frame_uniform_block({ .max = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT } });
 
         ui::layout();
         ui::render();

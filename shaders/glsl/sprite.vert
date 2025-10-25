@@ -3,8 +3,8 @@
 layout(std140, binding = 0) uniform FrameUniformBlock {
 	float app_time;
 	float game_time;
-	float window_framebuffer_width;
-	float window_framebuffer_height;
+	float viewport_width;
+	float viewport_height;
 	mat4 view_proj_matrix;
 };
 

@@ -1,7 +1,8 @@
 #pragma once
 
 namespace ui {
-	extern bool debug;
+	extern bool debug_layout;
+	extern bool debug_bounding_boxes;
 
 	void startup();
 	void shutdown();

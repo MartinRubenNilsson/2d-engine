@@ -1,5 +1,4 @@
 #pragma once
-#ifdef _DEBUG
 
 namespace shapes {
 	const unsigned int MAX_POLYGON_VERTICES = 8;
@@ -11,7 +10,5 @@ namespace shapes {
 	void draw_circle_later(const Vec2f& center, float radius, const Color& color = Color::WHITE, float lifetime = 0.f);
 
 	void update_lifetimes(float dt);
-	void draw_all_now(const Vec2f& camera_min, const Vec2f& camera_max);
+	void draw_all_now();
 }
-
-#endif // _DEBUG
