@@ -16,6 +16,7 @@ namespace shared {
 	Clay_TextElementConfig pressed_text{};
 
 	Clay_ElementDeclaration menu_element{};
+	Clay_ElementDeclaration main_menu_element{};
 	Clay_ElementDeclaration menu_with_gray_bg_element{};
 
 	void startup() {
@@ -42,6 +43,9 @@ namespace shared {
 		menu_element.layout.childAlignment.y = CLAY_ALIGN_Y_CENTER;
 		menu_element.layout.layoutDirection = CLAY_TOP_TO_BOTTOM;
 		menu_element.floating.attachTo = CLAY_ATTACH_TO_ROOT;
+
+		main_menu_element = menu_element;
+		main_menu_element.layout.childGap = 3;
 
 		menu_with_gray_bg_element = menu_element;
 		menu_with_gray_bg_element.backgroundColor = Color(64, 64, 64, 76);

@@ -10,6 +10,7 @@ namespace shared {
 	extern Clay_TextElementConfig hovered_text;
 	extern Clay_TextElementConfig pressed_text;
 	extern Clay_ElementDeclaration menu_element;
+	extern Clay_ElementDeclaration main_menu_element;
 	extern Clay_ElementDeclaration menu_with_gray_bg_element;
 
 	void startup();

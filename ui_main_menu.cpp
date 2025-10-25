@@ -47,7 +47,7 @@ namespace main_menu {
 	}
 
 	void layout() {
-		CLAY(CLAY_ID("main_menu"), shared::menu_element) {
+		CLAY(CLAY_ID("main_menu"), shared::main_menu_element) {
 			_layout_game_logo();
 			shared::layout_text_button("Play", bindings::on_click_play);
 			shared::layout_text_button("Settings", bindings::on_click_settings);

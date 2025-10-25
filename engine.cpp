@@ -146,7 +146,6 @@ namespace engine {
                         map::open("summer_forest_00");
                     } break;
                     case ui::EventType::GoToMainMenu: {
-                        background::set_type(background::Type::MountainDusk);
                         map::close(0.f);
                     } break;
  
@@ -158,7 +157,13 @@ namespace engine {
         console::update((float)_delta_time);
         ui::update_rmlui((float)_delta_time);
 
-        background::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
+        if (map::is_open()) {
+            background::set_type(background::Type::None);
+        } else {
+            background::set_type(background::Type::MountainDusk);
+            background::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
+        }
+
         map::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
 
         double game_delta_time = _delta_time;
