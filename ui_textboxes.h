@@ -28,11 +28,11 @@ namespace textboxes {
 		std::vector<TextboxOption> options;
 	};
 
-	// Adds a textbox to the list of textbox presets.
+	// Adds a textbox to the list of textbox presets. This should only be called at startup.
 	void add_textbox(Textbox&& textbox);
 	// Returns a sorted list of all textbox presets, sorted by Textbox::path.
 	std::span<const Textbox> get_textboxes();
-	// Returns a sorted list of all textbox whose path starts with the given path.
+	// Returns a sorted list of all textboxes whose path starts with the given path.
 	std::span<const Textbox> get_textboxes_starting_with(std::string_view path);
 
 	bool closed(); // Is the textbox currently closed?
