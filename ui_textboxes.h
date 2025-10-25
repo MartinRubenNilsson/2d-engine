@@ -39,7 +39,11 @@ namespace textboxes {
 	const Textbox& get_textbox(); // Returns the currenty open textbox. May be an empty textbox.
 	std::string_view get_typed_text(); // Up to how much have been typed.
 	bool is_typing_text(); // Is the text still being typed out?
-	void skip_tying_text(); // Reveals all text.
+	void skip_typing_text(); // Reveals all text.
+
+	void set_current_option(size_t option);
+	size_t get_current_option();
+	void select_current_option();
 
 	// In addition to the current textbox (which may or may not be open), we store a queue of textboxes.
 	// This can be used to sequence them, e.g. for a dialogue. The API works as follows:

@@ -219,6 +219,10 @@ namespace ui {
 		_render_clay(dimensions, { _clay_render_commands.internalArray, (size_t)_clay_render_commands.length });
 	}
 
+	Clay_String to_clay(std::string_view string) {
+		return { false, (int32_t)string.size(), string.data() };
+	}
+
 	bool mouse_down() {
 		return _mouse_state == MouseState::PressedThisFrame;
 	}

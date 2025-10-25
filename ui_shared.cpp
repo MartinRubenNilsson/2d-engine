@@ -12,9 +12,8 @@ namespace shared {
 	TextData _default_text_data{};
 
 	Clay_TextElementConfig default_text{};
-	Clay_TextElementConfig _default_menu_button_text{};
-	Clay_TextElementConfig _hovered_menu_button_text{};
-	Clay_TextElementConfig _pressed_menu_button_text{};
+	Clay_TextElementConfig hovered_text{};
+	Clay_TextElementConfig pressed_text{};
 
 	Clay_ElementDeclaration menu_element{};
 	Clay_ElementDeclaration menu_with_gray_bg_element{};
@@ -30,14 +29,11 @@ namespace shared {
 		default_text.fontSize = 13; // PITFALL: Not a power of 2 - not a problem, but maybe unexpected since it is a pixel font.
 		default_text.lineHeight = 11;
 
-		_default_menu_button_text = default_text;
-		_default_menu_button_text.textAlignment = CLAY_TEXT_ALIGN_CENTER;
+		hovered_text = default_text;
+		hovered_text.textColor = Color::SILVER;
 
-		_hovered_menu_button_text = _default_menu_button_text;
-		_hovered_menu_button_text.textColor = Color::SILVER;
-
-		_pressed_menu_button_text = _default_menu_button_text;
-		_pressed_menu_button_text.textColor = Color::DIM_GRAY;
+		pressed_text = default_text;
+		pressed_text.textColor = Color::DIM_GRAY;
 
 		menu_element.layout.sizing.width = CLAY_SIZING_GROW(0);
 		menu_element.layout.sizing.height = CLAY_SIZING_GROW(0);
@@ -51,10 +47,6 @@ namespace shared {
 		menu_with_gray_bg_element.backgroundColor = Color(64, 64, 64, 76);
 	}
 
-	Clay_String to_clay(std::string_view string) {
-		return { false, (int32_t)string.size(), string.data() };
-	}
-
 	void layout_text(std::string_view text) {
 		CLAY_TEXT(to_clay(text), &default_text);
 	}
@@ -64,11 +56,11 @@ namespace shared {
 			if (mouse_enter()) {
 				audio::create_event("event:/ui/snd_button_hover");
 			}
-			Clay_TextElementConfig* text_config = &_default_menu_button_text;
+			Clay_TextElementConfig* text_config = &default_text;
 			if (mouse_over()) {
-				text_config = &_hovered_menu_button_text;
+				text_config = &hovered_text;
 				if (mouse_pressed()) {
-					text_config = &_pressed_menu_button_text;
+					text_config = &pressed_text;
 				}
 				if (mouse_up()) {
 					if (on_click) {

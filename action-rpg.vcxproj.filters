@@ -294,9 +294,6 @@
     <ClCompile Include="ui_menus.cpp">
       <Filter>game\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ui_bindings.cpp">
-      <Filter>game\ui</Filter>
-    </ClCompile>
     <ClCompile Include="ui_game.cpp">
       <Filter>game\ui</Filter>
     </ClCompile>
@@ -690,9 +687,6 @@
       <Filter>engine\graphics\text</Filter>
     </ClInclude>
     <ClInclude Include="ui_menus.h">
-      <Filter>game\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_bindings.h">
       <Filter>game\ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_data.h">

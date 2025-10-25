@@ -9,6 +9,8 @@ namespace ui {
 	void layout();
 	void render();
 
+	Clay_String to_clay(std::string_view string);
+
 	// Was the left mouse button pressed this frame?
 	bool mouse_down();
 	// Is the left mouse button currently being held down?

@@ -2,7 +2,6 @@
 #include "ui_rmlui.h"
 #include "ui_rmlui_system_interface.h"
 #include "ui_rmlui_render_interface.h"
-#include "ui_bindings.h"
 #include "ui_menus.h"
 #include "ui_textboxes.h"
 #include "console.h"
@@ -59,7 +58,6 @@ namespace ui {
 		Rml::SetRenderInterface(&_render_interface);
 		Rml::Initialise();
 		_context = Rml::CreateContext("main", Rml::Vector2i());
-		create_bindings();
 	}
 
 	void shutdown_rmlui() {

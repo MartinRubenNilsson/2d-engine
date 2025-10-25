@@ -52,7 +52,7 @@ namespace main_menu {
 			shared::layout_text_button("Play", bindings::on_click_play);
 			shared::layout_text_button("Settings", bindings::on_click_settings);
 			shared::layout_text_button("Credits", bindings::on_click_credits);
-			shared::layout_text_button("Quit", []{ window::set_should_close(true); });
+			shared::layout_text_button("Quit", [] { window::set_should_close(true); });
 		}
 	}
 }

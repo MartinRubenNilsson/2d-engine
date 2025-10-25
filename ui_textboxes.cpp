@@ -7,18 +7,18 @@
 namespace ui {
 namespace textboxes {
 
-	std::vector<Textbox> _textboxes; // Sorted by Textbox::path.
+	std::vector<Textbox> _presets; // Sorted by Textbox::path.
 
 	void add_preset(Textbox&& textbox) {
-		_textboxes.emplace_back(std::move(textbox));
+		_presets.emplace_back(std::move(textbox));
 	}
 
 	std::span<const Textbox> get_presets() {
-		return _textboxes;
+		return _presets;
 	}
 
 	std::span<const Textbox> get_presets_starting_with(std::string_view path) {
-		const auto [first, last] = std::equal_range(_textboxes.begin(), _textboxes.end(), Textbox{ path },
+		const auto [first, last] = std::equal_range(_presets.begin(), _presets.end(), Textbox{ path },
 			[](const Textbox& a, const Textbox& b) {
 				const size_t size = std::min(a.path.size(), b.path.size());
 				return strncmp(a.path.data(), b.path.data(), size) < 0;
@@ -85,7 +85,7 @@ namespace textboxes {
 
 	State _state = State::Closed;
 	Textbox _textbox{}; // The current textbox (may be empty).
-	std::deque<Textbox> _queue;
+	std::deque<Textbox> _queue; // Queue of next textboxes to open.
 	std::string _typed_text; // The text revealed so far in the open textbox.
 	float _typed_time = 0.f; // Time since last character in _typed_text was typed
 	size_t _typed_count = 0; // number of characters typed
@@ -106,8 +106,30 @@ namespace textboxes {
 		return _typed_count < _get_plain_count(_textbox.text);
 	}
 
-	void skip_tying_text() {
+	void skip_typing_text() {
 		_typed_count = _get_plain_count(_textbox.text);
+	}
+
+	size_t _current_option = 0;
+	bool _current_option_selected = false;
+
+	void set_current_option(size_t option) {
+		if (option >= _textbox.options.size())
+			return;
+		if (option != _current_option) {
+			audio::create_event("event:/ui/snd_button_hover");
+		}
+		_current_option = option;
+	}
+
+	size_t get_current_option() {
+		return _current_option;
+	}
+
+	void select_current_option() {
+		if (_current_option >= _textbox.options.size())
+			return;
+		_current_option_selected = true;
 	}
 
 	void close() {
@@ -116,6 +138,8 @@ namespace textboxes {
 		_typed_text.clear();
 		_typed_time = 0.f;
 		_typed_count = 0;
+		_current_option = 0;
+		_current_option_selected = false;
 	}
 
 	void close_all() {
@@ -158,39 +182,31 @@ namespace textboxes {
 	void _add_presets(); // ui_textbox_creation.cpp
 
 	void startup() {
-		_textboxes.clear();
+		_presets.clear();
 		_add_presets();
-		std::sort(_textboxes.begin(), _textboxes.end(), [](const Textbox& a, const Textbox& b) {
+		std::sort(_presets.begin(), _presets.end(), [](const Textbox& a, const Textbox& b) {
 			return a.path < b.path; }); // Sort all presets by path.
 	}
 
-	size_t _selected_option = SIZE_MAX;
-
 	void _on_pressed_confirm() {
 		if (is_typing_text()) {
-			skip_tying_text();
-		} else if (_selected_option < _textbox.options.size()) {
-			const TextboxOption& option = _textbox.options[_selected_option];
-			if (option.on_selected) {
-				option.on_selected();
-				audio::create_event("event:/ui/snd_button_click");
-			}
+			skip_typing_text();
+		} else if (!_textbox.options.empty()) {
+			select_current_option();
 		} else {
 			proceed();
 		}
 	}
 
 	void _on_pressed_up() {
-		if (_selected_option > 0) {
-			_selected_option--;
-			audio::create_event("event:/ui/snd_button_hover");
+		if (_current_option > 0) {
+			set_current_option(_current_option - 1);
 		}
 	}
 
 	void _on_pressed_down() {
-		if (_selected_option + 1 < _textbox.options.size()) {
-			_selected_option++;
-			audio::create_event("event:/ui/snd_button_hover");
+		if (_current_option + 1 < _textbox.options.size()) {
+			set_current_option(_current_option + 1);
 		}
 	}
 
@@ -224,8 +240,20 @@ namespace textboxes {
 		_typed_text = _replace_graphical_plain_with_nbsp(_textbox.text, _typed_count);
 	}
 
-	void update(float dt) {
+	void _update_options() {
+		if (_current_option >= _textbox.options.size())
+			return;
+		if (!_current_option_selected)
+			return;
+		_current_option_selected = false;
+		audio::create_event("event:/ui/snd_button_click");
+		if (_textbox.options[_current_option].on_selected) {
+			_textbox.options[_current_option].on_selected();
+		}
+		proceed();
+	}
 
+	void update(float dt) {
 		switch (_state) {
 			case State::Closed: {
 				proceed();
@@ -235,6 +263,7 @@ namespace textboxes {
 			} break;
 			case State::Open: {
 				_handle_input();
+				_update_options();
 				_update_typing(dt);
 			} break;
 		}
