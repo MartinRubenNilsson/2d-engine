@@ -85,7 +85,11 @@
 // Note: If a compile error led you here, you might be trying to use CLAY_ID_LOCAL with something other than a string literal. To construct an ID with a dynamic string, use CLAY_SID_LOCAL instead.
 #define CLAY_ID_LOCAL(label) CLAY_SID_LOCAL(CLAY_STRING(label))
 
-#define CLAY_SID_LOCAL(label) Clay__HashString(label, Clay__GetParentElementId())
+// CHANGE (25-10-25): I think there's bug here. If we do CLAY(CLAY_SID_LOCAL("local")) {} then since the current
+// layout hasn't been opened yet we get the parent element id from two steps up. So I've changed it to use the
+// open layout element ID.
+//#define CLAY_SID_LOCAL(label) Clay__HashString(label, Clay__GetParentElementId())
+#define CLAY_SID_LOCAL(label) Clay__HashString(label, Clay__GetOpenLayoutElementId())
 
 // Note: If a compile error led you here, you might be trying to use CLAY_IDI_LOCAL with something other than a string literal. To construct an ID with a dynamic string, use CLAY_SIDI_LOCAL instead.
 #define CLAY_IDI_LOCAL(label, index) CLAY_SIDI_LOCAL(CLAY_STRING(label), index)
@@ -930,6 +934,7 @@ CLAY_DLL_EXPORT Clay_ElementId Clay__HashString(Clay_String key, uint32_t seed);
 CLAY_DLL_EXPORT Clay_ElementId Clay__HashStringWithOffset(Clay_String key, uint32_t offset, uint32_t seed);
 CLAY_DLL_EXPORT void Clay__OpenTextElement(Clay_String text, Clay_TextElementConfig *textConfig);
 CLAY_DLL_EXPORT Clay_TextElementConfig *Clay__StoreTextElementConfig(Clay_TextElementConfig config);
+CLAY_DLL_EXPORT uint32_t Clay__GetOpenLayoutElementId(void); // CHANGE (25-10-25): I added this.
 CLAY_DLL_EXPORT uint32_t Clay__GetParentElementId(void);
 
 extern Clay_Color Clay__debugViewHighlightColor;
@@ -1319,6 +1324,11 @@ Clay_String Clay__WriteStringToCharBuffer(Clay__charArray *buffer, Clay_String s
 Clay_LayoutElement* Clay__GetOpenLayoutElement(void) {
     Clay_Context* context = Clay_GetCurrentContext();
     return Clay_LayoutElementArray_Get(&context->layoutElements, Clay__int32_tArray_GetValue(&context->openLayoutElementStack, context->openLayoutElementStack.length - 1));
+}
+
+// CHANGE: (25-10-25) I added this.
+uint32_t Clay__GetOpenLayoutElementId(void) {
+    return Clay__GetOpenLayoutElement()->id;
 }
 
 uint32_t Clay__GetParentElementId(void) {

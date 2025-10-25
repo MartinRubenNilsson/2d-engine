@@ -5,11 +5,16 @@
 namespace ui {
 namespace textboxes {
 
-	void _layout_textbox_border() {
-		CLAY(CLAY_ID_LOCAL("textbox_border"), { .layout = {
-			.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, // Grow to fit whole textbox.
-			.floating = { .attachTo = CLAY_ATTACH_TO_PARENT }, // Attach to textbox top left corner.
-			.border = { .color = Color::WHITE, .width = { .left = 1, .right = 1, .top = 1, .bottom = 1 } } }) {} // White border, one pixel thick.
+	const Clay_ElementDeclaration _border_element = { .layout = {
+		.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, // Grow to fit whole parent.
+		.floating = { .attachTo = CLAY_ATTACH_TO_PARENT }, // Attach to parent top left corner.
+		.border = { .color = Color::WHITE, .width = { .left = 1, .right = 1, .top = 1, .bottom = 1 } } // White border, one pixel thick.
+	};
+
+	void _layout_border() {
+		const auto parent = Clay__GetParentElementId();
+		const auto child = Clay__HashString(CLAY_STRING("border"), parent);
+		CLAY(CLAY_ID_LOCAL("border"), _border_element) {}
 	}
 
 	void _layout_textbox_text(std::string_view text) {
@@ -37,9 +42,6 @@ namespace textboxes {
 	}
 
 	void _layout_textbox() {
-		if (closed())
-			return;
-
 		const Textbox& textbox = get_textbox();
 		const std::string_view text = get_typed_text();
 
@@ -53,7 +55,7 @@ namespace textboxes {
 			.layoutDirection = CLAY_LEFT_TO_RIGHT },
 			.backgroundColor = Color::BLACK })
 		{
-			_layout_textbox_border();
+			_layout_border();
 			if (textbox.image) {
 				_layout_textbox_image(textbox.image);
 			}
@@ -61,14 +63,40 @@ namespace textboxes {
 		}
 	}
 
+	void _layout_options() {
+		CLAY(CLAY_ID_LOCAL("options"), { .layout = {} }) {}
+	}
+
 	void layout() {
+		if (closed())
+			return;
+
+		const Textbox& textbox = get_textbox();
+
 		CLAY(CLAY_ID("textboxes"), { .layout = {
 			.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) },
 			.padding = CLAY_PADDING_ALL(8),
+			.childGap = 8,
 			.childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_BOTTOM },
 			.layoutDirection = CLAY_TOP_TO_BOTTOM },
 			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{
+			if (!textbox.options.empty()) {
+				constexpr uint16_t SPACING = 5;
+				CLAY(CLAY_ID("options_box"), { .layout = {
+					.padding = CLAY_PADDING_ALL(SPACING + 1), // One extra pixel of padding to include border.
+					.childGap = SPACING,
+					.layoutDirection = CLAY_LEFT_TO_RIGHT },
+					.backgroundColor = Color::BLACK })
+				{
+					_layout_border();
+					CLAY(CLAY_ID_LOCAL("options"), { .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM } }) {
+						for (const TextboxOption& option : textbox.options) {
+							shared::layout_text(option.text);
+						}
+					}
+				}
+			}
 			_layout_textbox();
 		}
 	}

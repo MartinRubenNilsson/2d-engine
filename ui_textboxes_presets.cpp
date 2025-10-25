@@ -23,7 +23,7 @@ namespace textboxes {
 		_skull_image.size = size;
 	}
 
-	void _startup_presets() {
+	void _add_presets() {
 		_startup_images();
 
 		add_preset({
@@ -35,14 +35,9 @@ namespace textboxes {
 			.path = "player/die/1",
 			.text = "Would you like to try again?",
 			.image = &_skull_image,
-			.options = { "Yes", "No" },
-			.on_option_selected = [](std::string_view option) {
-				if (option == "Yes") {
-					map::reset();
-				} else if (option == "No") {
-					bindings::on_click_main_menu();
-				}
-			}
+			.options = {
+				{ "Yes", [] { map::reset(); } },
+				{ "No", [] { bindings::on_click_main_menu(); } } }
 			});
 	}
 }

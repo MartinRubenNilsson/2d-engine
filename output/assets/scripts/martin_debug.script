@@ -4,4 +4,5 @@ bind f3 toggle_debug_states
 bind f4 toggle_debug_tasks
 bind f5 toggle_debug_terrain
 bind f6 toggle_debug_ui
+bind t "open_textboxes player/die"
 map_open summer_forest_00

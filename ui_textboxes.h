@@ -4,6 +4,11 @@ namespace ui {
 	struct ImageData;
 
 namespace textboxes {
+	struct TextboxOption {
+		std::string_view text;
+		void (*on_selected)() = nullptr;
+	};
+
 	struct Textbox {
 		// The path uniquely identifies the textbox and also groups related textboxes together,
 		// much like you would put related files in the same directory. Example:
@@ -20,8 +25,7 @@ namespace textboxes {
 		std::string_view typing_sound = "event:/snd_txt1"; // Audio event path.
 		float typing_speed = 25.f; // In chars per second. Set to 0.f to reveal all text instantly.
 		ImageData* image = nullptr;
-		std::vector<std::string_view> options;
-		void (*on_option_selected)(std::string_view option) = nullptr;
+		std::vector<TextboxOption> options;
 	};
 
 	// Adds a textbox to the list of textbox presets.
@@ -32,18 +36,18 @@ namespace textboxes {
 	std::span<const Textbox> get_presets_starting_with(std::string_view path);
 
 	bool closed(); // Is the textbox currently closed?
-	const Textbox& get_textbox(); // Returns the current textbox. May be empty.
+	const Textbox& get_textbox(); // Returns the currenty open textbox. May be an empty textbox.
 	std::string_view get_typed_text(); // Up to how much have been typed.
-	bool is_typing();
-	void skip_typing();
+	bool is_typing_text(); // Is the text still being typed out?
+	void skip_tying_text(); // Reveals all text.
 
 	// In addition to the current textbox (which may or may not be open), we store a queue of textboxes.
-	// This is useful for sequencing them, e.g. for a monologue. The API works as follows:
+	// This can be used to sequence them, e.g. for a dialogue. The API works as follows:
 	// 
 	// - close(): Closes the current textbox without affecting the queue.
 	// - close_all(): Closes the current textbox and clears the queue.
 	// - open(): Immediately opens a new textbox, replacing any currently open textbox.
-	// - open_next(): Opens the textbox immediately if there is no textbox open, otherwise enqueues it.
+	// - open_next(): Opens the textbox immediately if there is no textbox open, otherwise enqueues it/them.
 	// - proceed(): Closes the current textbox (if any) and opens the next textbox in the queue (if any).
 
 	void close();
@@ -51,7 +55,7 @@ namespace textboxes {
 	void open(const Textbox& textbox);
 	void open_next(const Textbox& textbox);
 	void open_next(std::string_view path);
-	bool proceed(); // Returns true if there was a next textbox to open.
+	void proceed();
 
 	void startup();
 	void update(float dt);

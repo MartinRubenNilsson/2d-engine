@@ -30,7 +30,7 @@ namespace console {
 	bool get_bool(const Arg& arg);
 	bool get_int(const Arg& arg);
 	bool get_float(const Arg& arg);
-	std::string get_string(const Arg& arg);
+	std::string_view get_string(const Arg& arg);
 	Vec2f get_vec2f(const Arg& arg);
 
 	using Args = std::span<const Arg>;
@@ -39,7 +39,7 @@ namespace console {
 		std::string_view name;
 		std::string_view desc;
 		std::vector<Param> params;
-		void (*callback)(Args args) = nullptr;
+		void (*execute)(Args args) = nullptr;
 	};
 
 	std::string get_command_help_message(const Command& command);

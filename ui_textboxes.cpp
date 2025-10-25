@@ -102,11 +102,11 @@ namespace textboxes {
 		return _typed_text;
 	}
 
-	bool is_typing() {
+	bool is_typing_text() {
 		return _typed_count < _get_plain_count(_textbox.text);
 	}
 
-	void skip_typing() {
+	void skip_tying_text() {
 		_typed_count = _get_plain_count(_textbox.text);
 	}
 
@@ -146,34 +146,35 @@ namespace textboxes {
 		}
 	}
 
-	bool proceed() {
+	void proceed() {
 		if (_queue.empty()) {
 			close();
-			return false;
+			return;
 		}
 		open(_queue.front());
 		_queue.pop_front();
-		return true;
 	}
 
-	void _startup_presets(); // ui_textbox_creation.cpp
+	void _add_presets(); // ui_textbox_creation.cpp
 
 	void startup() {
 		_textboxes.clear();
-		_startup_presets();
+		_add_presets();
 		std::sort(_textboxes.begin(), _textboxes.end(), [](const Textbox& a, const Textbox& b) {
-			return a.path < b.path; });
+			return a.path < b.path; }); // Sort all presets by path.
 	}
 
 	size_t _selected_option = SIZE_MAX;
 
 	void _on_pressed_confirm() {
-		if (is_typing()) {
-			skip_typing();
-		} else if (_textbox.on_option_selected && _selected_option < _textbox.options.size()) {
-			const std::string_view option = _textbox.options[_selected_option];
-			_textbox.on_option_selected(option);
-			audio::create_event("event:/ui/snd_button_click");
+		if (is_typing_text()) {
+			skip_tying_text();
+		} else if (_selected_option < _textbox.options.size()) {
+			const TextboxOption& option = _textbox.options[_selected_option];
+			if (option.on_selected) {
+				option.on_selected();
+				audio::create_event("event:/ui/snd_button_click");
+			}
 		} else {
 			proceed();
 		}

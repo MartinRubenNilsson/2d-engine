@@ -77,9 +77,26 @@ namespace ui {
 		_shutdown_clay();
 	}
 
+	bool _contains(std::span<const uint32_t> ids, const uint32_t& id) {
+		for (const uint32_t& other_id : ids) {
+			if (other_id == id) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	bool debug = false;
 
+	std::vector<uint32_t> _mouse_over_ids;
+	std::vector<uint32_t> _mouse_enter_ids;
+	std::vector<uint32_t> _mouse_leave_ids;
+
 	void update(float dt) {
+#if 1
+		Clay_SetDebugModeEnabled(debug);
+#endif
+
 		static Clay_Vector2 mouse_pos{};
 		static bool mouse_is_down = false;
 
@@ -130,11 +147,34 @@ namespace ui {
 			mouse_is_down = false;
 		}
 
+		// This updates the array returned by Clay_GetPointerOverIds() and calls any callbacks set
+		// with Clay_OnHover() (among other things).
 		Clay_SetPointerState(mouse_pos, mouse_is_down);
 
-#if 1
-		Clay_SetDebugModeEnabled(debug);
-#endif
+		// Update mouse over/enter/leave IDs.
+		_mouse_enter_ids.clear();
+		_mouse_leave_ids.clear();
+		{
+			static std::vector<uint32_t> curr_mouse_over_ids;
+			{
+				const Clay_ElementIdArray ids = Clay_GetPointerOverIds();
+				for (int32_t i = 0; i < ids.length; ++i) {
+					curr_mouse_over_ids.push_back(ids.internalArray[i].id);
+				}
+			}
+			for (uint32_t prev_id : _mouse_over_ids) {
+				if (!_contains(curr_mouse_over_ids, prev_id)) {
+					_mouse_leave_ids.push_back(prev_id);
+				}
+			}
+			for (uint32_t curr_id : curr_mouse_over_ids) {
+				if (!_contains(_mouse_over_ids, curr_id)) {
+					_mouse_enter_ids.push_back(curr_id);
+				}
+			}
+			std::swap(_mouse_over_ids, curr_mouse_over_ids);
+			curr_mouse_over_ids.clear();
+		}
 
 		game::update(dt);
 	}
@@ -163,5 +203,19 @@ namespace ui {
 		const std::span<const Clay_RenderCommand> commands{
 			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
 		_render_clay(dimensions, commands);
+	}
+
+	bool mouse_over() {
+		return Clay_Hovered();
+	}
+
+	bool mouse_enter() {
+		const uint32_t id = Clay__GetOpenLayoutElementId();
+		return _contains(_mouse_enter_ids, id);
+	}
+
+	bool mouse_leave() {
+		const uint32_t id = Clay__GetOpenLayoutElementId();
+		return _contains(_mouse_leave_ids, id);
 	}
 }

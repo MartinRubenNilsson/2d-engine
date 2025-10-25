@@ -25,7 +25,7 @@ namespace console {
 		return 0.f;
 	}
 
-	std::string get_string(const Arg& arg) {
+	std::string_view get_string(const Arg& arg) {
 		if (std::holds_alternative<std::string>(arg))
 			return std::get<std::string>(arg);
 		log_error("Invalid argument type: expected string");
@@ -146,7 +146,7 @@ namespace console {
 			log_error("Unknown command: " + std::string(name));
 			return;
 		}
-		if (!command->callback) {
+		if (!command->execute) {
 			log_error("Command is missing a callback: " + name);
 			return;
 		}
@@ -168,7 +168,7 @@ namespace console {
 				return;
 			}
 		}
-		command->callback(args); // Execute the command
+		command->execute(args); // Execute the command
 	}
 
 	void _create_commands(); // console_commands_creation.cpp

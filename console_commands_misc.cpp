@@ -8,6 +8,7 @@
 //#include "ui_rmlui.h"
 //#include "shaders.h"
 #include "ui.h"
+#include "ui_textboxes.h"
 #include "ecs.h"
 #include "ecs_player.h"
 #include "ecs_lifetime.h"
@@ -54,42 +55,42 @@ namespace console {
 			.name = "help",
 			.desc = "Shows help for a command",
 			.params = { { ParamType::String, "command", "The command to show help for" } },
-			.callback = _execute_help_command,
+			.execute = _execute_help_command,
 			});
 		create_command({
 			.name = "clear",
 			.desc = "Clears the console",
-			.callback = [](Args args) { clear(); }
+			.execute = [](Args args) { clear(); }
 			});
 		create_command({
 			.name = "sleep",
 			.desc = "Defers incoming commands, executing them later",
 			.params = { { ParamType::Float, "seconds", "The number of seconds to sleep" } },
-			.callback = [](Args args) { sleep(get_float(args[0])); }
+			.execute = [](Args args) { sleep(get_float(args[0])); }
 			});
 		create_command({
 			.name = "log",
 			.desc = "Logs a message to the console",
 			.params = { { ParamType::String, "message", "The message to log" } },
-			.callback = [](Args args) { log(get_string(args[0])); }
+			.execute = [](Args args) { log(get_string(args[0])); }
 			});
 		create_command({
 			.name = "log_error",
 			.desc = "Logs an error message to the console",
 			.params = { { ParamType::String, "message", "The message to log" } },
-			.callback = [](Args args) { log_error(get_string(args[0])); }
+			.execute = [](Args args) { log_error(get_string(args[0])); }
 			});
 		create_command({
 			.name = "execute",
 			.desc = "Executes a console command",
 			.params = { { ParamType::String, "command_line", "The command to execute" } },
-			.callback = [](Args args) { execute(get_string(args[0])); }
+			.execute = [](Args args) { execute(get_string(args[0])); }
 			});
 		create_command({
 			.name = "execute_script",
 			.desc = "Executes a console script",
 			.params = { { ParamType::String, "script_name", "The name of the script" } },
-			.callback = [](Args args) { execute_script_from_file(get_string(args[0])); }
+			.execute = [](Args args) { execute_script_from_file(get_string(args[0])); }
 			});
 		create_command({
 			.name = "bind",
@@ -98,13 +99,13 @@ namespace console {
 				{ ParamType::String, "key", "The key to bind" },
 				{ ParamType::String, "command_line", "The command to execute" }
 				},
-			.callback = [](Args args) { console::bind(get_string(args[0]), get_string(args[1])); }
+			.execute = [](Args args) { console::bind(get_string(args[0]), get_string(args[1])); }
 			});
 		create_command({
 			.name = "unbind",
 			.desc = "Unbinds a key",
 			.params = { { ParamType::String, "key", "The key to unbind" } },
-			.callback = [](Args args) { unbind(get_string(args[0])); }
+			.execute = [](Args args) { unbind(get_string(args[0])); }
 			});
 #if 0
 		register_command({
@@ -120,7 +121,7 @@ namespace console {
 		create_command({
 			.name = "toggle_fps_counter",
 			.desc = "Toggles whether the FPS counter is visible or hidden.",
-			.callback = [](Args) { engine::should_show_fps_counter = !engine::should_show_fps_counter; }
+			.execute = [](Args) { engine::should_show_fps_counter = !engine::should_show_fps_counter; }
 			});
 
 		// SHADERS
@@ -141,7 +142,7 @@ namespace console {
 			.name = "audio_play",
 			.desc = "Plays an audio event",
 			.params = { { ParamType::String, "event_path", "The full path of the event" } },
-			.callback = [](Args args) {
+			.execute = [](Args args) {
 				audio::create_event(get_string(args[0]));
 			}
 			});
@@ -151,7 +152,7 @@ namespace console {
 		create_command({
 			.name = "toggle_debug_ui",
 			.desc = "Toggles the UI debug window.",
-			.callback = [](Args) { ui::debug = !ui::debug; }
+			.execute = [](Args) { ui::debug = !ui::debug; }
 			});
 
 		// MAP
@@ -160,17 +161,17 @@ namespace console {
 			.name = "map_open",
 			.desc = "Opens a map",
 			.params = { { ParamType::String, "name", "The name of the map" } },
-			.callback = [](Args args) { map::open(get_string(args[0])); }
+			.execute = [](Args args) { map::open(get_string(args[0])); }
 			});
 		create_command({
 			.name = "map_close",
 			.desc = "Closes the current map",
-			.callback = [](Args) { map::close(); }
+			.execute = [](Args) { map::close(); }
 			});
 		create_command({
 			.name = "map_reset",
 			.desc = "Resets the current map",
-			.callback = [](Args) { map::reset(); }
+			.execute = [](Args) { map::reset(); }
 			});
 
 		// GAME
@@ -181,7 +182,7 @@ namespace console {
 			.params = {
 				{ ParamType::Int, "entity", "The ID of the entity to destroy" },
 			},
-			.callback = [](Args args) {
+			.execute = [](Args args) {
 				ecs::destroy_later((entt::entity)get_int(args[0]));
 			}
 			});
@@ -232,5 +233,19 @@ namespace console {
 			}
 			});
 #endif
+
+		// UI
+
+		create_command({
+			.name = "open_textboxes",
+			.desc = "Open all textboxes whose path start with the given path.",
+			.params = {
+				{ ParamType::String, "path", "A textbox path." },
+			},
+			.execute = [](Args args) {
+				const std::string_view path = get_string(args[0]);
+				ui::textboxes::open_next(path);
+			}
+			});
 	}
 }
