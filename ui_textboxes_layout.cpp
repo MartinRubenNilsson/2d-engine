@@ -26,8 +26,8 @@ namespace textboxes {
 
 	void _layout_textbox_text(std::string_view text) {
 		CLAY(CLAY_ID_LOCAL("textbox_text"), { .layout = {
-			.sizing = { .height = CLAY_SIZING_FIXED(34.f) }, // Fixed height equal to image/portrait size plus padding.
-			.padding = { .left = 2, .right = 1, .bottom = 2 } } }) // Extra padding to compensate for (visually) uneven bounding box.
+			.sizing = { .height = CLAY_SIZING_FIXED(32.f) }, // Fixed height equal to image/portrait size.
+			.padding = { .left = 2, .right = 1 } } }) // Extra padding to compensate for (visually) uneven bounding box.
 		{
 			shared::layout_text(text);
 		}
@@ -37,7 +37,9 @@ namespace textboxes {
 		if (!image) return; // DEFENSIVE
 		CLAY(CLAY_ID("textbox_image_container"), { .layout = {
 			// Two extra pixels at top and bottom to align better with text.
-			.sizing = { .width = CLAY_SIZING_FIXED(34.f), .height = CLAY_SIZING_FIXED(34.f) } },
+			.sizing = {
+				.width = CLAY_SIZING_FIXED(32.f),
+				.height = CLAY_SIZING_FIXED(32.f) } },
 			//.backgroundColor = Color::RED // for debugging
 			}) {
 			CLAY(CLAY_ID("textbox_image"), { .layout = {
@@ -55,7 +57,7 @@ namespace textboxes {
 		constexpr float MIN_WIDTH = 16 * 16.f; // 16 tiles wide
 
 		CLAY(CLAY_ID_LOCAL("textbox"), { .layout = {
-			//.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f) },
+			.sizing = { .width = CLAY_SIZING_FIT(MIN_WIDTH, 0.f) },
 			.padding = CLAY_PADDING_ALL(SPACING + 1), // One extra pixel of padding to include border.
 			.childGap = SPACING,
 			.layoutDirection = CLAY_LEFT_TO_RIGHT },

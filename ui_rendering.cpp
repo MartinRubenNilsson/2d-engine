@@ -78,10 +78,6 @@ namespace ui {
 			box.max.x = command.boundingBox.x + command.boundingBox.width;
 			box.max.y = command.boundingBox.y + command.boundingBox.height;
 
-			if (debug_bounding_boxes) {
-				shapes::draw_box_later(box.min, box.max, random::color(c));
-			}
-
 			// Snap to pixels.
 			// PITFALL: This may cause slight discrepancies between the visual bounding box and the
 			// bounding box used for input (mouse hover, etc.), but this shouldn't be a big problem.
@@ -90,6 +86,10 @@ namespace ui {
 				const Vec2f offset = new_min - box.min;
 				box.min = new_min;
 				box.max += offset;
+			}
+
+			if (debug_bounding_boxes) {
+				shapes::draw_box_later(box.min, box.max, random::color(c));
 			}
 
 			Handle<graphics::Texture> texture = graphics::white_texture; // 1x1 white texture
