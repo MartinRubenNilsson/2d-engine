@@ -11,6 +11,7 @@ namespace engine {
     int _buffer_offset = 0;
 
 	void update_fps_counter(float dt) {
+        if (dt <= 0.f) return;
         _dt_buffer[_buffer_offset] = dt;
         _fps_buffer[_buffer_offset] = 1.f / dt;
         _buffer_offset = (_buffer_offset + 1) % 256;

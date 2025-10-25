@@ -7,7 +7,7 @@ namespace ecs {
 	void setup_physics(MapId map);
 	void clear_physics();
 	void update_physics(float dt);
-	void debug_draw_physics();
+	void debug_draw_physics(const Rect2f& view);
 
 	// Swaps the role of shapeA and shapeB in the manifold. (Inverts the normal vector, etc.)
 	void swap(b2Manifold& manifold);

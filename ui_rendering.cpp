@@ -264,7 +264,7 @@ namespace ui {
 
 		// Transform all vertices to clip space.
 		for (unsigned int v = 0; v < graphics::temp_vertices.size(); ++v) {
-			graphics::Vertex& vertex = graphics::temp_vertices[v];
+			graphics::VertexPCT& vertex = graphics::temp_vertices[v];
 			vertex.position.x /= dimensions.width;
 			vertex.position.y /= dimensions.height;
 			vertex.position.x = vertex.position.x * 2.f - 1.f;
@@ -272,9 +272,8 @@ namespace ui {
 		}
 
 		// Update and bind the vertex buffer.
-		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
-			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
-		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices);
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::VertexPCT));
 
 		// At this point we're done with the temp vertex buffer.
 		graphics::temp_vertices.clear();

@@ -49,7 +49,7 @@ namespace ui {
 		graphics::set_viewport(_previous_viewport);
 		graphics::set_scissor_test_enabled(_previous_scissor_test_enabled);
 		graphics::set_scissor(_previous_scissor);
-		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::VertexPCT));
 		graphics::bind_index_buffer(graphics::dynamic_index_buffer);
 		graphics::pop_debug_group();
 	}
@@ -64,7 +64,7 @@ namespace ui {
 		CompiledGeometry* compiled_geometry = new CompiledGeometry();
 		compiled_geometry->vertex_buffer = graphics::create_buffer({
 			.debug_name = "rmlui vertex buffer",
-			.size = (unsigned int)(sizeof(graphics::Vertex) * vertices.size()),
+			.size = (unsigned int)(sizeof(graphics::VertexPCT) * vertices.size()),
 			.type = graphics::BufferType::VertexBuffer,
 			.initial_data = vertices.data()
 		});
@@ -80,7 +80,7 @@ namespace ui {
 
 	void RmlUiRenderInterface::RenderGeometry(Rml::CompiledGeometryHandle geometry, Rml::Vector2f translation, Rml::TextureHandle texture) {
 		CompiledGeometry* compiled_geometry = (CompiledGeometry *)geometry;
-		graphics::bind_vertex_buffer(0, compiled_geometry->vertex_buffer, sizeof(graphics::Vertex));
+		graphics::bind_vertex_buffer(0, compiled_geometry->vertex_buffer, sizeof(graphics::VertexPCT));
 		graphics::bind_index_buffer(compiled_geometry->index_buffer);
 		const Rml::Matrix4f transform = _view_proj_matrix * _transform * Rml::Matrix4f::Translate(translation.x, translation.y, 0.0f);
 		graphics::update_buffer(graphics::ui_uniform_buffer, transform.data(), sizeof(Rml::Matrix4f));

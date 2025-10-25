@@ -41,6 +41,11 @@ namespace graphics {
 	void update_buffer(Handle<Buffer> handle, const void* data, unsigned int size, unsigned int offset = 0);
 	// Updates the buffer if the data size does not exceed the buffer size, otherwise recreates it.
 	void update_or_recreate_buffer(Handle<Buffer> handle, const void* data, unsigned int size);
+	// Templated version of update_or_recreate_buffer().
+	template <typename Container>
+	void update_or_recreate_buffer(Handle<Buffer> handle, const Container& container) {
+		update_or_recreate_buffer(handle, container.data(), (unsigned int)container.size() * sizeof(Container::value_type));
+	}
 	// Get the size of the buffer in bytes.
 	size_t get_buffer_size(Handle<Buffer> handle);
 	// Pass an empty handle to unbind any currently bound buffer.

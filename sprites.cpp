@@ -159,8 +159,7 @@ namespace sprites {
 			_batches.back().vertex_count += 4;
 		}
 
-		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
-			(unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+		graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices);
 
 		Handle<graphics::VertexShader> last_bound_vertex_shader;
 		Handle<graphics::FragmentShader> last_bound_fragment_shader;

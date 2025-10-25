@@ -161,15 +161,14 @@ namespace text {
         _texts.clear();
 
         // Update vertex buffer.
-        graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices.data(),
-            (unsigned int)graphics::temp_vertices.size() * sizeof(graphics::Vertex));
+        graphics::update_or_recreate_buffer(graphics::dynamic_vertex_buffer, graphics::temp_vertices);
 
         // At this point we don't need the temp vertex buffer anymore.
         graphics::temp_vertices.clear();
 
         // Draw all batches.
         graphics::set_primitives(graphics::Primitives::TriangleList);
-        graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::Vertex));
+        graphics::bind_vertex_buffer(0, graphics::dynamic_vertex_buffer, sizeof(graphics::VertexPCT));
         graphics::bind_vertex_shader(graphics::sprite_vert);
         graphics::bind_fragment_shader(graphics::text_frag);
         {

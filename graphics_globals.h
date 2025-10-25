@@ -9,11 +9,10 @@ namespace graphics {
 		float game_time = 0.f;
 		float viewport_width = 0.f;
 		float viewport_height = 0.f;
-
 		float view_proj_matrix[16] = {};
 	};
 
-	struct UiUniformBlock {
+	struct UiUniformBlock { // TODO: remove
 		float transform[16] = {};
 	};
 
@@ -26,7 +25,7 @@ namespace graphics {
 
 	// You may use this as a temporary scratch buffer for vertices, for example
 	// when building a list of vertices to eventually upload to a buffer.
-	extern eastl::vector<graphics::Vertex> temp_vertices;
+	extern eastl::vector<graphics::VertexPCT> temp_vertices;
 
 	// SHADERS
 
@@ -44,7 +43,8 @@ namespace graphics {
 
 	// VERTEX INPUTS
 
-	extern Handle<VertexInput> sprite_vertex_input;
+	extern Handle<VertexInput> vertex_pc_input;
+	extern Handle<VertexInput> vertex_pct_input;
 
 	// BUFFERS
 

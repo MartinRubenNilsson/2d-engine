@@ -11,7 +11,11 @@ namespace ecs {
 		return color;
 	}
 
+	Rect2f _physics_debug_draw_view{};
+
 	void _b2_debug_draw_polygon(const b2Vec2* vertices, int vertexCount, b2HexColor color, void* context) {
+		if (shapes::cull_polygon(_physics_debug_draw_view, (const Vec2f*)vertices, vertexCount))
+			return;
 		shapes::draw_polygon_later((const Vec2f*)vertices, vertexCount, _to_color(color));
 	}
 
@@ -20,14 +24,20 @@ namespace ecs {
 		for (int i = 0; i < vertexCount; ++i) {
 			transformed_vertices[i] = b2TransformPoint(transform, vertices[i]);
 		}
+		if (shapes::cull_polygon(_physics_debug_draw_view, (const Vec2f*)transformed_vertices, vertexCount))
+			return;
 		shapes::draw_polygon_later((const Vec2f*)transformed_vertices, vertexCount, _to_color(color));
 	}
 
 	void _b2_debug_draw_circle(b2Vec2 center, float radius, b2HexColor color, void* context) {
+		if (shapes::cull_circle(_physics_debug_draw_view, center, radius))
+			return;
 		shapes::draw_circle_later(center, radius, _to_color(color));
 	}
 
 	void _b2_debug_draw_solid_circle(b2Transform transform, float radius, b2HexColor color, void* context) {
+		if (shapes::cull_circle(_physics_debug_draw_view, transform.p, radius))
+			return;
 		shapes::draw_circle_later(transform.p, radius, _to_color(color));
 	}
 
@@ -36,6 +46,8 @@ namespace ecs {
 	}
 
 	void _b2_debug_draw_segment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context) {
+		if (shapes::cull_line(_physics_debug_draw_view, p1, p2))
+			return;
 		shapes::draw_line_later(p1, p2, _to_color(color));
 	}
 
@@ -53,8 +65,8 @@ namespace ecs {
 
 	extern b2WorldId _physics_world;
 
-	void debug_draw_physics() {
-		// TODO: shapes::clear
+	void debug_draw_physics(const Rect2f& view) {
+		_physics_debug_draw_view = view;
 
 		b2DebugDraw debug_draw{};
 		debug_draw.DrawPolygonFcn = _b2_debug_draw_polygon;

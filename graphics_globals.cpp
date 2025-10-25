@@ -5,7 +5,7 @@
 #include "files.h"
 
 namespace graphics {
-	eastl::vector<graphics::Vertex> temp_vertices;
+	eastl::vector<graphics::VertexPCT> temp_vertices;
 
 	Handle<VertexShader> fullscreen_vert;
 	Handle<VertexShader> fullscreen_flip_vert;
@@ -19,7 +19,8 @@ namespace graphics {
 	Handle<FragmentShader> ui_frag;
 	Handle<FragmentShader> player_outfit_frag;
 
-	Handle<VertexInput> sprite_vertex_input;
+	Handle<VertexInput> vertex_pc_input;
+	Handle<VertexInput> vertex_pct_input;
 
 	Handle<Buffer> dynamic_vertex_buffer;
 	Handle<Buffer> dynamic_index_buffer;
@@ -80,18 +81,18 @@ namespace graphics {
 				.code = shader_code,
 				.binary = binary
 			});
-			sprite_vertex_input = graphics::create_vertex_input({
-				.debug_name = "sprite vertex input",
+			vertex_pct_input = graphics::create_vertex_input({
+				.debug_name = "vertex PCT input",
 				.attributes = { {
 					.format = Format::RG32_FLOAT,
-					.offset = offsetof(Vertex, position)
+					.offset = offsetof(VertexPCT, position)
 				}, {
 					.format = Format::RGBA8_UNORM,
-					.offset = offsetof(Vertex, color),
+					.offset = offsetof(VertexPCT, color),
 					.normalized = true // FIXME: normalized is not supported in d3d11
 				}, {
 					.format = Format::RG32_FLOAT,
-					.offset = offsetof(Vertex, tex_coord)
+					.offset = offsetof(VertexPCT, tex_coord)
 				}, },
 				.bytecode = shader_code
 			});
@@ -109,6 +110,18 @@ namespace graphics {
 				.code = shader_code,
 				.binary = binary
 			});
+			vertex_pc_input = graphics::create_vertex_input({
+				.debug_name = "vertex PC input",
+				.attributes = { {
+						.format = Format::RG32_FLOAT,
+						.offset = offsetof(VertexPC, position)
+					}, {
+						.format = Format::RGBA8_UNORM,
+						.offset = offsetof(VertexPC, color),
+						.normalized = true // FIXME: normalized is not supported in d3d11
+					}, },
+				.bytecode = shader_code
+				});
 		}
 		if (files::read_binary_file("assets/shaders/shape.frag" + extension, shader_code)) {
 			shape_frag = create_fragment_shader({
@@ -150,7 +163,7 @@ namespace graphics {
 	void _create_buffers() {
 		dynamic_vertex_buffer = create_buffer({
 			.debug_name = "dynamic vertex buffer",
-			.size = 8192 * sizeof(Vertex), // 8192 is an initial estimate
+			.size = 8192 * sizeof(VertexPCT), // 8192 is an initial estimate
 			.type = BufferType::VertexBuffer,
 			.dynamic = true
 		});
@@ -303,8 +316,8 @@ namespace graphics {
 	}
 
 	void _bind_globals() {
-		bind_vertex_input(sprite_vertex_input);
-		bind_vertex_buffer(0, dynamic_vertex_buffer, sizeof(Vertex));
+		bind_vertex_input(vertex_pct_input);
+		bind_vertex_buffer(0, dynamic_vertex_buffer, sizeof(VertexPCT));
 		bind_index_buffer(dynamic_index_buffer);
 		bind_uniform_buffer(0, frame_uniform_buffer);
 		bind_sampler(0, nearest_sampler);

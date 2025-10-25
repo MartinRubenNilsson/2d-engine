@@ -13,7 +13,7 @@ namespace ecs {
 
 	void debug_draw(const Rect2f& view) {
 		if (debug_physics) {
-			debug_draw_physics();
+			debug_draw_physics(view);
 		}
 		if (debug_terrain) {
 			debug_draw_terrain(view);
