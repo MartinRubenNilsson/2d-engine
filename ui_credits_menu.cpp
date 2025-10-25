@@ -13,7 +13,7 @@ namespace ui {
 				shared::layout_text("Gameplay Programmer - Tim White");
 				shared::layout_text("Engine Programmer - Martin Nilsson");
 				CLAY(CLAY_ID("credits_menu_padding"), { .layout = { .sizing = { .height = CLAY_SIZING_FIXED(4) }}}) {}
-				shared::layout_menu_button("Back", bindings::on_click_back);
+				shared::layout_text_button("Back", bindings::on_click_back);
 			}
 		}
 	}

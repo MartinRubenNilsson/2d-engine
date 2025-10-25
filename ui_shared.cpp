@@ -14,6 +14,7 @@ namespace shared {
 	Clay_TextElementConfig default_text{};
 	Clay_TextElementConfig _default_menu_button_text{};
 	Clay_TextElementConfig _hovered_menu_button_text{};
+	Clay_TextElementConfig _pressed_menu_button_text{};
 
 	Clay_ElementDeclaration menu_element{};
 	Clay_ElementDeclaration menu_with_gray_bg_element{};
@@ -35,6 +36,9 @@ namespace shared {
 		_hovered_menu_button_text = _default_menu_button_text;
 		_hovered_menu_button_text.textColor = Color::SILVER;
 
+		_pressed_menu_button_text = _default_menu_button_text;
+		_pressed_menu_button_text.textColor = Color::DIM_GRAY;
+
 		menu_element.layout.sizing.width = CLAY_SIZING_GROW(0);
 		menu_element.layout.sizing.height = CLAY_SIZING_GROW(0);
 		menu_element.layout.childGap = 6;
@@ -51,28 +55,29 @@ namespace shared {
 		return { false, (int32_t)string.size(), string.data() };
 	}
 
-	void _on_hover_menu_button(Clay_ElementId element_id, Clay_PointerData pointer_data, intptr_t user_data) {
-		using OnClick = void(*)(); // to make it easier to cast
-		const OnClick on_click = (OnClick)user_data;
-		if (!on_click) return;
-		if (pointer_data.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-			audio::create_event("event:/ui/snd_button_click");
-			on_click();
-		}
-	}
-
 	void layout_text(std::string_view text) {
 		CLAY_TEXT(to_clay(text), &default_text);
 	}
 
-	void layout_menu_button(std::string_view text, void(*on_click)()) {
-		const Clay_ElementId id = CLAY_SID_LOCAL(to_clay(text));
-		CLAY(id) {
+	void layout_text_button(std::string_view text, void(*on_click)()) {
+		CLAY(CLAY_SID_LOCAL(to_clay(text))) {
 			if (mouse_enter()) {
 				audio::create_event("event:/ui/snd_button_hover");
 			}
-			CLAY_TEXT(to_clay(text), Clay_Hovered() ? &_hovered_menu_button_text : &_default_menu_button_text);
-			Clay_OnHover(_on_hover_menu_button, (uintptr_t)on_click);
+			Clay_TextElementConfig* text_config = &_default_menu_button_text;
+			if (mouse_over()) {
+				text_config = &_hovered_menu_button_text;
+				if (mouse_pressed()) {
+					text_config = &_pressed_menu_button_text;
+				}
+				if (mouse_up()) {
+					if (on_click) {
+						on_click();
+					}
+					audio::create_event("event:/ui/snd_button_click");
+				}
+			}
+			CLAY_TEXT(to_clay(text), text_config);
 		}
 	}
 }

@@ -11,10 +11,10 @@ namespace pause_menu {
 
 	void layout() {
 		CLAY(CLAY_ID("pause_menu"), shared::menu_with_gray_bg_element) {
-			shared::layout_menu_button("Resume", bindings::on_click_resume);
-			shared::layout_menu_button("Restart", [] { show = false; map::reset(); });
-			shared::layout_menu_button("Settings", bindings::on_click_settings);
-			shared::layout_menu_button("Main Menu", bindings::on_click_main_menu);
+			shared::layout_text_button("Resume", bindings::on_click_resume);
+			shared::layout_text_button("Restart", [] { show = false; map::reset(); });
+			shared::layout_text_button("Settings", bindings::on_click_settings);
+			shared::layout_text_button("Main Menu", bindings::on_click_main_menu);
 		}
 	}
 }

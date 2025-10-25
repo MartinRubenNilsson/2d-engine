@@ -49,10 +49,10 @@ namespace main_menu {
 	void layout() {
 		CLAY(CLAY_ID("main_menu"), shared::menu_element) {
 			_layout_game_logo();
-			shared::layout_menu_button("Play", bindings::on_click_play);
-			shared::layout_menu_button("Settings", bindings::on_click_settings);
-			shared::layout_menu_button("Credits", bindings::on_click_credits);
-			shared::layout_menu_button("Quit", []{ window::set_should_close(true); });
+			shared::layout_text_button("Play", bindings::on_click_play);
+			shared::layout_text_button("Settings", bindings::on_click_settings);
+			shared::layout_text_button("Credits", bindings::on_click_credits);
+			shared::layout_text_button("Quit", []{ window::set_should_close(true); });
 		}
 	}
 }

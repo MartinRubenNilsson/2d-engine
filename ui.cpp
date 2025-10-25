@@ -88,6 +88,14 @@ namespace ui {
 
 	bool debug = false;
 
+	enum class MouseState {
+		Released,
+		ReleasedThisFrame,
+		Pressed,
+		PressedThisFrame,
+	};
+
+	MouseState _mouse_state = MouseState::Released;
 	std::vector<uint32_t> _mouse_over_ids;
 	std::vector<uint32_t> _mouse_enter_ids;
 	std::vector<uint32_t> _mouse_leave_ids;
@@ -98,7 +106,13 @@ namespace ui {
 #endif
 
 		static Clay_Vector2 mouse_pos{};
-		static bool mouse_is_down = false;
+
+		if (_mouse_state == MouseState::PressedThisFrame) {
+			_mouse_state = MouseState::Pressed;
+		}
+		if (_mouse_state == MouseState::ReleasedThisFrame) {
+			_mouse_state = MouseState::Released;
+		}
 
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
@@ -123,12 +137,12 @@ namespace ui {
 				} break;
 				case window::EventType::MouseButtonPress: {
 					if (ev.mouse_button.button == window::MouseButton::Left) {
-						mouse_is_down = true;
+						_mouse_state = MouseState::PressedThisFrame;
 					}
 				} break;
 				case window::EventType::MouseButtonRelease: {
 					if (ev.mouse_button.button == window::MouseButton::Left) {
-						mouse_is_down = false;
+						_mouse_state = MouseState::ReleasedThisFrame;
 					}
 				} break;
 				case window::EventType::MouseScroll: {
@@ -140,16 +154,18 @@ namespace ui {
 			}
 		}
 
+		bool is_mouse_down = (_mouse_state == MouseState::PressedThisFrame || _mouse_state == MouseState::Pressed);
+
 		// Make sure Clay doesn't capture the mouse if ImGui is already doing so.
 		if (ImGui::GetIO().WantCaptureMouse) {
 			mouse_pos.x = -1.f;
 			mouse_pos.y = -1.f;
-			mouse_is_down = false;
+			is_mouse_down = false;
 		}
 
 		// This updates the array returned by Clay_GetPointerOverIds() and calls any callbacks set
 		// with Clay_OnHover() (among other things).
-		Clay_SetPointerState(mouse_pos, mouse_is_down);
+		Clay_SetPointerState(mouse_pos, is_mouse_down);
 
 		// Update mouse over/enter/leave IDs.
 		_mouse_enter_ids.clear();
@@ -200,9 +216,19 @@ namespace ui {
 
 	void render() {
 		const Clay_Dimensions dimensions = Clay_GetCurrentContext()->layoutDimensions;
-		const std::span<const Clay_RenderCommand> commands{
-			_clay_render_commands.internalArray, (size_t)_clay_render_commands.length };
-		_render_clay(dimensions, commands);
+		_render_clay(dimensions, { _clay_render_commands.internalArray, (size_t)_clay_render_commands.length });
+	}
+
+	bool mouse_down() {
+		return _mouse_state == MouseState::PressedThisFrame;
+	}
+
+	bool mouse_pressed() {
+		return _mouse_state == MouseState::PressedThisFrame || _mouse_state == MouseState::Pressed;
+	}
+
+	bool mouse_up() {
+		return _mouse_state == MouseState::ReleasedThisFrame;
 	}
 
 	bool mouse_over() {

@@ -192,6 +192,7 @@ namespace ecs {
 	}
 
 	void update_state_machines(float dt) {
+		if (dt <= 0.f) return;
 		for (auto [entity, sm] : _registry.view<StateMachine>().each()) {
 			update(sm, entity, dt);
 		}
