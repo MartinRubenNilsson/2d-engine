@@ -29,14 +29,14 @@ namespace textboxes {
 	};
 
 	// Adds a textbox to the list of textbox presets.
-	void add_preset(Textbox&& textbox);
+	void add_textbox(Textbox&& textbox);
 	// Returns a sorted list of all textbox presets, sorted by Textbox::path.
-	std::span<const Textbox> get_presets();
+	std::span<const Textbox> get_textboxes();
 	// Returns a sorted list of all textbox whose path starts with the given path.
-	std::span<const Textbox> get_presets_starting_with(std::string_view path);
+	std::span<const Textbox> get_textboxes_starting_with(std::string_view path);
 
 	bool closed(); // Is the textbox currently closed?
-	const Textbox& get_textbox(); // Returns the currenty open textbox. May be an empty textbox.
+	const Textbox& get_current_textbox(); // Returns the currenty open textbox. May be an empty textbox.
 	std::string_view get_typed_text(); // Up to how much have been typed.
 	bool is_typing_text(); // Is the text still being typed out?
 	void skip_typing_text(); // Reveals all text.

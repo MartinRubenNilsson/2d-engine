@@ -120,7 +120,7 @@ namespace textboxes {
 			.layoutDirection = CLAY_TOP_TO_BOTTOM },
 			.floating = { .attachTo = CLAY_ATTACH_TO_ROOT } })
 		{
-			const Textbox& textbox = get_textbox();
+			const Textbox& textbox = get_current_textbox();
 			CLAY(CLAY_ID_LOCAL("options_and_textbox"), { .layout = {
 				.childGap = 8,
 				.layoutDirection = CLAY_TOP_TO_BOTTOM } })
