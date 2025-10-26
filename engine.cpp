@@ -47,25 +47,9 @@ namespace engine {
         audio::startup();
         text::startup_fonts();
         ui::startup();
-        ui::startup_rmlui(); // TODO: remove
         ecs::startup();
-
-
-        for (const files::File& file : files::get_all_files_in_directory("assets/fonts")) { // TODO: remove
-            if (file.format != files::FileFormat::TrueTypeFont) continue;
-            ui::load_font_from_file(file.path);
-        }
-        for (const files::File& file : files::get_all_files_in_directory("assets/ui")) { // TODO: remove
-            if (file.format != files::FileFormat::RmlUiDocument) continue;
-            ui::load_document_from_file(file.path);
-        }
-
-        // TODO: remove
-        ui::add_event_listeners(); // Must come after loading RML documents.
-
         settings::load_from_file(settings::APP_SETTINGS_PATH, settings::app_settings);
         settings::apply(settings::app_settings);
-
         window::set_visible(true);
         console::execute(argc, argv);
         _should_run = true;
@@ -73,7 +57,6 @@ namespace engine {
 
     void shutdown() {
         ecs::shutdown();
-        ui::shutdown_rmlui();
         ui::shutdown();
         text::shutdown_fonts();
         audio::shutdown();
@@ -130,8 +113,6 @@ namespace engine {
                         map::debug = !map::debug;
                     }
                 }
-
-                ui::handle_window_event_for_rmlui(ev);
             }
         }
 
@@ -155,7 +136,6 @@ namespace engine {
 
         audio::update();
         console::update((float)_delta_time);
-        ui::update_rmlui((float)_delta_time);
 
         if (map::is_open()) {
             background::set_type(background::Type::None);
@@ -311,7 +291,6 @@ namespace engine {
 
         ui::layout();
         ui::render();
-        ui::render_rmlui(); // TODO: remove
 
         _render_copy_final_framebuffer_to_back_buffer();
 

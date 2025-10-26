@@ -56,12 +56,6 @@
     <ClCompile Include="timer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="ui_rmlui_system_interface.cpp">
-      <Filter>engine\ui\rmlui_interfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_rmlui_render_interface.cpp">
-      <Filter>engine\ui\rmlui_interfaces</Filter>
-    </ClCompile>
     <ClCompile Include="renderdoc.cpp">
       <Filter>engine\renderdoc</Filter>
     </ClCompile>
@@ -339,6 +333,9 @@
     <ClCompile Include="console_commands_console.cpp">
       <Filter>engine\console\commands\implementations</Filter>
     </ClCompile>
+    <ClCompile Include="ui_settings_menu.cpp">
+      <Filter>game\ui\menus\settings_menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -465,12 +462,6 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="color.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_rmlui_render_interface.h">
-      <Filter>engine\ui\rmlui_interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_rmlui_system_interface.h">
-      <Filter>engine\ui\rmlui_interfaces</Filter>
     </ClInclude>
     <ClInclude Include="fwd.h" />
     <ClInclude Include="renderdoc.h">
@@ -728,6 +719,9 @@
     <ClInclude Include="window_settings.h">
       <Filter>engine\window</Filter>
     </ClInclude>
+    <ClInclude Include="ui_settings_menu.h">
+      <Filter>game\ui\menus\settings_menu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -895,9 +889,6 @@
     <Filter Include="engine\fps_counter">
       <UniqueIdentifier>{6cca2ef6-c7f9-4d9c-8c30-4a61303d8732}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\ui\rmlui_interfaces">
-      <UniqueIdentifier>{cb12366d-8c11-48b4-a752-e5b39ec96b0e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\ui\menus">
       <UniqueIdentifier>{0865a393-2715-41e4-ab93-343c85debf5d}</UniqueIdentifier>
     </Filter>
@@ -924,6 +915,9 @@
     </Filter>
     <Filter Include="game\background">
       <UniqueIdentifier>{367c609f-1358-448b-aec2-9f6065058a97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ui\menus\settings_menu">
+      <UniqueIdentifier>{c449f998-1f35-4b48-a328-487d67235f6a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

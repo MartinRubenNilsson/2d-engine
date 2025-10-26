@@ -2,6 +2,7 @@
 #include "config.h"
 
 #include <algorithm>
+#include <bitset>
 #include <format>
 #include <ranges>
 #include <span>
@@ -22,7 +23,6 @@
 #include <clay/clay.h>
 #include <entt/entity/registry.hpp>
 #include <box2d/box2d.h>
-#include <RmlUi/Core.h> // TODO: get rid of this crap!!
 
 #include "fwd.h"
 #include "handle.h"

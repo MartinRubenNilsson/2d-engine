@@ -17,7 +17,6 @@
     "stb",
     "ktx",
     "rapidjson",
-    "rmlui",
     "entt",
     "magic-enum",
     "pugixml",

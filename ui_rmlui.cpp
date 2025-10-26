@@ -1,7 +1,5 @@
 ﻿#include "stdafx.h"
 #include "ui_rmlui.h"
-#include "ui_rmlui_system_interface.h"
-#include "ui_rmlui_render_interface.h"
 #include "ui_menus.h"
 #include "ui_textboxes.h"
 #include "console.h"
@@ -9,11 +7,6 @@
 #include "files.h"
 
 namespace ui {
-	constexpr float _DT_ACCUMULATOR_MIN = 1.0f / 60.0f;
-	float _dt_accumulator = 0.f;
-	RmlUiSystemInterface _system_interface;
-	RmlUiRenderInterface _render_interface;
-	Rml::Context* _context = nullptr;
 	std::vector<Event> _events;
 
 	void _on_escape_key_pressed() {
@@ -53,18 +46,7 @@ namespace ui {
 		}
 	}
 
-	void startup_rmlui() {
-		Rml::SetSystemInterface(&_system_interface);
-		Rml::SetRenderInterface(&_render_interface);
-		Rml::Initialise();
-		_context = Rml::CreateContext("main", Rml::Vector2i());
-	}
-
-	void shutdown_rmlui() {
-		Rml::Shutdown();
-		_context = nullptr;
-	}
-
+#if 0
 	Rml::Input::KeyIdentifier _translate_key_identifier_to_rml(window::Key key) {
 		switch (key) {
 		case window::Key::A:         return Rml::Input::KI_A;
@@ -165,106 +147,7 @@ namespace ui {
 		//if (key_modifier_flags & window::MODIFIER_KEY_SCROLL_LOCK) rml_key_modifiers |= Rml::Input::KM_SCROLLLOCK; // We don't have KEY_SCROLL_LOCK
 		return rml_key_modifiers;
 	}
-
-	double _mouse_position_x = 0;
-	double _mouse_position_y = 0;
-	bool _mouse_is_down = false;
-	float _scroll_delta_x = 0.f;
-
-	void handle_window_event_for_rmlui(const window::Event& ev) {
-		switch (ev.type) {
-		case window::EventType::FramebufferSize:
-		{
-			set_viewport(ev.size.width, ev.size.height);
-			_context->SetDimensions(Rml::Vector2i(ev.size.width, ev.size.height));
-			float dp_ratio_x = (float)ev.size.width / GAME_FRAMEBUFFER_WIDTH;
-			float dp_ratio_y = (float)ev.size.height / GAME_FRAMEBUFFER_HEIGHT;
-			float dp_ratio = std::min(dp_ratio_x, dp_ratio_y);
-			_context->SetDensityIndependentPixelRatio(dp_ratio);
-			// Don't set density independent pixel ratio for the debugger context!
-			// It should always be 1.0, so that it remains the same size.
-
-		} break;
-#if 1
-		case window::EventType::KeyPress:
-		{
-			if (ev.key.code == window::Key::Escape) {
-				_on_escape_key_pressed();
-			}
-			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
-			_context->ProcessKeyDown(key_identifier, key_modifier_flags);
-		} break;
-		case window::EventType::KeyRelease:
-		{
-			Rml::Input::KeyIdentifier key_identifier = _translate_key_identifier_to_rml(ev.key.code);
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.key.modifier_key_flags);
-			_context->ProcessKeyUp(key_identifier, key_modifier_flags);
-		} break;
 #endif
-		case window::EventType::MouseMove:
-		{
-			// CRITICAL: We get big frame drops when calling ProcessMouseMove() a lot,
-			// since it invokes a heavy update hover chain call. This happens when for example
-			// when we move the mouse around a lot. I dropped from 350 FPS to 230 FPS!
-			// Hence, let's only call ProcessMouseMove() when we're in a menu,
-			// since it's only then that we're using the mouse position (to press buttons).
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			_mouse_position_x = (int)ev.mouse_move.x;
-			_mouse_position_y = (int)ev.mouse_move.y;
-
-		} break;
-		case window::EventType::MouseButtonPress:
-		{
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			_context->ProcessMouseButtonDown((int)ev.mouse_button.button, key_modifier_flags);
-			_mouse_is_down = true;
-		} break;
-		case window::EventType::MouseButtonRelease:
-		{
-			int key_modifier_flags = _translate_key_modifier_flags_to_rml(ev.mouse_button.modifier_key_flags);
-			_context->ProcessMouseButtonUp((int)ev.mouse_button.button, key_modifier_flags);
-			_mouse_is_down = false;
-		} break;
-		}
-	}
-
-	void update_rmlui(float dt) {
-		// As an optimization, update the UI at a lower FPS than the game.
-		_dt_accumulator += dt;
-		if (_dt_accumulator < _DT_ACCUMULATOR_MIN) return;
-		_context->Update();
-		_dt_accumulator = 0.0f;
-	}
-
-	void render_rmlui() {
-		prepare_render_state();
-		//_context->Render();
-		restore_render_state();
-	}
-
-	void load_font_from_file(const std::string& path) {
-		Rml::LoadFontFace(path);
-	}
-
-	void load_document_from_file(const std::string& path) {
-		Rml::ElementDocument* doc = _context->LoadDocument(path);
-		if (!doc) {
-			console::log_error("Failed to load RmlUi document: " + path);
-			return;
-		}
-		doc->SetId(files::get_stem(path));
-	}
-
-	void add_event_listeners() {
-		add_menu_event_listeners();
-	}
-
-	void show_document(const std::string& name) {
-		if (Rml::ElementDocument* doc = _context->GetDocument(name)) {
-			doc->Show();
-		}
-	}
 
 	bool get_next_event(Event& ev) {
 		if (_events.empty()) return false;

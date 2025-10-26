@@ -203,6 +203,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="esc_terrain.cpp" />
     <ClCompile Include="files.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="ui_settings_menu.cpp" />
     <ClCompile Include="text_fonts.cpp" />
     <ClCompile Include="graphics_globals.cpp" />
     <ClCompile Include="images.cpp" />
@@ -251,7 +252,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="ui.cpp" />
-    <ClCompile Include="ui_rmlui_render_interface.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -259,7 +259,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ecs_animations.cpp" />
     <ClCompile Include="ui_hud.cpp" />
     <ClCompile Include="ui_menus.cpp" />
-    <ClCompile Include="ui_rmlui_system_interface.cpp" />
     <ClCompile Include="ui_textboxes.cpp" />
     <ClCompile Include="ui_textboxes_startup.cpp" />
     <ClCompile Include="ui_textboxes_layout.cpp" />
@@ -335,6 +334,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="platform_directory_changes.h" />
     <ClInclude Include="platform_libraries.h" />
     <ClInclude Include="rect2.h" />
+    <ClInclude Include="ui_settings_menu.h" />
     <ClInclude Include="text_fonts.h" />
     <ClInclude Include="kdtree_test.h" />
     <ClInclude Include="graphics_globals.h" />
@@ -360,7 +360,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ui_main_menu.h" />
     <ClInclude Include="ui_pause_menu.h" />
     <ClInclude Include="ui_shared.h" />
-    <ClInclude Include="ui_rmlui_system_interface.h" />
     <ClInclude Include="ui_data.h" />
     <ClInclude Include="vec2.h" />
     <ClInclude Include="window_events.h" />
@@ -391,7 +390,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="easings.h" />
     <ClInclude Include="ui_rmlui.h" />
     <ClInclude Include="map.h" />
-    <ClInclude Include="ui_rmlui_render_interface.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ecs_animations.h" />
     <ClInclude Include="ui_hud.h" />

@@ -4,10 +4,10 @@
 #include "ui_main_menu.h"
 #include "ui_pause_menu.h"
 #include "ui_credits_menu.h"
+#include "ui_settings_menu.h"
 
 namespace ui {
-	Rml::ElementDocument* _get_menu_document(MenuType type); // Forward declaration
-
+#if 0
 	struct SettingsMenuEventListener : public Rml::EventListener {
 		void ProcessEvent(Rml::Event& ev) override {
 			switch (ev.GetId()) {
@@ -41,26 +41,32 @@ namespace ui {
 			}
 		}
 	};
+#endif
 
-	extern Rml::Context* _context;
-	SettingsMenuEventListener _settings_menu_event_listener;
+#if 0
+	void RmlUiSystemInterface::SetMouseCursor(const Rml::String& cursor_name) {
+		if (cursor_name.empty() || cursor_name == "arrow") {
+			//window::set_cursor_shape(window::CursorShape::Arrow);
+			window::set_cursor_shape(window::CursorShape::HandPoint);
+		} else if (cursor_name == "move") {
+			//window::set_cursor_shape(sf::Cursor::SizeAll);
+		} else if (cursor_name == "pointer") {
+			window::set_cursor_shape(window::CursorShape::HandPointUp);
+		} else if (cursor_name == "resize") {
+			//window::set_cursor_shape(sf::Cursor::SizeTopLeftBottomRight);
+		} else if (cursor_name == "cross") {
+			window::set_cursor_shape(window::CursorShape::Crosshair);
+		} else if (cursor_name == "text") {
+			window::set_cursor_shape(window::CursorShape::Quill);
+		} else if (cursor_name == "unavailable") {
+			//window::set_cursor_shape(sf::Cursor::NotAllowed);
+		} else if (cursor_name.starts_with("rmlui-scroll")) {
+			//window::set_cursor_shape(sf::Cursor::SizeAll);
+		}
+	}
+#endif
+
 	std::vector<MenuType> _menu_stack;
-
-	Rml::ElementDocument* _get_menu_document(MenuType type) {
-		switch (type) {
-			case MenuType::Settings:
-				return _context->GetDocument("settings_menu");
-			default:
-				return nullptr;
-		}
-	}
-
-	void add_menu_event_listeners() {
-		if (Rml::ElementDocument* doc = _get_menu_document(MenuType::Settings)) {
-			doc->AddEventListener(Rml::EventId::Show, &_settings_menu_event_listener);
-			doc->AddEventListener(Rml::EventId::Submit, &_settings_menu_event_listener);
-		}
-	}
 
 	MenuType get_top_menu() {
 		return _menu_stack.empty() ? MenuType::Count : _menu_stack.back();
@@ -71,6 +77,9 @@ namespace ui {
 			case MenuType::Main: {
 				ui::main_menu::show = visible;
 			} return;
+			case MenuType::Settings: {
+				ui::settings_menu::show = visible;
+			} return;
 			case MenuType::Credits: {
 				ui::credits_menu::show = visible;
 			} return;
@@ -78,8 +87,6 @@ namespace ui {
 				ui::pause_menu::show = visible;
 			} return;
 		}
-		if (Rml::ElementDocument* doc = _get_menu_document(type))
-			visible ? doc->Show() : doc->Hide();
 	}
 
 	void push_menu(MenuType type) {

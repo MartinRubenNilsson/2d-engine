@@ -9,8 +9,6 @@ namespace ui {
 		Count,
 	};
 
-	void add_menu_event_listeners();
-
 	// We use a stack to manage menus.
 	// The top menu is the only one that is visible.
 

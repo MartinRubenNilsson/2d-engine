@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ui_shared.h"
 #include "ui_main_menu.h"
+#include "ui_settings_menu.h"
 #include "ui_credits_menu.h"
 #include "ui_pause_menu.h"
 #include "ui_hud.h"
@@ -33,6 +34,9 @@ namespace game {
 		}
 		if (main_menu::show) {
 			main_menu::layout();
+		}
+		if (settings_menu::show) {
+			settings_menu::layout();
 		}
 		if (credits_menu::show) {
 			credits_menu::layout();
