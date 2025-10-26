@@ -6,5 +6,8 @@ namespace game {
 	void shutdown();
 	void update(float dt);
 	void layout();
+
+	bool should_pause_game();
+	bool should_blur_background();
 }
 }

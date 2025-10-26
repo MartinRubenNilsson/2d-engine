@@ -1,44 +1,11 @@
 ﻿#include "stdafx.h"
 #include "ui_rmlui.h"
-#include "ui_menus.h"
-#include "ui_textboxes.h"
-#include "map.h"
 
 namespace ui {
-	void _on_escape_key_pressed() {
-		MenuType current_menu = get_top_menu();
-		if (current_menu == MenuType::Count) // no menus are open
-			push_menu(MenuType::Pause);
-		else if (current_menu != MenuType::Main) // don't pop main menu
-			pop_menu();
-	}
-
 	namespace bindings {
-		void on_click_play() {
-			pop_all_menus();
-			map::open("summer_forest_00");
-		}
 
 		void on_click_settings() {
-			push_menu(MenuType::Settings);
-		}
-
-		void on_click_credits() {
-			push_menu(MenuType::Credits);
-		}
-
-		void on_click_back() {
-			pop_menu();
-		}
-
-		void on_click_resume() {
-			pop_menu();
-		}
-
-		void on_click_main_menu() {
-			pop_all_menus();
-			push_menu(MenuType::Main);
-			map::close(0.f);
+			//push_menu(MenuType::Settings);
 		}
 	}
 
@@ -144,8 +111,4 @@ namespace ui {
 		return rml_key_modifiers;
 	}
 #endif
-
-	bool is_menu_or_visible() {
-		return (get_top_menu() != MenuType::Count) || !textboxes::closed();
-	}
 }

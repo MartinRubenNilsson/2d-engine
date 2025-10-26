@@ -6,9 +6,8 @@
 #include "window.h"
 #include "window_events.h"
 #include "audio.h"
-#include "ui_rmlui.h"
-#include "ui_menus.h"
 #include "ui.h"
+#include "ui_game.h"
 #include "map.h"
 #include "ecs.h"
 #include "console.h"
@@ -75,7 +74,6 @@ namespace engine {
     double _time = 0.0; // total time since engine startup
     double _delta_time = 0.0; // time since last call to run()
     double _game_time = 0.0;
-    double _game_delta_time = 0.0;
 
     void _update_times() {
         const double prev_time = _time;
@@ -128,22 +126,33 @@ namespace engine {
 
         map::update((float)_delta_time); // TODO: this doesn't belong in engine.cpp
 
-        double game_delta_time = _delta_time;
+        bool should_update_game = true;
         if (steam::is_overlay_active()) {
-            game_delta_time = 0.0;
+            should_update_game = false;
         }
-        if (ui::is_menu_or_visible()) { // TODO: this doesn't belong in engine.cpp
-            game_delta_time = 0.0;
+        if (ui::game::should_pause_game()) { // TODO: this doesn't belong in engine.cpp
+            should_update_game = false;
         }
         if (map::get_transition_progress() != 0.f) {
-            game_delta_time = 0.0; // pause game while map is transitioning
+            should_update_game = false; // pause game while map is transitioning
         }
 
-        _game_time += game_delta_time;
+        if (should_update_game) {
+            _game_time += _delta_time;
+            ecs::update((float)_delta_time);
+            postprocessing::update((float)_delta_time);
+        }
 
-        ecs::update((float)game_delta_time);
         ui::update((float)_delta_time);
-        postprocessing::update((float)game_delta_time);
+
+        if (ui::game::should_blur_background()) {
+            postprocessing::set_gaussian_blur_iterations(2);
+        } else {
+            postprocessing::set_gaussian_blur_iterations(0);
+        }
+
+        postprocessing::set_darkness_intensity(map::is_dark() ? 0.95f : 0.f);
+        postprocessing::set_screen_transition_progress(map::get_transition_progress());
     }
 
     void _update_frame_uniform_block(const Rect2f& view) {
@@ -247,19 +256,6 @@ namespace engine {
         background::draw_sprites_now(view);
         ecs::draw_sprites_now(view);
 
-        switch (ui::get_top_menu()) {
-            case ui::MenuType::Pause:
-            case ui::MenuType::Settings:
-            case ui::MenuType::Credits: {
-                postprocessing::set_gaussian_blur_iterations(2);
-            } break;
-            default: {
-                postprocessing::set_gaussian_blur_iterations(0);
-            } break;
-        }
-
-        postprocessing::set_darkness_intensity(map::is_dark() ? 0.95f : 0.f);
-        postprocessing::set_screen_transition_progress(map::get_transition_progress());
         postprocessing::render(view);
 
         _render_to_final_framebuffer();
@@ -267,7 +263,7 @@ namespace engine {
         ecs::debug_draw(view);
 
         shapes::draw_all_now();
-        shapes::update_lifetimes((float)_game_delta_time);
+        shapes::update_lifetimes((float)_delta_time);
 
         _update_frame_uniform_block({ .max = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT } });
 
@@ -284,11 +280,11 @@ namespace engine {
         // final framebuffer, since when using OpenGL as backend we flip the final framebuffer vertically.
         imgui_impl::render();
         graphics::present_swap_chain_back_buffer();
-        renderdoc::open_capture_directory_if_frame_capturing();
     }
 
     void run() {
         _update();
         _render();
+        renderdoc::open_capture_directory_if_frame_capturing();
     }
 }

@@ -95,10 +95,10 @@ namespace textboxes {
 						Clay_TextElementConfig* text_config = &shared::default_text;
 						if (option == get_current_option()) {
 							text_config = &shared::hovered_text;
-							if (mouse_pressed()) {
+							if (mouse_over() && mouse_pressed()) {
 								text_config = &shared::pressed_text;
 							}
-							if (mouse_up()) {
+							if (mouse_over() && mouse_up()) {
 								select_current_option();
 							}
 						}

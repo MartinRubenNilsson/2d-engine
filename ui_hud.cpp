@@ -33,7 +33,7 @@ namespace hud {
 	std::string _arrows_string;
 	std::string _bombs_string;
 
-	void update(float dt) {
+	void update() {
 		_rupees_string = "Rupees: " + std::to_string(rupees);
 		_arrows_string = "Arrows: " + std::to_string(arrows);
 		_bombs_string  = "Bombs:  " + std::to_string(bombs);

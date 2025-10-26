@@ -4,6 +4,7 @@ namespace ui {
 namespace settings_menu {
 	extern bool show;
 
+	void update();
 	void layout();
 }
 }

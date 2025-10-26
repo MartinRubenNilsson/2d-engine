@@ -10,7 +10,7 @@ namespace hud {
 	extern unsigned int bombs;
 
 	void startup();
-	void update(float dt);
+	void update();
 	void layout();
 }
 }

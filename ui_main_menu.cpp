@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "ui_main_menu.h"
+#include "ui_settings_menu.h"
+#include "ui_credits_menu.h"
 #include "ui_shared.h"
+#include "ui_hud.h"
+#include "map.h"
 #include "graphics.h"
 #include "window.h"
-#include "ui_rmlui.h"
 
 namespace ui {
 namespace main_menu {
@@ -46,13 +49,34 @@ namespace main_menu {
 		}
 	}
 
+	void _on_select_play() {
+		map::open("summer_forest_00", [] {
+			show = false;
+			hud::show = true;
+			});
+	}
+
+	void _on_select_settings() {
+		show = false;
+		settings_menu::show = true;
+	}
+
+	void _on_select_credits() {
+		show = false;
+		credits_menu::show = true;
+	}
+
+	void _on_select_quit() {
+		window::set_should_close(true);
+	}
+
 	void layout() {
 		CLAY(CLAY_ID("main_menu"), shared::main_menu_element) {
 			_layout_game_logo();
-			shared::layout_text_button("Play", bindings::on_click_play);
-			shared::layout_text_button("Settings", bindings::on_click_settings);
-			shared::layout_text_button("Credits", bindings::on_click_credits);
-			shared::layout_text_button("Quit", [] { window::set_should_close(true); });
+			shared::layout_text_button("Play", _on_select_play);
+			shared::layout_text_button("Settings", _on_select_settings);
+			shared::layout_text_button("Credits", _on_select_credits);
+			shared::layout_text_button("Quit", _on_select_quit);
 		}
 	}
 }

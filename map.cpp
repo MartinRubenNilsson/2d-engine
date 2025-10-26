@@ -15,6 +15,7 @@ namespace map {
 	std::string _next_map_path;
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
+	void (*on_transition_complete)() = nullptr;
 
 	void _show_debug_window(float dt) {
 		ImGui::Begin("Maps");
@@ -45,21 +46,26 @@ namespace map {
 		return "";
 	}
 
-	void destroy_entities() {
-		ecs::clear();
-	}
-
 	void update(float dt) {
 		if (debug) {
 			_show_debug_window(dt);
 		}
 
-		if (_transition_duration < 0.f) return; // not transitioning
+		if (_transition_duration < 0.f)
+			return; // not transitioning
 
 		const float delta_progress = _transition_duration ? (dt / _transition_duration) : 1.f;
-		bool shall_change_map = false;
+		bool should_change_map = false;
 
-		if (_transition_progress < 0.f) {
+		if (_transition_progress >= 0.f) {
+			// transitioning out (progress goes from 0 to 1)
+			_transition_progress += delta_progress;
+			if (_transition_progress >= 1.f) {
+				// finished transitioning out
+				_transition_progress = -1.f;
+				should_change_map = true;
+			}
+		} else {
 			// transitioning in (progress goes from -1 to 0)
 			_transition_progress += delta_progress;
 			if (_transition_progress >= 0.f) {
@@ -67,44 +73,37 @@ namespace map {
 				_transition_progress = 0.f;
 				_transition_duration = -1.f; // stop transitioning
 			}
-		} else {
-			// transitioning out (progress goes from 0 to 1)
-			_transition_progress += delta_progress;
-			if (_transition_progress >= 1.f) {
-				// finished transitioning out
-				if (_next_map_path.empty()) {
-					_transition_progress = 1.f;
-					_transition_duration = -1.f; // stop transitioning
-				} else {
-					_transition_progress = -1.f;
-				}
-				shall_change_map = true;
-			}
 		}
 
-		if (!shall_change_map) return;
+		if (!should_change_map) return;
 
 		ecs::MapId current_map = ecs::get_map(_current_map_path);
 		ecs::MapId next_map = ecs::get_map(_next_map_path);
 		_current_map_path = _next_map_path;
 		_next_map_path.clear();
 
-		// CLOSE CURRENT MAP
-
+		// Close current map.
 		if (current_map) {
 			audio::stop_all_in_bus(audio::BUS_SOUND);
 			ui::textboxes::close_all();
 		}
 
-		// OPEN NEXT MAP
+		ecs::clear();
 
+		if (on_transition_complete) {
+			on_transition_complete();
+			on_transition_complete = nullptr;
+		}
+		
 		if (!next_map) {
-			destroy_entities();
 			audio::stop_all_in_bus();
 			return;
 		}
 
+		// Open next map.
+
 		ecs::setup(next_map);
+		ecs::update(0.f); // HACK: make sure cameras and such are initialized
 
 		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
 		if (!music_event_path.empty()) {
@@ -115,10 +114,23 @@ namespace map {
 		}
 	}
 
-	bool transition(const MapTransitionOptions& options) {
+	enum class TransitionType {
+		Open,
+		Close,
+		Reset,
+	};
+
+	struct TransitionOptions {
+		TransitionType type = TransitionType::Open;
+		std::string_view map_name; // Only used when type is Open.
+		float duration = DEFAULT_TRANSITION_DURATION; // In seconds; set to 0 to make the transition instant.
+		void(*on_complete)() = nullptr;
+	};
+
+	bool _transition(const TransitionOptions& options) {
 		if (_transition_duration >= 0.f) return false; // already transitioning
 		switch (options.type) {
-		case MapTransitionType::Open: {
+		case TransitionType::Open: {
 			if (options.map_name.empty()) return false;
 			if (_current_map_path == options.map_name) return false;
 			if (ecs::MapId map = ecs::get_map(options.map_name)) {
@@ -128,10 +140,10 @@ namespace map {
 				return false;
 			}
 		} break;
-		case MapTransitionType::Close: {
+		case TransitionType::Close: {
 			if (_current_map_path.empty()) return false;
 		} break;
-		case MapTransitionType::Reset: {
+		case TransitionType::Reset: {
 			if (_current_map_path.empty()) return false;
 			_next_map_path = _current_map_path;
 		} break;
@@ -139,6 +151,7 @@ namespace map {
 			return false;
 		}
 		_transition_duration = std::max(options.duration, 0.f);
+		on_transition_complete = options.on_complete;
 		return true;
 	}
 
@@ -146,26 +159,29 @@ namespace map {
 		return !_current_map_path.empty();
 	}
 
-	bool open(std::string_view map_name, float transition_duration) {
-		MapTransitionOptions options{};
-		options.type = MapTransitionType::Open;
+	bool open(std::string_view map_name, void(*on_complete)(), float duration) {
+		TransitionOptions options{};
+		options.type = TransitionType::Open;
 		options.map_name = map_name;
-		options.duration = transition_duration;
-		return transition(options);
+		options.duration = duration;
+		options.on_complete = on_complete;
+		return _transition(options);
 	}
 
-	bool close(float transition_duration) {
-		MapTransitionOptions options{};
-		options.type = MapTransitionType::Close;
-		options.duration = transition_duration;
-		return transition(options);
+	bool close(void(*on_complete)(), float duration) {
+		TransitionOptions options{};
+		options.type = TransitionType::Close;
+		options.duration = duration;
+		options.on_complete = on_complete;
+		return _transition(options);
 	}
 
-	bool reset(float transition_duration) {
-		MapTransitionOptions options{};
-		options.type = MapTransitionType::Reset;
-		options.duration = transition_duration;
-		return transition(options);
+	bool reset(void(*on_complete)(), float duration) {
+		TransitionOptions options{};
+		options.type = TransitionType::Reset;
+		options.duration = duration;
+		options.on_complete = on_complete;
+		return _transition(options);
 	}
 
 	std::string get_name() {

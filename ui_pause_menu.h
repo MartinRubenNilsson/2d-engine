@@ -4,6 +4,7 @@ namespace ui {
 namespace pause_menu {
 	extern bool show;
 
+	void update();
 	void layout();
 }
 }
