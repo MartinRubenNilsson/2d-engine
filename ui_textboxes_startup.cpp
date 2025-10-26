@@ -25,7 +25,6 @@ namespace textboxes {
 
 	void _go_back_to_main_menu() {
 		map::close([] {
-			ui::hud::show = false;
 			ui::main_menu::show = true;
 			});
 	}

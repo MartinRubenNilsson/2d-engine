@@ -7,6 +7,8 @@
 #include "ui_hud.h"
 #include "ui_textboxes.h"
 #include "ui_game.h"
+#include "input.h"
+#include "map.h"
 
 namespace ui {
 namespace game {
@@ -16,7 +18,6 @@ namespace game {
 		main_menu::startup();
 		hud::startup();
 		textboxes::startup();
-		hud::show = true;
 	}
 
 	void shutdown() {
@@ -35,7 +36,12 @@ namespace game {
 		}
 		if (pause_menu::show) {
 			pause_menu::update();
+		} else {
+			if (map::is_open() && input::pressed(window::Key::Escape)) {
+				pause_menu::show = true;
+			}
 		}
+		hud::show = map::is_open();
 		if (hud::show) {
 			hud::update();
 		}
