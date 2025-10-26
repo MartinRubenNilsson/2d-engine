@@ -164,27 +164,6 @@ namespace engine {
         postprocessing::update((float)game_delta_time);
     }
 
-    void _render_copy_final_framebuffer_to_back_buffer() {
-        GRAPHICS_DEBUG_GROUP;
-        const Handle<graphics::Framebuffer> back_buffer = graphics::get_swap_chain_back_buffer();
-        graphics::clear_framebuffer(back_buffer);
-        graphics::bind_framebuffer(back_buffer);
-#ifdef GRAPHICS_API_OPENGL
-        // NOTE: In order to easier handle some differences between OpenGL and D3D11,
-        // we render each framebuffer upside-down. This means we can use the same UV
-        // and viewport coordinates for both APIs. However, it means we need to do a
-        // vertical flip when rendering to the back buffer in OpenGL, otherwise the
-        // final image will be upside-down.
-        graphics::bind_vertex_shader(graphics::fullscreen_flip_vert);
-#else
-        graphics::bind_vertex_shader(graphics::fullscreen_vert);
-#endif
-        graphics::bind_fragment_shader(graphics::fullscreen_frag);
-        graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::final_framebuffer));
-        graphics::bind_sampler(0, graphics::nearest_sampler);
-        graphics::draw(3); // draw a fullscreen-covering triangle
-    }
-
     void _update_frame_uniform_block(const Rect2f& view) {
         GRAPHICS_DEBUG_GROUP;
 
@@ -218,6 +197,40 @@ namespace engine {
         graphics::update_buffer(graphics::frame_uniform_buffer, &block, sizeof(block));
     }
 
+    void _render_to_final_framebuffer() {
+        GRAPHICS_DEBUG_GROUP;
+        graphics::clear_framebuffer(graphics::final_framebuffer);
+        graphics::bind_framebuffer(graphics::final_framebuffer);
+        graphics::bind_vertex_shader(graphics::fullscreen_vert);
+        graphics::bind_fragment_shader(graphics::fullscreen_frag);
+        graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_ping_framebuffer));
+        const Vec2u framebuffer_size = graphics::get_texture_size(graphics::get_framebuffer_texture(graphics::final_framebuffer));
+        graphics::set_viewport({ .width = (float)framebuffer_size.x, .height = (float)framebuffer_size.y });
+        graphics::set_primitives(graphics::Primitives::TriangleList);
+        graphics::draw(3); // draw a fullscreen-covering triangle
+    }
+
+    void _render_to_back_buffer() {
+        GRAPHICS_DEBUG_GROUP;
+        const Handle<graphics::Framebuffer> back_buffer = graphics::get_swap_chain_back_buffer();
+        graphics::clear_framebuffer(back_buffer);
+        graphics::bind_framebuffer(back_buffer);
+#ifdef GRAPHICS_API_OPENGL
+        // NOTE: In order to easier handle some differences between OpenGL and D3D11,
+        // we render each framebuffer upside-down. This means we can use the same UV
+        // and viewport coordinates for both APIs. However, it means we need to do a
+        // vertical flip when rendering to the back buffer in OpenGL, otherwise the
+        // final image will be upside-down.
+        graphics::bind_vertex_shader(graphics::fullscreen_flip_vert);
+#else
+        graphics::bind_vertex_shader(graphics::fullscreen_vert);
+#endif
+        graphics::bind_fragment_shader(graphics::fullscreen_frag);
+        graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::final_framebuffer));
+        graphics::bind_sampler(0, graphics::nearest_sampler);
+        graphics::draw(3); // draw a fullscreen-covering triangle
+    }
+
     void _render() {
         const Vec2i window_framebuffer_size = window::get_framebuffer_size();
         const graphics::Viewport viewport = {
@@ -225,29 +238,23 @@ namespace engine {
             .height = (float)window_framebuffer_size.y };
 
         Rect2f view{}; // The current camera view in world-space.
-        Vec2f camera_min = { 0.f, 0.f };
-        Vec2f camera_max = window_framebuffer_size;
+        view.min = Vec2f::ZERO;
+        view.max = window_framebuffer_size; // Default
         if (map::is_open()) {
-            ecs::get_camera_bounds(camera_min, camera_max);
+            view = ecs::get_camera_view();
         }
-        const Vec2f camera_center = (camera_min + camera_max) / 2.f;
-        const Vec2f camera_size = camera_max - camera_min;
 
         graphics::clear_framebuffer(graphics::game_ping_framebuffer);
         // Try to ensure game_ping_framebuffer is unbound as input before binding it as output
         graphics::bind_texture(0, Handle<graphics::Texture>());
         graphics::bind_framebuffer(graphics::game_ping_framebuffer);
-        graphics::set_viewport({ .width = camera_size.x, .height = camera_size.y });
+        graphics::set_viewport({ .width = view.max.x - view.min.x, .height = view.max.y - view.min.y });
 
-        _update_frame_uniform_block({ camera_min, camera_max });
-
-        // RENDER SPRITES TO GAME FRAMEBUFFER
+        _update_frame_uniform_block(view);
 
         sprites::clear_statistics();
-        background::draw_sprites_now(camera_min, camera_max);
-        ecs::draw_sprites_now(camera_min, camera_max);
-
-        // POSTPROCESS GAME FRAMEBUFFER
+        background::draw_sprites_now(view);
+        ecs::draw_sprites_now(view);
 
         switch (ui::get_top_menu()) {
             case ui::MenuType::Pause:
@@ -262,45 +269,28 @@ namespace engine {
 
         postprocessing::set_darkness_intensity(map::is_dark() ? 0.95f : 0.f);
         postprocessing::set_screen_transition_progress(map::get_transition_progress());
-        postprocessing::render(camera_min, camera_max);
+        postprocessing::render(view);
 
-        // UPSCALE GAME FRAMEBUFFER TO FINAL FRAMEBUFFER
+        _render_to_final_framebuffer();
 
-        if (!window::minimized()) {
-            const graphics::ScopedDebugGroup debug_group("Upscale to final framebuffer");
-            graphics::clear_framebuffer(graphics::final_framebuffer);
-            graphics::bind_framebuffer(graphics::final_framebuffer);
-            graphics::bind_vertex_shader(graphics::fullscreen_vert);
-            graphics::bind_fragment_shader(graphics::fullscreen_frag);
-            graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_ping_framebuffer));
-            graphics::set_viewport(viewport);
-            graphics::set_primitives(graphics::Primitives::TriangleList);
-            graphics::draw(3); // draw a fullscreen-covering triangle
-        }
-
-        ecs::debug_draw({ camera_min, camera_max });
-
-        // RENDER DEBUG SHAPES TO FINAL FRAMEBUFFER
+        ecs::debug_draw(view);
 
         shapes::draw_all_now();
         shapes::update_lifetimes((float)_game_delta_time);
-
-        // RENDER UI TO FINAL FRAMEBUFFER
 
         _update_frame_uniform_block({ .max = { GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT } });
 
         ui::layout();
         ui::render();
 
-        _render_copy_final_framebuffer_to_back_buffer();
+        _render_to_back_buffer();
 
         if (should_show_fps_counter) {
-            show_fps_counter_imgui();
+            show_fps_counter();
         }
 
-        // PITFALL: ImGui uses its own shaders and such, so we need to render it
-        // to the back buffer, not the final framebuffer, since when using OpenGL
-        // as backend we flip the final framebuffer vertically.
+        // PITFALL: ImGui uses its own shaders and such, so we need to render it to the back buffer, not the
+        // final framebuffer, since when using OpenGL as backend we flip the final framebuffer vertically.
         imgui_impl::render();
         graphics::present_swap_chain_back_buffer();
         renderdoc::open_capture_directory_if_frame_capturing();

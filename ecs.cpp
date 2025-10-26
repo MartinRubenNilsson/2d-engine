@@ -139,12 +139,14 @@ namespace ecs {
 		update_audio(dt);
 	}
 
-	void get_camera_bounds(Vec2f& min, Vec2f& max) {
+	Rect2f get_camera_view() {
 		Vec2f center, size;
 		ecs::get_blended_camera_view(center, size);
-		min = center - size / 2.f;
-		max = center + size / 2.f;
-		min = round(min); // snap to pixel
-		max = round(max); // snap to pixel
+		Rect2f view{};
+		view.min = center - size / 2.f;
+		view.max = center + size / 2.f;
+		view.min = round(view.min); // snap to pixel
+		view.max = round(view.max); // snap to pixel
+		return view;
 	}
 }

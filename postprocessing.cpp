@@ -98,19 +98,11 @@ namespace postprocessing {
 		_update_shockwaves(dt);
 	}
 
-	Vec2f _map_world_to_target(
-		const Vec2f& pos_ws,
-		const Vec2f& camera_min_ws,
-		const Vec2f& camera_max_ws,
-		unsigned int target_width,
-		unsigned int target_height
-	) {
-		const float x = (pos_ws.x - camera_min_ws.x) / (camera_max_ws.x - camera_min_ws.x) * target_width;
-		const float y = (pos_ws.y - camera_min_ws.y) / (camera_max_ws.y - camera_min_ws.y) * target_height;
-		return Vec2f(x, y);
+	Vec2f _map_world_to_target(const Vec2f& position, const Rect2f& view, const Vec2f& target_size) {
+		return (position - view.min) / (view.max - view.min) * target_size;
 	}
 
-	void _render_shockwaves(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void _render_shockwaves(const Rect2f& view) {
 		if (_shockwaves.empty()) return;
 		if (_shockwave_frag == Handle<graphics::FragmentShader>()) return;
 		GRAPHICS_DEBUG_GROUP;
@@ -119,9 +111,7 @@ namespace postprocessing {
 		ShockwaveUniformBlock shockwave_ub{};
 		shockwave_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
 		for (const Shockwave& shockwave : _shockwaves) {
-			shockwave_ub.center = _map_world_to_target(
-				shockwave.position_ws, camera_min, camera_max,
-				GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
+			shockwave_ub.center = _map_world_to_target(shockwave.position_ws, view, shockwave_ub.resolution);
 			shockwave_ub.force = shockwave.force;
 			shockwave_ub.size = shockwave.size;
 			shockwave_ub.thickness = shockwave.thickness;
@@ -133,7 +123,7 @@ namespace postprocessing {
 		}
 	}
 
-	void _render_darkness(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void _render_darkness(const Rect2f& view) {
 		if (_darkness_intensity == 0.f) return;
 		if (_darkness_frag == Handle<graphics::FragmentShader>()) return;
 		GRAPHICS_DEBUG_GROUP;
@@ -142,9 +132,7 @@ namespace postprocessing {
 		graphics::bind_fragment_shader(_darkness_frag);
 		DarknessUniformBlock darkness_ub{};
 		darkness_ub.resolution = Vec2f(GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
-		darkness_ub.center = _map_world_to_target(
-			_darkness_center_ws, camera_min, camera_max,
-			GAME_FRAMEBUFFER_WIDTH, GAME_FRAMEBUFFER_HEIGHT);
+		darkness_ub.center = _map_world_to_target(_darkness_center_ws, view, darkness_ub.resolution);
 		darkness_ub.intensity = _darkness_intensity;
 		graphics::update_buffer(_darkness_uniform_buffer, &darkness_ub, sizeof(darkness_ub));
 		graphics::bind_uniform_buffer(1, _darkness_uniform_buffer);
@@ -193,12 +181,12 @@ namespace postprocessing {
 		graphics::bind_sampler(0, graphics::nearest_sampler);
 	}
 
-	void render(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void render(const Rect2f& view) {
 		GRAPHICS_DEBUG_GROUP;
 		graphics::set_primitives(graphics::Primitives::TriangleList);
 		graphics::bind_vertex_shader(graphics::fullscreen_vert);
-		_render_shockwaves(camera_min, camera_max);
-		_render_darkness(camera_min, camera_max);
+		_render_shockwaves(view);
+		_render_darkness(view);
 		_render_screen_transition();
 		_render_gaussian_blur();
 	}

@@ -10,7 +10,7 @@ namespace postprocessing {
 
 	void startup();
 	void update(float dt);
-	void render(const Vec2f &camera_min, const Vec2f& camera_max);
+	void render(const Rect2f& view);
 
 	void add_shockwave(const Vec2f& position_ws); // ws = world space
 	void set_darkness_intensity(float intensity); // 0 <= intensity <= 1

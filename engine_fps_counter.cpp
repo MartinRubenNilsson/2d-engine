@@ -20,7 +20,7 @@ namespace engine {
         _smoothed_fps = SMOOTHING_FACTOR * _smoothed_fps + (1.f - SMOOTHING_FACTOR) / dt;
 	}
 
-	void show_fps_counter_imgui() {
+	void show_fps_counter() {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("Stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
         char overlay_text[64];

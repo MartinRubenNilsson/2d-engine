@@ -54,7 +54,7 @@ namespace background {
 		}
 	}
 
-	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void draw_sprites_now(const Rect2f& view) {
 		if (_type == Type::None) return;
 
 		GRAPHICS_DEBUG_GROUP;
@@ -65,8 +65,8 @@ namespace background {
 			if (!layer.texture_size.x) continue;
 			sprite.texture = layer.texture;
 			sprite.size = layer.texture_size;
-			for (float x = camera_min.x - layer.offset_x; x < camera_max.x; x += layer.texture_size.x) {
-				sprite.position = { x, camera_min.y };
+			for (float x = view.min.x - layer.offset_x; x < view.max.x; x += layer.texture_size.x) {
+				sprite.position = { x, view.min.y };
 				sprites::draw_later(sprite);
 			}
 		}

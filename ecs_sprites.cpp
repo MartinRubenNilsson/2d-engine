@@ -102,7 +102,7 @@ namespace ecs {
 		}
 	}
 
-	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max) {
+	void draw_sprites_now(const Rect2f& view) {
 		GRAPHICS_DEBUG_GROUP;
 
 		_blink_sprites_before_drawing();
@@ -112,10 +112,10 @@ namespace ecs {
 
 		for (auto [entity, sprite] : _registry.view<sprites::Sprite>().each()) {
 			if (!(sprite.flags & sprites::SPRITE_VISIBLE)) continue;
-			if (sprite.position.x > camera_max.x) continue;
-			if (sprite.position.y > camera_max.y) continue;
-			if (sprite.position.x + sprite.size.x < camera_min.x) continue;
-			if (sprite.position.y + sprite.size.y < camera_min.y) continue;
+			if (sprite.position.x > view.max.x) continue;
+			if (sprite.position.y > view.max.y) continue;
+			if (sprite.position.x + sprite.size.x < view.min.x) continue;
+			if (sprite.position.y + sprite.size.y < view.min.y) continue;
 			sprites::Sprite copy = sprite;
 			copy.position = round(copy.position); // snap to pixels
 			if (const UniformBlock* block = _registry.try_get<const UniformBlock>(entity)) {

@@ -9,7 +9,7 @@ namespace ecs {
 	void update(float dt);
 	void debug_draw(const Rect2f& view);
 
-	void get_camera_bounds(Vec2f& min, Vec2f& max);
-	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max);
+	Rect2f get_camera_view();
+	void draw_sprites_now(const Rect2f& view);
 }
 
