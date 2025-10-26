@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ui_rmlui.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
     <ClCompile Include="map.cpp">
       <Filter>game\map</Filter>
     </ClCompile>
@@ -404,9 +401,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ui_rmlui.h">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
     <ClInclude Include="map.h">
       <Filter>game\map</Filter>
     </ClInclude>

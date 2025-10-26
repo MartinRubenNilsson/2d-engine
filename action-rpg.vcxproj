@@ -248,7 +248,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ui_pause_menu.cpp" />
     <ClCompile Include="ui_rendering.cpp" />
     <ClCompile Include="ui_shared.cpp" />
-    <ClCompile Include="ui_rmlui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="ui.cpp" />
@@ -388,7 +387,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="steam_server.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="easings.h" />
-    <ClInclude Include="ui_rmlui.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ecs_animations.h" />
