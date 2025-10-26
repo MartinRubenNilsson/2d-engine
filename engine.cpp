@@ -102,9 +102,10 @@ namespace engine {
                 if (ev.type == window::EventType::FramebufferSize) {
                     // When the window is minimized, an event is sent with size 0, 0,
                     // which we must therefore ignore.
-                    if (ev.size.width && ev.size.height) {
-                        graphics::resize_swap_chain_framebuffer({ (unsigned int)ev.size.width, (unsigned int)ev.size.height });
-                        graphics::resize_final_framebuffer(ev.size.width, ev.size.height);
+                    const Vec2u size = { ev.size.width, ev.size.height };
+                    if (size != Vec2u::ZERO) {
+                        graphics::resize_swap_chain_framebuffer(size);
+                        graphics::resize_big_framebuffers(size);
                     }
                 } else if (ev.type == window::EventType::KeyPress) {
                     if (ev.key.code == window::Key::F7) {
@@ -188,16 +189,16 @@ namespace engine {
         graphics::update_buffer(graphics::frame_uniform_buffer, &block, sizeof(block));
     }
 
-    void _render_to_final_framebuffer() {
+    void _render_to_big_framebuffer() {
         GRAPHICS_DEBUG_GROUP;
         const Handle<graphics::Framebuffer> prev_framebuffer = graphics::get_bound_framebuffer();
-        graphics::clear_framebuffer(graphics::final_framebuffer);
-        graphics::bind_framebuffer(graphics::final_framebuffer);
+        graphics::clear_framebuffer(graphics::big_ping_framebuffer);
+        graphics::bind_framebuffer(graphics::big_ping_framebuffer);
         graphics::bind_vertex_shader(graphics::fullscreen_vert);
         graphics::bind_fragment_shader(graphics::fullscreen_frag);
         graphics::bind_texture(0, graphics::get_framebuffer_texture(prev_framebuffer));
         const Vec2u new_framebuffer_size = graphics::get_texture_size(
-            graphics::get_framebuffer_texture(graphics::final_framebuffer));
+            graphics::get_framebuffer_texture(graphics::big_ping_framebuffer));
         graphics::set_viewport({ .width = (float)new_framebuffer_size.x, .height = (float)new_framebuffer_size.y });
         graphics::set_primitives(graphics::Primitives::TriangleList);
         graphics::draw(3); // draw a fullscreen-covering triangle
@@ -244,10 +245,10 @@ namespace engine {
             view = ecs::get_camera_view();
         }
 
-        graphics::clear_framebuffer(graphics::game_ping_framebuffer);
+        graphics::clear_framebuffer(graphics::small_ping_framebuffer);
         // Try to ensure game_ping_framebuffer is unbound as input before binding it as output
         graphics::bind_texture(0, Handle<graphics::Texture>());
-        graphics::bind_framebuffer(graphics::game_ping_framebuffer);
+        graphics::bind_framebuffer(graphics::small_ping_framebuffer);
         graphics::set_viewport({ .width = view.max.x - view.min.x, .height = view.max.y - view.min.y });
 
         _update_frame_uniform_block(view);
@@ -256,9 +257,9 @@ namespace engine {
         background::draw_sprites_now(view);
         ecs::draw_sprites_now(view);
 
-        postprocessing::render(view);
+        postprocessing::render_pre_ui(view);
 
-        _render_to_final_framebuffer();
+        _render_to_big_framebuffer();
 
         ecs::debug_draw(view);
 
@@ -269,6 +270,8 @@ namespace engine {
 
         ui::layout();
         ui::render();
+
+        postprocessing::render_post_ui(view);
 
         _render_to_back_buffer();
 

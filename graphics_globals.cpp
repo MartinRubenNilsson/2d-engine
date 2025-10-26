@@ -35,9 +35,10 @@ namespace graphics {
 	Handle<Sampler> nearest_sampler;
 	Handle<Sampler> linear_sampler;
 
-	Handle<Framebuffer> final_framebuffer;
-	Handle<Framebuffer> game_ping_framebuffer;
-	Handle<Framebuffer> game_pong_framebuffer;
+	Handle<Framebuffer> big_ping_framebuffer;
+	Handle<Framebuffer> big_pong_framebuffer;
+	Handle<Framebuffer> small_ping_framebuffer;
+	Handle<Framebuffer> small_pong_framebuffer;
 	Handle<Framebuffer> player_outfit_framebuffer;
 
 	Handle<RasterizerState> default_rasterizer_state;
@@ -247,11 +248,11 @@ namespace graphics {
 	}
 
 	void _create_framebuffers() {
-		final_framebuffer = create_framebuffer({
-			.debug_name = "final framebuffer"
+		big_ping_framebuffer = create_framebuffer({
+			.debug_name = "big ping framebuffer"
 		});
-		attach_framebuffer_texture(final_framebuffer, create_texture({
-			.debug_name = "final framebuffer color texture",
+		attach_framebuffer_texture(big_ping_framebuffer, create_texture({
+			.debug_name = "big framebuffer color texture",
 			// this is just the initial size, it will be resized when the window is resized
 			.width = GAME_FRAMEBUFFER_WIDTH,
 			.height = GAME_FRAMEBUFFER_HEIGHT,
@@ -259,22 +260,34 @@ namespace graphics {
 			.framebuffer_color = true
 		}));
 
-		game_ping_framebuffer = create_framebuffer({
-			.debug_name = "game ping framebuffer"
+		big_pong_framebuffer = create_framebuffer({
+			.debug_name = "big pong framebuffer"
+			});
+		attach_framebuffer_texture(big_pong_framebuffer, create_texture({
+			.debug_name = "big pong framebuffer color texture",
+			// this is just the initial size, it will be resized when the window is resized
+			.width = GAME_FRAMEBUFFER_WIDTH,
+			.height = GAME_FRAMEBUFFER_HEIGHT,
+			.format = Format::RGBA8_UNORM,
+			.framebuffer_color = true
+			}));
+
+		small_ping_framebuffer = create_framebuffer({
+			.debug_name = "small ping framebuffer"
 		});
-		attach_framebuffer_texture(game_ping_framebuffer, create_texture({
-			.debug_name = "game ping framebuffer color texture",
+		attach_framebuffer_texture(small_ping_framebuffer, create_texture({
+			.debug_name = "small ping framebuffer color texture",
 			.width = GAME_FRAMEBUFFER_WIDTH,
 			.height = GAME_FRAMEBUFFER_HEIGHT,
 			.format = Format::RGBA8_UNORM,
 			.framebuffer_color = true
 		}));
 
-		game_pong_framebuffer = create_framebuffer({
-			.debug_name = "game pong framebuffer"
+		small_pong_framebuffer = create_framebuffer({
+			.debug_name = "small pong framebuffer"
 		});
-		attach_framebuffer_texture(game_pong_framebuffer, create_texture({
-			.debug_name = "game pong framebuffer color texture",
+		attach_framebuffer_texture(small_pong_framebuffer, create_texture({
+			.debug_name = "game small framebuffer color texture",
 			.width = GAME_FRAMEBUFFER_WIDTH,
 			.height = GAME_FRAMEBUFFER_HEIGHT,
 			.format = Format::RGBA8_UNORM,
@@ -336,7 +349,8 @@ namespace graphics {
 		_bind_globals();
 	}
 
-	void resize_final_framebuffer(unsigned int new_width, unsigned int new_height) {
-		graphics::resize_framebuffer(final_framebuffer, { new_width, new_height });
+	void resize_big_framebuffers(const Vec2u& size) {
+		graphics::resize_framebuffer(big_ping_framebuffer, size);
+		graphics::resize_framebuffer(big_pong_framebuffer, size);
 	}
 }

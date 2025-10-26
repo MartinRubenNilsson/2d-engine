@@ -14,7 +14,7 @@ namespace settings_menu {
 	struct SettingsMenuEventListener : public Rml::EventListener {
 		void ProcessEvent(Rml::Event& ev) override {
 			switch (ev.GetId()) {
-				case Rml::EventId::Show: {
+				case Rml::EventId::Show: 
 					if (Rml::ElementDocument* doc = _get_menu_document(MenuType::Settings)) {
 						if (Rml::Element* el = doc->GetElementById("checkbox-fullscreen"))
 							settings::app_settings.fullscreen ? el->SetAttribute("checked", "true") : el->RemoveAttribute("checked");

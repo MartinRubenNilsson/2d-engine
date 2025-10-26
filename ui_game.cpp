@@ -48,7 +48,7 @@ namespace game {
 			hud::update();
 		}
 		textboxes::update(dt);
-
+		
 		if (mouse_over_any()) {
 			window::set_cursor_shape(window::CursorShape::HandPointUp);
 		} else {

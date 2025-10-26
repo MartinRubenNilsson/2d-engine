@@ -67,9 +67,10 @@ namespace graphics {
 
 	// FRAMEBUFFERS
 
-	extern Handle<Framebuffer> final_framebuffer; // same size as the window framebuffer
-	extern Handle<Framebuffer> game_ping_framebuffer; // GAME_FRAMEBUFFER_WIDTH x GAME_FRAMEBUFFER_HEIGHT
-	extern Handle<Framebuffer> game_pong_framebuffer; // GAME_FRAMEBUFFER_WIDTH x GAME_FRAMEBUFFER_HEIGHT
+	extern Handle<Framebuffer> big_ping_framebuffer; // same size as the window framebuffer
+	extern Handle<Framebuffer> big_pong_framebuffer; // same size as the window framebuffer
+	extern Handle<Framebuffer> small_ping_framebuffer; // GAME_FRAMEBUFFER_WIDTH x GAME_FRAMEBUFFER_HEIGHT
+	extern Handle<Framebuffer> small_pong_framebuffer; // GAME_FRAMEBUFFER_WIDTH x GAME_FRAMEBUFFER_HEIGHT
 	extern Handle<Framebuffer> player_outfit_framebuffer; // 1024 x 1024
 
 	// RASTERIZER STATES
@@ -81,5 +82,5 @@ namespace graphics {
 	extern Handle<BlendState> default_blend_state;
 
 	void startup_globals();
-	void resize_final_framebuffer(unsigned int new_width, unsigned int new_height);
+	void resize_big_framebuffers(const Vec2u& size);
 }

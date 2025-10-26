@@ -1,16 +1,10 @@
 #pragma once
 
 namespace postprocessing {
-	// Calling render() applies the following effects in order:
-	// 
-	// 1. Shockwaves
-	// 2. Lighting
-	// 3. Screen transition
-	// 4. Gaussian blur
-
 	void startup();
 	void update(float dt);
-	void render(const Rect2f& view);
+	void render_pre_ui(const Rect2f& view);
+	void render_post_ui(const Rect2f& view);
 
 	void add_shockwave(const Vec2f& position_ws); // ws = world space
 	void set_darkness_intensity(float intensity); // 0 <= intensity <= 1

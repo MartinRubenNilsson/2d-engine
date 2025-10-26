@@ -8,7 +8,7 @@
 #include "ecs_tiled.h"
 
 namespace map {
-	const float DEFAULT_TRANSITION_DURATION = 0.6f; // seconds
+	const float DEFAULT_TRANSITION_DURATION = 0.7f; // seconds
 
 	bool debug = false;
 	std::string _current_map_path;
