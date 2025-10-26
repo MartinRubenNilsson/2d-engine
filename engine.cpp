@@ -116,24 +116,6 @@ namespace engine {
             }
         }
 
-        // PROCESS UI EVENTS
-        {
-            // TODO: get rid of this!!!!!!
-            ui::Event ev;
-            while (ui::get_next_event(ev)) {
-                switch (ev.type) {
-                    case ui::EventType::PlayGame: {
-                        background::set_type(background::Type::None);
-                        map::open("summer_forest_00");
-                    } break;
-                    case ui::EventType::GoToMainMenu: {
-                        map::close(0.f);
-                    } break;
- 
-                }
-            }
-        }
-
         audio::update();
         console::update((float)_delta_time);
 

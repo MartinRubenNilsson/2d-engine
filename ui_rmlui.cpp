@@ -2,13 +2,9 @@
 #include "ui_rmlui.h"
 #include "ui_menus.h"
 #include "ui_textboxes.h"
-#include "console.h"
-#include "window_events.h"
-#include "files.h"
+#include "map.h"
 
 namespace ui {
-	std::vector<Event> _events;
-
 	void _on_escape_key_pressed() {
 		MenuType current_menu = get_top_menu();
 		if (current_menu == MenuType::Count) // no menus are open
@@ -20,7 +16,7 @@ namespace ui {
 	namespace bindings {
 		void on_click_play() {
 			pop_all_menus();
-			_events.push_back({ EventType::PlayGame });
+			map::open("summer_forest_00");
 		}
 
 		void on_click_settings() {
@@ -42,7 +38,7 @@ namespace ui {
 		void on_click_main_menu() {
 			pop_all_menus();
 			push_menu(MenuType::Main);
-			_events.push_back({ EventType::GoToMainMenu });
+			map::close(0.f);
 		}
 	}
 
@@ -148,13 +144,6 @@ namespace ui {
 		return rml_key_modifiers;
 	}
 #endif
-
-	bool get_next_event(Event& ev) {
-		if (_events.empty()) return false;
-		ev = _events.back();
-		_events.pop_back();
-		return true;
-	}
 
 	bool is_menu_or_visible() {
 		return (get_top_menu() != MenuType::Count) || !textboxes::closed();
