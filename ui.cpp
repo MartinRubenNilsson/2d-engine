@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ui.h"
-#include "ui_data.h"
 #include "ui_game.h"
 #include "window.h"
 #include "window_events.h"
@@ -234,6 +233,10 @@ namespace ui {
 
 	bool mouse_up() {
 		return _mouse_state == MouseState::ReleasedThisFrame;
+	}
+
+	bool mouse_over_any() {
+		return !_mouse_over_ids.empty();
 	}
 
 	bool mouse_over() {

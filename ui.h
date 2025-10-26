@@ -18,6 +18,9 @@ namespace ui {
 	bool mouse_pressed();
 	// Was the left mouse button released this frame?
 	bool mouse_up();
+
+	// Is the mouse hovering over any element?
+	bool mouse_over_any();
 	// Is the mouse hovering over the current element?
 	bool mouse_over();
 	// Did the mouse start hovering the current element this frame?

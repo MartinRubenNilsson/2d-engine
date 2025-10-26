@@ -282,9 +282,6 @@
     <ClCompile Include="text_shaping.cpp">
       <Filter>engine\graphics\text</Filter>
     </ClCompile>
-    <ClCompile Include="ui_menus.cpp">
-      <Filter>game\ui</Filter>
-    </ClCompile>
     <ClCompile Include="ui_game.cpp">
       <Filter>game\ui</Filter>
     </ClCompile>
@@ -676,9 +673,6 @@
     </ClInclude>
     <ClInclude Include="text_shaping.h">
       <Filter>engine\graphics\text</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_menus.h">
-      <Filter>game\ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_data.h">
       <Filter>engine\ui</Filter>

@@ -257,7 +257,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     </ClCompile>
     <ClCompile Include="ecs_animations.cpp" />
     <ClCompile Include="ui_hud.cpp" />
-    <ClCompile Include="ui_menus.cpp" />
     <ClCompile Include="ui_textboxes.cpp" />
     <ClCompile Include="ui_textboxes_startup.cpp" />
     <ClCompile Include="ui_textboxes_layout.cpp" />
@@ -391,7 +390,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ecs_animations.h" />
     <ClInclude Include="ui_hud.h" />
-    <ClInclude Include="ui_menus.h" />
     <ClInclude Include="ui_textboxes.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="window_graphics.h" />

@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "ui_game.h"
+#include "ui.h"
 #include "ui_shared.h"
 #include "ui_main_menu.h"
 #include "ui_settings_menu.h"
@@ -6,9 +8,9 @@
 #include "ui_pause_menu.h"
 #include "ui_hud.h"
 #include "ui_textboxes.h"
-#include "ui_game.h"
 #include "input.h"
 #include "map.h"
+#include "window.h"
 
 namespace ui {
 namespace game {
@@ -46,6 +48,12 @@ namespace game {
 			hud::update();
 		}
 		textboxes::update(dt);
+
+		if (mouse_over_any()) {
+			window::set_cursor_shape(window::CursorShape::HandPointUp);
+		} else {
+			window::set_cursor_shape(window::CursorShape::HandPoint);
+		}
 	}
 
 	void layout() {
