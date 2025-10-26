@@ -19,17 +19,11 @@ namespace api {
 	void set_debug_message_callback(DebugMessageCallback callback);
 
 	struct StartupOptions {
-#ifdef GRAPHICS_API_OPENGL
-		void* (*glad_load_proc)(const char* name) = nullptr;
-#endif
-#ifdef GRAPHICS_API_VULKAN
-		const char* application_name = "Application";
-		const char* engine_name = "Engine";
-		std::span<const char*> vulkan_instance_extensions;
-#endif
-#ifdef GRAPHICS_API_D3D11
-		void* hwnd = nullptr; // win32 window handle (HWND)
-#endif
+		const char* application_name = "Application"; // Only needed with GRAPHICS_API_VULKAN.
+		const char* engine_name = "Engine"; // Only needed with GRAPHICS_API_VULKAN.
+		void* (*glad_load_proc)(const char* name) = nullptr; // Only needed with GRAPHICS_API_OPENGL.
+		std::span<const char*> vulkan_instance_extensions; // Only needed with GRAPHICS_API_VULKAN.
+		void* hwnd = nullptr; // Win32 window handle (HWND). Only needed with GRAPHICS_API_D3D11.
 	};
 
 	bool startup(const StartupOptions &options);

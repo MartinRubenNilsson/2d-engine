@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "graphics.h"
 #include "graphics_api.h"
-#include "graphics_vertices.h"
 #include "window.h"
 #include "window_graphics.h"
 #include "pool.h"
@@ -15,24 +14,24 @@ namespace graphics {
 	// IMPORTANT: These structs are internal! Don't move them to graphics.h!
 
 	struct VertexShader {
-		api::VertexShaderId api_handle{};
+		api::VertexShaderId id{};
 	};
 
 	struct FragmentShader {
-		api::FragmentShaderId api_handle{};
+		api::FragmentShaderId id{};
 	};
 
 	struct VertexInput {
-		api::VertexInputId api_handle{};
+		api::VertexInputId id{};
 	};
 
 	struct Buffer {
-		api::BufferId api_handle{};
+		api::BufferId id{};
 		BufferDesc desc{};
 	};
 
 	struct Texture {
-		api::TextureId api_handle{};
+		api::TextureId id{};
 		// PITFALL: When loading a texture, desc.debug_name is set to the texture path.
 		// To ensure the string_view doesn't get invalidated, the owning string is
 		// moved into _path_to_texture. If this map gets cleared for whatever reason,
@@ -41,24 +40,24 @@ namespace graphics {
 	};
 
 	struct Sampler {
-		api::SamplerId api_handle{};
+		api::SamplerId id{};
 		SamplerDesc desc{};
 	};
 
 	struct Framebuffer {
-		api::FramebufferId api_handle{};
+		api::FramebufferId id{};
 		FramebufferDesc desc{};
 		Handle<Texture> texture;
 		bool is_swap_chain_back_buffer = false;
 	};
 
 	struct RasterizerState {
-		api::RasterizerStateId api_handle{};
+		api::RasterizerStateId id{};
 		RasterizerDesc desc{};
 	};
 
 	struct BlendState {
-		api::BlendStateId api_handle{};
+		api::BlendStateId id{};
 		BlendDesc desc{};
 	};
 	
@@ -77,8 +76,8 @@ namespace graphics {
 	Pool<RasterizerState> _rasterizer_state_pool;
 	Pool<BlendState> _blend_state_pool;
 	Viewport _viewport;
-	Rect _scissor;
 	bool _scissor_test_enabled = false;
+	Rect _scissor;
 
 #ifdef GRAPHICS_API_DEBUG
 	void _debug_message_callback(std::string_view message) {
@@ -133,7 +132,7 @@ namespace graphics {
 		// INITIALIZE SWAP CHAIN BACK BUFFER
 
 		Framebuffer swap_chain_back_buffer{};
-		swap_chain_back_buffer.api_handle = api::get_swap_chain_back_buffer();
+		swap_chain_back_buffer.id = api::get_swap_chain_back_buffer();
 		swap_chain_back_buffer.is_swap_chain_back_buffer = true;
 		_swap_chain_back_buffer_handle = _framebuffer_pool.emplace(std::move(swap_chain_back_buffer));
 
@@ -142,10 +141,10 @@ namespace graphics {
 
 	void _destroy_vertex_shaders() {
 		for (VertexShader& shader : _vertex_shader_pool.span()) {
-			if (shader.api_handle.object) {
-				api::destroy_vertex_shader(shader.api_handle);
-				shader.api_handle = api::VertexShaderId();
+			if (shader.id.object) {
+				api::destroy_vertex_shader(shader.id);
 			}
+			shader = {};
 		}
 		_vertex_shader_pool.clear();
 		_vertex_shader_cache.clear();
@@ -153,41 +152,41 @@ namespace graphics {
 
 	void _destroy_fragment_shaders() {
 		for (FragmentShader& shader : _fragment_shader_pool.span()) {
-			if (shader.api_handle.object) {
-				api::destroy_fragment_shader(shader.api_handle);
-				shader.api_handle = api::FragmentShaderId();
+			if (shader.id.object) {
+				api::destroy_fragment_shader(shader.id);
 			}
+			shader = {};
 		}
 		_fragment_shader_pool.clear();
 		_fragment_shader_cache.clear();
 	}
 
 	void _destroy_vertex_inputs() {
-		for (VertexInput& vertex_input : _vertex_input_pool.span()) {
-			if (vertex_input.api_handle.object) {
-				api::destroy_vertex_input(vertex_input.api_handle);
-				vertex_input.api_handle = api::VertexInputId();
+		for (VertexInput& input : _vertex_input_pool.span()) {
+			if (input.id.object) {
+				api::destroy_vertex_input(input.id);
 			}
+			input = {};
 		}
 		_vertex_input_pool.clear();
 	}
 
 	void _destroy_buffers() {
 		for (Buffer& buffer : _buffer_pool.span()) {
-			if (buffer.api_handle.object) {
-				api::destroy_buffer(buffer.api_handle);
-				buffer.api_handle = api::BufferId();
+			if (buffer.id.object) {
+				api::destroy_buffer(buffer.id);
 			}
+			buffer = {};
 		}
 		_buffer_pool.clear();
 	}
 
 	void _destroy_textures() {
 		for (Texture& texture : _texture_pool.span()) {
-			if (texture.api_handle.object) {
-				api::destroy_texture(texture.api_handle);
-				texture.api_handle = api::TextureId();
+			if (texture.id.object) {
+				api::destroy_texture(texture.id);
 			}
+			texture = {};
 		}
 		_texture_pool.clear();
 		_texture_cache.clear();
@@ -195,45 +194,46 @@ namespace graphics {
 
 	void _destroy_framebuffers() {
 		for (Framebuffer& framebuffer : _framebuffer_pool.span()) {
-			// The swap chain back buffer can't be destroyed the usual way
-			// since it it handled differently from the user-created framebuffers.
-			// For example, it might be owned by the window (if using OpenGL+GLFW),
+			// PITFALL: The swap chain back buffer can't be destroyed the usual way since it it handled differently
+			// from the user-created framebuffers. For example, it might be owned by the window (if using OpenGL+GLFW),
 			// or by the IDGXISwapChain (if using D3D11).
-			if (framebuffer.is_swap_chain_back_buffer) continue;
-			if (framebuffer.api_handle.object) {
-				api::destroy_framebuffer(framebuffer.api_handle);
-				framebuffer.api_handle = api::FramebufferId();
+			if (framebuffer.is_swap_chain_back_buffer)
+				continue;
+			if (framebuffer.id.object) {
+				api::destroy_framebuffer(framebuffer.id);
 			}
+			framebuffer = {};
 		}
 		_framebuffer_pool.clear();
 	}
 
 	void _destroy_samplers() {
 		for (Sampler& sampler : _sampler_pool.span()) {
-			if (sampler.api_handle.object) {
-				api::destroy_sampler(sampler.api_handle);
-				sampler.api_handle = api::SamplerId();
+			if (sampler.id.object) {
+				api::destroy_sampler(sampler.id);
 			}
+			sampler = {};
 		}
 		_sampler_pool.clear();
 	}
 
 	void _destroy_rasterizer_states() {
-		for (RasterizerState& rasterizer_state : _rasterizer_state_pool.span()) {
-			if (rasterizer_state.api_handle.object) {
-				api::destroy_rasterizer_state(rasterizer_state.api_handle);
-				rasterizer_state.api_handle = api::RasterizerStateId();
+		for (RasterizerState& state : _rasterizer_state_pool.span()) {
+			if (state.id.object) {
+				api::destroy_rasterizer_state(state.id);
 			}
+			state = {};
 		}
 		_rasterizer_state_pool.clear();
 	}
 
 	void _destroy_blend_states() {
-		for (BlendState& blend_state : _blend_state_pool.span()) {
-			if (blend_state.api_handle.object) {
-				api::destroy_blend_state(blend_state.api_handle);
-				blend_state.api_handle = api::BlendStateId();
+		for (BlendState& state : _blend_state_pool.span()) {
+			if (state.id.object) {
+				api::destroy_blend_state(state.id);
+				state.id = api::BlendStateId();
 			}
+			state = {};
 		}
 		_blend_state_pool.clear();
 	}
@@ -264,9 +264,9 @@ namespace graphics {
 	}
 
 	Handle<VertexShader> create_vertex_shader(ShaderDesc&& desc) {
-		api::VertexShaderId api_handle = api::create_vertex_shader(desc);
-		if (!api_handle.object) return Handle<VertexShader>();
-		return _vertex_shader_pool.emplace(api_handle);
+		const api::VertexShaderId id = api::create_vertex_shader(desc);
+		if (!id.object) return Handle<VertexShader>();
+		return _vertex_shader_pool.emplace(id);
 	}
 
 	bool _shader_code_is_binary() {
@@ -317,14 +317,14 @@ namespace graphics {
 		if (handle == Handle<VertexShader>()) {
 			api::bind_vertex_shader(api::VertexShaderId());
 		} else if (const VertexShader* shader = _vertex_shader_pool.get(handle)) {
-			api::bind_vertex_shader(shader->api_handle);
+			api::bind_vertex_shader(shader->id);
 		}
 	}
 
 	Handle<FragmentShader> create_fragment_shader(ShaderDesc&& desc) {
-		api::FragmentShaderId api_handle = api::create_fragment_shader(desc);
-		if (!api_handle.object) return Handle<FragmentShader>();
-		return _fragment_shader_pool.emplace(api_handle);
+		const api::FragmentShaderId id = api::create_fragment_shader(desc);
+		if (!id.object) return Handle<FragmentShader>();
+		return _fragment_shader_pool.emplace(id);
 	}
 
 	Handle<FragmentShader> load_fragment_shader(std::string_view path) {
@@ -354,45 +354,45 @@ namespace graphics {
 		if (handle == Handle<FragmentShader>()) {
 			api::bind_fragment_shader(api::FragmentShaderId());
 		} else if (const FragmentShader* shader = _fragment_shader_pool.get(handle)) {
-			api::bind_fragment_shader(shader->api_handle);
+			api::bind_fragment_shader(shader->id);
 		}
 	}
 
 	Handle<VertexInput> create_vertex_input(VertexInputDesc&& desc) {
-		api::VertexInputId api_handle = api::create_vertex_input(desc);
-		if (!api_handle.object) return Handle<VertexInput>();
-		return _vertex_input_pool.emplace(api_handle);
+		const api::VertexInputId id = api::create_vertex_input(desc);
+		if (!id.object) return Handle<VertexInput>();
+		return _vertex_input_pool.emplace(id);
 	}
 
 	void bind_vertex_input(Handle<VertexInput> handle) {
 		if (handle == Handle<VertexInput>()) {
 			api::bind_vertex_input(api::VertexInputId());
 		} else if (const VertexInput* vertex_input = _vertex_input_pool.get(handle)) {
-			api::bind_vertex_input(vertex_input->api_handle);
+			api::bind_vertex_input(vertex_input->id);
 		}
 	}
 
 	Handle<Buffer> create_buffer(BufferDesc&& desc) {
-		api::BufferId api_handle = api::create_buffer(desc);
-		if (!api_handle.object) return Handle<Buffer>();
+		const api::BufferId id = api::create_buffer(desc);
+		if (!id.object) return Handle<Buffer>();
 		desc.initial_data = nullptr;
-		return _buffer_pool.emplace(api_handle, std::move(desc));
+		return _buffer_pool.emplace(id, std::move(desc));
 	}
 
 	void recreate_buffer(Handle<Buffer> handle, unsigned int size, const void* initial_data) {
 		Buffer* buffer = _buffer_pool.get(handle);
 		if (!buffer) return;
-		api::destroy_buffer(buffer->api_handle);
+		api::destroy_buffer(buffer->id);
 		buffer->desc.size = size;
 		buffer->desc.initial_data = initial_data;
-		buffer->api_handle = api::create_buffer(buffer->desc);
+		buffer->id = api::create_buffer(buffer->desc);
 		buffer->desc.initial_data = nullptr;
 	}
 
 	void destroy_buffer(Handle<Buffer> handle) {
 		Buffer* buffer = _buffer_pool.get(handle);
 		if (!buffer) return;
-		api::destroy_buffer(buffer->api_handle);
+		api::destroy_buffer(buffer->id);
 		*buffer = Buffer();
 		_buffer_pool.free(handle);
 	}
@@ -403,7 +403,7 @@ namespace graphics {
 		if (!buffer) return;
 		if (!buffer->desc.dynamic) return;
 		if (offset + size > buffer->desc.size) return;
-		api::update_buffer(buffer->api_handle, data, size, offset);
+		api::update_buffer(buffer->id, data, size, offset);
 	}
 
 	void update_or_recreate_buffer(Handle<Buffer> handle, const void* data, unsigned int size) {
@@ -412,13 +412,13 @@ namespace graphics {
 		if (!buffer) return;
 		if (!buffer->desc.dynamic) return;
 		if (size <= buffer->desc.size) {
-			api::update_buffer(buffer->api_handle, data, size, 0);
+			api::update_buffer(buffer->id, data, size, 0);
 			return;
 		}
-		api::destroy_buffer(buffer->api_handle);
+		api::destroy_buffer(buffer->id);
 		buffer->desc.size = size;
 		buffer->desc.initial_data = data;
-		buffer->api_handle = api::create_buffer(buffer->desc);
+		buffer->id = api::create_buffer(buffer->desc);
 		buffer->desc.initial_data = nullptr;
 	}
 
@@ -433,7 +433,7 @@ namespace graphics {
 		if (handle == Handle<Buffer>()) {
 			api::bind_vertex_buffer(binding, api::BufferId(), 0, 0);
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
-			api::bind_vertex_buffer(binding, buffer->api_handle, stride, offset);
+			api::bind_vertex_buffer(binding, buffer->id, stride, offset);
 		}
 	}
 
@@ -441,7 +441,7 @@ namespace graphics {
 		if (handle == Handle<Buffer>()) {
 			api::bind_index_buffer(api::BufferId());
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
-			api::bind_index_buffer(buffer->api_handle);
+			api::bind_index_buffer(buffer->id);
 		}
 	}
 
@@ -449,7 +449,7 @@ namespace graphics {
 		if (handle == Handle<Buffer>()) {
 			api::bind_uniform_buffer(binding, api::BufferId());
 		} else if (const Buffer* buffer = _buffer_pool.get(handle)) {
-			api::bind_uniform_buffer(binding, buffer->api_handle);
+			api::bind_uniform_buffer(binding, buffer->id);
 		}
 	}
 
@@ -457,7 +457,7 @@ namespace graphics {
 		const Buffer* buffer = _buffer_pool.get(handle);
 		if (!buffer) return;
 		if (offset + size > buffer->desc.size) return;
-		api::bind_uniform_buffer_range(binding, buffer->api_handle, size, offset);
+		api::bind_uniform_buffer_range(binding, buffer->id, size, offset);
 	}
 
 	unsigned int _format_to_channels(Format format) {
@@ -475,11 +475,11 @@ namespace graphics {
 	}
 
 	Handle<Texture> create_texture(TextureDesc&& desc) {
-		api::TextureId api_handle = api::create_texture(desc);
-		if (!api_handle.object) return Handle<Texture>();
+		const api::TextureId id = api::create_texture(desc);
+		if (!id.object) return Handle<Texture>();
 		desc.initial_data = nullptr;
 		_total_texture_memory_usage_in_bytes += _get_texture_byte_size(desc);
-		return _texture_pool.emplace(api_handle, std::move(desc));
+		return _texture_pool.emplace(id, std::move(desc));
 	}
 
 	Format _channels_to_format(unsigned int channels) {
@@ -569,7 +569,7 @@ namespace graphics {
 	void destroy_texture(Handle<Texture> handle) {
 		Texture* texture = _texture_pool.get(handle);
 		if (!texture) return;
-		api::destroy_texture(texture->api_handle);
+		api::destroy_texture(texture->id);
 		_total_texture_memory_usage_in_bytes -= _get_texture_byte_size(texture->desc);
 		// HACK: When a texture is loaded, its debug_name is set to the path.
 		_vertex_shader_cache.erase(std::string(texture->desc.debug_name));
@@ -581,14 +581,14 @@ namespace graphics {
 		if (handle == Handle<Texture>()) {
 			api::bind_texture(binding, api::TextureId());
 		} else if (const Texture* texture = _texture_pool.get(handle)) {
-			api::bind_texture(binding, texture->api_handle);
+			api::bind_texture(binding, texture->id);
 		}
 	}
 
 	void update_texture(Handle<Texture> handle, const unsigned char* data) {
 		const Texture* texture = _texture_pool.get(handle);
 		if (!texture) return;
-		api::update_texture(texture->api_handle, 0, 0, 0,
+		api::update_texture(texture->id, 0, 0, 0,
 			texture->desc.width, texture->desc.height, texture->desc.format, data);
 	}
 
@@ -599,13 +599,13 @@ namespace graphics {
 		if (dest_texture->desc.width != src_texture->desc.width) return;
 		if (dest_texture->desc.height != src_texture->desc.height) return;
 		api::copy_texture(
-			dest_texture->api_handle, 0, 0, 0, 0,
-			src_texture->api_handle, 0, 0, 0, 0,
+			dest_texture->id, 0, 0, 0, 0,
+			src_texture->id, 0, 0, 0, 0,
 			src_texture->desc.width, src_texture->desc.height, 1);
 	}
 
 	Vec2u get_texture_size(Handle<Texture> handle) {
-		Vec2u size;
+		Vec2u size{};
 		if (const Texture* texture = _texture_pool.get(handle)) {
 			size.x = texture->desc.width;
 			size.y = texture->desc.height;
@@ -614,9 +614,9 @@ namespace graphics {
 	}
 
 	Handle<Framebuffer> create_framebuffer(FramebufferDesc&& desc) {
-		api::FramebufferId api_handle = api::create_framebuffer(desc);
-		if (!api_handle.object) return Handle<Framebuffer>();
-		return _framebuffer_pool.emplace(api_handle, std::move(desc));
+		const api::FramebufferId id = api::create_framebuffer(desc);
+		if (!id.object) return Handle<Framebuffer>();
+		return _framebuffer_pool.emplace(id, std::move(desc));
 	}
 
 	void attach_framebuffer_texture(Handle<Framebuffer> framebuffer_handle, Handle<Texture> texture_handle) {
@@ -628,7 +628,7 @@ namespace graphics {
 		}
 		Texture* texture = _texture_pool.get(texture_handle);
 		if (!texture) return;
-		if (!api::attach_framebuffer_color_texture(framebuffer->api_handle, 0, texture->api_handle)) {
+		if (!api::attach_framebuffer_color_texture(framebuffer->id, 0, texture->id)) {
 			console::log_error(
 				"Failed to attach texture " +
 				std::string(texture->desc.debug_name) +
@@ -649,9 +649,9 @@ namespace graphics {
 		return framebuffer->texture;
 	}
 
-	void resize_framebuffer(Handle<Framebuffer> framebuffer_handle, unsigned int width, unsigned int height) {
-		if (width == 0 || height == 0) return; // Illegal size
-		Framebuffer* framebuffer = _framebuffer_pool.get(framebuffer_handle);
+	void resize_framebuffer(Handle<Framebuffer> handle, const Vec2u& size) {
+		if (size.x == 0 || size.y == 0) return; // Illegal size
+		Framebuffer* framebuffer = _framebuffer_pool.get(handle);
 		if (!framebuffer) return;
 		if (framebuffer->is_swap_chain_back_buffer) {
 			console::log_error("Cannot resize the swap chain back buffer.");
@@ -659,27 +659,36 @@ namespace graphics {
 		}
 		Texture* texture = _texture_pool.get(framebuffer->texture);
 		if (!texture) return;
-		if (texture->desc.width == width && texture->desc.height == height) return; // No-op
-		api::destroy_texture(texture->api_handle);
+		if (texture->desc.width == size.x && texture->desc.height == size.y)
+			return; // No-op
+		api::destroy_texture(texture->id);
 		_total_texture_memory_usage_in_bytes -= _get_texture_byte_size(texture->desc);
-		texture->desc.width = width;
-		texture->desc.height = height;
-		texture->api_handle = api::create_texture(texture->desc);
+		texture->desc.width = size.x;
+		texture->desc.height = size.y;
+		texture->id = api::create_texture(texture->desc);
 		_total_texture_memory_usage_in_bytes += _get_texture_byte_size(texture->desc);
-		api::attach_framebuffer_color_texture(framebuffer->api_handle, 0, texture->api_handle);
+		api::attach_framebuffer_color_texture(framebuffer->id, 0, texture->id);
 	}
+
+	Handle<Framebuffer> _bound_framebuffer{};
 
 	void bind_framebuffer(Handle<Framebuffer> handle) {
 		if (handle == Handle<Framebuffer>()) {
 			api::bind_framebuffer(api::FramebufferId());
+			_bound_framebuffer = handle;
 		} else if (const Framebuffer* framebuffer = _framebuffer_pool.get(handle)) {
-			api::bind_framebuffer(framebuffer->api_handle);
+			api::bind_framebuffer(framebuffer->id);
+			_bound_framebuffer = handle;
 		}
+	}
+
+	Handle<Framebuffer> get_bound_framebuffer() {
+		return _bound_framebuffer;
 	}
 
 	void clear_framebuffer(Handle<Framebuffer> handle, const float color[4]) {
 		if (const Framebuffer* framebuffer = _framebuffer_pool.get(handle)) {
-			api::clear_framebuffer_color(framebuffer->api_handle, 0, color);
+			api::clear_framebuffer_color(framebuffer->id, 0, color);
 		}
 	}
 
@@ -687,13 +696,13 @@ namespace graphics {
 		return _swap_chain_back_buffer_handle;
 	}
 
-	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height) {
+	bool resize_swap_chain_framebuffer(const Vec2u& size) {
 #ifdef GRAPHICS_API_OPENGL
 		// The window owns the swap chain, so this is a no-op.
 		return true;
 #endif
 #ifdef GRAPHICS_API_D3D11
-		return api::resize_swap_chain_framebuffer(new_width, new_height);
+		return api::resize_swap_chain_framebuffer(size.x, size.y);
 #endif
 	}
 
@@ -718,15 +727,15 @@ namespace graphics {
 	}
 
 	Handle<Sampler> create_sampler(SamplerDesc&& desc) {
-		api::SamplerId api_handle = api::create_sampler(desc);
-		if (!api_handle.object) return Handle<Sampler>();
-		return _sampler_pool.emplace(api_handle, std::move(desc));
+		const api::SamplerId id = api::create_sampler(desc);
+		if (!id.object) return Handle<Sampler>();
+		return _sampler_pool.emplace(id, std::move(desc));
 	}
 
 	void destroy_sampler(Handle<Sampler> handle) {
 		Sampler* sampler = _sampler_pool.get(handle);
 		if (!sampler) return;
-		api::destroy_sampler(sampler->api_handle);
+		api::destroy_sampler(sampler->id);
 		*sampler = Sampler();
 		_sampler_pool.free(handle);
 	}
@@ -735,20 +744,20 @@ namespace graphics {
 		if (handle == Handle<Sampler>()) {
 			api::bind_sampler(binding, api::SamplerId());
 		} else if (const Sampler* sampler = _sampler_pool.get(handle)) {
-			api::bind_sampler(binding, sampler->api_handle);
+			api::bind_sampler(binding, sampler->id);
 		}
 	}
 
 	Handle<RasterizerState> create_rasterizer_state(RasterizerDesc&& desc) {
-		api::RasterizerStateId api_handle = api::create_rasterizer_state(desc);
-		if (!api_handle.object) return Handle<RasterizerState>();
-		return _rasterizer_state_pool.emplace(api_handle, std::move(desc));
+		const api::RasterizerStateId id = api::create_rasterizer_state(desc);
+		if (!id.object) return Handle<RasterizerState>();
+		return _rasterizer_state_pool.emplace(id, std::move(desc));
 	}
 
 	void destroy_rasterizer_state(Handle<RasterizerState> handle) {
 		RasterizerState* state = _rasterizer_state_pool.get(handle);
 		if (!state) return;
-		api::destroy_rasterizer_state(state->api_handle);
+		api::destroy_rasterizer_state(state->id);
 		*state = RasterizerState();
 		_rasterizer_state_pool.free(handle);
 	}
@@ -757,20 +766,20 @@ namespace graphics {
 		if (handle == Handle<RasterizerState>()) {
 			api::bind_rasterizer_state(api::RasterizerStateId());
 		} else if (const RasterizerState* state = _rasterizer_state_pool.get(handle)) {
-			api::bind_rasterizer_state(state->api_handle);
+			api::bind_rasterizer_state(state->id);
 		}
 	}
 
 	Handle<BlendState> create_blend_state(BlendDesc&& desc) {
-		api::BlendStateId api_handle = api::create_blend_state(desc);
-		if (!api_handle.object) return Handle<BlendState>();
-		return _blend_state_pool.emplace(api_handle, std::move(desc));
+		const api::BlendStateId id = api::create_blend_state(desc);
+		if (!id.object) return Handle<BlendState>();
+		return _blend_state_pool.emplace(id, std::move(desc));
 	}
 
 	void destroy_blend_state(Handle<BlendState> handle) {
 		BlendState* state = _blend_state_pool.get(handle);
 		if (!state) return;
-		api::destroy_blend_state(state->api_handle);
+		api::destroy_blend_state(state->id);
 		*state = BlendState();
 		_blend_state_pool.free(handle);
 	}
@@ -779,7 +788,7 @@ namespace graphics {
 		if (handle == Handle<BlendState>()) {
 			api::bind_blend_state(api::BlendStateId());
 		} else if (const BlendState* state = _blend_state_pool.get(handle)) {
-			api::bind_blend_state(state->api_handle);
+			api::bind_blend_state(state->id);
 		}
 	}
 
@@ -796,11 +805,6 @@ namespace graphics {
 		return _viewport;
 	}
 
-	void set_scissor(const Rect& scissor) {
-		api::set_scissors(&scissor, 1);
-		_scissor = scissor;
-	}
-
 	void set_scissor_test_enabled(bool enable) {
 		api::set_scissor_test_enabled(enable);
 		_scissor_test_enabled = enable;
@@ -810,16 +814,21 @@ namespace graphics {
 		return _scissor_test_enabled;
 	}
 
-	void get_scissor(Rect& scissor) {
-		scissor = _scissor;
+	void set_scissor(const Rect& scissor) {
+		api::set_scissors(&scissor, 1);
+		_scissor = scissor;
+	}
+
+	const Rect& get_scissor() {
+		return _scissor;
 	}
 
 	void draw(unsigned int vertex_count, unsigned int vertex_offset) {
 		api::draw(vertex_count, vertex_offset);
 	}
 
-	void draw_indexed(unsigned int index_count) {
-		api::draw_indexed(index_count);
+	void draw_indexed(unsigned int index_count, unsigned int base_vertex) {
+		api::draw_indexed(index_count, base_vertex);
 	}
 
 #if 0
@@ -828,7 +837,7 @@ namespace graphics {
 		ImGui::Text("Total memory usage: %d MB", _total_texture_memory_usage_in_bytes / 1024 / 1024);
 		for (size_t i = 0; i < _texture_pool.size(); ++i) {
 			const Texture& texture = _texture_pool.data()[i];
-			if (!texture.api_handle.object) continue;
+			if (!texture.id.object) continue;
 			if (ImGui::TreeNode(texture.desc.debug_name.data())) {
 				ImGui::Text("Dimensions: %dx%dx", texture.desc.width, texture.desc.height);
 				ImGui::Text("Format: %s", magic_enum::enum_name(texture.desc.format).data());
@@ -841,7 +850,7 @@ namespace graphics {
 					ImGui::Text("Memory: %d KB", kb);
 				}
 				ImVec2 texture_size = ImVec2((float)texture.desc.width, (float)texture.desc.height);
-				ImGui::Image((ImTextureID)texture.api_handle.object, texture_size);
+				ImGui::Image((ImTextureID)texture.id.object, texture_size);
 				ImGui::TreePop();
 			}
 		}

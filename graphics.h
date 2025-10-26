@@ -74,12 +74,13 @@ namespace graphics {
 	void attach_framebuffer_texture(Handle<Framebuffer> framebuffer_handle, Handle<Texture> texture_handle);
 	Handle<Texture> get_framebuffer_texture(Handle<Framebuffer> handle);
 	// Resizes all textures attached to the framebuffer.
-	void resize_framebuffer(Handle<Framebuffer> framebuffer_handle, unsigned int width, unsigned int height);
+	void resize_framebuffer(Handle<Framebuffer> handle, const Vec2u& size);
 	void bind_framebuffer(Handle<Framebuffer> handle);
+	Handle<Framebuffer> get_bound_framebuffer();
 	void clear_framebuffer(Handle<Framebuffer> handle, const float color[4] = DEFAULT_CLEAR_COLOR);
 
 	Handle<Framebuffer> get_swap_chain_back_buffer();
-	bool resize_swap_chain_framebuffer(unsigned int new_width, unsigned int new_height);
+	bool resize_swap_chain_framebuffer(const Vec2u& size);
 	void set_swap_chain_sync_interval(unsigned int sync_interval);
 	void present_swap_chain_back_buffer();
 
@@ -99,11 +100,11 @@ namespace graphics {
 	void set_primitives(Primitives primitives);
 	void set_viewport(const Viewport& viewport);
 	const Viewport& get_viewport();
-	void set_scissor(const Rect& scissor);
-	void get_scissor(Rect& scissor);
 	void set_scissor_test_enabled(bool enable);
 	bool get_scissor_test_enabled();
+	void set_scissor(const Rect& scissor);
+	const Rect& get_scissor();
 
 	void draw(unsigned int vertex_count, unsigned int vertex_offset = 0);
-	void draw_indexed(unsigned int index_count);
+	void draw_indexed(unsigned int index_count, unsigned int base_vertex = 0);
 }

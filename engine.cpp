@@ -105,7 +105,7 @@ namespace engine {
                     // When the window is minimized, an event is sent with size 0, 0,
                     // which we must therefore ignore.
                     if (ev.size.width && ev.size.height) {
-                        graphics::resize_swap_chain_framebuffer(ev.size.width, ev.size.height);
+                        graphics::resize_swap_chain_framebuffer({ (unsigned int)ev.size.width, (unsigned int)ev.size.height });
                         graphics::resize_final_framebuffer(ev.size.width, ev.size.height);
                     }
                 } else if (ev.type == window::EventType::KeyPress) {
@@ -199,22 +199,25 @@ namespace engine {
 
     void _render_to_final_framebuffer() {
         GRAPHICS_DEBUG_GROUP;
+        const Handle<graphics::Framebuffer> prev_framebuffer = graphics::get_bound_framebuffer();
         graphics::clear_framebuffer(graphics::final_framebuffer);
         graphics::bind_framebuffer(graphics::final_framebuffer);
         graphics::bind_vertex_shader(graphics::fullscreen_vert);
         graphics::bind_fragment_shader(graphics::fullscreen_frag);
-        graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::game_ping_framebuffer));
-        const Vec2u framebuffer_size = graphics::get_texture_size(graphics::get_framebuffer_texture(graphics::final_framebuffer));
-        graphics::set_viewport({ .width = (float)framebuffer_size.x, .height = (float)framebuffer_size.y });
+        graphics::bind_texture(0, graphics::get_framebuffer_texture(prev_framebuffer));
+        const Vec2u new_framebuffer_size = graphics::get_texture_size(
+            graphics::get_framebuffer_texture(graphics::final_framebuffer));
+        graphics::set_viewport({ .width = (float)new_framebuffer_size.x, .height = (float)new_framebuffer_size.y });
         graphics::set_primitives(graphics::Primitives::TriangleList);
         graphics::draw(3); // draw a fullscreen-covering triangle
     }
 
     void _render_to_back_buffer() {
         GRAPHICS_DEBUG_GROUP;
-        const Handle<graphics::Framebuffer> back_buffer = graphics::get_swap_chain_back_buffer();
-        graphics::clear_framebuffer(back_buffer);
-        graphics::bind_framebuffer(back_buffer);
+        const Handle<graphics::Framebuffer> prev_framebuffer = graphics::get_bound_framebuffer();
+        const Handle<graphics::Framebuffer> new_framebuffer = graphics::get_swap_chain_back_buffer();
+        graphics::clear_framebuffer(new_framebuffer);
+        graphics::bind_framebuffer(new_framebuffer);
 #ifdef GRAPHICS_API_OPENGL
         // NOTE: In order to easier handle some differences between OpenGL and D3D11,
         // we render each framebuffer upside-down. This means we can use the same UV
@@ -226,8 +229,14 @@ namespace engine {
         graphics::bind_vertex_shader(graphics::fullscreen_vert);
 #endif
         graphics::bind_fragment_shader(graphics::fullscreen_frag);
-        graphics::bind_texture(0, graphics::get_framebuffer_texture(graphics::final_framebuffer));
+        graphics::bind_texture(0, graphics::get_framebuffer_texture(prev_framebuffer));
         graphics::bind_sampler(0, graphics::nearest_sampler);
+#if 0
+        const Vec2u new_framebuffer_size = graphics::get_texture_size(
+            graphics::get_framebuffer_texture(new_framebuffer));
+        graphics::set_viewport({ .width = (float)new_framebuffer_size.x, .height = (float)new_framebuffer_size.y });
+#endif
+        graphics::set_primitives(graphics::Primitives::TriangleList);
         graphics::draw(3); // draw a fullscreen-covering triangle
     }
 

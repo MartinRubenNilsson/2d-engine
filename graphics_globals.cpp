@@ -337,6 +337,6 @@ namespace graphics {
 	}
 
 	void resize_final_framebuffer(unsigned int new_width, unsigned int new_height) {
-		graphics::resize_framebuffer(final_framebuffer, new_width, new_height);
+		graphics::resize_framebuffer(final_framebuffer, { new_width, new_height });
 	}
 }
