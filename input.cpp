@@ -77,6 +77,11 @@ namespace input {
 			return;
 		}
 
+		if (ImGui::GetIO().WantCaptureMouse) {
+			_held_mouse_buttons.reset();
+			return;
+		}
+
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
 				case window::EventType::KeyPress: {

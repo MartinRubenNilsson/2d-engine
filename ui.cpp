@@ -5,6 +5,7 @@
 #include "text_fonts.h"
 #include "text_shaping.h"
 #include "console.h"
+#include "input.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data
@@ -85,14 +86,6 @@ namespace ui {
 	bool debug_layout = false;
 	bool debug_bounding_boxes = false;
 
-	enum class MouseState {
-		Released,
-		ReleasedThisFrame,
-		Pressed,
-		PressedThisFrame,
-	};
-
-	MouseState _mouse_state = MouseState::Released;
 	std::vector<uint32_t> _mouse_over_ids;
 	std::vector<uint32_t> _mouse_enter_ids;
 	std::vector<uint32_t> _mouse_leave_ids;
@@ -103,13 +96,6 @@ namespace ui {
 #endif
 
 		static Clay_Vector2 mouse_pos{};
-
-		if (_mouse_state == MouseState::PressedThisFrame) {
-			_mouse_state = MouseState::Pressed;
-		}
-		if (_mouse_state == MouseState::ReleasedThisFrame) {
-			_mouse_state = MouseState::Released;
-		}
 
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
@@ -132,16 +118,6 @@ namespace ui {
 					mouse_pos.x = ((float)ev.mouse_move.x / window_size.x) * GAME_FRAMEBUFFER_WIDTH;
 					mouse_pos.y = ((float)ev.mouse_move.y / window_size.y) * GAME_FRAMEBUFFER_HEIGHT;
 				} break;
-				case window::EventType::MouseButtonPress: {
-					if (ev.mouse_button.button == window::MouseButton::Left) {
-						_mouse_state = MouseState::PressedThisFrame;
-					}
-				} break;
-				case window::EventType::MouseButtonRelease: {
-					if (ev.mouse_button.button == window::MouseButton::Left) {
-						_mouse_state = MouseState::ReleasedThisFrame;
-					}
-				} break;
 				case window::EventType::MouseScroll: {
 					const Clay_Vector2 scoll_delta{
 						.x = (float)ev.mouse_scroll.delta_x,
@@ -151,7 +127,7 @@ namespace ui {
 			}
 		}
 
-		bool is_mouse_down = (_mouse_state == MouseState::PressedThisFrame || _mouse_state == MouseState::Pressed);
+		bool is_mouse_down = input::held(input::MouseButton::Left);
 
 		// Make sure Clay doesn't capture the mouse if ImGui is already doing so.
 		if (ImGui::GetIO().WantCaptureMouse) {
@@ -221,15 +197,15 @@ namespace ui {
 	}
 
 	bool mouse_down() {
-		return _mouse_state == MouseState::PressedThisFrame;
+		return input::pressed(input::MouseButton::Left);
 	}
 
 	bool mouse_pressed() {
-		return _mouse_state == MouseState::PressedThisFrame || _mouse_state == MouseState::Pressed;
+		return input::held(input::MouseButton::Left);
 	}
 
 	bool mouse_up() {
-		return _mouse_state == MouseState::ReleasedThisFrame;
+		return input::released(input::MouseButton::Left);
 	}
 
 	bool mouse_over_any() {
