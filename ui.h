@@ -14,11 +14,11 @@ namespace ui {
 	Clay_String to_clay(std::string_view string);
 
 	// Was the left mouse button pressed this frame?
-	bool mouse_down();
-	// Is the left mouse button currently being held down?
 	bool mouse_pressed();
+	// Is the left mouse button currently being held down?
+	bool mouse_down();
 	// Was the left mouse button released this frame?
-	bool mouse_up();
+	bool mouse_released();
 
 	// Is the mouse hovering over any element?
 	bool mouse_over_any();

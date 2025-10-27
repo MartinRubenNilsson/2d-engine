@@ -18,7 +18,7 @@ namespace input {
 		return _pressed_keys[_to_index(key)];
 	}
 
-	bool held(Key key) {
+	bool down(Key key) {
 		return _held_keys[_to_index(key)];
 	}
 
@@ -35,7 +35,7 @@ namespace input {
 		return _pressed_mouse_buttons[(size_t)button];
 	}
 
-	bool held(MouseButton button) {
+	bool down(MouseButton button) {
 		return _held_mouse_buttons[(size_t)button];
 	}
 
@@ -43,12 +43,18 @@ namespace input {
 		return _released_mouse_buttons[(size_t)button];
 	}
 
+	Vec2d _mouse_position{}; // relative to the window client rect
+
+	const Vec2d& get_mouse_position() {
+		return _mouse_position;
+	}
+
 	float get_x_axis() {
-		return (float)held(Key::Right) - (float)held(Key::Left);
+		return (float)down(Key::Right) - (float)down(Key::Left);
 	}
 
 	float get_y_axis() {
-		return (float)held(Key::Down) - (float)held(Key::Up);
+		return (float)down(Key::Down) - (float)down(Key::Up);
 	}
 
 	Vec2f get_dir() {
@@ -79,6 +85,7 @@ namespace input {
 
 		if (ImGui::GetIO().WantCaptureMouse) {
 			_held_mouse_buttons.reset();
+			_mouse_position = Vec2d::ZERO;
 			return;
 		}
 
@@ -95,6 +102,10 @@ namespace input {
 				} break;
 				case window::EventType::MouseButtonRelease: {
 					_released_mouse_buttons.set((size_t)ev.mouse_button.button);
+				} break;
+				case window::EventType::MouseMove: {
+					_mouse_position.x = ev.mouse_move.x;
+					_mouse_position.y = ev.mouse_move.y;
 				} break;
 			}
 		}

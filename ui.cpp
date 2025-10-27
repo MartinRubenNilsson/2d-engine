@@ -95,8 +95,6 @@ namespace ui {
 		Clay_SetDebugModeEnabled(debug_layout);
 #endif
 
-		static Clay_Vector2 mouse_pos{};
-
 		for (const window::Event& ev : window::get_events()) {
 			switch (ev.type) {
 #if 0
@@ -109,15 +107,6 @@ namespace ui {
 					Clay_SetLayoutDimensions(dimensions);
 				} break;
 #endif
-				case window::EventType::MouseMove: {
-					// The window size will generally be much bigger than the layout size,
-					// so we need to transform the mouse position to match the layout.
-					const Vec2i window_size = window::get_size();
-					if (window_size.x == 0 || window_size.y == 0)
-						break;
-					mouse_pos.x = ((float)ev.mouse_move.x / window_size.x) * GAME_FRAMEBUFFER_WIDTH;
-					mouse_pos.y = ((float)ev.mouse_move.y / window_size.y) * GAME_FRAMEBUFFER_HEIGHT;
-				} break;
 				case window::EventType::MouseScroll: {
 					const Clay_Vector2 scoll_delta{
 						.x = (float)ev.mouse_scroll.delta_x,
@@ -127,18 +116,25 @@ namespace ui {
 			}
 		}
 
-		bool is_mouse_down = input::held(input::MouseButton::Left);
+		// Update pointer.
+		{
+			Clay_Vector2 pointer_pos{};
+			{
+				// The window size will generally be much bigger than the layout size,
+				// so we need to transform the mouse position to match the layout.
+				const Vec2i window_size = window::get_size();
+				if (window_size != Vec2i::ZERO) {
+					const Vec2d mouse_pos = input::get_mouse_position();
+					pointer_pos.x = ((float)mouse_pos.x / window_size.x) * GAME_FRAMEBUFFER_WIDTH;
+					pointer_pos.y = ((float)mouse_pos.y / window_size.y) * GAME_FRAMEBUFFER_HEIGHT;
+				}
+			}
+			const bool is_pointer_down = input::down(input::MouseButton::Left);
 
-		// Make sure Clay doesn't capture the mouse if ImGui is already doing so.
-		if (ImGui::GetIO().WantCaptureMouse) {
-			mouse_pos.x = -1.f;
-			mouse_pos.y = -1.f;
-			is_mouse_down = false;
+			// This updates the array returned by Clay_GetPointerOverIds() and calls any callbacks set
+			// with Clay_OnHover() (among other things).
+			Clay_SetPointerState(pointer_pos, is_pointer_down);
 		}
-
-		// This updates the array returned by Clay_GetPointerOverIds() and calls any callbacks set
-		// with Clay_OnHover() (among other things).
-		Clay_SetPointerState(mouse_pos, is_mouse_down);
 
 		// Update mouse over/enter/leave IDs.
 		_mouse_enter_ids.clear();
@@ -196,15 +192,15 @@ namespace ui {
 		return { false, (int32_t)string.size(), string.data() };
 	}
 
-	bool mouse_down() {
+	bool mouse_pressed() {
 		return input::pressed(input::MouseButton::Left);
 	}
 
-	bool mouse_pressed() {
-		return input::held(input::MouseButton::Left);
+	bool mouse_down() {
+		return input::down(input::MouseButton::Left);
 	}
 
-	bool mouse_up() {
+	bool mouse_released() {
 		return input::released(input::MouseButton::Left);
 	}
 

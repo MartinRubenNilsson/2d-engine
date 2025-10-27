@@ -63,10 +63,10 @@ namespace shared {
 			Clay_TextElementConfig* text_config = &default_text;
 			if (mouse_over()) {
 				text_config = &hovered_text;
-				if (mouse_pressed()) {
+				if (mouse_down()) {
 					text_config = &pressed_text;
 				}
-				if (mouse_up()) {
+				if (mouse_released()) {
 					if (on_click) {
 						on_click();
 					}

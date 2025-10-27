@@ -55,9 +55,9 @@ namespace ecs {
 		if (input_dir != Vec2f::ZERO) {
 			if (touching_something_in_dir) {
 				player.motion = PlayerMotion::Pushing;
-			} else if (input::held(input::Key::LControl)) {
+			} else if (input::down(input::Key::LControl)) {
 				player.motion = PlayerMotion::Sneaking;
-			} else if (input::held(input::Key::LShift)) {
+			} else if (input::down(input::Key::LShift)) {
 				player.motion = PlayerMotion::Running;
 			} else {
 				player.motion = PlayerMotion::Walking;

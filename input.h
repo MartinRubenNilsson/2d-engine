@@ -7,12 +7,15 @@ namespace input {
 	using window::MouseButton;
 
 	bool pressed(Key key);
-	bool held(Key key);
+	bool down(Key key);
 	bool released(Key key);
 
 	bool pressed(MouseButton button);
-	bool held(MouseButton button);
+	bool down(MouseButton button);
 	bool released(MouseButton button);
+
+	const Vec2d& get_mouse_position();
+	Vec2d get_mouse_scroll_delta();
 
 	float get_x_axis(); // one of -1, 0, 1
 	float get_y_axis(); // one of -1, 0, 1
