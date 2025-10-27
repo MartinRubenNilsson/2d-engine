@@ -390,12 +390,6 @@
     <None Include="shaders\glsl\ui.vert">
       <Filter>engine\graphics\shaders</Filter>
     </None>
-    <None Include="shaders\glsl\ui_clay.frag">
-      <Filter>engine\graphics\shaders</Filter>
-    </None>
-    <None Include="shaders\glsl\ui_clay.vert">
-      <Filter>engine\graphics\shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="map.h">

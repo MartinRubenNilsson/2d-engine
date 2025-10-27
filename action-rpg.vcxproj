@@ -284,8 +284,6 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <None Include="shaders\glsl\text.frag" />
     <None Include="shaders\glsl\ui.frag" />
     <None Include="shaders\glsl\ui.vert" />
-    <None Include="shaders\glsl\ui_clay.frag" />
-    <None Include="shaders\glsl\ui_clay.vert" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
