@@ -49,6 +49,12 @@ namespace input {
 		return _mouse_position;
 	}
 
+	Vec2d _mouse_scroll_delta{};
+
+	const Vec2d& get_mouse_scroll_delta() {
+		return _mouse_scroll_delta;
+	}
+
 	float get_x_axis() {
 		return (float)down(Key::Right) - (float)down(Key::Left);
 	}
@@ -76,6 +82,7 @@ namespace input {
 		_released_keys.reset();
 		_pressed_mouse_buttons.reset();
 		_released_mouse_buttons.reset();
+		_mouse_scroll_delta = Vec2d::ZERO;
 
 		if (!_should_capture_input()) {
 			_held_keys.reset();
@@ -106,6 +113,10 @@ namespace input {
 				case window::EventType::MouseMove: {
 					_mouse_position.x = ev.mouse_move.x;
 					_mouse_position.y = ev.mouse_move.y;
+				} break;
+				case window::EventType::MouseScroll: {
+					_mouse_scroll_delta.x = ev.mouse_scroll.delta_x;
+					_mouse_scroll_delta.y = ev.mouse_scroll.delta_y;
 				} break;
 			}
 		}

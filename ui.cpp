@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ui.h"
 #include "window.h"
-#include "window_events.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
 #include "console.h"
@@ -95,28 +94,7 @@ namespace ui {
 		Clay_SetDebugModeEnabled(debug_layout);
 #endif
 
-		for (const window::Event& ev : window::get_events()) {
-			switch (ev.type) {
-#if 0
-				case window::EventType::FramebufferSize: {
-					// TODO: If in the future we render the game world to a smaller viewport, then
-					// we should probably still pass the gameworld size here???
-					const Clay_Dimensions dimensions{
-						.width = (float)ev.size.width,
-						.height = (float)ev.size.height };
-					Clay_SetLayoutDimensions(dimensions);
-				} break;
-#endif
-				case window::EventType::MouseScroll: {
-					const Clay_Vector2 scoll_delta{
-						.x = (float)ev.mouse_scroll.delta_x,
-						.y = (float)ev.mouse_scroll.delta_y };
-					Clay_UpdateScrollContainers(false, scoll_delta, dt);
-				} break;
-			}
-		}
-
-		// Update pointer.
+		// Set pointer state.
 		{
 			Clay_Vector2 pointer_pos{};
 			{
@@ -134,6 +112,13 @@ namespace ui {
 			// This updates the array returned by Clay_GetPointerOverIds() and calls any callbacks set
 			// with Clay_OnHover() (among other things).
 			Clay_SetPointerState(pointer_pos, is_pointer_down);
+		}
+
+		// Update scroll containers.
+		{
+			const Vec2d mouse_scroll_delta = input::get_mouse_scroll_delta();
+			const Clay_Vector2 scoll_delta = { (float)mouse_scroll_delta.x, (float)mouse_scroll_delta.y };
+			Clay_UpdateScrollContainers(false, scoll_delta, dt);
 		}
 
 		// Update mouse over/enter/leave IDs.

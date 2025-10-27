@@ -15,7 +15,7 @@ namespace input {
 	bool released(MouseButton button);
 
 	const Vec2d& get_mouse_position();
-	Vec2d get_mouse_scroll_delta();
+	const Vec2d& get_mouse_scroll_delta();
 
 	float get_x_axis(); // one of -1, 0, 1
 	float get_y_axis(); // one of -1, 0, 1
