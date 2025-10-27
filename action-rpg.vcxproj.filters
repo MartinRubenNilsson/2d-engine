@@ -707,6 +707,9 @@
     <ClInclude Include="ui_settings_menu.h">
       <Filter>game\ui\menus\settings_menu</Filter>
     </ClInclude>
+    <ClInclude Include="window_mouse_buttons.h">
+      <Filter>engine\window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

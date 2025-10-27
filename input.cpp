@@ -6,7 +6,6 @@
 
 namespace input {
 	constexpr size_t KEY_COUNT = (size_t)Key::Last - (size_t)Key::First + 1;
-
 	std::bitset<KEY_COUNT> _pressed_keys;
 	std::bitset<KEY_COUNT> _held_keys;
 	std::bitset<KEY_COUNT> _released_keys;
@@ -25,6 +24,23 @@ namespace input {
 
 	bool released(Key key) {
 		return _released_keys[_to_index(key)];
+	}
+
+	constexpr size_t MOUSE_BUTTON_COUNT = (size_t)MouseButton::Count;
+	std::bitset<MOUSE_BUTTON_COUNT> _pressed_mouse_buttons;
+	std::bitset<MOUSE_BUTTON_COUNT> _held_mouse_buttons;
+	std::bitset<MOUSE_BUTTON_COUNT> _released_mouse_buttons;
+
+	bool pressed(MouseButton button) {
+		return _pressed_mouse_buttons[(size_t)button];
+	}
+
+	bool held(MouseButton button) {
+		return _held_mouse_buttons[(size_t)button];
+	}
+
+	bool released(MouseButton button) {
+		return _released_mouse_buttons[(size_t)button];
 	}
 
 	float get_x_axis() {
@@ -52,9 +68,12 @@ namespace input {
 	void handle_window_events() {
 		_pressed_keys.reset();
 		_released_keys.reset();
+		_pressed_mouse_buttons.reset();
+		_released_mouse_buttons.reset();
 
 		if (!_should_capture_input()) {
 			_held_keys.reset();
+			_held_mouse_buttons.reset();
 			return;
 		}
 
@@ -66,10 +85,18 @@ namespace input {
 				case window::EventType::KeyRelease: {
 					_released_keys.set(_to_index(ev.key.code));
 				} break;
+				case window::EventType::MouseButtonPress: {
+					_pressed_mouse_buttons.set((size_t)ev.mouse_button.button);
+				} break;
+				case window::EventType::MouseButtonRelease: {
+					_released_mouse_buttons.set((size_t)ev.mouse_button.button);
+				} break;
 			}
 		}
 
 		_held_keys |= _pressed_keys;
 		_held_keys &= ~_released_keys;
+		_held_mouse_buttons |= _pressed_mouse_buttons;
+		_held_mouse_buttons &= _released_mouse_buttons;
 	}
 }

@@ -83,5 +83,4 @@ namespace graphics {
 
 	void startup_globals();
 	void handle_window_events_for_globals();
-	void resize_big_framebuffers(const Vec2u& size);
 }

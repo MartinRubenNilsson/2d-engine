@@ -61,7 +61,7 @@ namespace textboxes {
 	// Replaces graphical plain text with non-breaking spaces, starting at offset.
 	// This is used to prevent the text from jumping around when being typed out.
 	std::string _replace_graphical_plain_with_nbsp(std::string_view string, size_t offset) {
-		static constexpr char NBSP_utf8[] = { 0xC2, 0xA0, '\0' }; // non-breaking space
+		static constexpr char NBSP_utf8[] = { (char)0xC2, (char)0xA0, '\0' }; // non-breaking space
 		static constexpr std::string_view NBSP = NBSP_utf8;
 		std::string ret;
 		size_t count = 0;

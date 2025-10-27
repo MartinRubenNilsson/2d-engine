@@ -1,21 +1,8 @@
 #pragma once
 #include "window_keys.h"
+#include "window_mouse_buttons.h"
 
 namespace window {
-	enum class MouseButton {
-		Button1,
-		Button2,
-		Button3,
-		Button4,
-		Button5,
-		Button6,
-		Button7,
-		Button8,
-		Left = Button1,
-		Right = Button2,
-		Middle = Button3,
-	};
-
 	enum MODIFIER_KEY_FLAGS {
 		MODIFIER_KEY_SHIFT = (1 << 1), // If this bit is set one or more Shift keys were held down.
 		MODIFIER_KEY_CONTROL = (1 << 2), // If this bit is set one or more Control keys were held down.
