@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "graphics_api.h"
 #include "window.h"
+#include "window_events.h"
 #include "window_graphics.h"
 #include "pool.h"
 #include "console.h"
@@ -10,9 +11,6 @@
 #include "platform.h"
 
 namespace graphics {
-
-	// IMPORTANT: These structs are internal! Don't move them to graphics.h!
-
 	struct VertexShader {
 		api::VertexShaderId id{};
 	};
@@ -127,7 +125,8 @@ namespace graphics {
 #ifdef GRAPHICS_API_D3D11
 		options.hwnd = window::get_win32_window();
 #endif
-		if (!api::startup(options)) return false;
+		if (!api::startup(options))
+			return false;
 
 		// INITIALIZE SWAP CHAIN BACK BUFFER
 
@@ -249,6 +248,19 @@ namespace graphics {
 		_destroy_rasterizer_states();
 		_destroy_blend_states();
 		api::shutdown();
+	}
+
+	void handle_window_events() {
+		for (const window::Event& ev : window::get_events()) {
+			if (ev.type == window::EventType::FramebufferSize) {
+				const Vec2u size = { ev.size.width, ev.size.height };
+				// When the window is minimized, an event is sent with size (0, 0)
+				// which we must ignore. Otherwise we get an error message.
+				if (size != Vec2u::ZERO) {
+					resize_swap_chain_framebuffer(size);
+				}
+			}
+		}
 	}
 
 	bool is_spirv_supported() {

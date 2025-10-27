@@ -87,31 +87,14 @@ namespace engine {
         platform::update_directory_watchers();
         steam::run_message_loop();
         window::update_events();
+        graphics::handle_window_events();
+        graphics::handle_window_events_for_globals();
         imgui_impl::new_frame();
         console::handle_window_events();
         input::handle_window_events();
 
         if (window::should_close()) {
             _should_run = false;
-        }
-
-        // PROCESS WINDOW EVENTS
-        {
-            for (const window::Event& ev : window::get_events()) {
-                if (ev.type == window::EventType::FramebufferSize) {
-                    // When the window is minimized, an event is sent with size 0, 0,
-                    // which we must therefore ignore.
-                    const Vec2u size = { ev.size.width, ev.size.height };
-                    if (size != Vec2u::ZERO) {
-                        graphics::resize_swap_chain_framebuffer(size);
-                        graphics::resize_big_framebuffers(size);
-                    }
-                } else if (ev.type == window::EventType::KeyPress) {
-                    if (ev.key.code == window::Key::F7) {
-                        map::debug = !map::debug;
-                    }
-                }
-            }
         }
 
         audio::update();

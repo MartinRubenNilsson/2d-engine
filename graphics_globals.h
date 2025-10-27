@@ -82,5 +82,6 @@ namespace graphics {
 	extern Handle<BlendState> default_blend_state;
 
 	void startup_globals();
+	void handle_window_events_for_globals();
 	void resize_big_framebuffers(const Vec2u& size);
 }

@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "graphics_globals.h"
 #include "graphics_vertices.h"
+#include "window_events.h"
 #include "files.h"
 
 namespace graphics {
@@ -349,8 +350,17 @@ namespace graphics {
 		_bind_globals();
 	}
 
-	void resize_big_framebuffers(const Vec2u& size) {
-		graphics::resize_framebuffer(big_ping_framebuffer, size);
-		graphics::resize_framebuffer(big_pong_framebuffer, size);
+	void handle_window_events_for_globals() {
+		for (const window::Event& ev : window::get_events()) {
+			if (ev.type == window::EventType::FramebufferSize) {
+				const Vec2u size = { ev.size.width, ev.size.height };
+				// When the window is minimized, an event is sent with size (0, 0)
+				// which we must ignore. Otherwise we get an error message.
+				if (size != Vec2u::ZERO) {
+					graphics::resize_framebuffer(big_ping_framebuffer, size);
+					graphics::resize_framebuffer(big_pong_framebuffer, size);
+				}
+			}
+		}
 	}
 }

@@ -16,6 +16,7 @@ namespace graphics {
 
 	bool startup();
 	void shutdown();
+	void handle_window_events();
 
 	bool is_spirv_supported(); // TODO: remove from public api, this should be internal
 
