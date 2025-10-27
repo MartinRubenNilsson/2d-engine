@@ -7,7 +7,8 @@ namespace ui {
 	void startup();
 	void shutdown();
 	void update(float dt);
-	void layout();
+	void begin_layout();
+	void end_layout();
 	void render();
 
 	Clay_String to_clay(std::string_view string);

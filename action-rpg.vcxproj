@@ -200,6 +200,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ecs_uniform_block.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="engine_fps_counter.cpp" />
+    <ClCompile Include="engine_rendering.cpp" />
     <ClCompile Include="esc_terrain.cpp" />
     <ClCompile Include="files.cpp" />
     <ClCompile Include="input.cpp" />

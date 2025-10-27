@@ -14,7 +14,7 @@ namespace ui {
 	Handle<graphics::VertexShader> _ui_vert;
 	Handle<graphics::FragmentShader> _ui_frag;
 
-	void _load_shaders() {
+	void _startup_rendering() {
 		_ui_vert = graphics::load_vertex_shader("assets/shaders/ui.vert");
 		_ui_frag = graphics::load_fragment_shader("assets/shaders/ui.frag");
 	}

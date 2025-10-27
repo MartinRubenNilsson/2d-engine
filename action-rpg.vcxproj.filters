@@ -330,6 +330,9 @@
     <ClCompile Include="ui_settings_menu.cpp">
       <Filter>game\ui\menus\settings_menu</Filter>
     </ClCompile>
+    <ClCompile Include="engine_rendering.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

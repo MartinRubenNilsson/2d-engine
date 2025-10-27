@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ui.h"
-#include "ui_game.h"
 #include "window.h"
 #include "window_events.h"
 #include "text_fonts.h"
@@ -63,16 +62,14 @@ namespace ui {
 		_clay_arena_memory = {};
 	}
 
-	void _load_shaders(); // ui_rendering.cpp
+	void _startup_rendering(); // ui_rendering.cpp
 
 	void startup() {
 		_startup_clay();
-		_load_shaders();
-		game::startup();
+		_startup_rendering();
 	}
 
 	void shutdown() {
-		game::shutdown();
 		_shutdown_clay();
 	}
 
@@ -191,16 +188,13 @@ namespace ui {
 			std::swap(_mouse_over_ids, curr_mouse_over_ids);
 			curr_mouse_over_ids.clear();
 		}
-
-		game::update(dt);
 	}
 
 	Clay_RenderCommandArray _clay_render_commands{};
 
-	void layout() {
+	void begin_layout() {
 		_clay_render_commands = {};
 		Clay_BeginLayout();
-		game::layout();
 		if (debug_layout) {
 #if 0
 			static Clay_CustomRenderData _DEBUG_START_CUSTOM_DATA{};
@@ -209,6 +203,9 @@ namespace ui {
 			CLAY(CLAY_ID("DebugStart"), { .custom = { .customData = &_DEBUG_START_CUSTOM_DATA } });
 #endif
 		}
+	}
+
+	void end_layout() {
 		_clay_render_commands = Clay_EndLayout();
 	}
 
