@@ -22,23 +22,14 @@
     <ClCompile Include="ecs_physics_filters.cpp">
       <Filter>game\ecs\engine\physics</Filter>
     </ClCompile>
-    <ClCompile Include="postprocessing.cpp">
-      <Filter>engine\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="ecs_player.cpp">
       <Filter>game\ecs\game\players</Filter>
     </ClCompile>
     <ClCompile Include="steam.cpp">
       <Filter>engine\steam</Filter>
     </ClCompile>
-    <ClCompile Include="shapes.cpp">
-      <Filter>engine\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="steam_server.cpp">
       <Filter>engine\steam</Filter>
-    </ClCompile>
-    <ClCompile Include="sprites.cpp">
-      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="graphics.cpp">
       <Filter>engine\graphics</Filter>
@@ -97,9 +88,6 @@
     </ClCompile>
     <ClCompile Include="ecs_lighting.cpp">
       <Filter>game\ecs\engine\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="images.cpp">
-      <Filter>engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="networking.cpp">
       <Filter>engine\networking</Filter>
@@ -333,6 +321,18 @@
     <ClCompile Include="engine_rendering.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="sprites.cpp">
+      <Filter>engine\graphics\sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocessing.cpp">
+      <Filter>engine\graphics\postprocessing</Filter>
+    </ClCompile>
+    <ClCompile Include="images.cpp">
+      <Filter>engine\graphics\images</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes.cpp">
+      <Filter>engine\graphics\shapes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -416,23 +416,14 @@
     <ClInclude Include="ecs_physics_filters.h">
       <Filter>game\ecs\engine\physics</Filter>
     </ClInclude>
-    <ClInclude Include="postprocessing.h">
-      <Filter>engine\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="ecs_player.h">
       <Filter>game\ecs\game\players</Filter>
     </ClInclude>
     <ClInclude Include="steam.h">
       <Filter>engine\steam</Filter>
     </ClInclude>
-    <ClInclude Include="shapes.h">
-      <Filter>engine\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="steam_server.h">
       <Filter>engine\steam</Filter>
-    </ClInclude>
-    <ClInclude Include="sprites.h">
-      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics.h">
       <Filter>engine\graphics</Filter>
@@ -499,9 +490,6 @@
     </ClInclude>
     <ClInclude Include="ecs_lighting.h">
       <Filter>game\ecs\engine\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="images.h">
-      <Filter>engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="networking.h">
       <Filter>engine\networking</Filter>
@@ -710,6 +698,18 @@
     <ClInclude Include="window_mouse_buttons.h">
       <Filter>engine\window</Filter>
     </ClInclude>
+    <ClInclude Include="sprites.h">
+      <Filter>engine\graphics\sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocessing.h">
+      <Filter>engine\graphics\postprocessing</Filter>
+    </ClInclude>
+    <ClInclude Include="images.h">
+      <Filter>engine\graphics\images</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes.h">
+      <Filter>engine\graphics\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -906,6 +906,18 @@
     </Filter>
     <Filter Include="game\ui\menus\settings_menu">
       <UniqueIdentifier>{c449f998-1f35-4b48-a328-487d67235f6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics\sprites">
+      <UniqueIdentifier>{a7e8d6a9-b728-4688-b1be-bd43665ed5f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics\postprocessing">
+      <UniqueIdentifier>{f2a0af8b-11f3-4e3c-821e-2aa45bd3aebd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics\images">
+      <UniqueIdentifier>{a4eda369-226e-4961-9001-71ac01c74a29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphics\shapes">
+      <UniqueIdentifier>{0c6c522c-fddc-478f-b6cd-c1c5f5131622}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
