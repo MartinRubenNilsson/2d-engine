@@ -6,7 +6,8 @@ namespace viewport {
 	bool show = false;
 
 	void show_imgui() {
-		// TODO
+		ImGui::Begin("Viewport");
+		ImGui::End();
 	}
 }
 }
