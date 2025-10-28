@@ -198,6 +198,8 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="ecs_sprites.cpp" />
     <ClCompile Include="ecs_tiled_setup.cpp" />
     <ClCompile Include="ecs_uniform_block.cpp" />
+    <ClCompile Include="editor_entities.cpp" />
+    <ClCompile Include="editor_viewport.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="engine_fps_counter.cpp" />
     <ClCompile Include="engine_rendering.cpp" />
@@ -323,6 +325,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ecs_tiled_ids.h" />
     <ClInclude Include="ecs_uniform_block.h" />
     <ClInclude Include="editor_entities.h" />
+    <ClInclude Include="editor_viewport.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="engine_fps_counter.h" />
     <ClInclude Include="files.h" />

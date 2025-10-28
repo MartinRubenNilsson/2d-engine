@@ -1,7 +1,7 @@
 #pragma once
 
 namespace editor {
-namespace entities {
+namespace viewport {
 	extern bool show;
 
 	void show_imgui();

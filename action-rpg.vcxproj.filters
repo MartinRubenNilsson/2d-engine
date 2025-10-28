@@ -333,6 +333,12 @@
     <ClCompile Include="shapes.cpp">
       <Filter>engine\graphics\shapes</Filter>
     </ClCompile>
+    <ClCompile Include="editor_entities.cpp">
+      <Filter>editor\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="editor_viewport.cpp">
+      <Filter>editor\viewport</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -711,7 +717,10 @@
       <Filter>engine\graphics\shapes</Filter>
     </ClInclude>
     <ClInclude Include="editor_entities.h">
-      <Filter>editor</Filter>
+      <Filter>editor\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="editor_viewport.h">
+      <Filter>editor\viewport</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -924,6 +933,12 @@
     </Filter>
     <Filter Include="editor">
       <UniqueIdentifier>{0430e8a9-9389-4bb6-9000-b08b760a8fe0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor\entities">
+      <UniqueIdentifier>{f91ab59a-bad1-4212-ae23-6404b41467b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor\viewport">
+      <UniqueIdentifier>{88ba39c6-9363-438c-af5e-67d9bbe2edf1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
