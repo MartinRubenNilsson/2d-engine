@@ -50,7 +50,7 @@ namespace main_menu {
 	}
 
 	void _on_select_play() {
-		map::open("summer_forest_00", [] {
+		map::open("assets/tiled/maps/summer_forest_00.tmx", [] {
 			show = false;
 			hud::show = true;
 			});
