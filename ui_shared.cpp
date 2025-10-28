@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "ui_shared.h"
-#include "ui_data.h"
 #include "ui.h"
+#include "ui_game.h"
+#include "ui_data.h"
 #include "text_fonts.h"
 #include "audio.h"
 
@@ -62,6 +63,7 @@ namespace shared {
 			}
 			Clay_TextElementConfig* text_config = &default_text;
 			if (mouse_over()) {
+				game::set_cursor_hovering();
 				text_config = &hovered_text;
 				if (mouse_down()) {
 					text_config = &pressed_text;

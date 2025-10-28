@@ -2,6 +2,7 @@
 #include "ui_textboxes.h"
 #include "ui.h"
 #include "ui_shared.h"
+#include "ui_game.h"
 
 namespace ui {
 namespace textboxes {
@@ -90,6 +91,7 @@ namespace textboxes {
 					const TextboxOption& opt = options[option];
 					CLAY(CLAY_SID_LOCAL(to_clay(opt.text))) {
 						if (mouse_over()) {
+							game::set_cursor_hovering();
 							set_current_option(option);
 						}
 						Clay_TextElementConfig* text_config = &shared::default_text;

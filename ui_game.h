@@ -9,5 +9,7 @@ namespace game {
 
 	bool should_pause_game();
 	bool should_blur_background();
+
+	void set_cursor_hovering();
 }
 }

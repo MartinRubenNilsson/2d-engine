@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ui_textboxes.h"
 #include "ui_data.h"
-#include "ui_hud.h"
 #include "ui_main_menu.h"
 #include "graphics.h"
 #include "map.h"

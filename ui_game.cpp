@@ -48,15 +48,12 @@ namespace game {
 			hud::update();
 		}
 		textboxes::update(dt);
-		
-		if (mouse_over_any()) {
-			window::set_cursor_shape(window::CursorShape::HandPointUp);
-		} else {
-			window::set_cursor_shape(window::CursorShape::HandPoint);
-		}
 	}
 
+	bool _cursor_hovering = false;
+
 	void layout() {
+		_cursor_hovering = false;
 		if (hud::show) {
 			hud::layout();
 		}
@@ -73,6 +70,11 @@ namespace game {
 			pause_menu::layout();
 		}
 		textboxes::layout();
+		if (_cursor_hovering) {
+			window::set_cursor_shape(window::CursorShape::HandPointUp);
+		} else {
+			window::set_cursor_shape(window::CursorShape::HandPoint);
+		}
 	}
 
 	bool should_pause_game() {
@@ -89,6 +91,10 @@ namespace game {
 		if (credits_menu::show) return true;
 		if (pause_menu::show) return true;
 		return false;
+	}
+
+	void set_cursor_hovering() {
+		_cursor_hovering = true;
 	}
 }
 }
