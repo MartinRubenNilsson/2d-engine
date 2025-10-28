@@ -6,4 +6,4 @@ bind f5 debug_terrain
 bind f6 debug_ui
 bind r debug_ui_bounding_boxes
 bind t "open_textboxes player/die"
-map_open summer_forest_00
+open_map assets/tiled/maps/summer_forest_00.tmx

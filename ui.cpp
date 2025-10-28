@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "ui.h"
-#include "window.h"
 #include "text_fonts.h"
 #include "text_shaping.h"
-#include "console.h"
 #include "input.h"
+#include "window.h"
+#include "console.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4244) // conversion from '...' to '...', possible loss of data

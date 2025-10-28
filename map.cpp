@@ -8,26 +8,25 @@
 #include "ecs_tiled.h"
 
 namespace map {
-	const float DEFAULT_TRANSITION_DURATION = 0.7f; // seconds
-
 	bool debug = false;
-	std::string _current_map_path;
-	std::string _next_map_path;
+
+	ecs::MapId _current_map{};
+	ecs::MapId _next_map{};
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
 	void (*on_transition_complete)() = nullptr;
 
 	void _show_debug_window(float dt) {
 		ImGui::Begin("Maps");
-		if (ImGui::BeginCombo("Map", _current_map_path.c_str())) {
+		const std::string current_path(_current_map ? ecs::get_path(_current_map) : "");
+		if (ImGui::BeginCombo("Map", current_path.c_str())) {
 			for (ecs::MapId map : ecs::get_all_maps()) {
-				std::string_view path = ecs::get_path(map);
-				bool is_selected = (_current_map_path == path);
-				const std::string stem = files::get_stem(path);
-				if (ImGui::Selectable(stem.c_str(), is_selected)) {
-					open(stem);
+				const bool selected = (map == _current_map);
+				const std::string path(ecs::get_path(map));
+				if (ImGui::Selectable(path.c_str(), selected)) {
+					open(path);
 				}
-				if (is_selected) {
+				if (selected) {
 					ImGui::SetItemDefaultFocus();
 				}
 			}
@@ -75,15 +74,10 @@ namespace map {
 			}
 		}
 
-		if (!should_change_map) return;
+		if (!should_change_map)
+			return;
 
-		ecs::MapId current_map = ecs::get_map(_current_map_path);
-		ecs::MapId next_map = ecs::get_map(_next_map_path);
-		_current_map_path = _next_map_path;
-		_next_map_path.clear();
-
-		// Close current map.
-		if (current_map) {
+		if (_current_map) {
 			audio::stop_all_in_bus(audio::BUS_SOUND);
 			ui::textboxes::close_all();
 		}
@@ -94,18 +88,19 @@ namespace map {
 			on_transition_complete();
 			on_transition_complete = nullptr;
 		}
+
+		_current_map = _next_map;
+		_next_map = {};
 		
-		if (!next_map) {
+		if (!_current_map) {
 			audio::stop_all_in_bus();
 			return;
 		}
 
-		// Open next map.
-
-		ecs::setup(next_map);
+		ecs::setup(_current_map);
 		ecs::update(0.f); // HACK: make sure cameras and such are initialized
 
-		const std::string music_event_path(_get_music_event_path_for_map(_current_map_path));
+		const std::string music_event_path(_get_music_event_path_for_map(ecs::get_path(_current_map)));
 		if (!music_event_path.empty()) {
 			if (!audio::is_any_playing(music_event_path)) {
 				audio::stop_all_in_bus(audio::BUS_MUSIC);
@@ -120,32 +115,37 @@ namespace map {
 		Reset,
 	};
 
+	const float DEFAULT_TRANSITION_DURATION = 0.7f; // seconds
+
 	struct TransitionOptions {
 		TransitionType type = TransitionType::Open;
-		std::string_view map_name; // Only used when type is Open.
+		std::string_view path; // Only used when type is Open.
 		float duration = DEFAULT_TRANSITION_DURATION; // In seconds; set to 0 to make the transition instant.
 		void(*on_complete)() = nullptr;
 	};
 
 	bool _transition(const TransitionOptions& options) {
-		if (_transition_duration >= 0.f) return false; // already transitioning
+		if (_transition_duration >= 0.f)
+			return false; // already transitioning
 		switch (options.type) {
 		case TransitionType::Open: {
-			if (options.map_name.empty()) return false;
-			if (_current_map_path == options.map_name) return false;
-			if (ecs::MapId map = ecs::get_map(options.map_name)) {
-				_next_map_path = ecs::get_path(map);
-			} else {
-				console::log_error("Map not found: " + std::string(options.map_name));
+			const ecs::MapId map = ecs::get_map(options.path);
+			if (!map) {
+				console::log_error("Map not found: " + std::string(options.path));
 				return false;
 			}
+			if (map == _current_map)
+				return false;
+			_next_map = map;
 		} break;
 		case TransitionType::Close: {
-			if (_current_map_path.empty()) return false;
+			if (!_current_map)
+				return false;
 		} break;
 		case TransitionType::Reset: {
-			if (_current_map_path.empty()) return false;
-			_next_map_path = _current_map_path;
+			if (!_current_map)
+				return false;
+			_next_map = _current_map;
 		} break;
 		default:
 			return false;
@@ -156,13 +156,13 @@ namespace map {
 	}
 
 	bool is_open() {
-		return !_current_map_path.empty();
+		return _current_map;
 	}
 
-	bool open(std::string_view map_name, void(*on_complete)(), float duration) {
+	bool open(std::string_view path, void(*on_complete)(), float duration) {
 		TransitionOptions options{};
 		options.type = TransitionType::Open;
-		options.map_name = map_name;
+		options.path = path;
 		options.duration = duration;
 		options.on_complete = on_complete;
 		return _transition(options);
@@ -184,15 +184,12 @@ namespace map {
 		return _transition(options);
 	}
 
-	std::string get_name() {
-		return files::get_stem(_current_map_path);
-	}
-
 	float get_transition_progress() {
 		return (_transition_duration >= 0.f) ? _transition_progress : 0.f;
 	}
 
 	bool is_dark() {
-		return get_name().starts_with("muddy_cave"); // HACK
+		//return get_name().starts_with("muddy_cave"); // HACK
+		return false;
 	}
 }

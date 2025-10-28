@@ -57,12 +57,10 @@ namespace ecs {
 	}
 
 	MapId get_map(std::string_view path) {
-		for (uint16_t i = 0; i < _tiled_context.maps.size(); ++i) {
-			std::string_view tentative_path = _tiled_context.maps[i].path;
-			if (tentative_path == path) {
-				return { .id = i };
-			} else if (files::get_stem(tentative_path) == files::get_stem(path)) {
-				return { .id = i };
+		const std::string normalized_path = files::get_normalized_path(path);
+		for (uint16_t id = 0; id < _tiled_context.maps.size(); ++id) {
+			if (_tiled_context.maps[id].path == normalized_path) {
+				return { .id = id };
 			}
 		}
 		return {};
@@ -70,8 +68,8 @@ namespace ecs {
 
 	std::vector<MapId> get_all_maps() {
 		std::vector<MapId> maps(_tiled_context.maps.size());
-		for (uint16_t i = 0; i < maps.size(); ++i) {
-			maps[i] = { .id = i };
+		for (uint16_t id = 0; id < maps.size(); ++id) {
+			maps[id] = { .id = id };
 		}
 		return maps;
 	}
@@ -82,10 +80,6 @@ namespace ecs {
 
 	std::string_view get_path(MapId map) {
 		return _get_map(map).path;
-	}
-
-	std::string_view get_name(MapId map) {
-		return _get_map(map).name;
 	}
 
 	Vec2u get_tile_size(MapId map) {

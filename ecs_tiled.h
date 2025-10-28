@@ -13,7 +13,6 @@ namespace ecs {
 	MapId get_map(std::string_view path);
 	std::vector<MapId> get_all_maps();
 	std::string_view get_path(MapId map);
-	std::string_view get_name(MapId map); // this is just the path stem (filename without extension)
 	Vec2u get_tile_size(MapId map); // in pixels
 	Vec2u get_size_in_tiles(MapId map);
 	Vec2u get_size_in_pixels(MapId map);

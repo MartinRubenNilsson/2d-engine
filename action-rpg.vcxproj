@@ -322,6 +322,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClInclude Include="ecs_tiled.h" />
     <ClInclude Include="ecs_tiled_ids.h" />
     <ClInclude Include="ecs_uniform_block.h" />
+    <ClInclude Include="editor_entities.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="engine_fps_counter.h" />
     <ClInclude Include="files.h" />

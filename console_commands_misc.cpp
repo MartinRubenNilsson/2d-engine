@@ -53,18 +53,18 @@ namespace console {
 		// MAP
 
 		create_command({
-			.name = "map_open",
+			.name = "open_map",
 			.desc = "Opens a map",
 			.params = { { ParamType::String, "name", "The name of the map" } },
 			.execute = [](Args args) { map::open(get_string(args[0])); }
 			});
 		create_command({
-			.name = "map_close",
+			.name = "close_map",
 			.desc = "Closes the current map",
 			.execute = [](Args) { map::close(); }
 			});
 		create_command({
-			.name = "map_reset",
+			.name = "reset_map",
 			.desc = "Resets the current map",
 			.execute = [](Args) { map::reset(); }
 			});
