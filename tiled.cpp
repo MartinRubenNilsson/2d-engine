@@ -189,24 +189,24 @@ namespace tiled {
 		}
 
 		if (!context.file_load_callback) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("File load callback is not set: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("File load callback is not set: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to load tileset file: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to load tileset file: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to parse tileset file: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to parse tileset file: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
@@ -234,8 +234,8 @@ namespace tiled {
 		for (pugi::xml_node tile_node : tileset_node.children("tile")) {
 			const unsigned int tile_id = tile_node.attribute("id").as_uint();
 			if (tile_id >= tileset.tile_count) {
-				if (context.debug_message_callback) {
-					context.debug_message_callback("Invalid tile ID in tileset: " + std::to_string(tile_id));
+				if (context.error_message_callback) {
+					context.error_message_callback("Invalid tile ID in tileset: " + std::to_string(tile_id));
 				}
 				continue;
 			}
@@ -313,24 +313,24 @@ namespace tiled {
 		}
 
 		if (!context.file_load_callback) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("File load callback is not set: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("File load callback is not set: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to load Tiled template: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to load Tiled template: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to parse Tiled template: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to parse Tiled template: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
@@ -342,8 +342,8 @@ namespace tiled {
 		if (pugi::xml_node tileset_node = template_node.child("tileset")) {
 			const pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			if (!source_attribute) {
-				if (context.debug_message_callback) {
-					context.debug_message_callback("Tileset source attribute is missing: " + normalized_path);
+				if (context.error_message_callback) {
+					context.error_message_callback("Tileset source attribute is missing: " + normalized_path);
 				}
 			} else {
 				std::string tileset_path = _get_parent_path(normalized_path);
@@ -475,8 +475,8 @@ namespace tiled {
 					}
 					// Base64 string length must be a multiple of 4
 					if (base64_string.size() % 4 != 0) {
-						if (context.debug_message_callback) {
-							context.debug_message_callback(
+						if (context.error_message_callback) {
+							context.error_message_callback(
 								"Invalid Base64 string length: " + std::to_string(base64_string.size()) + "\n"
 								"  Map: " + map.path + "\n"
 								"  Layer: " + layer.name);
@@ -499,8 +499,8 @@ namespace tiled {
 					// We may have up to 3 bytes of padding at the end of compressed_data
 					// as a result of the Base64 decoding process; these can be discarded.
 					if (compressed_data.size() < layer.tiles.size() * sizeof(unsigned int)) {
-						if (context.debug_message_callback) {
-							context.debug_message_callback(
+						if (context.error_message_callback) {
+							context.error_message_callback(
 								"Base64-decoded data is too small: " + std::to_string(compressed_data.size()) + "\n"
 								"  Map: " + map.path + "\n"
 								"  Layer: " + layer.name);
@@ -510,8 +510,8 @@ namespace tiled {
 					memcpy(layer.tiles.data(), compressed_data.data(), layer.tiles.size() * sizeof(unsigned int));
 				} else {
 					// Unknown compression type
-					if (context.debug_message_callback) {
-						context.debug_message_callback(
+					if (context.error_message_callback) {
+						context.error_message_callback(
 							"Unknown Tiled map tile layer compression: " + std::string(compression) + "\n"
 							"  Map: " + map.path + "\n"
 							"  Layer: " + layer.name);
@@ -520,8 +520,8 @@ namespace tiled {
 
 			} else {
 				// Unknown encoding type
-				if (context.debug_message_callback) {
-					context.debug_message_callback(
+				if (context.error_message_callback) {
+					context.error_message_callback(
 						"Unknown Tiled map tile layer encoding: " + std::string(encoding) + "\n"
 						"  Map: " + map.path + "\n"
 						"  Layer: " + layer.name);
@@ -574,24 +574,24 @@ namespace tiled {
 		}
 
 		if (!context.file_load_callback) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("File load callback is not set: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("File load callback is not set: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to load Tiled map: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to load Tiled map: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.debug_message_callback) {
-				context.debug_message_callback("Failed to parse Tiled map: " + normalized_path);
+			if (context.error_message_callback) {
+				context.error_message_callback("Failed to parse Tiled map: " + normalized_path);
 			}
 			return UINT_MAX;
 		}
@@ -612,8 +612,8 @@ namespace tiled {
 			pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			// TODO: handle embedded tilesets
 			if (!source_attribute) {
-				if (context.debug_message_callback) {
-					context.debug_message_callback("Embedded tilesets are not supported: " + map.path);
+				if (context.error_message_callback) {
+					context.error_message_callback("Embedded tilesets are not supported: " + map.path);
 				}
 				continue;
 			}

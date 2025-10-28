@@ -194,7 +194,7 @@ namespace tiled {
 
 	struct Context {
 		bool (*file_load_callback)(std::string_view path, std::string& contents) = nullptr;
-		void (*debug_message_callback)(std::string_view message) = nullptr;
+		void (*error_message_callback)(std::string_view message) = nullptr;
 		std::vector<Map> maps;
 		std::vector<Tileset> tilesets;
 		std::vector<Object> objects; // stores objects from maps, tiles and templates together

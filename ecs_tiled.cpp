@@ -28,7 +28,7 @@ namespace ecs {
 		_tiled_context.file_load_callback = [](std::string_view path, std::string& contents) {
 			return files::read_text_file(path, contents);
 		};
-		_tiled_context.debug_message_callback = [](std::string_view message) {
+		_tiled_context.error_message_callback = [](std::string_view message) {
 			console::log(message);
 		};
 
