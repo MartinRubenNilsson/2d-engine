@@ -97,7 +97,54 @@ namespace ecs {
 		}
 	}
 
+	b2BodyId _emplace_static_box_body(entt::entity entity, const Rect2f& box) {
+
+		const Vec2f center = (box.min + box.max) * 0.5f;
+		const Vec2f half_size = (box.max - box.min) * 0.5f;
+
+		b2BodyDef body_def = b2DefaultBodyDef();
+		body_def.type = b2_staticBody;
+		body_def.fixedRotation = true;
+		body_def.position = center;
+
+		const b2BodyId body = emplace_body(entity, body_def);
+
+		b2ShapeDef shape_def = b2DefaultShapeDef();
+		shape_def.enableContactEvents = true;
+
+		const b2Polygon polygon = b2MakeOffsetBox(half_size.x, half_size.y, Vec2f::ZERO, b2Rot_identity);
+		b2CreatePolygonShape(body, &shape_def, &polygon);
+
+		return body;
+	}
+
 	void setup_physics(MapId map) {
+
+		// Setup map bounds static colliders.
+		{
+			constexpr float THICKNESS = 16.f; // one full tile
+
+			const Vec2f map_size = get_size_in_pixels(map);
+
+			const Rect2f left_box = {
+				.min = { -THICKNESS, -THICKNESS },
+				.max = { 0.f, map_size.y + THICKNESS } };
+			const Rect2f right_box = {
+				.min = { map_size.x, -THICKNESS },
+				.max = { map_size.x + THICKNESS, map_size.y + THICKNESS } };
+			const Rect2f top_box = {
+				.min = { -THICKNESS, -THICKNESS },
+				.max = { map_size.x + THICKNESS, 0.f } };
+			const Rect2f bottom_box = {
+				.min = { -THICKNESS, map_size.y },
+				.max = { map_size.x + THICKNESS, map_size.y + THICKNESS } };
+
+			entt::entity entity = _registry.create();
+			_emplace_static_box_body(entity, left_box);
+			_emplace_static_box_body(entity, right_box);
+			_emplace_static_box_body(entity, top_box);
+			_emplace_static_box_body(entity, bottom_box);
+		}
 
 		const Vec2u map_tile_size = get_tile_size(map);
 
