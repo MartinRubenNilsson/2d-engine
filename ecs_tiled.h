@@ -8,6 +8,10 @@ namespace ecs {
 
 	uint8_t get_object_layer();
 
+	/// WORLDS
+
+	WorldId get_world(std::string_view path);
+
 	/// MAPS
 
 	MapId get_map(std::string_view path);

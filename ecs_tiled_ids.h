@@ -1,6 +1,13 @@
 #pragma once
 
 namespace ecs {
+	struct WorldId {
+		uint16_t id = UINT16_MAX;
+
+		operator bool() const; // checks if the ID is valid
+		auto operator<=>(const WorldId&) const = default;
+	};
+
 	struct MapId {
 		uint16_t id = UINT16_MAX;
 
@@ -32,6 +39,8 @@ namespace ecs {
 		auto operator<=>(const TileId& other) const {
 			return value <=> other.value;
 		}
+		// For some reason this needs to be explicitly defined for unions, otherwise
+		// the operator bool() gets called unexpectedly.
 		bool operator==(const TileId& other) const {
 			return value == other.value;
 		}

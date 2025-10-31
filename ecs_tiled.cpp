@@ -7,6 +7,10 @@
 namespace ecs {
 	tiled::Context _tiled_context;
 
+	WorldId::operator bool() const {
+		return id < _tiled_context.worlds.size();
+	}
+
 	MapId::operator bool() const {
 		return id < _tiled_context.maps.size();
 	}
@@ -63,6 +67,16 @@ namespace ecs {
 
 	void shutdown_tiled() {
 		_tiled_context = {};
+	}
+
+	WorldId get_world(std::string_view path) {
+		const std::string normalized_path = files::get_normalized_path(path);
+		for (uint16_t id = 0; id < _tiled_context.worlds.size(); ++id) {
+			if (_tiled_context.worlds[id].path == normalized_path) {
+				return { .id = id };
+			}
+		}
+		return {};
 	}
 
 	MapId get_map(std::string_view path) {

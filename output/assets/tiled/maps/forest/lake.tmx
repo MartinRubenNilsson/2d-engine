@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="2">
  <tileset firstgid="1" source="../../tilesets/summer_forest/summer forest wang tiles.tsx"/>
+ <tileset firstgid="2049" source="../../tilesets/characters/player/player.tsx"/>
  <layer id="1" name="Tile Layer 1" width="30" height="20">
   <data encoding="csv">
 194,386,386,322,258,194,194,7,8,8,391,8,8,264,72,323,263,391,8,9,130,386,322,258,130,7,391,391,9,322,
@@ -25,4 +26,7 @@
 386,130,322,135,200,323,259,323,387,144,209,129,82,72,387,131,195,72,387,195,323,131,259,323,323,259,195,72,72,199
 </data>
  </layer>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="1" template="../../templates/player.tx" x="83" y="179"/>
+ </objectgroup>
 </map>
