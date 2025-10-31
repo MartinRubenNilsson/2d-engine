@@ -44,15 +44,18 @@ namespace ecs {
 #if 0 // Enable to debug print.
 		console::log(std::format("({0}, {1}), ({2}, {3})", position.x, position.y, normal.x, normal.y));
 #endif
-		const WorldId curr_world = get_world("assets/tiled/maps/forest/forest.world");
+		const WorldId curr_world = get_world("assets/tiled/maps/forest/forest.world"); // HACK
 		if (!curr_world) return;
 		const MapId curr_map = map::get_current_map();
 		if (!curr_map) return;
-		const Vec2i map_pos_in_world = get_position_of_map(curr_world, curr_map);
-		const Vec2i pos_in_world = Vec2i(position) + map_pos_in_world;
-		const Vec2i next_pos_in_world = pos_in_world + Vec2i(normal) * 16;
-		const MapId next_map = get_map_at_position(curr_world, next_pos_in_world);
+		const Vec2i curr_map_world_pos = get_position_of_map(curr_world, curr_map);
+		const Vec2i player_curr_world_pos = Vec2i(position) + curr_map_world_pos;
+		const Vec2i player_next_world_pos = player_curr_world_pos + Vec2i(normal) * 16;
+		const MapId next_map = get_map_at_position(curr_world, player_next_world_pos);
 		if (!next_map) return;
+		const Vec2i next_map_world_pos = get_position_of_map(curr_world, next_map);
+		Patch& patch = get_patch(next_map);
+		patch.player_position = player_next_world_pos - next_map_world_pos;
 		map::open(get_path(next_map));
 	}
 
@@ -174,9 +177,17 @@ namespace ecs {
 		}
 	}
 
+	void _teleport_players_to_position(const Vec2f& position) {
+		for (auto [entity, body] : _registry.view<Type<Tag::Player>, b2BodyId>().each()) {
+			b2Body_SetTransform(body, position - b2Body_GetLocalCenterOfMass(body), b2Rot_identity);
+		}
+	}
+
 	void patch_players(const Patch& patch) {
 		if (!patch.portal_to_exit.empty()) {
 			_teleport_players_to_portal(patch.portal_to_exit);
+		} else if (patch.player_position != Vec2f::MAX) {
+			_teleport_players_to_position(patch.player_position);
 		}
 	}
 
