@@ -1,5 +1,7 @@
 #include "tiled.h"
 #include <pugixml.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 #include <zlib.h>
 #include <filesystem> // TODO: remove, it is slow to compile!
 #include <span>
@@ -178,6 +180,19 @@ namespace tiled {
 		return std::filesystem::path(path).parent_path().string();
 	}
 
+	void _output_error_message(const Context& context, std::string_view message) {
+		if (context.error_message_callback) {
+			context.error_message_callback(message);
+		}
+	}
+
+	bool _check_file_load_callback(const Context& context) {
+		if (context.file_load_callback)
+			return true;
+		_output_error_message(context, "Tiled file load callback is not set. ");
+		return false;
+	}
+
 	unsigned int load_tileset(Context& context, std::string_view path) {
 		std::string normalized_path = _get_normalized_path(path);
 
@@ -188,26 +203,18 @@ namespace tiled {
 			}
 		}
 
-		if (!context.file_load_callback) {
-			if (context.error_message_callback) {
-				context.error_message_callback("File load callback is not set: " + normalized_path);
-			}
+		if (!_check_file_load_callback(context))
 			return UINT_MAX;
-		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to load tileset file: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to load Tiled tileset: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to parse tileset file: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to parse Tiled tileset XML: " + normalized_path);
 			return UINT_MAX;
 		}
 		const pugi::xml_node tileset_node = doc.child("tileset");
@@ -234,9 +241,7 @@ namespace tiled {
 		for (pugi::xml_node tile_node : tileset_node.children("tile")) {
 			const unsigned int tile_id = tile_node.attribute("id").as_uint();
 			if (tile_id >= tileset.tile_count) {
-				if (context.error_message_callback) {
-					context.error_message_callback("Invalid tile ID in tileset: " + std::to_string(tile_id));
-				}
+				_output_error_message(context, "Invalid tile ID in tileset: " + std::to_string(tile_id));
 				continue;
 			}
 			Tile& tile = tileset.tiles[tile_id];
@@ -312,26 +317,18 @@ namespace tiled {
 			}
 		}
 
-		if (!context.file_load_callback) {
-			if (context.error_message_callback) {
-				context.error_message_callback("File load callback is not set: " + normalized_path);
-			}
+		if (!_check_file_load_callback(context))
 			return UINT_MAX;
-		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to load Tiled template: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to load Tiled template: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to parse Tiled template: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to parse Tiled template XML: " + normalized_path);
 			return UINT_MAX;
 		}
 
@@ -342,9 +339,7 @@ namespace tiled {
 		if (pugi::xml_node tileset_node = template_node.child("tileset")) {
 			const pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			if (!source_attribute) {
-				if (context.error_message_callback) {
-					context.error_message_callback("Tileset source attribute is missing: " + normalized_path);
-				}
+				_output_error_message(context, "Tileset source attribute is missing: " + normalized_path);
 			} else {
 				std::string tileset_path = _get_parent_path(normalized_path);
 				tileset_path += '/';
@@ -475,12 +470,10 @@ namespace tiled {
 					}
 					// Base64 string length must be a multiple of 4
 					if (base64_string.size() % 4 != 0) {
-						if (context.error_message_callback) {
-							context.error_message_callback(
-								"Invalid Base64 string length: " + std::to_string(base64_string.size()) + "\n"
-								"  Map: " + map.path + "\n"
-								"  Layer: " + layer.name);
-						}
+						_output_error_message(context,
+							"Invalid Base64 string length: " + std::to_string(base64_string.size()) + "\n"
+							"  Map: " + map.path + "\n"
+							"  Layer: " + layer.name);
 						break;
 					}
 					compressed_data.resize((base64_string.size() / 4) * 3);
@@ -499,33 +492,27 @@ namespace tiled {
 					// We may have up to 3 bytes of padding at the end of compressed_data
 					// as a result of the Base64 decoding process; these can be discarded.
 					if (compressed_data.size() < layer.tiles.size() * sizeof(unsigned int)) {
-						if (context.error_message_callback) {
-							context.error_message_callback(
-								"Base64-decoded data is too small: " + std::to_string(compressed_data.size()) + "\n"
-								"  Map: " + map.path + "\n"
-								"  Layer: " + layer.name);
-						}
+						_output_error_message(context,
+							"Base64-decoded data is too small: " + std::to_string(compressed_data.size()) + "\n"
+							"  Map: " + map.path + "\n"
+							"  Layer: " + layer.name);
 						break;
 					}
 					memcpy(layer.tiles.data(), compressed_data.data(), layer.tiles.size() * sizeof(unsigned int));
 				} else {
 					// Unknown compression type
-					if (context.error_message_callback) {
-						context.error_message_callback(
-							"Unknown Tiled map tile layer compression: " + std::string(compression) + "\n"
-							"  Map: " + map.path + "\n"
-							"  Layer: " + layer.name);
-					}
+					_output_error_message(context,
+						"Unknown Tiled map tile layer compression: " + std::string(compression) + "\n"
+						"  Map: " + map.path + "\n"
+						"  Layer: " + layer.name);
 				}
 
 			} else {
 				// Unknown encoding type
-				if (context.error_message_callback) {
-					context.error_message_callback(
-						"Unknown Tiled map tile layer encoding: " + std::string(encoding) + "\n"
-						"  Map: " + map.path + "\n"
-						"  Layer: " + layer.name);
-				}
+				_output_error_message(context,
+					"Unknown Tiled map tile layer encoding: " + std::string(encoding) + "\n"
+					"  Map: " + map.path + "\n"
+					"  Layer: " + layer.name);
 			}
 			// Resolve GIDs. This converts Tiled GIDs (which are local to this map) into a pair
 			// of IDs which can be used to reference the tile independently of this map.
@@ -573,26 +560,18 @@ namespace tiled {
 			}
 		}
 
-		if (!context.file_load_callback) {
-			if (context.error_message_callback) {
-				context.error_message_callback("File load callback is not set: " + normalized_path);
-			}
+		if (!_check_file_load_callback(context))
 			return UINT_MAX;
-		}
 
 		std::string file_contents;
 		if (!context.file_load_callback(normalized_path, file_contents)) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to load Tiled map: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to load Tiled map: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
 		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
-			if (context.error_message_callback) {
-				context.error_message_callback("Failed to parse Tiled map: " + normalized_path);
-			}
+			_output_error_message(context, "Failed to parse Tiled map XML: " + normalized_path);
 			return UINT_MAX;
 		}
 		pugi::xml_node map_node = doc.child("map");
@@ -612,9 +591,7 @@ namespace tiled {
 			pugi::xml_attribute source_attribute = tileset_node.attribute("source");
 			// TODO: handle embedded tilesets
 			if (!source_attribute) {
-				if (context.error_message_callback) {
-					context.error_message_callback("Embedded tilesets are not supported: " + map.path);
-				}
+				_output_error_message(context, "Embedded tilesets are not supported: " + map.path);
 				continue;
 			}
 			std::string tileset_path = _get_parent_path(map.path);
@@ -637,6 +614,113 @@ namespace tiled {
 
 		const unsigned int id = (unsigned int)context.maps.size();
 		context.maps.emplace_back(std::move(map));
+		return id;
+	}
+
+	int try_get_int(const rapidjson::Value& value, const char* name) {
+		const auto it = value.FindMember(name);
+		if (it == value.MemberEnd())
+			return 0;
+		if (!it->value.IsInt())
+			return 0;
+		return it->value.GetInt();
+	}
+
+	unsigned int load_world(Context& context, std::string_view path) {
+		std::string normalized_path = _get_normalized_path(path);
+
+		// Check if the world is already loaded
+		for (unsigned int id = 0; id < context.worlds.size(); ++id) {
+			if (context.worlds[id].path == normalized_path) {
+				return id;
+			}
+		}
+
+		if (!context.file_load_callback) {
+			_output_error_message(context, "File load callback is not set: " + normalized_path);
+			return UINT_MAX;
+		}
+
+		std::string file_contents;
+		if (!context.file_load_callback(normalized_path, file_contents)) {
+			_output_error_message(context, "Failed to load Tiled world: " + normalized_path);
+			return UINT_MAX;
+		}
+
+		rapidjson::Document document{};
+		const rapidjson::ParseResult result = document.ParseInsitu((char*)file_contents.c_str());
+		if (!result) {
+			_output_error_message(context, "Failed to parse Tiled world JSON: " + normalized_path);
+			_output_error_message(context, GetParseError_En(result.Code()));
+			return UINT_MAX;
+		}
+
+		if (!document.IsObject()) {
+			_output_error_message(context, "Tiled world is not a JSON object: " + normalized_path);
+			return UINT_MAX;
+		}
+
+		// Check that the JSON has a member "type": "world".
+		{
+			const auto type_it = document.FindMember("type");
+			if (type_it == document.MemberEnd()) {
+				_output_error_message(context, "Tiled world JSON does not have a \"type\" member: " + normalized_path);
+				return UINT_MAX;
+			}
+			const rapidjson::Value& type = type_it->value;
+			if (!type.IsString()) {
+				_output_error_message(context, "Tiled world JSON member \"type\" is not a string: " + normalized_path);
+				return UINT_MAX;
+			}
+			if (strcmp(type.GetString(), "world") != 0) {
+				_output_error_message(context, "Tiled world JSON member \"type\" is not \"world\": " + normalized_path);
+				return UINT_MAX;
+			}
+		}
+
+		World world{};
+		world.path = std::move(normalized_path);
+
+		// Load maps.
+		const auto maps_it = document.FindMember("maps");
+		if (maps_it != document.MemberEnd()) {
+			const rapidjson::Value& maps = maps_it->value;
+			if (!maps.IsArray()) {
+				_output_error_message(context, "Tiled world JSON member \"maps\" is not an array: " + normalized_path);
+			} else {
+				const std::string world_dir_path = _get_parent_path(world.path);
+				std::string map_path;
+				for (const rapidjson::Value* map = maps.Begin(); map != maps.End(); ++map) {
+					if (!map->IsObject())
+						continue;
+					const auto path_it = map->FindMember("fileName");
+					if (path_it == map->MemberEnd()) {
+						_output_error_message(context, "Tiled world map does not have a JSON member \"fileName\": " + normalized_path);
+						continue;
+					}
+					const rapidjson::Value& path = path_it->value;
+					if (!path.IsString()) {
+						_output_error_message(context, "Tiled world map JSON member \"fileName\" is not a string: " + normalized_path);
+						continue;
+					}
+					map_path.clear();
+					map_path += world_dir_path;
+					map_path += '/';
+					map_path += path.GetString();
+					const auto map_id = load_map(context, map_path);
+					if (map_id == UINT_MAX)
+						continue; // Failed to load map.
+					WorldMap& world_map = world.maps.emplace_back(map_id);
+					world_map.x = try_get_int(*map, "x");
+					world_map.y = try_get_int(*map, "y");
+					world_map.width = try_get_int(*map, "width");
+					world_map.height = try_get_int(*map, "height");
+				}
+			}
+		}
+
+		const unsigned int id = (unsigned int)context.worlds.size();
+		context.worlds.emplace_back(std::move(world));
 		return id;
 	}
 }

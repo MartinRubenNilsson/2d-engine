@@ -1,0 +1,20 @@
+{
+    "maps": [
+        {
+            "fileName": "lake.tmx",
+            "height": 320,
+            "width": 480,
+            "x": 752,
+            "y": 176
+        },
+        {
+            "fileName": "stonehenge.tmx",
+            "height": 0,
+            "width": 0,
+            "x": 272,
+            "y": 176
+        }
+    ],
+    "onlyShowAdjacentMaps": false,
+    "type": "world"
+}

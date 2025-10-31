@@ -192,23 +192,41 @@ namespace tiled {
 		unsigned int tile_height = 0; // in pixels
 	};
 
+	struct WorldMap {
+		unsigned int map_id = UINT_MAX;
+		int x = 0; // x-position in world in pixels
+		int y = 0; // y-position in world in pixels
+		int width = 0; // in pixels
+		int height = 0; // in pixels
+	};
+
+	struct World {
+		std::string path;
+		std::vector<WorldMap> maps;
+	};
+
 	struct Context {
 		bool (*file_load_callback)(std::string_view path, std::string& contents) = nullptr;
 		void (*error_message_callback)(std::string_view message) = nullptr;
-		std::vector<Map> maps;
-		std::vector<Tileset> tilesets;
 		std::vector<Object> objects; // stores objects from maps, tiles and templates together
+		std::vector<Tileset> tilesets;
 		std::vector<Template> templates;
+		std::vector<Map> maps;
+		std::vector<World> worlds;
 	};
 
 	// Returns the tileset ID (an index into Context::tilesets[]), or UINT_MAX on failure.
-	unsigned int load_tileset(Context &context, std::string_view path);
+	unsigned int load_tileset(Context& context, std::string_view path);
 
 	// Returns the object ID (an index into Context::objects[]), or UINT_MAX on failure.
 	// May load a tileset as a side effect.
-	unsigned int load_template(Context &context, std::string_view path);
+	unsigned int load_template(Context& context, std::string_view path);
 
 	// Returns the map ID (an index into Context::maps[]), or UINT_MAX on failure.
-	// May load one or more tilesets and templates as a side effect.
-	unsigned int load_map(Context &context, std::string_view path);
+	// May load one or more tilesets and/or templates as a side effect.
+	unsigned int load_map(Context& context, std::string_view path);
+
+	// Returns the world ID (an index into Context::worlds[]), or UINT_MAX on failure.
+	// Will load maps as a side effect.
+	unsigned int load_world(Context& context, std::string_view path);
 }

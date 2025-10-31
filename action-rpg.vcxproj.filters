@@ -339,6 +339,9 @@
     <ClCompile Include="editor_viewport.cpp">
       <Filter>editor\viewport</Filter>
     </ClCompile>
+    <ClCompile Include="editor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -721,6 +724,9 @@
     </ClInclude>
     <ClInclude Include="editor_viewport.h">
       <Filter>editor\viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="editor.h">
+      <Filter>editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

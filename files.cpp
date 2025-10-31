@@ -6,18 +6,19 @@
 namespace files {
 
 	FileFormat _path_to_file_format(std::string_view path) {
-		if (path.ends_with(".txt"))  return FileFormat::Text;
-		if (path.ends_with(".png"))  return FileFormat::PngImage;
-		if (path.ends_with(".ktx2")) return FileFormat::KhronosTexture;
-		if (path.ends_with(".tmx"))  return FileFormat::TiledMap;
-		if (path.ends_with(".tsx"))  return FileFormat::TiledTileset;
-		if (path.ends_with(".tx"))   return FileFormat::TiledTemplate;
-		if (path.ends_with(".ttf"))  return FileFormat::TrueTypeFont;
-		if (path.ends_with(".vert")) return FileFormat::GLSLVertexShader;
-		if (path.ends_with(".frag")) return FileFormat::GLSLFragmentShader;
-		if (path.ends_with(".rml"))  return FileFormat::RmlUiDocument;
-		if (path.ends_with(".rcss")) return FileFormat::RmlUiStyleSheet;
-		if (path.ends_with(".bank")) return FileFormat::FmodStudioBank;
+		if (path.ends_with(".txt"))   return FileFormat::Text;
+		if (path.ends_with(".png"))   return FileFormat::PngImage;
+		if (path.ends_with(".ktx2"))  return FileFormat::KhronosTexture;
+		if (path.ends_with(".world")) return FileFormat::TiledWorld;
+		if (path.ends_with(".tmx"))   return FileFormat::TiledMap;
+		if (path.ends_with(".tsx"))   return FileFormat::TiledTileset;
+		if (path.ends_with(".tx"))    return FileFormat::TiledTemplate;
+		if (path.ends_with(".ttf"))   return FileFormat::TrueTypeFont;
+		if (path.ends_with(".vert"))  return FileFormat::GLSLVertexShader;
+		if (path.ends_with(".frag"))  return FileFormat::GLSLFragmentShader;
+		if (path.ends_with(".rml"))   return FileFormat::RmlUiDocument;
+		if (path.ends_with(".rcss"))  return FileFormat::RmlUiStyleSheet;
+		if (path.ends_with(".bank"))  return FileFormat::FmodStudioBank;
 		return FileFormat::Unknown;
 	}
 
@@ -76,7 +77,7 @@ namespace files {
 		return true;
 	}
 
-	bool read_binary_file(std::string_view path, std::vector<unsigned char>& data) {
+	bool read_binary_file(std::string_view path, std::vector<uint8_t>& data) {
 		std::ifstream file(std::string{ path }, std::ios::ate | std::ios::binary);
 		if (!file) return false;
 		data.resize(file.tellg());
@@ -85,7 +86,7 @@ namespace files {
 		return true;
 	}
 
-	bool write_binary_file(std::string_view path, std::span<const unsigned char> data) {
+	bool write_binary_file(std::string_view path, std::span<const uint8_t> data) {
 		std::ofstream file(std::string{ path }, std::ios::binary);
 		if (!file) return false;
 		file.write(reinterpret_cast<const char*>(data.data()), data.size());

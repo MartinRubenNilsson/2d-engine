@@ -13,6 +13,7 @@
 #include "ui.h"
 #include "ui_game.h"
 #include "background.h"
+#include "editor.h"
 
 namespace engine {
     extern double _time;
@@ -151,6 +152,10 @@ namespace engine {
 
         if (should_show_fps_counter) {
             show_fps_counter();
+        }
+
+        if (editor::show) {
+            editor::show_imgui();
         }
 
         // PITFALL: ImGui uses its own shaders and such, so we need to render it to the back buffer, not the

@@ -6,8 +6,6 @@
 #include "console.h"
 
 namespace ecs {
-	extern entt::registry _registry;
-
 	void _create_shapes(b2BodyId body, const b2ShapeDef& def, ObjectId object, bool object_is_in_local_space) {
 
 		// PITFALL: Calling get_position() for non-tile objects returns the top left, but
@@ -117,6 +115,8 @@ namespace ecs {
 
 		return body;
 	}
+
+	extern entt::registry _registry;
 
 	void setup_physics(MapId map) {
 

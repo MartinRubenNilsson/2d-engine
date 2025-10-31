@@ -22,6 +22,7 @@
 #include "text_fonts.h"
 #include "platform.h"
 #include "platform_directory_changes.h"
+#include "editor.h"
 
 namespace engine {
     bool _should_run = false;

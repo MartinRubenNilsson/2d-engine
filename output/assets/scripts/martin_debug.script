@@ -4,6 +4,7 @@ bind f3 debug_states
 bind f4 debug_tasks
 bind f5 debug_terrain
 bind f6 debug_ui
+bind e toggle_editor
 bind r debug_ui_bounding_boxes
 bind t "open_textboxes player/die"
 open_map assets/tiled/maps/forest/stonehenge.tmx

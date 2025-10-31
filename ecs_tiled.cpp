@@ -29,7 +29,7 @@ namespace ecs {
 			return files::read_text_file(path, contents);
 		};
 		_tiled_context.error_message_callback = [](std::string_view message) {
-			console::log(message);
+			console::log_error(message);
 		};
 
 		// Preload all Tiled assets.
@@ -37,18 +37,27 @@ namespace ecs {
 
 		// Load tilesets first...
 		for (const files::File& file : files) {
-			if (file.format != files::FileFormat::TiledTileset) continue;
-			tiled::load_tileset(_tiled_context, file.path);
+			if (file.format == files::FileFormat::TiledTileset) {
+				tiled::load_tileset(_tiled_context, file.path);
+			}
 		}
 		// ...then templates...
 		for (const files::File& file : files) {
-			if (file.format != files::FileFormat::TiledTemplate) continue;
-			tiled::load_template(_tiled_context, file.path);
+			if (file.format == files::FileFormat::TiledTemplate) {
+				tiled::load_template(_tiled_context, file.path);
+			}
 		}
-		// ...and lastly maps.
+		// ...then maps...
 		for (const files::File& file : files) {
-			if (file.format != files::FileFormat::TiledMap) continue;
-			tiled::load_map(_tiled_context, file.path);
+			if (file.format == files::FileFormat::TiledMap) {
+				tiled::load_map(_tiled_context, file.path);
+			}
+		}
+		// ...and lastly worlds.
+		for (const files::File& file : files) {
+			if (file.format == files::FileFormat::TiledWorld) {
+				tiled::load_world(_tiled_context, file.path);
+			}
 		}
 	}
 

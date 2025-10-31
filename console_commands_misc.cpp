@@ -1,20 +1,10 @@
 #include "stdafx.h"
 #include "console_commands.h"
-#include "console.h"
 #include "engine_fps_counter.h"
-//#include "window.h"
 #include "audio.h"
 #include "map.h"
-//#include "ui_rmlui.h"
-//#include "shaders.h"
-#include "ui.h"
-#include "ui_textboxes.h"
-#include "ecs.h"
-#include "ecs_player.h"
 #include "ecs_lifetime.h"
-#include "ecs_camera.h"
-#include "ecs_vfx.h"
-#include "ecs_tags.h"
+#include "editor.h"
 
 namespace console {
 	void _create_commands_misc() {
@@ -25,6 +15,14 @@ namespace console {
 			.name = "toggle_fps_counter",
 			.desc = "Toggles whether the FPS counter is visible or hidden.",
 			.execute = [](Args) { engine::should_show_fps_counter = !engine::should_show_fps_counter; }
+			});
+
+		// EDITOR
+
+		create_command({
+			.name = "toggle_editor",
+			.desc = "Toggles whether the editor should be visible.",
+			.execute = [](Args) { editor::show = !editor::show; }
 			});
 
 		// SHADERS
