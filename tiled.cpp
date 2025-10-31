@@ -206,14 +206,14 @@ namespace tiled {
 		if (!_check_file_load_callback(context))
 			return UINT_MAX;
 
-		std::string file_contents;
-		if (!context.file_load_callback(normalized_path, file_contents)) {
+		std::string file_data;
+		if (!context.file_load_callback(normalized_path, file_data)) {
 			_output_error_message(context, "Failed to load Tiled tileset: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
-		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
+		if (!doc.load_buffer_inplace(file_data.data(), file_data.size())) {
 			_output_error_message(context, "Failed to parse Tiled tileset XML: " + normalized_path);
 			return UINT_MAX;
 		}
@@ -418,7 +418,8 @@ namespace tiled {
 		// hence we have an early return if we fail to convert the node name to a LayerType.
 
 		LayerType type;
-		if (!_string_to_layer_type(node.name(), type)) return;
+		if (!_string_to_layer_type(node.name(), type))
+			return;
 
 		Layer& layer = map.layers.emplace_back();
 		layer.type = type;
@@ -563,14 +564,14 @@ namespace tiled {
 		if (!_check_file_load_callback(context))
 			return UINT_MAX;
 
-		std::string file_contents;
-		if (!context.file_load_callback(normalized_path, file_contents)) {
+		std::string file_data;
+		if (!context.file_load_callback(normalized_path, file_data)) {
 			_output_error_message(context, "Failed to load Tiled map: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		pugi::xml_document doc;
-		if (!doc.load_buffer_inplace(file_contents.data(), file_contents.size())) {
+		if (!doc.load_buffer_inplace(file_data.data(), file_data.size())) {
 			_output_error_message(context, "Failed to parse Tiled map XML: " + normalized_path);
 			return UINT_MAX;
 		}
@@ -636,19 +637,17 @@ namespace tiled {
 			}
 		}
 
-		if (!context.file_load_callback) {
-			_output_error_message(context, "File load callback is not set: " + normalized_path);
+		if (!_check_file_load_callback(context))
 			return UINT_MAX;
-		}
 
-		std::string file_contents;
-		if (!context.file_load_callback(normalized_path, file_contents)) {
+		std::string file_data;
+		if (!context.file_load_callback(normalized_path, file_data)) {
 			_output_error_message(context, "Failed to load Tiled world: " + normalized_path);
 			return UINT_MAX;
 		}
 
 		rapidjson::Document document{};
-		const rapidjson::ParseResult result = document.ParseInsitu((char*)file_contents.c_str());
+		const rapidjson::ParseResult result = document.ParseInsitu((char*)file_data.c_str());
 		if (!result) {
 			_output_error_message(context, "Failed to parse Tiled world JSON: " + normalized_path);
 			_output_error_message(context, GetParseError_En(result.Code()));
@@ -686,7 +685,7 @@ namespace tiled {
 		if (maps_it != document.MemberEnd()) {
 			const rapidjson::Value& maps = maps_it->value;
 			if (!maps.IsArray()) {
-				_output_error_message(context, "Tiled world JSON member \"maps\" is not an array: " + normalized_path);
+				_output_error_message(context, "Tiled world JSON member \"maps\" is not an array: " + world.path);
 			} else {
 				const std::string world_dir_path = _get_parent_path(world.path);
 				std::string map_path;
@@ -695,12 +694,12 @@ namespace tiled {
 						continue;
 					const auto path_it = map->FindMember("fileName");
 					if (path_it == map->MemberEnd()) {
-						_output_error_message(context, "Tiled world map does not have a JSON member \"fileName\": " + normalized_path);
+						_output_error_message(context, "Tiled world map does not have a JSON member \"fileName\": " + world.path);
 						continue;
 					}
 					const rapidjson::Value& path = path_it->value;
 					if (!path.IsString()) {
-						_output_error_message(context, "Tiled world map JSON member \"fileName\" is not a string: " + normalized_path);
+						_output_error_message(context, "Tiled world map JSON member \"fileName\" is not a string: " + world.path);
 						continue;
 					}
 					map_path.clear();
