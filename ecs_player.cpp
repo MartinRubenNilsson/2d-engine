@@ -19,6 +19,8 @@
 #include "player_outfit.h"
 #include "audio.h"
 #include "ui_hud.h"
+#include "console.h"
+#include "map.h"
 
 namespace ecs {
 
@@ -38,7 +40,23 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void _player_begin_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
+	void _player_handle_touch_bounds(const Vec2f& position, const Vec2f& normal) {
+#if 0 // Enable to debug print.
+		console::log(std::format("({0}, {1}), ({2}, {3})", position.x, position.y, normal.x, normal.y));
+#endif
+		const WorldId curr_world = get_world("assets/tiled/maps/forest/forest.world");
+		if (!curr_world) return;
+		const MapId curr_map = map::get_current_map();
+		if (!curr_map) return;
+		const Vec2i map_pos_in_world = get_position_of_map(curr_world, curr_map);
+		const Vec2i pos_in_world = Vec2i(position) + map_pos_in_world;
+		const Vec2i next_pos_in_world = pos_in_world + Vec2i(normal) * 16;
+		const MapId next_map = get_map_at_position(curr_world, next_pos_in_world);
+		if (!next_map) return;
+		map::open(get_path(next_map));
+	}
+
+	void _player_handle_touch_pickup(entt::entity player_entity, entt::entity pickup_entity) {
 		Player* player = _registry.try_get<Player>(player_entity);
 		if (!player) return;
 
@@ -69,10 +87,14 @@ namespace ecs {
 	}
 
 	void _player_handle_touch(const TouchEvent& ev) {
-		if (ev.type == TouchEventType::SensorBegin) {
-			const Tag other_tag = get_tag(ev.other_entity);
+		const Tag other_tag = get_tag(ev.other_entity);
+		if (ev.type == TouchEventType::ContactBegin) {
+			if (other_tag == Tag::Bounds) {
+				_player_handle_touch_bounds(ev.manifold.points[0].point, ev.manifold.normal);
+			}
+		} else if (ev.type == TouchEventType::SensorBegin) {
 			if (other_tag == Tag::Pickup) {
-				_player_begin_touch_pickup(ev.entity, ev.other_entity);
+				_player_handle_touch_pickup(ev.entity, ev.other_entity);
 			}
 		}
 	}

@@ -105,7 +105,7 @@ namespace engine {
         Rect2f view{}; // The current camera view in world-space.
         view.min = Vec2f::ZERO;
         view.max = window_framebuffer_size; // Default
-        if (map::is_open()) {
+        if (map::has_current_map()) {
             view = ecs::get_camera_view();
         }
 
@@ -127,7 +127,7 @@ namespace engine {
             postprocessing::set_gaussian_blur_iterations(0);
         }
 
-        postprocessing::set_darkness_intensity(map::is_dark() ? 0.95f : 0.f);
+        //postprocessing::set_darkness_intensity(map::is_dark() ? 0.95f : 0.f);
         postprocessing::set_screen_transition_progress(map::get_transition_progress());
 
         postprocessing::render_pre_ui(view);

@@ -11,6 +11,23 @@ namespace map {
 	bool debug = false;
 
 	ecs::MapId _current_map{};
+
+	bool has_current_map() {
+		return (bool)_current_map;
+	}
+
+	ecs::MapId get_current_map() {
+		return _current_map;
+	}
+
+	// Returns nullptr if no music event is associated with the map.
+	// TODO: this really belongs somewhere else!!!!!!!!!
+	std::string_view _get_music_event_path_for_map(std::string_view map_path) {
+		if (map_path.find("summer_forest") != std::string::npos)   return "event:/music/map/summer_forest";
+		if (map_path.find("eternal_dungeon") != std::string::npos) return "event:/music/map/eternal_dungeon";
+		return "";
+	}
+
 	ecs::MapId _next_map{};
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
@@ -36,13 +53,6 @@ namespace map {
 		if (ImGui::Button("Reset")) reset();
 		ImGui::Value("Transition Progress", _transition_progress);
 		ImGui::End();
-	}
-
-	// Returns nullptr if no music event is associated with the map.
-	std::string_view _get_music_event_path_for_map(std::string_view map_path) {
-		if (map_path.find("summer_forest") != std::string::npos)   return "event:/music/map/summer_forest";
-		if (map_path.find("eternal_dungeon") != std::string::npos) return "event:/music/map/eternal_dungeon";
-		return "";
 	}
 
 	void update(float dt) {
@@ -155,10 +165,6 @@ namespace map {
 		return true;
 	}
 
-	bool is_open() {
-		return _current_map;
-	}
-
 	bool open(std::string_view path, void(*on_complete)(), float duration) {
 		TransitionOptions options{};
 		options.type = TransitionType::Open;
@@ -186,10 +192,5 @@ namespace map {
 
 	float get_transition_progress() {
 		return (_transition_duration >= 0.f) ? _transition_progress : 0.f;
-	}
-
-	bool is_dark() {
-		//return get_name().starts_with("muddy_cave"); // HACK
-		return false;
 	}
 }

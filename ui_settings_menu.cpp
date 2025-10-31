@@ -48,7 +48,7 @@ namespace settings_menu {
 
 	void _on_select_back() {
 		show = false;
-		if (map::is_open()) {
+		if (map::has_current_map()) {
 			pause_menu::show = true;
 		} else {
 			main_menu::show = true;

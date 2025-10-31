@@ -79,6 +79,31 @@ namespace ecs {
 		return {};
 	}
 
+	const tiled::World& _get_world(WorldId id) {
+		return _tiled_context.worlds[id.id];
+	}
+
+	MapId get_map_at_position(WorldId world, const Vec2i& position) {
+		const tiled::World& w = _get_world(world);
+		for (const tiled::WorldMap& m : w.maps) {
+			if (position.x < m.x) continue;
+			if (position.y < m.y) continue;
+			if (position.x > m.x + m.width) continue;
+			if (position.y > m.y + m.height) continue;
+			return { .id = (uint16_t)m.map_id };
+		}
+		return {};
+	}
+
+	Vec2i get_position_of_map(WorldId world, MapId map) {
+		const tiled::World& w = _get_world(world);
+		for (const tiled::WorldMap& m : w.maps) {
+			if (m.map_id != map.id) continue;
+			return { m.x, m.y };
+		}
+		return Vec2i::ZERO;
+	}
+
 	MapId get_map(std::string_view path) {
 		const std::string normalized_path = files::get_normalized_path(path);
 		for (uint16_t id = 0; id < _tiled_context.maps.size(); ++id) {

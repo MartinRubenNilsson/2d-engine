@@ -101,7 +101,7 @@ namespace engine {
         audio::update();
         console::update((float)_delta_time);
 
-        if (map::is_open()) {
+        if (map::has_current_map()) {
             background::set_type(background::Type::None);
         } else {
             background::set_type(background::Type::MountainDusk);

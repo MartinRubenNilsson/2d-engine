@@ -39,11 +39,11 @@ namespace game {
 		if (pause_menu::show) {
 			pause_menu::update();
 		} else {
-			if (map::is_open() && input::pressed(window::Key::Escape)) {
+			if (map::has_current_map() && input::pressed(window::Key::Escape)) {
 				pause_menu::show = true;
 			}
 		}
-		hud::show = map::is_open();
+		hud::show = map::has_current_map();
 		if (hud::show) {
 			hud::update();
 		}

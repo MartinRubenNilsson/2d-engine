@@ -11,6 +11,8 @@ namespace ecs {
 	/// WORLDS
 
 	WorldId get_world(std::string_view path);
+	MapId get_map_at_position(WorldId world, const Vec2i& position); // position in pixels
+	Vec2i get_position_of_map(WorldId world, MapId map); // position in pixels
 
 	/// MAPS
 

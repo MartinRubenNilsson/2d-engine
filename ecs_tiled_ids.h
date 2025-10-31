@@ -4,21 +4,21 @@ namespace ecs {
 	struct WorldId {
 		uint16_t id = UINT16_MAX;
 
-		operator bool() const; // checks if the ID is valid
+		explicit operator bool() const; // checks if the ID is valid
 		auto operator<=>(const WorldId&) const = default;
 	};
 
 	struct MapId {
 		uint16_t id = UINT16_MAX;
 
-		operator bool() const; // checks if the ID is valid
+		explicit operator bool() const; // checks if the ID is valid
 		auto operator<=>(const MapId&) const = default;
 	};
 
 	struct TilesetId {
 		uint16_t id = UINT16_MAX;
 
-		operator bool() const; // checks if the ID is valid
+		explicit operator bool() const; // checks if the ID is valid
 		auto operator<=>(const TilesetId&) const = default;
 	};
 
@@ -49,7 +49,7 @@ namespace ecs {
 	struct ObjectId {
 		uint32_t id = UINT32_MAX;
 
-		operator bool() const; // checks if the ID is valid
+		explicit operator bool() const; // checks if the ID is valid
 		auto operator<=>(const ObjectId&) const = default;
 	};
 }

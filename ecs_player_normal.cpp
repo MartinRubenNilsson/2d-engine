@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ecs_player_types.h"
 #include "ecs_states.h"
-#include "ecs_tiled.h"
+#include "ecs_tags.h"
 #include "ecs_animations.h"
 #include "ecs_physics.h"
 #include "ecs_bomb.h"
@@ -46,6 +46,8 @@ namespace ecs {
 		// Figure out if we're touching anything in the direction of motion.
 		bool touching_something_in_dir = false;
 		for (const b2ContactData& contact : get_contacts(body)) {
+			const Tag other_tag = get_tag(get_entity(b2Shape_GetBody(contact.shapeIdB)));
+			if (other_tag == Tag::Bounds) continue;
 			const Direction contact_dir = to_cardinal(contact.manifold.normal);
 			touching_something_in_dir = (contact_dir == dir);
 		}

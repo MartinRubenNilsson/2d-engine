@@ -120,30 +120,39 @@ namespace ecs {
 
 	void setup_physics(MapId map) {
 
-		// Setup map bounds static colliders.
+		// Setup map bounds.
 		{
-			constexpr float THICKNESS = 16.f; // one full tile
+			constexpr Vec2f MARGIN = { 4.f, 4.f };
+			constexpr Vec2f OFFSET = { 0.f, 4.f };
+			constexpr Vec2f THICKNESS = { 16.f, 16.f }; // one full tile
 
 			const Vec2f map_size = get_size_in_pixels(map);
 
-			const Rect2f left_box = {
-				.min = { -THICKNESS, -THICKNESS },
-				.max = { 0.f, map_size.y + THICKNESS } };
-			const Rect2f right_box = {
-				.min = { map_size.x, -THICKNESS },
-				.max = { map_size.x + THICKNESS, map_size.y + THICKNESS } };
-			const Rect2f top_box = {
-				.min = { -THICKNESS, -THICKNESS },
-				.max = { map_size.x + THICKNESS, 0.f } };
-			const Rect2f bottom_box = {
-				.min = { -THICKNESS, map_size.y },
-				.max = { map_size.x + THICKNESS, map_size.y + THICKNESS } };
+			const Rect2f inner_box = {
+				.min = -MARGIN + OFFSET,
+				.max = map_size + MARGIN + OFFSET };
+			const Rect2f outer_box = {
+				.min = inner_box.min - THICKNESS,
+				.max = inner_box.max + THICKNESS };
 
-			entt::entity entity = _registry.create();
-			_emplace_static_box_body(entity, left_box);
-			_emplace_static_box_body(entity, right_box);
-			_emplace_static_box_body(entity, top_box);
-			_emplace_static_box_body(entity, bottom_box);
+			const Rect2f left_box = {
+				.min = outer_box.min,
+				.max = { inner_box.min.x, outer_box.max.y } };
+			const Rect2f right_box = {
+				.min = { inner_box.max.x, outer_box.min.y },
+				.max = outer_box.max };
+			const Rect2f top_box = {
+				.min = outer_box.min,
+				.max = { outer_box.max.x, inner_box.min.y } };
+			const Rect2f bottom_box = {
+				.min = { outer_box.min.x, inner_box.max.y },
+				.max = outer_box.max };
+
+			for (const Rect2f& box : { left_box, right_box, top_box, bottom_box }) {
+				entt::entity entity = _registry.create();
+				set_tag(entity, Tag::Bounds);
+				_emplace_static_box_body(entity, box);
+			}
 		}
 
 		const Vec2u map_tile_size = get_tile_size(map);

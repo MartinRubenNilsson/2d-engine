@@ -3,6 +3,7 @@
 namespace ecs {
 	enum class Tag {
 		None,
+		Bounds, // map bounds
 		Collider, // static level geometry
 		Player,
 		Slime,
