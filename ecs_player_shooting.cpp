@@ -4,6 +4,7 @@
 #include "ecs_tiled.h"
 #include "ecs_animations.h"
 #include "ecs_arrow.h"
+#include "ecs_audio.h"
 #include "input.h"
 #include "audio.h"
 
@@ -20,7 +21,7 @@ namespace ecs {
 		anim.set_loop(false);
 		const float anim_duration = get_animation_duration(tile);
 		transition_to_state_later(entity, "normal", anim_duration);
-		audio::create_event("event:/player/arrow/load");
+		play_audio_at("event:/player/arrow/load", entity);
 	}
 
 	void _player_update_shooting(entt::entity entity, float dt) {
@@ -44,11 +45,14 @@ namespace ecs {
 		}
 		// Shoot arrow.
 		Player& player = _registry.get<Player>(entity);
-		const Vec2f pos = b2Body_GetWorldCenterOfMass(_registry.get<b2BodyId>(entity));
+		const Vec2f player_pos = b2Body_GetWorldCenterOfMass(_registry.get<b2BodyId>(entity));
+		const Vec2f arrow_pos = player_pos + unit_dir * 16.f;
 		constexpr float ARROW_SPEED = 16.f * 20;
-		create_arrow(pos + unit_dir * 16.f, unit_dir * ARROW_SPEED);
+		const entt::entity arrow_entity = create_arrow(arrow_pos, unit_dir * ARROW_SPEED);
+		if (arrow_entity == entt::null)
+			return;
 		player.arrows--;
-		audio::create_event("event:/player/arrow/shoot");
+		play_attached_audio("event:/player/arrow/shoot", arrow_entity);
 	}
 
 	StateId add_player_shooting_state(StateMachine& sm, StateId parent) {

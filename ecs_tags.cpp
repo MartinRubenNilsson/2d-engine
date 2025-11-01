@@ -3,6 +3,12 @@
 #include "ecs_tiled.h"
 #include <magic_enum/magic_enum_switch.hpp>
 
+template <>
+struct magic_enum::customize::enum_range<ecs::Tag> {
+	static constexpr int min = (int)ecs::Tag::None;
+	static constexpr int max = (int)ecs::Tag::Count;
+};
+
 namespace ecs {
 	Tag to_tag(std::string_view string) {
 		std::string copy{ string };

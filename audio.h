@@ -1,10 +1,6 @@
 #pragma once
 
 namespace audio {
-	extern const std::string_view BUS_MASTER;
-	extern const std::string_view BUS_SOUND;
-	extern const std::string_view BUS_MUSIC;
-
 	extern bool log_errors;
 
 	void startup();
@@ -34,15 +30,20 @@ namespace audio {
 	};
 
 	Handle<Event> create_event(std::string_view path, const EventOptions&& desc = {});
-	void stop_event(Handle<Event> handle);
-	void set_event_volume(Handle<Event> handle, float volume);
-	float get_event_volume(Handle<Event> handle);
-	void set_event_position(Handle<Event> handle, const Vec2f& position);
-	Vec2f get_event_position(Handle<Event> handle);
-	void set_event_parameter_label(Handle<Event> handle, const std::string& name, const std::string& label);
+	bool valid(Handle<Event> event);
+	void stop(Handle<Event> event);
+	void set_volume(Handle<Event> event, float volume);
+	float get_volume(Handle<Event> event);
+	void set_position(Handle<Event> event, const Vec2f& position);
+	Vec2f get_position(Handle<Event> event);
+	void set_parameter_label(Handle<Event> event, const std::string& name, const std::string& label);
 
-	bool set_bus_volume(std::string_view bus_path, float volume);
-	bool get_bus_volume(std::string_view bus_path, float& volume);
-	bool stop_all_in_bus(std::string_view bus_path = BUS_MASTER);
+	extern const std::string_view BUS_MASTER;
+	extern const std::string_view BUS_SOUND;
+	extern const std::string_view BUS_MUSIC;
+
+	void set_bus_volume(std::string_view bus_path, float volume);
+	float get_bus_volume(std::string_view bus_path);
+	void stop_all_in_bus(std::string_view bus_path = BUS_MASTER);
 }
 

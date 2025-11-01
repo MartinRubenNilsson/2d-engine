@@ -85,7 +85,7 @@ namespace map {
 			console::log_error("Failed to open map: " + std::string(map_path));
 			return false;
 		}
-		open(map, callback);
+		return open(map, callback);
 	}
 
 	bool close(TransitionCallback callback) {

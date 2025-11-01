@@ -111,7 +111,7 @@ namespace ecs {
 		const std::string terrain(to_string(get_terrain_at(pos)));
 		if (anim.frame_changed() && anim.get_frame() < UINT_MAX && anim.get_frame() % 3 == 0) {
 			Handle<audio::Event> ev = audio::create_event("event:/snd_footstep");
-			audio::set_event_parameter_label(ev, "terrain", terrain);
+			audio::set_parameter_label(ev, "terrain", terrain);
 		}
 
 		// Update postprocessing. TODO: this should be in another place

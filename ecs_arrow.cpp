@@ -8,19 +8,21 @@
 #include "ecs_physics_filters.h"
 #include "ecs_physics_events.h"
 #include "ecs_damage.h"
+#include "ecs_audio.h"
 #include "tile_ids.h"
-#include "audio.h"
 
 namespace ecs {
 	extern entt::registry _registry;
 
 	void _arrow_handle_touch(const TouchEvent& ev) {
+		const Tag other_tag = get_tag(ev.other_entity);
 		if (ev.type == TouchEventType::ContactBegin) {
-			// Destroy the arrow and apply damage to the other entity
 			destroy_later(ev.entity);
+			if (other_tag == Tag::Bounds)
+				return;
+			// Deal damage to the other entity.
 			deal_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
-			const Vec2f position = b2Body_GetWorldCenterOfMass(ev.body);
-			audio::create_event("event:/player/arrow/impact", { .position = position });
+			play_audio_at("event:/player/arrow/impact", ev.entity);
 		}
 	}
 

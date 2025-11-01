@@ -3,6 +3,8 @@
 #include "ecs_tags.h"
 #include "ecs_tiled.h"
 #include "audio.h"
+#include "sprites.h"
+#include "console.h"
 
 namespace ecs {
 	struct AudioListener {}; // Acts like a tag.
@@ -14,10 +16,31 @@ namespace ecs {
 		_registry.emplace<AudioListener>(entity);
 	}
 
-	void _update_audio_listeners(float dt) {
-		for (auto [entity, body] : _registry.view<AudioListener, b2BodyId>().each()) {
-			const Vec2f pos = b2Body_GetWorldCenterOfMass(body);
-			audio::set_listener_position(pos);
+	Vec2f _determine_audio_position(entt::entity entity) {
+		if (!_registry.valid(entity)) {
+			console::log_error("Error: Trying to determine audio position for an invalid entity.");
+			return Vec2f::ZERO;
+		}
+		// 1. Try the body center.
+		if (const b2BodyId* body = _registry.try_get<b2BodyId>(entity)) {
+			return b2Body_GetWorldCenterOfMass(*body);
+		}
+		// 2. Try the sprite center.
+		if (const sprites::Sprite* sprite = _registry.try_get<sprites::Sprite>(entity)) {
+			return sprite->position + sprite->size * 0.5f; // center of sprite
+		}
+		// 3. Try the object center.
+		if (const ObjectId* object = _registry.try_get<ObjectId>(entity)) {
+			return get_center(*object);
+		}
+		console::log_error("Error: Could not determine audio position for entity = " + std::to_string((ENTT_ID_TYPE)entity));
+		return Vec2f::ZERO;
+	}
+
+	void _update_audio_listeners() {
+		for (auto [entity] : _registry.view<AudioListener>().each()) {
+			const Vec2f position = _determine_audio_position(entity);
+			audio::set_listener_position(position);
 		}
 	}
 
@@ -30,11 +53,54 @@ namespace ecs {
 		}
 	}
 
+	Handle<audio::Event> play_audio_at(std::string_view event_path, const Vec2f& position) {
+		return audio::create_event(event_path, { .position = position });
+	}
+
+	Handle<audio::Event> play_audio_at(std::string_view event_path, entt::entity entity) {
+		const Vec2f position = _determine_audio_position(entity);
+		return play_audio_at(event_path, position);
+	}
+
+	struct AttachedAudio {
+		std::vector<Handle<audio::Event>> events;
+	};
+
+	Handle<audio::Event> play_attached_audio(std::string_view event_path, entt::entity entity) {
+		if (!_registry.valid(entity))
+			return {};
+		const Vec2f position = _determine_audio_position(entity);
+		const Handle<audio::Event> event = audio::create_event(event_path, { .position = position });
+		if (event == Handle<audio::Event>())
+			return event;
+		AttachedAudio& attached = _registry.get_or_emplace<AttachedAudio>(entity);
+		attached.events.push_back(event);
+		return event;
+	}
+
+	void _update_attached_audio() {
+		for (auto [entity, attached] : _registry.view<AttachedAudio>().each()) {
+			if (attached.events.empty())
+				continue;
+			const Vec2f position = _determine_audio_position(entity);
+			for (auto it = attached.events.begin(); it != attached.events.end();) {
+				const Handle<audio::Event> event = *it;
+				if (!audio::valid(event)) {
+					it = attached.events.erase(it);
+					continue;
+				}
+				audio::set_position(event, position);
+				it++;
+			}
+		}
+	}
+
 	void setup_audio() {
 		_setup_audio_sources();
 	}
 
-	void update_audio(float dt) {
-		_update_audio_listeners(dt);
+	void update_audio() {
+		_update_audio_listeners();
+		_update_attached_audio();
 	}
 }

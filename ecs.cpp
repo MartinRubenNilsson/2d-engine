@@ -136,7 +136,7 @@ namespace ecs {
 		_update_engine_logic(dt);
 		_update_game_graphics(dt);
 		_update_engine_graphics(dt);
-		update_audio(dt);
+		update_audio();
 	}
 
 	Rect2f get_camera_view() {

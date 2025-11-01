@@ -61,7 +61,7 @@ namespace ecs {
 	void _stop_extending_blade_trap(entt::entity entity) {
 		BladeTrap& trap = _registry.get<BladeTrap>(entity);
 		// Stop playing extension sound.
-		audio::stop_event(trap.audio_event);
+		audio::stop(trap.audio_event);
 	}
 
 	void _start_impacting_blade_trap(entt::entity entity) {
@@ -111,7 +111,7 @@ namespace ecs {
 			.magnitude = 6.f,
 			.exponent = 2.f });
 		// Stop playing retraction sound.
-		audio::stop_event(trap.audio_event);
+		audio::stop(trap.audio_event);
 		// Play reset sound.
 		audio::create_event("event:/blade_trap/reset", { .position = trap.start_position });
 	}
@@ -183,7 +183,7 @@ namespace ecs {
 			blade_trap.update_count++;
 			// Update audio position.
 			if (blade_trap.audio_event != Handle<audio::Event>()) {
-				audio::set_event_position(blade_trap.audio_event, b2Body_GetWorldCenterOfMass(body));
+				audio::set_position(blade_trap.audio_event, b2Body_GetWorldCenterOfMass(body));
 			}
 		}
 	}

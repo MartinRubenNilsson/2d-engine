@@ -17,12 +17,12 @@ namespace ecs {
 			return;
 		PushableBlock& pushable = _registry.get<PushableBlock>(ev.entity);
 		if (ev.type == TouchEventType::ContactBegin) {
-			audio::stop_event(pushable.stone_sliding_sound); // defensive
+			audio::stop(pushable.stone_sliding_sound); // defensive
 			pushable.stone_sliding_sound = audio::create_event("event:/props/stone_slide");
 		}
 		if (ev.type == TouchEventType::ContactEnd) {
 			b2Body_SetLinearVelocity(ev.body, Vec2f::ZERO);
-			audio::stop_event(pushable.stone_sliding_sound);
+			audio::stop(pushable.stone_sliding_sound);
 		}
 	}
 

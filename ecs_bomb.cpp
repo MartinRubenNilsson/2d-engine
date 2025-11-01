@@ -33,7 +33,7 @@ namespace ecs {
             }
 
             const Vec2f center = b2Body_GetPosition(body);
-            audio::set_event_position(bomb.fuse_sound, center);
+            audio::set_position(bomb.fuse_sound, center);
 
             if (!bomb.explosion_timer.finished()) continue;
 
@@ -43,7 +43,7 @@ namespace ecs {
             create_vfx(VfxType::Explosion, center);
             destroy_later(entity);
             audio::create_event("event:/snd_bomb_explosion", { .position = center });
-            audio::stop_event(bomb.fuse_sound);
+            audio::stop(bomb.fuse_sound);
             postprocessing::add_shockwave(center);
         }
     }
