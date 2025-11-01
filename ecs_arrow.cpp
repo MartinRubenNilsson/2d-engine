@@ -22,7 +22,7 @@ namespace ecs {
 				return;
 			// Deal damage to the other entity.
 			deal_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
-			play_audio_at("event:/player/arrow/impact", ev.entity);
+			play_audio_from("event:/player/arrow/impact", ev.entity);
 		}
 	}
 

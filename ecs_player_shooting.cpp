@@ -21,7 +21,7 @@ namespace ecs {
 		anim.set_loop(false);
 		const float anim_duration = get_animation_duration(tile);
 		transition_to_state_later(entity, "normal", anim_duration);
-		play_audio_at("event:/player/arrow/load", entity);
+		play_audio_from("event:/player/arrow/load", entity);
 	}
 
 	void _player_update_shooting(entt::entity entity, float dt) {

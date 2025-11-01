@@ -24,13 +24,13 @@ namespace ecs {
 		swap(contact.manifold);
 	}
 
-	void _on_destroy_b2BodyId(entt::registry& registry, entt::entity entity) {
+	void _on_destroy_body(entt::registry& registry, entt::entity entity) {
 		b2DestroyBody(registry.get<b2BodyId>(entity));
 	}
 
 	extern entt::registry _registry;
 
-	void _clone_b2BodyId(entt::entity clone, const void* component) {
+	void _clone_body(entt::entity clone, const void* component) {
 		b2BodyId body = *(b2BodyId*)component;
 		b2BodyDef body_def = get_def(body);
 		b2BodyId body_clone = emplace_body(clone, body_def);
@@ -54,12 +54,12 @@ namespace ecs {
 		b2WorldDef def = b2DefaultWorldDef();
 		def.gravity = Vec2f::ZERO; // no gravity
 		_physics_world = b2CreateWorld(&def);
-		_registry.on_destroy<b2BodyId>().connect<_on_destroy_b2BodyId>();
-		set_cloning_handler(entt::type_id<b2BodyId>(), _clone_b2BodyId);
+		_registry.on_destroy<b2BodyId>().connect<_on_destroy_body>();
+		set_cloning_handler(entt::type_id<b2BodyId>(), _clone_body);
 	}
 
 	void shutdown_physics() {
-		_registry.on_destroy<b2BodyId>().disconnect<_on_destroy_b2BodyId>();
+		_registry.on_destroy<b2BodyId>().disconnect<_on_destroy_body>();
 		b2DestroyWorld(_physics_world);
 		_physics_world = b2_nullWorldId;
 	}

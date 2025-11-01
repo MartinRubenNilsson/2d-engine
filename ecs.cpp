@@ -26,6 +26,7 @@
 namespace ecs {
 	void _startup_engine() {
 		startup_physics();
+		startup_audio();
 		startup_tiled();
 	}
 
@@ -40,6 +41,7 @@ namespace ecs {
 
 	void shutdown() {
 		clear();
+		shutdown_audio();
 		shutdown_physics();
 	}
 
