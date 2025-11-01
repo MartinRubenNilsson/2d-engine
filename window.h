@@ -17,6 +17,8 @@ namespace window {
 	bool minimized();
 	void set_fullscreen(bool fullscreen);
 	bool get_fullscreen();
+	void set_position(const Vec2i& position);
+	Vec2i get_position();
 	void set_size(const Vec2i& size);
 	Vec2i get_size();
 	Vec2i get_framebuffer_size();

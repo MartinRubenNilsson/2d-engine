@@ -168,6 +168,16 @@ namespace window {
 		return glfwGetWindowMonitor(_window) != nullptr;
 	}
 
+	void set_position(const Vec2i& position) {
+		glfwSetWindowPos(_window, position.x, position.y);
+	}
+
+	Vec2i get_position() {
+		Vec2i position{};
+		glfwGetWindowPos(_window, &position.x, &position.y);
+		return position;
+	}
+
 	void set_size(const Vec2i& size) {
 		glfwSetWindowSize(_window, size.x, size.y);
 	}
