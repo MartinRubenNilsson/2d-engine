@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "map.h"
-#include "files.h"
 #include "console.h"
 #include "audio.h"
 #include "ui_textboxes.h"
@@ -8,8 +7,6 @@
 #include "ecs_tiled.h"
 
 namespace map {
-	bool debug = false;
-
 	ecs::MapId _current_map{};
 
 	bool has_current_map() {
@@ -31,7 +28,83 @@ namespace map {
 	ecs::MapId _next_map{};
 	float _transition_duration = -1.f; // negative when not transitioning; zero when transitioning instantly; otherwise positive
 	float _transition_progress = 1.f; // -1 to 1
-	void (*on_transition_complete)() = nullptr;
+	TransitionCallback _transition_callback = nullptr;
+
+	enum class TransitionType {
+		Open,
+		Close,
+		Reset,
+	};
+
+	struct TransitionOptions {
+		TransitionType type = TransitionType::Open;
+		ecs::MapId map{}; // Only used when type is Open.
+		TransitionCallback callback = nullptr;
+	};
+
+	bool _transition(const TransitionOptions& options) {
+		if (_transition_duration >= 0.f)
+			return false; // already transitioning
+		switch (options.type) {
+		case TransitionType::Open: {
+			if (options.map == _current_map)
+				return false;
+			_next_map = options.map;
+		} break;
+		case TransitionType::Close: {
+			if (!_current_map)
+				return false;
+		} break;
+		case TransitionType::Reset: {
+			if (!_current_map)
+				return false;
+			_next_map = _current_map;
+		} break;
+		default:
+			return false; // Should never happen.
+		}
+		constexpr float TRANSITION_DURATION = 0.7f; // seconds
+		_transition_duration = TRANSITION_DURATION;
+		_transition_callback = options.callback;
+		return true;
+	}
+
+	bool open(ecs::MapId map, TransitionCallback callback) {
+		if (!map)
+			return false;
+		TransitionOptions options{};
+		options.type = TransitionType::Open;
+		options.map = map;
+		options.callback = callback;
+		return _transition(options);
+	}
+
+	bool open(std::string_view map_path, TransitionCallback callback) {
+		const ecs::MapId map = ecs::get_map(map_path);
+		if (!map) {
+			console::log_error("Failed to open map: " + std::string(map_path));
+			return false;
+		}
+		open(map, callback);
+	}
+
+	bool close(TransitionCallback callback) {
+		TransitionOptions options{};
+		options.type = TransitionType::Close;
+		options.callback = callback;
+		return _transition(options);
+	}
+
+	bool reset(TransitionCallback callback) {
+		TransitionOptions options{};
+		options.type = TransitionType::Reset;
+		options.callback = callback;
+		return _transition(options);
+	}
+
+	float get_transition_progress() {
+		return (_transition_duration >= 0.f) ? _transition_progress : 0.f;
+	}
 
 	void _show_debug_window(float dt) {
 		ImGui::Begin("Maps");
@@ -41,7 +114,7 @@ namespace map {
 				const bool selected = (map == _current_map);
 				const std::string path(ecs::get_path(map));
 				if (ImGui::Selectable(path.c_str(), selected)) {
-					open(path);
+					open(map);
 				}
 				if (selected) {
 					ImGui::SetItemDefaultFocus();
@@ -54,6 +127,8 @@ namespace map {
 		ImGui::Value("Transition Progress", _transition_progress);
 		ImGui::End();
 	}
+
+	bool debug = false;
 
 	void update(float dt) {
 		if (debug) {
@@ -94,21 +169,24 @@ namespace map {
 
 		ecs::clear();
 
-		if (on_transition_complete) {
-			on_transition_complete();
-			on_transition_complete = nullptr;
+		if (_transition_callback) {
+			_transition_callback();
+			_transition_callback = nullptr;
 		}
 
 		_current_map = _next_map;
 		_next_map = {};
-		
+
 		if (!_current_map) {
 			audio::stop_all_in_bus();
 			return;
 		}
 
 		ecs::setup(_current_map);
-		ecs::update(0.f); // HACK: make sure cameras and such are initialized
+
+		// Make sure all systems have a chance to run right after the setup (and patching) is done.
+		// This ensures all graphics are ready for rendering.
+		ecs::update(0.f);
 
 		const std::string music_event_path(_get_music_event_path_for_map(ecs::get_path(_current_map)));
 		if (!music_event_path.empty()) {
@@ -117,80 +195,5 @@ namespace map {
 				audio::create_event(music_event_path);
 			}
 		}
-	}
-
-	enum class TransitionType {
-		Open,
-		Close,
-		Reset,
-	};
-
-	const float DEFAULT_TRANSITION_DURATION = 0.7f; // seconds
-
-	struct TransitionOptions {
-		TransitionType type = TransitionType::Open;
-		std::string_view path; // Only used when type is Open.
-		float duration = DEFAULT_TRANSITION_DURATION; // In seconds; set to 0 to make the transition instant.
-		void(*on_complete)() = nullptr;
-	};
-
-	bool _transition(const TransitionOptions& options) {
-		if (_transition_duration >= 0.f)
-			return false; // already transitioning
-		switch (options.type) {
-		case TransitionType::Open: {
-			const ecs::MapId map = ecs::get_map(options.path);
-			if (!map) {
-				console::log_error("Map not found: " + std::string(options.path));
-				return false;
-			}
-			if (map == _current_map)
-				return false;
-			_next_map = map;
-		} break;
-		case TransitionType::Close: {
-			if (!_current_map)
-				return false;
-		} break;
-		case TransitionType::Reset: {
-			if (!_current_map)
-				return false;
-			_next_map = _current_map;
-		} break;
-		default:
-			return false;
-		}
-		_transition_duration = std::max(options.duration, 0.f);
-		on_transition_complete = options.on_complete;
-		return true;
-	}
-
-	bool open(std::string_view path, void(*on_complete)(), float duration) {
-		TransitionOptions options{};
-		options.type = TransitionType::Open;
-		options.path = path;
-		options.duration = duration;
-		options.on_complete = on_complete;
-		return _transition(options);
-	}
-
-	bool close(void(*on_complete)(), float duration) {
-		TransitionOptions options{};
-		options.type = TransitionType::Close;
-		options.duration = duration;
-		options.on_complete = on_complete;
-		return _transition(options);
-	}
-
-	bool reset(void(*on_complete)(), float duration) {
-		TransitionOptions options{};
-		options.type = TransitionType::Reset;
-		options.duration = duration;
-		options.on_complete = on_complete;
-		return _transition(options);
-	}
-
-	float get_transition_progress() {
-		return (_transition_duration >= 0.f) ? _transition_progress : 0.f;
 	}
 }

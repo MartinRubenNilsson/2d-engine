@@ -28,6 +28,7 @@ namespace window {
 	void set_cursor_pos(const Vec2d& pos);
 	Vec2d get_cursor_pos();
 
+	// TODO: these belong somewhere else
 	enum class CursorShape {
 		// STANDARD CURSORS
 

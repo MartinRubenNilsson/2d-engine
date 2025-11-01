@@ -3,8 +3,8 @@
 
 namespace ecs {
 	struct Patch {
-		MapId map{}; // The map being patched.
 		Vec2f player_position = Vec2f::MAX;
+		Direction player_direction = Direction::S;
 		std::string portal_to_exit; // The name of the portal the player should exit.
 		std::unordered_set<entt::entity> entities_to_destroy;
 		std::unordered_set<entt::entity> chests_to_open;

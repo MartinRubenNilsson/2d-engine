@@ -53,8 +53,11 @@ namespace console {
 		create_command({
 			.name = "open_map",
 			.desc = "Opens a map",
-			.params = { { ParamType::String, "name", "The name of the map" } },
-			.execute = [](Args args) { map::open(get_string(args[0])); }
+			.params = { { ParamType::String, "path", "The path of the map" } },
+			.execute = [](Args args) {
+				const std::string_view path = get_string(args[0]);
+				map::open(path);
+			}
 			});
 		create_command({
 			.name = "close_map",
