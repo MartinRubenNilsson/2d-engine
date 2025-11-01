@@ -7,14 +7,7 @@
 #include "console.h"
 
 namespace ecs {
-	struct AudioListener {}; // Acts like a tag.
-
 	extern entt::registry _registry;
-
-	void set_audio_listener(entt::entity entity) {
-		_registry.clear<AudioListener>(); // There can only be one audio listener at a time.
-		_registry.emplace<AudioListener>(entity);
-	}
 
 	Vec2f _get_position_for_audio(entt::entity entity) {
 		if (!_registry.valid(entity)) {
@@ -35,6 +28,13 @@ namespace ecs {
 		}
 		console::log_error("Error: Could not determine suitable audio position for entity = " + std::to_string((ENTT_ID_TYPE)entity));
 		return Vec2f::ZERO;
+	}
+
+	struct AudioListener {}; // Acts like a tag.
+
+	void set_audio_listener(entt::entity entity) {
+		_registry.clear<AudioListener>(); // There can only be one audio listener at a time.
+		_registry.emplace<AudioListener>(entity);
 	}
 
 	void _update_audio_listeners() {
