@@ -122,9 +122,10 @@ namespace engine {
         }
 
         if (should_update_game) {
-            _game_time += _delta_time;
-            ecs::update((float)_delta_time);
-            postprocessing::update((float)_delta_time);
+            const double game_delta_time = _delta_time;
+            _game_time += game_delta_time;
+            ecs::update((float)game_delta_time);
+            postprocessing::update((float)game_delta_time);
         }
 
         ui::update((float)_delta_time);

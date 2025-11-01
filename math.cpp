@@ -128,6 +128,10 @@ Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max) {
 	return { std::clamp(v.x, min.x, max.x), std::clamp(v.y, min.y, max.y) };
 }
 
+Rect2f lerp(const Rect2f& a, const Rect2f& b, float t) {
+	return { lerp(a.min, b.min, t), lerp(a.max, b.max, t) };
+}
+
 bool convex(std::span<const Vec2f> polygon) {
 	float first_nonzero_det = 0;
 	const size_t vertex_count = polygon.size();

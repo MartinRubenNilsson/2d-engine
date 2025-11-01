@@ -159,14 +159,13 @@ namespace ecs {
 
 			_emplace_player_state_machine(entity);
 
-			{
-				Camera camera{};
-				camera.confines_min = Vec2f::ZERO;
-				camera.confines_max = map_size_in_pixels;
-				camera.entity_to_follow = entity;
-				emplace_camera(entity, camera);
-				activate_camera(entity, true);
-			}
+			emplace_camera(entity, {
+				.bounds = {
+					.min = Vec2f::ZERO,
+					.max = map_size_in_pixels },
+				.entity_to_follow = entity,
+				});
+			activate_camera(entity, true);
 		}
 	}
 

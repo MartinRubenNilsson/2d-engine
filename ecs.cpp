@@ -140,11 +140,7 @@ namespace ecs {
 	}
 
 	Rect2f get_camera_view() {
-		Vec2f center, size;
-		ecs::get_blended_camera_view(center, size);
-		Rect2f view{};
-		view.min = center - size / 2.f;
-		view.max = center + size / 2.f;
+		Rect2f view = ecs::get_blended_camera_view();
 		view.min = round(view.min); // snap to pixel
 		view.max = round(view.max); // snap to pixel
 		return view;

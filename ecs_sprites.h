@@ -38,7 +38,8 @@ namespace ecs {
 	// Loading the texture (or fetching it if already loaded) can be expensive
 	// or maybe not desired (if we have tileset variants), so it is optional.
 	void setup_sprite(sprites::Sprite& sprite, TileId tile, bool load_texture);
+
 	void setup_sprites(MapId map);
 	void update_sprites(float dt);
-	void draw_sprites_now(const Vec2f& camera_min, const Vec2f& camera_max);
+	void draw_sprites_now(const Rect2f& view);
 }

@@ -17,6 +17,7 @@ namespace ecs {
 		Chest,
 		Camera,
 		AudioSource,
+		Count,
 	};
 
 	template <Tag tag>

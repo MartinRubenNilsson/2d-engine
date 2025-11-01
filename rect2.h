@@ -15,10 +15,12 @@ struct Rect2 {
 
 	static const Rect2 ZERO;
 	static const Rect2 EMPTY;
+	static const Rect2 FULL;
 };
 
 template <typename T> const Rect2<T> Rect2<T>::ZERO{ Vec2<T>::ZERO, Vec2<T>::ZERO };
 template <typename T> const Rect2<T> Rect2<T>::EMPTY{ Vec2<T>::MAX, Vec2<T>::MIN };
+template <typename T> const Rect2<T> Rect2<T>::FULL{ Vec2<T>::MIN, Vec2<T>::MAX };
 
 template <typename T>
 bool empty(const Vec2<T>& min, const Vec2<T>& max) {

@@ -46,7 +46,11 @@ Vec2f lerp_polar(const Vec2f& a, const Vec2f& b, float t);
 Vec2f damp(const Vec2f& a, const Vec2f& b, float damping, float dt); // time-dependent damping
 Vec2f clamp(const Vec2f& v, const Vec2f& min, const Vec2f& max);
 
+// RECTS
+
+Rect2f lerp(const Rect2f& a, const Rect2f& b, float t);
+
 // COMPUTATIONAL GEOMETRY
 
 bool convex(std::span<const Vec2f> polygon);
-std::vector<Vec2f> triangulate(std::span<const Vec2f>polygon); // Returns a list of triangles.
+std::vector<Vec2f> triangulate(std::span<const Vec2f> polygon); // Returns a list of triangles.
