@@ -72,7 +72,7 @@ namespace ecs {
 	}
 
 	void _update_tile_animations(float dt) {
-		for (auto [entity, tile, animation] : _registry.view<const TileId, TileAnimation>().each()) {
+		for (auto [entity, tile, animation] : _registry.view<TileId, TileAnimation>().each()) {
 
 			if (!tile) continue;
 

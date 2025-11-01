@@ -9,7 +9,7 @@
 #include "ecs_physics_events.h"
 #include "ecs_damage.h"
 #include "ecs_audio.h"
-#include "tile_ids.h"
+#include "ecs_animations.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -30,14 +30,22 @@ namespace ecs {
 		entt::entity entity = _registry.create();
 		set_tag(entity, Tag::Arrow);
 		const Vec2f tile_center = { 8.f, 8.f };
-		const Vec2f position_to_top_left = -tile_center - Vec2f(0.f, 16.f);
-		if (const TilesetId tileset = get_tileset("items1")) {
-			if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_SPEAR)) {
+		const Vec2f position_to_top_left = -tile_center - Vec2f(0.f, 12.f);
+		if (const TilesetId tileset = get_tileset("arrow")) {
+			if (TileId tile = get_tile(tileset, 0)) {
+				switch (to_cardinal(velocity)) {
+					case Direction::E: break;
+					case Direction::W: tile.flipped_horizontally = true; break;
+					case Direction::S: tile.flipped_diagonally = true; break;
+					case Direction::N: tile.flipped_diagonally = true; tile.flipped_vertically = true; break;
+				}
+				_registry.emplace<TileId>(entity, tile);
 				sprites::Sprite& sprite = emplace_sprite(entity);
 				setup_sprite(sprite, tile, true);
 				sprite.position = position + position_to_top_left;
 				sprite.sorting_layer = get_object_layer();
 				sprite.sorting_point = tile_center;
+				emplace_tile_animation(entity);
 			}
 		}
 		{
