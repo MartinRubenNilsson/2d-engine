@@ -29,7 +29,7 @@ namespace audio {
 		bool release = true;
 	};
 
-	Handle<Event> create_event(std::string_view path, const EventOptions&& desc = {});
+	Handle<Event> create_event(std::string_view path, const EventOptions&& options = {});
 	bool valid(Handle<Event> event);
 	void stop(Handle<Event> event);
 	void set_volume(Handle<Event> event, float volume);
