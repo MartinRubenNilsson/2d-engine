@@ -19,6 +19,8 @@ namespace ecs {
 			// Destroy the arrow and apply damage to the other entity
 			destroy_later(ev.entity);
 			deal_damage(ev.other_entity, { .type = DamageType::Projectile, .amount = 1 });
+			const Vec2f position = b2Body_GetWorldCenterOfMass(ev.body);
+			audio::create_event("event:/player/arrow/impact", { .position = position });
 		}
 	}
 
@@ -51,7 +53,6 @@ namespace ecs {
 			b2CreateCircleShape(body, &shape_def, &circle);
 		}
 		set_touch_event_handler(entity, _arrow_handle_touch);
-		audio::create_event("event:/snd_fire_arrow", { .position = position });
 		return entity;
 	}
 }

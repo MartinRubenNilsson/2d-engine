@@ -5,6 +5,7 @@
 #include "ecs_animations.h"
 #include "ecs_arrow.h"
 #include "input.h"
+#include "audio.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -19,6 +20,7 @@ namespace ecs {
 		anim.set_loop(false);
 		const float anim_duration = get_animation_duration(tile);
 		transition_to_state_later(entity, "normal", anim_duration);
+		audio::create_event("event:/player/arrow/load");
 	}
 
 	void _player_update_shooting(entt::entity entity, float dt) {
@@ -46,6 +48,7 @@ namespace ecs {
 		constexpr float ARROW_SPEED = 16.f * 20;
 		create_arrow(pos + unit_dir * 16.f, unit_dir * ARROW_SPEED);
 		player.arrows--;
+		audio::create_event("event:/player/arrow/shoot");
 	}
 
 	StateId add_player_shooting_state(StateMachine& sm, StateId parent) {
