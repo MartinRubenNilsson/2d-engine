@@ -143,25 +143,29 @@ namespace window {
 	}
 
 	void set_fullscreen(bool fullscreen) {
-		if (fullscreen == get_fullscreen()) return;
+		if (fullscreen == get_fullscreen())
+			return;
 		static int last_windowed_xpos = 0;
 		static int last_windowed_ypos = 0;
 		static int last_windowed_width = 0;
 		static int last_windowed_height = 0;
-		if (fullscreen) {
-			GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
-			if (!primary_monitor) return;
-			const GLFWvidmode* video_mode = glfwGetVideoMode(primary_monitor);
-			if (!video_mode) return;
-			glfwGetWindowPos(_window, &last_windowed_xpos, &last_windowed_ypos);
-			glfwGetWindowSize(_window, &last_windowed_width, &last_windowed_height);
-			glfwSetWindowMonitor(_window, primary_monitor,
-				0, 0, video_mode->width, video_mode->height, video_mode->refreshRate);
-		} else {
+		if (!fullscreen) {
 			glfwSetWindowMonitor(_window, nullptr,
-				last_windowed_xpos, last_windowed_ypos,
-				last_windowed_width, last_windowed_height, GLFW_DONT_CARE);
+				last_windowed_xpos,
+				last_windowed_ypos,
+				last_windowed_width,
+				last_windowed_height,
+				GLFW_DONT_CARE);
+			return;
 		}
+		GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
+		if (!primary_monitor) return;
+		const GLFWvidmode* video_mode = glfwGetVideoMode(primary_monitor);
+		if (!video_mode) return;
+		glfwGetWindowPos(_window, &last_windowed_xpos, &last_windowed_ypos);
+		glfwGetWindowSize(_window, &last_windowed_width, &last_windowed_height);
+		glfwSetWindowMonitor(_window, primary_monitor,
+			0, 0, video_mode->width, video_mode->height, video_mode->refreshRate);
 	}
 
 	bool get_fullscreen() {

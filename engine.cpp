@@ -48,6 +48,7 @@ namespace engine {
         ecs::startup();
         settings::load_from_file(settings::APP_SETTINGS_PATH, settings::app_settings);
         settings::apply(settings::app_settings);
+        window::set_position(Vec2i::ZERO);
         window::set_visible(true);
         console::execute(argc, argv);
         _should_run = true;
