@@ -6,6 +6,7 @@ namespace ecs {
 		Bounds, // map bounds
 		Collider, // static level geometry
 		Player,
+		Billboard,
 		Slime,
 		PushableBlock,
 		Bomb,

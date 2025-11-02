@@ -138,7 +138,7 @@
       <Filter>game\ecs\engine\audio</Filter>
     </ClCompile>
     <ClCompile Include="ecs_chest.cpp">
-      <Filter>game\ecs\game\chests</Filter>
+      <Filter>game\ecs\game\interactables\chests</Filter>
     </ClCompile>
     <ClCompile Include="ecs_pickups.cpp">
       <Filter>game\ecs\game\pickups</Filter>
@@ -344,6 +344,9 @@
     </ClCompile>
     <ClCompile Include="window_cursor.cpp">
       <Filter>engine\window</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs_billboards.cpp">
+      <Filter>game\ecs\game\interactables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -564,7 +567,7 @@
       <Filter>game\ecs\engine\audio</Filter>
     </ClInclude>
     <ClInclude Include="ecs_chest.h">
-      <Filter>game\ecs\game\chests</Filter>
+      <Filter>game\ecs\game\interactables\chests</Filter>
     </ClInclude>
     <ClInclude Include="ecs_pickups.h">
       <Filter>game\ecs\game\pickups</Filter>
@@ -734,6 +737,9 @@
     <ClInclude Include="window_cursor.h">
       <Filter>engine\window</Filter>
     </ClInclude>
+    <ClInclude Include="ecs_billboards.h">
+      <Filter>game\ecs\game\interactables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -771,9 +777,6 @@
     </Filter>
     <Filter Include="game\ecs\game\enemies">
       <UniqueIdentifier>{c8484bdc-09b7-4b8c-ac87-16b2f0ccfaac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\ecs\game\chests">
-      <UniqueIdentifier>{56ba1ffe-bcd3-4ab3-ab39-375a42ef707b}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\ecs\game\portals">
       <UniqueIdentifier>{529cdad0-dd89-4b72-b232-eefaadbc77a5}</UniqueIdentifier>
@@ -951,6 +954,12 @@
     </Filter>
     <Filter Include="editor\viewport">
       <UniqueIdentifier>{88ba39c6-9363-438c-af5e-67d9bbe2edf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\interactables">
+      <UniqueIdentifier>{2cec111e-aa98-4c54-b832-42d9a034188c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\ecs\game\interactables\chests">
+      <UniqueIdentifier>{56ba1ffe-bcd3-4ab3-ab39-375a42ef707b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="4">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="5">
  <tileset firstgid="1" source="../../tilesets/summer_forest/summer forest wang tiles.tsx"/>
  <tileset firstgid="2049" source="../../tilesets/summer_forest/summer 32x32.tsx"/>
  <tileset firstgid="2056" source="../../tilesets/characters/player/player.tsx"/>
@@ -7,6 +7,7 @@
  <tileset firstgid="2984" source="../../tilesets/summer_forest/summer forest, tree wall (canopy only).tsx"/>
  <tileset firstgid="3008" source="../../tilesets/summer_forest/summer trees 80x112.tsx"/>
  <tileset firstgid="3011" source="../../tilesets/summer_forest/collision &amp; alpha.tsx"/>
+ <tileset firstgid="3139" source="../../tilesets/props/billboards.tsx"/>
  <layer id="1" name="Tile Layer 1" width="30" height="20">
   <data encoding="csv">
 322,386,258,74,129,321,257,87,330,130,7,264,323,263,8,9,130,130,386,386,386,71,72,195,72,387,327,130,194,194,
@@ -57,6 +58,11 @@
  </layer>
  <objectgroup id="3" name="Object Layer 1">
   <object id="3" template="../../templates/player.tx" x="175.82" y="185.686"/>
+  <object id="4" gid="3143" x="320" y="176" width="16" height="16">
+   <properties>
+    <property name="textbox" value="forest/stonehenge/billboard"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer id="4" name="collision" width="30" height="20" visible="0">
   <data encoding="csv">

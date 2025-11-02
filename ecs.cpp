@@ -22,6 +22,7 @@
 #include "ecs_tasks.h"
 #include "ecs_pushable.h"
 #include "ecs_terrain.h"
+#include "ecs_billboards.h"
 
 namespace ecs {
 	void _startup_engine() {
@@ -67,6 +68,7 @@ namespace ecs {
 		setup_slimes();
 		setup_blade_traps();
 		setup_pushables();
+		setup_billboards();
 	}
 
 	void _setup(MapId map) {

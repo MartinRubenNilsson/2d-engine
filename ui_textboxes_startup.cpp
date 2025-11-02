@@ -44,6 +44,11 @@ namespace textboxes {
 				{ "Yes", [] { map::reset(); } },
 				{ "No", _go_back_to_main_menu } }
 			});
+
+		add_textbox({
+			.path = "forest/stonehenge/billboard",
+			.text = "You are a doofus. A total failure.",
+			});
 	}
 }
 }

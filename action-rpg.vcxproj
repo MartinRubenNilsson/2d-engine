@@ -156,6 +156,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
     <ClCompile Include="console_commands_ui.cpp" />
     <ClCompile Include="direction.cpp" />
     <ClCompile Include="ecs_audio.cpp" />
+    <ClCompile Include="ecs_billboards.cpp" />
     <ClCompile Include="ecs_cloning.cpp" />
     <ClCompile Include="ecs_debugging.cpp" />
     <ClCompile Include="ecs_patch.cpp" />
@@ -294,6 +295,7 @@ xcopy "%SRC%\*.vert" "%DST%\" /Y /I /Q</Command>
   <ItemGroup>
     <ClInclude Include="direction.h" />
     <ClInclude Include="ecs_audio.h" />
+    <ClInclude Include="ecs_billboards.h" />
     <ClInclude Include="ecs_cloning.h" />
     <ClInclude Include="ecs_debugging.h" />
     <ClInclude Include="ecs_patch.h" />
