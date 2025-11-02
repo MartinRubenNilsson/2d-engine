@@ -10,6 +10,7 @@
 #include "ecs_terrain.h"
 #include "input.h"
 #include "audio.h"
+#include "console.h"
 
 namespace ecs {
 	extern entt::registry _registry;
@@ -43,19 +44,20 @@ namespace ecs {
 			dir = to_cardinal(input_dir);
 		}
 
-		// Figure out if we're touching anything in the direction of motion.
-		bool touching_something_in_dir = false;
+		// Figure out if we're pushing anything in the direction of motion.
+		bool pushing_something_in_dir = false;
 		for (const b2ContactData& contact : get_contacts(body)) {
 			const Tag other_tag = get_tag(get_entity(b2Shape_GetBody(contact.shapeIdB)));
 			if (other_tag == Tag::Bounds) continue;
+			if (other_tag == Tag::Collider) continue;
 			const Direction contact_dir = to_cardinal(contact.manifold.normal);
-			touching_something_in_dir = (contact_dir == dir);
+			pushing_something_in_dir = (contact_dir == dir);
 		}
 
 		// Update motion.
 		player.motion = PlayerMotion::Motionless;
 		if (input_dir != Vec2f::ZERO) {
-			if (touching_something_in_dir) {
+			if (pushing_something_in_dir) {
 				player.motion = PlayerMotion::Pushing;
 			} else if (input::down(input::Key::LControl)) {
 				player.motion = PlayerMotion::Sneaking;
