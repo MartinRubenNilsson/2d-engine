@@ -12,48 +12,39 @@
 #include "ecs_tags.h"
 #include "audio.h"
 #include "postprocessing.h"
+#include "timer.h"
+#include "ecs_audio.h"
 
 namespace ecs {
+    struct Bomb {
+        bool ignited = false;
+        Timer explosion_timer = { 3.f };
+        float explosion_radius = 20.f;
+    };
+
     extern entt::registry _registry;
 
-    void update_bombs(float dt) {
-        for (auto [entity, bomb, body] : _registry.view<Bomb, b2BodyId>().each()) {
-
-            if (!bomb.ignited) continue;
-
-            const float progress_before = bomb.explosion_timer.get_progress();
-            bomb.explosion_timer.update(dt);
-            const float progress_after = bomb.explosion_timer.get_progress();
-
-            if (progress_before < 0.5f && progress_after >= 0.5f) {
-                make_sprite_blink(entity, {
-                    .duration = bomb.explosion_timer.get_time_left(),
-                    .interval = 0.2f,
-                    .color = { 255, 0, 0, 255 } });
-            }
-
-            const Vec2f center = b2Body_GetPosition(body);
-            audio::set_position(bomb.fuse_sound, center);
-
-            if (!bomb.explosion_timer.finished()) continue;
-
-            // Explode the bomb
-            deal_damage_in_circle({ DamageType::Explosion, 2, entity }, center, bomb.explosion_radius);
-            add_trauma_to_active_camera(0.8f);
-            create_vfx(VfxType::Explosion, center);
-            destroy_later(entity);
-            audio::create_event("event:/snd_bomb_explosion", { .position = center });
-            audio::stop(bomb.fuse_sound);
-            postprocessing::add_shockwave(center);
-        }
+    bool _handle_damage_to_bomb(entt::entity entity, const DamageEvent& ev) {
+        // DON'T call _explode_bomb() directly here, I got a stack overflow
+        // when two bombs kept on exploding each other in an infinite loop!
+        if (ev.amount <= 0) return false;
+        Bomb* bomb = _registry.try_get<Bomb>(entity);
+        if (!bomb) return false;
+        bomb->explosion_timer.finish();
+        return true;
     }
 
-    Bomb& emplace_bomb(entt::entity entity, const Bomb& bomb) {
-        return _registry.emplace_or_replace<Bomb>(entity, bomb);
+    void emplace_bomb(entt::entity entity) {
+        _registry.emplace_or_replace<Bomb>(entity);
     }
 
-    Bomb* get_bomb(entt::entity entity) {
-        return _registry.try_get<Bomb>(entity);
+    void ignite_bomb(entt::entity entity) {
+        Bomb* bomb = _registry.try_get<Bomb>(entity);
+        if (!bomb) return;
+        if (bomb->ignited) return;
+        bomb->ignited = true;
+        bomb->explosion_timer.start();
+        play_attached_audio("event:/snd_bomb_fuse", entity);
     }
 
     entt::entity create_bomb_at(const Vec2f& position) {
@@ -63,8 +54,6 @@ namespace ecs {
 
         entt::entity entity = _registry.create();
         set_tag(entity, Tag::Bomb);
-        emplace_bomb(entity);
-        ignite_bomb(entity);
         if (const TilesetId tileset = get_tileset("items1")) {
             if (const TileId tile = get_tile(tileset, TILE_ID_ITEM_POTION)) { // placeholder
                 sprites::Sprite& sprite = emplace_sprite(entity);
@@ -86,25 +75,40 @@ namespace ecs {
             circle.radius = 4.f;
             b2CreateCircleShape(body, &shape_def, &circle);
         }
+        set_damage_event_handler(entity, _handle_damage_to_bomb);
+        _registry.emplace<Bomb>(entity);
+        ignite_bomb(entity);
         return entity;
     }
 
-    void ignite_bomb(entt::entity entity) {
-        Bomb* bomb = get_bomb(entity);
-        if (!bomb) return;
-        if (bomb->ignited) return;
-        bomb->ignited = true;
-        bomb->explosion_timer.start();
-        bomb->fuse_sound = audio::create_event("event:/snd_bomb_fuse");
-    }
+    void update_bombs(float dt) {
+        for (auto [entity, bomb, body] : _registry.view<Bomb, b2BodyId>().each()) {
 
-    bool apply_damage_to_bomb(entt::entity entity, const DamageEvent& ev) {
-        // DON'T call _explode_bomb() directly here, I got a stack overflow
-        // when two bombs kept on exploding each other in an infinite loop!
-        if (ev.amount <= 0) return false;
-        Bomb* bomb = get_bomb(entity);
-        if (!bomb) return false;
-        bomb->explosion_timer.finish();
-        return true;
+            if (!bomb.ignited) continue;
+
+            const float progress_before = bomb.explosion_timer.get_progress();
+            bomb.explosion_timer.update(dt);
+            const float progress_after = bomb.explosion_timer.get_progress();
+
+            if (progress_before < 0.5f && progress_after >= 0.5f) {
+                make_sprite_blink(entity, {
+                    .duration = bomb.explosion_timer.get_time_left(),
+                    .interval = 0.2f,
+                    .color = { 255, 0, 0, 255 } });
+            }
+
+            const Vec2f center = b2Body_GetPosition(body);
+
+            if (!bomb.explosion_timer.finished())
+                continue;
+
+            // Explode the bomb
+            deal_damage_in_circle({ DamageType::Explosion, 2, entity }, center, bomb.explosion_radius);
+            add_trauma_to_active_camera(0.8f);
+            create_vfx(VfxType::Explosion, center);
+            destroy_later(entity);
+            play_audio_at("event:/snd_bomb_explosion", center);
+            postprocessing::add_shockwave(center);
+        }
     }
 }
