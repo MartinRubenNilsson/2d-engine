@@ -54,18 +54,21 @@ namespace audio {
 		_events_played_this_frame.clear();
 	}
 
+	// Writes the string plus a null terminator to a static ringbuffer and returns a pointer
+	// to the beginning of the string.
 	const char* _c_str(std::string_view string) {
 		const size_t size = string.size();
 		constexpr size_t BUFFER_SIZE = 512;
 		assert(size + 1 <= BUFFER_SIZE); // +1 to include null terminator
 		static size_t offset = 0;
-		if (offset + size + 1 > BUFFER_SIZE) {
+		if (offset + size + 1 > BUFFER_SIZE) { // +1 to include null terminator
 			offset = 0;
 		}
 		static char buffer[BUFFER_SIZE];
 		char* c_str = buffer + offset;
 		memcpy(c_str, string.data(), size);
 		c_str[size] = '\0';
+		offset += size + 1; // +1 to include null terminator
 		return c_str;
 	}
 
