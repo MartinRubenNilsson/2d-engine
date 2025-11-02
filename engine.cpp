@@ -27,6 +27,13 @@
 namespace engine {
     bool _should_run = false;
 
+    void _load_all_audio_banks() {
+        for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
+            if (file.format != files::FileFormat::FmodStudioBank) continue;
+            audio::load_bank(file.path);
+        }
+    }
+
     void startup(int argc, char* argv[]) {
         setlocale(LC_ALL, "en_US.utf8");
         if (steam::restart_app_if_necessary())
@@ -41,7 +48,11 @@ namespace engine {
         imgui_impl::startup();
         console::startup();
         postprocessing::startup();
+        audio::set_error_message_callback([](std::string_view message) {
+            console::log_error(message);
+            });
         audio::startup();
+        _load_all_audio_banks();
         text::startup_fonts();
         ui::startup();
         ui::game::startup();

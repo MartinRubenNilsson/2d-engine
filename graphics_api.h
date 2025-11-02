@@ -13,7 +13,6 @@ struct ID3D11DeviceContext;
 
 namespace graphics {
 namespace api {
-
 	using DebugMessageCallback = void(*)(std::string_view message);
 
 	void set_debug_message_callback(DebugMessageCallback callback);

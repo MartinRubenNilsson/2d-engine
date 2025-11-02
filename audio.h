@@ -1,9 +1,11 @@
 #pragma once
 
 namespace audio {
-	extern bool log_errors;
+	using ErrorMessageCallback = void(*)(std::string_view message);
 
-	void startup();
+	void set_error_message_callback(ErrorMessageCallback callback);
+
+	bool startup();
 	void shutdown();
 	void update();
 
@@ -12,11 +14,11 @@ namespace audio {
 	void set_listener_position(const Vec2f& position);
 	Vec2f get_listener_position();
 
-	bool set_parameter(std::string_view name, float value);
-	bool get_parameter(std::string_view name, float& value);
-	// TODO: this doesn't work?
-	bool set_parameter_label(const std::string& name, const std::string& label);
-	bool get_parameter_label(const std::string& name, std::string& label);
+	void set_parameter(std::string_view name, float value);
+	void get_parameter(std::string_view name, float& value);
+	void set_parameter_label(std::string_view name, std::string_view label);
+	// The returned string view is only valid until the next call to get_parameter_label().
+	std::string_view get_parameter_label(std::string_view name);
 
 	bool is_any_playing(std::string_view event_path);
 
@@ -36,7 +38,7 @@ namespace audio {
 	float get_volume(Handle<Event> event);
 	void set_position(Handle<Event> event, const Vec2f& position);
 	Vec2f get_position(Handle<Event> event);
-	void set_parameter_label(Handle<Event> event, const std::string& name, const std::string& label);
+	void set_parameter_label(Handle<Event> event, std::string_view name, std::string_view label);
 
 	extern const std::string_view BUS_MASTER;
 	extern const std::string_view BUS_SOUND;

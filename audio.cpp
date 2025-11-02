@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "audio.h"
-#include "files.h"
 #include "pool.h"
-#include "console.h"
 #include <fmod/fmod_studio.h>
 
 #ifdef _DEBUG
@@ -14,47 +12,29 @@
 #endif
 
 namespace audio {
-	bool log_errors =
-#ifdef _DEBUG
-		true;
-#else
-		false;
-#endif
+	ErrorMessageCallback _error_message_callback = nullptr;
 
-	const char* _c_str(std::string_view string) {
-		static char buffer[256];
-		const size_t size = string.size();
-		assert(size + 1 <= std::size(buffer)); // +1 to include null terminator
-		memcpy(buffer, string.data(), size);
-		buffer[size] = '\0';
-		return buffer;
-	}
+#define OUTPUT_ERROR_MESSAGE(message) { if (_error_message_callback) { _error_message_callback(message); } }
 
-	void _load_all_banks() {
-		for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
-			if (file.format != files::FileFormat::FmodStudioBank) continue;
-			audio::load_bank(file.path);
-		}
+	void set_error_message_callback(ErrorMessageCallback callback) {
+		_error_message_callback = callback;
 	}
 
 	FMOD_STUDIO_SYSTEM* _system = nullptr;
 
-	void startup() {
+	bool startup() {
 		FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
-		assert(result == FMOD_OK);
+		if (result != FMOD_OK)
+			return false;
+		constexpr int MAX_CHANNELS = 512;
 		FMOD_STUDIO_INITFLAGS flags = 0;
 #ifdef _DEBUG
 		flags |= FMOD_STUDIO_INIT_LIVEUPDATE;
 #endif
-		result = FMOD_Studio_System_Initialize(
-			_system,
-			512, // max channels
-			flags,
-			FMOD_INIT_NORMAL,
-			nullptr);
-		assert(result == FMOD_OK);
-
-		_load_all_banks();
+		result = FMOD_Studio_System_Initialize(_system, MAX_CHANNELS, flags, FMOD_INIT_NORMAL, nullptr);
+		if (result != FMOD_OK)
+			return false;
+		return true;
 	}
 
 	void shutdown() {
@@ -74,12 +54,26 @@ namespace audio {
 		_events_played_this_frame.clear();
 	}
 
+	const char* _c_str(std::string_view string) {
+		const size_t size = string.size();
+		constexpr size_t BUFFER_SIZE = 512;
+		assert(size + 1 <= BUFFER_SIZE); // +1 to include null terminator
+		static size_t offset = 0;
+		if (offset + size + 1 > BUFFER_SIZE) {
+			offset = 0;
+		}
+		static char buffer[BUFFER_SIZE];
+		char* c_str = buffer + offset;
+		memcpy(c_str, string.data(), size);
+		c_str[size] = '\0';
+		return c_str;
+	}
+
 	void load_bank(std::string_view path) {
 		FMOD_STUDIO_BANK* bank = nullptr;
 		const FMOD_RESULT result = FMOD_Studio_System_LoadBankFile(_system, _c_str(path), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);
-		if (result != FMOD_OK && log_errors) {
-			console::log_error("Failed to load audio bank: " + std::string(path));
-		}
+		if (result == FMOD_OK) return;
+		OUTPUT_ERROR_MESSAGE("Failed to load audio bank: " + std::string(path))
 	}
 
 	const float _PIXELS_PER_FMOD_UNIT = 16.f;
@@ -109,61 +103,47 @@ namespace audio {
 		return _3d_attributes_to_pos(attributes);
 	}
 
-	bool set_parameter(std::string_view name, float value) {
+	void set_parameter(std::string_view name, float value) {
 		const FMOD_RESULT result = FMOD_Studio_System_SetParameterByName(_system, _c_str(name), value, false);
-		if (result == FMOD_OK) return true;
-		if (log_errors) {
-			console::log_error("Could not find audio parameter: " + std::string(name) + "=" + std::to_string(value));
-		}
-		return false;
+		if (result == FMOD_OK) return;
+		OUTPUT_ERROR_MESSAGE("Could not find audio parameter: " + std::string(name) + "=" + std::to_string(value))
 	}
 
-	bool get_parameter(std::string_view name, float& value) {
+	void get_parameter(std::string_view name, float& value) {
 		const FMOD_RESULT result = FMOD_Studio_System_GetParameterByName(_system, _c_str(name), &value, nullptr);
-		if (result == FMOD_OK) return true;
-		if (log_errors) {
-			console::log_error("Could not find audio parameter: " + std::string(name));
-		}
-		return false;
+		if (result == FMOD_OK) return;
+		OUTPUT_ERROR_MESSAGE("Could not find audio parameter: " + std::string(name))
 	}
 
-	bool set_parameter_label(const std::string& name, const std::string& label) {
-		const FMOD_RESULT result = FMOD_Studio_System_SetParameterByNameWithLabel(_system, name.c_str(), label.c_str(), false);
-		if (result == FMOD_OK) return true;
-		if (log_errors) {
-			console::log_error("Could not find audio parameter label: " + name + "=" + label);
-		}
-		return false;
+	void set_parameter_label(std::string_view name, std::string_view label) {
+		const FMOD_RESULT result = FMOD_Studio_System_SetParameterByNameWithLabel(_system, _c_str(name), _c_str(label), false);
+		if (result == FMOD_OK) return;
+		OUTPUT_ERROR_MESSAGE("Could not find audio parameter label: " + std::string(name) + "=" + std::string(label))
 	}
 
-	bool get_parameter_label(const std::string& name, std::string& label) {
+	std::string_view get_parameter_label(std::string_view name) {
 		float value = 0.f;
-		FMOD_RESULT result = FMOD_Studio_System_GetParameterByName(_system, name.c_str(), &value, nullptr);
+		FMOD_RESULT result = FMOD_Studio_System_GetParameterByName(_system, _c_str(name), &value, nullptr);
 		if (result != FMOD_OK) {
-			if (log_errors) {
-				console::log_error("Could not find audio parameter: " + name);
-			}
-			return false;
+			OUTPUT_ERROR_MESSAGE("Could not find audio parameter: " + std::string(name))
+			return {};
 		}
-		char label_buffer[256];
-		result = FMOD_Studio_System_GetParameterLabelByName(
-			_system, name.c_str(), (int)value, label_buffer, _countof(label_buffer), nullptr);
+		static char buffer[256];
+		int retrieved = 0; // including the null terminator
+		result = FMOD_Studio_System_GetParameterLabelByName(_system, _c_str(name), (int)value, buffer, _countof(buffer), &retrieved);
 		if (result != FMOD_OK) {
-			if (log_errors) {
-				console::log_error("Could not get parameter label: " + name + "=" + std::to_string(value));
-			}
+			OUTPUT_ERROR_MESSAGE("Could not get parameter label: " + std::string(name) + "=" + std::to_string(value))
+			return {};
 		}
-		label = label_buffer;
-		return true;
+		return { buffer, (size_t)retrieved - 1 }; // -1 to exclude the null terminator
 	}
 
 	FMOD_STUDIO_EVENTDESCRIPTION* _get_description(std::string_view event_path) {
 		FMOD_STUDIO_EVENTDESCRIPTION* desc = nullptr;
 		const FMOD_RESULT result = FMOD_Studio_System_GetEvent(_system, _c_str(event_path), &desc);
-		if (result != FMOD_OK && log_errors) {
-			console::log_error("Could not find audio event: " + std::string(event_path));
-		}
-		return desc;
+		if (result == FMOD_OK) return desc;
+		OUTPUT_ERROR_MESSAGE("Could not find audio event: " + std::string(event_path))
+		return nullptr;
 	}
 
 	// The returned span is valid only until the next call to _get_event_instances.
@@ -189,10 +169,9 @@ namespace audio {
 	FMOD_STUDIO_EVENTINSTANCE* _create_instance(FMOD_STUDIO_EVENTDESCRIPTION* desc) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = nullptr;
 		const FMOD_RESULT result = FMOD_Studio_EventDescription_CreateInstance(desc, &instance);
-		if (result != FMOD_OK && log_errors) {
-			console::log_error("Failed to create audio event");
-		}
-		return instance;
+		if (result == FMOD_OK) return instance;
+		OUTPUT_ERROR_MESSAGE("Failed to create audio event")
+		return nullptr;
 	}
 
 	Handle<Event> _to_event_handle(void* userdata) {
@@ -283,18 +262,17 @@ namespace audio {
 		return _3d_attributes_to_pos(attributes);
 	}
 
-	void set_parameter_label(Handle<Event> event, const std::string& name, const std::string& label) {
+	void set_parameter_label(Handle<Event> event, std::string_view name, std::string_view label) {
 		FMOD_STUDIO_EVENTINSTANCE* instance = _get_instance(event);
 		if (!instance) return;
-		FMOD_Studio_EventInstance_SetParameterByNameWithLabel(instance, name.c_str(), label.c_str(), false);
+		FMOD_Studio_EventInstance_SetParameterByNameWithLabel(instance, _c_str(name), _c_str(label), false);
 	}
 
 	FMOD_STUDIO_BUS* _get_bus(std::string_view path) {
 		FMOD_STUDIO_BUS* bus = nullptr;
 		const FMOD_RESULT result = FMOD_Studio_System_GetBus(_system, _c_str(path), &bus);
-		if (result != FMOD_OK && log_errors) {
-			console::log_error("Could not find audio bus: " + std::string(path));
-		}
+		if (result == FMOD_OK) return bus;
+		OUTPUT_ERROR_MESSAGE("Could not find audio bus: " + std::string(path))
 		return bus;
 	}
 
