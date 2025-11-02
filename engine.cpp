@@ -35,7 +35,7 @@ namespace engine {
             console::log_error("Failed to load window icon: " + ICON_PATH);
             return;
         }
-        window::set_icon(image.width, image.height, (unsigned char*)image.data);
+        window::set_icon({ image.width, image.height }, (unsigned char*)image.data);
         images::free_image(image);
     }
 

@@ -169,10 +169,10 @@ namespace window {
 		glfwSetWindowTitle(_window, title.c_str());
 	}
 
-	void set_icon(unsigned int width, unsigned int height, unsigned char* pixels) {
+	void set_icon(const Vec2u& size, uint8_t* pixels) {
 		GLFWimage image{};
-		image.width = (int)width;
-		image.height = (int)height;
+		image.width = (int)size.x;
+		image.height = (int)size.y;
 		image.pixels = pixels;
 		glfwSetWindowIcon(_window, 1, &image);
 	}

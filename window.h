@@ -23,7 +23,7 @@ namespace window {
 	Vec2i get_size();
 	Vec2i get_framebuffer_size();
 	void set_title(const std::string& title);
-	void set_icon(unsigned int width, unsigned int height, unsigned char* pixels);
+	void set_icon(const Vec2u& size, uint8_t* pixels);
 	void set_clipboard_string(const std::string& string); // UTF-8
 	std::string_view get_clipboard_string(); // UTF-8
 }
