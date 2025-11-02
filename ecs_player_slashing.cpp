@@ -24,9 +24,11 @@ namespace ecs {
 	}
 
 	void _player_deal_slash_damage(entt::entity entity, const Vec2f& position) {
-		Vec2f box_min = position - Vec2f(6.f, 6.f);
-		Vec2f box_max = position + Vec2f(6.f, 6.f);
-		deal_damage_in_box({ DamageType::Melee, 1, entity }, box_min, box_max, ~CC_Player);
+		const Rect2f box = {
+			.min = position - Vec2f(6.f, 6.f),
+			.max = position + Vec2f(6.f, 6.f)
+		};
+		deal_damage_in_box({ DamageType::Melee, 1, entity }, box, ~CC_Player);
 	}
 
 	void _player_update_slashing(entt::entity entity, float dt) {

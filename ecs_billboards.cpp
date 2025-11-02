@@ -16,7 +16,9 @@ namespace ecs {
 
 	extern entt::registry _registry;
 
-	void _handle_interaction_with_billboard(entt::entity entity) {
+	void _handle_interaction_with_billboard(entt::entity entity, const InteractionEvent& ev) {
+        if (ev.source_dir != Direction::N)
+            return; // Can only read the billboard when facing north.
         Billboard& billboard = _registry.get<Billboard>(entity);
         if (billboard.textbox_path.empty())
             return;
@@ -43,7 +45,7 @@ namespace ecs {
                 b2Polygon box = b2MakeBox(4.f, 2.f);
                 b2CreatePolygonShape(body, &shape_def, &box);
             }
-            set_interaction_handler(entity, _handle_interaction_with_billboard);
+            set_interaction_event_handler(entity, _handle_interaction_with_billboard);
             set_damage_event_handler(entity, _handle_damage_to_billboard);
             const std::string_view textbox_path = get_string(object, "textbox");
             _registry.emplace<Billboard>(entity, std::string(textbox_path));

@@ -44,14 +44,14 @@ namespace ecs {
 		return hits;
 	}
 
-	std::vector<OverlapHit> overlap_box(const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
-		const b2AABB box = { box_min, box_max };
+	std::vector<OverlapHit> overlap_box(const Rect2f& box, uint32_t mask_bits) {
+		const b2AABB b2Box = { box.min, box.max };
 
 		b2QueryFilter query_filter = b2DefaultQueryFilter();
 		query_filter.maskBits = mask_bits;
 
 		std::vector<OverlapHit> hits;
-		b2World_OverlapAABB(_physics_world, box, query_filter, [](b2ShapeId shape, void* context) {
+		b2World_OverlapAABB(_physics_world, b2Box, query_filter, [](b2ShapeId shape, void* context) {
 			OverlapHit hit{};
 			hit.shape = shape;
 			hit.body = b2Shape_GetBody(shape);

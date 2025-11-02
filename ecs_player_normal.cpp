@@ -123,9 +123,15 @@ namespace ecs {
 		if (input::pressed(input::Key::C)) {
 			// Interact with everything one tile in front of the player.
 			const Vec2f center = pos + input_dir * 16.f;
-			const Vec2f min = center - Vec2f(6.f, 6.f);
-			const Vec2f max = center + Vec2f(6.f, 6.f);
-			interact_with_all_in_box(min, max);
+			const Rect2f box = {
+				.min = center - Vec2f(6.f, 6.f),
+				.max = center + Vec2f(6.f, 6.f)
+			};
+			const InteractionEvent ev = {
+				.source = entity,
+				.source_dir = dir
+			};
+			interact_with_all_in_box(box, ev);
 		}
 
 		// Should attack?

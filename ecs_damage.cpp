@@ -30,9 +30,9 @@ namespace ecs {
 	// This is used for record-keeping so we don't apply the same damage to the same entity multiple times.
 	std::unordered_set<entt::entity> _entities_that_took_damage;
 
-	bool deal_damage_in_box(const DamageEvent& ev, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits) {
+	bool deal_damage_in_box(const DamageEvent& ev, const Rect2f& box, uint32_t mask_bits) {
 		//debug::draw_box(box_min, box_max, Color::Red, 0.2f);
-		for (const OverlapHit& hit : overlap_box(box_min, box_max, mask_bits)) {
+		for (const OverlapHit& hit : overlap_box(box, mask_bits)) {
 			if (hit.entity == ev.source) continue; // For now, entities can't damage themselves
 			if (_entities_that_took_damage.contains(hit.entity)) continue;
 			if (!deal_damage(hit.entity, ev)) continue;

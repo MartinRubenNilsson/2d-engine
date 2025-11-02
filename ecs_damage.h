@@ -27,7 +27,7 @@ namespace ecs {
 	bool deal_damage(entt::entity entity, const DamageEvent& ev);
 
 	// Deals damage to all entities that intersect the given box. Returns true if any entity was damaged.
-	bool deal_damage_in_box(const DamageEvent& ev, const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
+	bool deal_damage_in_box(const DamageEvent& ev, const Rect2f& box, uint32_t mask_bits = UINT32_MAX);
 	// Deals damage to all entities that intersect the given circle. Returns true if any entity was damaged.
 	bool deal_damage_in_circle(const DamageEvent& ev, const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
 }

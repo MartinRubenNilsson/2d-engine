@@ -54,7 +54,7 @@ namespace ecs {
         audio::create_event("event:/props/chest/open");
     }
 
-    void _handle_interaction_with_chest(entt::entity entity) {
+    void _handle_interaction_with_chest(entt::entity entity, const InteractionEvent& ev) {
         _open_chest(entity);
     }
 
@@ -82,7 +82,7 @@ namespace ecs {
                 b2CreatePolygonShape(body, &shape_def, &box);
             }
 
-            set_interaction_handler(entity, _handle_interaction_with_chest);
+            set_interaction_event_handler(entity, _handle_interaction_with_chest);
         }
     }
 

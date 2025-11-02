@@ -19,6 +19,6 @@ namespace ecs {
 		entt::entity entity = entt::null;
 	};
 
-	std::vector<OverlapHit> overlap_box(const Vec2f& box_min, const Vec2f& box_max, uint32_t mask_bits = UINT32_MAX);
+	std::vector<OverlapHit> overlap_box(const Rect2f& box, uint32_t mask_bits = UINT32_MAX);
 	std::vector<OverlapHit> overlap_circle(const Vec2f& center, float radius, uint32_t mask_bits = UINT32_MAX);
 }

@@ -2,39 +2,34 @@
 #include "ecs_interactions.h"
 #include "ecs_physics_queries.h"
 #include "ecs_physics_filters.h"
-//#include "shapes.h"
 
 namespace ecs {
-	struct InteractionHandlerComponent {
-		InteractionHandler handler = nullptr;
-	};
-
 	extern entt::registry _registry;
 
-	void set_interaction_handler(entt::entity entity, InteractionHandler handler) {
+	void set_interaction_event_handler(entt::entity entity, InteractionEventHandler handler) {
 		if (handler) {
-			_registry.emplace_or_replace<InteractionHandlerComponent>(entity, handler);
+			_registry.emplace_or_replace<InteractionEventHandler>(entity, handler);
 		} else {
-			_registry.remove<InteractionHandlerComponent>(entity);
+			_registry.remove<InteractionEventHandler>(entity);
 		}
 	}
 
-	InteractionHandler get_interaction_handler(entt::entity entity) {
-		InteractionHandlerComponent* component_ptr = _registry.try_get<InteractionHandlerComponent>(entity);
-		if (!component_ptr) return nullptr;
-		return component_ptr->handler;
+	InteractionEventHandler get_interaction_event_handler(entt::entity entity) {
+		InteractionEventHandler* handler_ptr = _registry.try_get<InteractionEventHandler>(entity);
+		if (!handler_ptr) return nullptr;
+		return *handler_ptr;
 	}
 
-	void interact_with(entt::entity entity) {
-		InteractionHandler handler = get_interaction_handler(entity);
+	void interact_with(entt::entity entity, const InteractionEvent& ev) {
+		InteractionEventHandler handler = get_interaction_event_handler(entity);
 		if (!handler) return;
-		handler(entity);
+		handler(entity, ev);
 	}
 
-	void interact_with_all_in_box(const Vec2f& box_min, const Vec2f& box_max) {
+	void interact_with_all_in_box(const Rect2f& box, const InteractionEvent& ev) {
 		//shapes::add_box_to_render_queue(box_min, box_max, Color::CYAN, 0.2f);
-		for (const OverlapHit& hit : overlap_box(box_min, box_max, ~CC_Player)) {
-			interact_with(hit.entity);
+		for (const OverlapHit& hit : overlap_box(box, ~CC_Player)) {
+			interact_with(hit.entity, ev);
 		}
 	}
 }
