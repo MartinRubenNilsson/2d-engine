@@ -11,11 +11,40 @@
 #include "input.h"
 #include "map.h"
 #include "window.h"
+#include "window_cursor.h"
+#include "images.h"
+#include "console.h"
 
 namespace ui {
 namespace game {
 
+	window::CursorId _hand_point_cursor{};
+	window::CursorId _hand_point_up_cursor{};
+	window::CursorId _hand_grab_cursor{};
+
+	void _create_cursors() {
+		const std::string IMAGE_PATH = "assets/textures/cursors/cursor32x32.png";
+		images::Image image{};
+		if (!images::load_image(IMAGE_PATH, image)) {
+			console::log_error("Failed to load cursor image: " + IMAGE_PATH);
+			return;
+		}
+		constexpr Vec2u SIZE = { 32, 32 };
+		constexpr unsigned int BYTE_SIZE = SIZE.x * SIZE.y * 4;
+		if (image.width == SIZE.x && image.height == SIZE.y * 10 && image.data) {
+			uint8_t* pixels = (uint8_t*)image.data;
+			_hand_point_cursor = window::create_cursor(SIZE, pixels);
+			pixels += BYTE_SIZE;
+			_hand_point_up_cursor = window::create_cursor(SIZE, pixels);
+			pixels += BYTE_SIZE;
+			_hand_grab_cursor = window::create_cursor(SIZE, pixels);
+			pixels += BYTE_SIZE;
+		}
+		images::free_image(image);
+	}
+
 	void startup() {
+		_create_cursors();
 		shared::startup();
 		main_menu::startup();
 		hud::startup();
@@ -71,9 +100,9 @@ namespace game {
 		}
 		textboxes::layout();
 		if (_cursor_hovering) {
-			window::set_cursor_shape(window::CursorShape::HandPointUp);
+			window::set_cursor(_hand_point_up_cursor);
 		} else {
-			window::set_cursor_shape(window::CursorShape::HandPoint);
+			window::set_cursor(_hand_point_cursor);
 		}
 	}
 

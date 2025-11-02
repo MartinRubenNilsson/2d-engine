@@ -23,16 +23,33 @@
 #include "platform.h"
 #include "platform_directory_changes.h"
 #include "editor.h"
+#include "images.h"
 
 namespace engine {
-    bool _should_run = false;
+    void _startup_window() {
+        window::startup();
+        // Load and set icon.
+        const std::string ICON_PATH = "assets/window/swordsman.png";
+        images::Image image{};
+        if (!images::load_image(ICON_PATH, image)) {
+            console::log_error("Failed to load window icon: " + ICON_PATH);
+            return;
+        }
+        window::set_icon(image.width, image.height, (unsigned char*)image.data);
+        images::free_image(image);
+    }
 
-    void _load_all_audio_banks() {
+    void _startup_audio() {
+        audio::set_error_message_callback([](std::string_view message) { console::log_error(message); });
+        audio::startup();
+        // Load all audio banks.
         for (const files::File& file : files::get_all_files_in_directory("assets/audio/banks")) {
             if (file.format != files::FileFormat::FmodStudioBank) continue;
-            audio::load_bank(file.path);
+            audio::load_bank_from_file(file.path);
         }
     }
+
+    bool _should_run = false;
 
     void startup(int argc, char* argv[]) {
         setlocale(LC_ALL, "en_US.utf8");
@@ -42,17 +59,13 @@ namespace engine {
         files::startup();
         networking::startup();
         renderdoc::startup();
-        window::startup();
+        _startup_window();
         graphics::startup();
         graphics::startup_globals();
         imgui_impl::startup();
         console::startup();
         postprocessing::startup();
-        audio::set_error_message_callback([](std::string_view message) {
-            console::log_error(message);
-            });
-        audio::startup();
-        _load_all_audio_banks();
+        _startup_audio();
         text::startup_fonts();
         ui::startup();
         ui::game::startup();

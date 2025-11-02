@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "window.h"
 #include "window_graphics.h"
+#include "window_cursor.h"
 #include "console.h"
 #include "images.h"
 #include <GLFW/glfw3.h>
@@ -9,18 +10,20 @@
 
 namespace window {
 	GLFWwindow* _window = nullptr;
-	GLFWcursor* _cursors[(int)CursorShape::Count] = { nullptr };
 
 	void _error_callback(int error, const char* description) {
-		__debugbreak();
 		console::log_error("GLFW error: " + std::string(description));
 	}
 
 	void _set_event_callbacks(); // window_events.cpp
 
+	void _create_standard_cursors(); // window_cursor.cpp
+
 	bool startup() {
 		glfwSetErrorCallback(_error_callback);
-		if (!glfwInit()) return false;
+
+		if (!glfwInit())
+			return false;
 
 #ifdef GRAPHICS_API_OPENGL
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GRAPHICS_API_OPENGL_VERSION_MAJOR);
@@ -34,6 +37,7 @@ namespace window {
 #endif
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // Hide the window until we're ready to show it.
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
 		_window = glfwCreateWindow(
 			GAME_FRAMEBUFFER_WIDTH,
 			GAME_FRAMEBUFFER_HEIGHT,
@@ -43,53 +47,16 @@ namespace window {
 		if (!_window) return false;
 
 		_set_event_callbacks();
-
-		// CREATE STANDARD CURSORS
-
-		_cursors[(int)CursorShape::Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-		_cursors[(int)CursorShape::IBeam] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-		_cursors[(int)CursorShape::Crosshair] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-		_cursors[(int)CursorShape::Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-		_cursors[(int)CursorShape::HResize] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-		_cursors[(int)CursorShape::VResize] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
-
-		// LOAD AND CREATE CUSTOM CURSORS
-
-		images::Image cursor_image{};
-		if (!images::load_image("assets/textures/cursors/cursor32x32.png", cursor_image)) {
-			console::log_error("Failed to load cursor image");
-		} else {
-			constexpr int CURSOR_SIZE = 32;
-			constexpr int CURSOR_SIZE_BYTES = CURSOR_SIZE * CURSOR_SIZE * 4;
-			if (cursor_image.width == CURSOR_SIZE && cursor_image.height == CURSOR_SIZE * 10 && cursor_image.data) {
-				GLFWimage image{};
-				image.height = CURSOR_SIZE;
-				image.width = CURSOR_SIZE;
-				image.pixels = (unsigned char*)cursor_image.data;
-				_cursors[(int)CursorShape::HandPoint] = glfwCreateCursor(&image, 0, 0);
-				image.pixels += CURSOR_SIZE_BYTES;
-				_cursors[(int)CursorShape::HandPointUp] = glfwCreateCursor(&image, 0, 0);
-				image.pixels += CURSOR_SIZE_BYTES;
-				_cursors[(int)CursorShape::HandGrab] = glfwCreateCursor(&image, 0, 0);
-				image.pixels += CURSOR_SIZE_BYTES;
-				_cursors[(int)CursorShape::Quill] = glfwCreateCursor(&image, 0, 0);
-			}
-			images::free_image(cursor_image);
-		}
-
-		// FINAL SETUP
-
-		set_cursor_shape(CursorShape::HandPoint);
-		set_icon_from_file("assets/window/swordsman.png");
+		_create_standard_cursors();
+		set_cursor(arrow_cursor);
 
 		return true;
 	}
 
+	void _destroy_cursors(); // window_cursor.cpp
+
 	void shutdown() {
-		for (GLFWcursor* cursor : _cursors) {
-			glfwDestroyCursor(cursor);
-		}
-		memset(_cursors, 0, sizeof(_cursors));
+		_destroy_cursors();
 		glfwDestroyWindow(_window);
 		glfwTerminate();
 	}
@@ -202,53 +169,21 @@ namespace window {
 		glfwSetWindowTitle(_window, title.c_str());
 	}
 
-	void set_icon_from_memory(int width, int height, unsigned char* pixels) {
+	void set_icon(unsigned int width, unsigned int height, unsigned char* pixels) {
 		GLFWimage image{};
-		image.width = width;
-		image.height = height;
+		image.width = (int)width;
+		image.height = (int)height;
 		image.pixels = pixels;
 		glfwSetWindowIcon(_window, 1, &image);
 	}
 
-	void set_icon_from_file(const std::string& path) {
-		images::Image image{};
-		if (!images::load_image(path, image)) {
-			console::log_error("Failed to load icon: " + path);
-			return;
-		}
-		set_icon_from_memory(image.width, image.height, (unsigned char*)image.data);
-		images::free_image(image);
+	void set_clipboard_string(const std::string& string) {
+		glfwSetClipboardString(nullptr, string.c_str());
 	}
 
-	void set_cursor_visible(bool visible) {
-		glfwSetInputMode(_window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
-	}
-
-	bool cursor_visible() {
-		return glfwGetInputMode(_window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
-	}
-
-	void set_cursor_pos(const Vec2d& pos) {
-		glfwSetCursorPos(_window, pos.x, pos.y);
-	}
-
-	Vec2d get_cursor_pos() {
-		Vec2d pos;
-		glfwGetCursorPos(_window, &pos.x, &pos.y);
-		return pos;
-	}
-
-	void set_cursor_shape(CursorShape shape) {
-		glfwSetCursor(_window, _cursors[(int)shape]);
-	}
-
-	void set_clipboard_string(const std::u8string& string) {
-		glfwSetClipboardString(nullptr, (const char*)string.c_str());
-	}
-
-	std::u8string_view get_clipboard_string() {
+	std::string_view get_clipboard_string() {
 		const char* string = glfwGetClipboardString(nullptr);
-		return string ? (const char8_t*)string : u8"";
+		return string ? string : std::string_view{};
 	}
 
 #ifdef GRAPHICS_API_OPENGL

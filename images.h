@@ -1,7 +1,6 @@
 #pragma once
 
 namespace images {
-
 	struct Image {
 		unsigned int width = 0;
 		unsigned int height = 0;

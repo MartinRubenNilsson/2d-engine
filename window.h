@@ -23,35 +23,7 @@ namespace window {
 	Vec2i get_size();
 	Vec2i get_framebuffer_size();
 	void set_title(const std::string& title);
-	void set_icon_from_memory(int width, int height, unsigned char* pixels);
-	void set_icon_from_file(const std::string& path);
-	void set_cursor_visible(bool visible);
-	bool cursor_visible();
-	void set_cursor_pos(const Vec2d& pos);
-	Vec2d get_cursor_pos();
-
-	// TODO: these belong somewhere else
-	enum class CursorShape {
-		// STANDARD CURSORS
-
-		Arrow, // The regular arrow cursor shape.
-		IBeam, // The text input I-beam cursor shape.
-		Crosshair, // The crosshair shape.
-		Hand, // The hand shape.
-		HResize, // The horizontal resize arrow shape.
-		VResize, // The vertical resize arrow shape.
-
-		// CUSTOM CURSORS
-
-		HandPoint,
-		HandPointUp,
-		HandGrab,
-		Quill,
-
-		Count, // Keep last -- the total number of cursor shapes.
-	};
-
-	void set_cursor_shape(CursorShape shape);
-	void set_clipboard_string(const std::u8string& string);
-	std::u8string_view get_clipboard_string();
+	void set_icon(unsigned int width, unsigned int height, unsigned char* pixels);
+	void set_clipboard_string(const std::string& string); // UTF-8
+	std::string_view get_clipboard_string(); // UTF-8
 }

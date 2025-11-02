@@ -69,7 +69,7 @@ namespace audio {
 		return c_str;
 	}
 
-	void load_bank(std::string_view path) {
+	void load_bank_from_file(std::string_view path) {
 		FMOD_STUDIO_BANK* bank = nullptr;
 		const FMOD_RESULT result = FMOD_Studio_System_LoadBankFile(_system, _c_str(path), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);
 		if (result == FMOD_OK) return;

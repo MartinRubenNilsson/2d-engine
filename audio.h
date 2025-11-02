@@ -9,7 +9,8 @@ namespace audio {
 	void shutdown();
 	void update();
 
-	void load_bank(std::string_view path);
+	void load_bank_from_file(std::string_view path);
+	// TODO: load bank from memory
 
 	void set_listener_position(const Vec2f& position);
 	Vec2f get_listener_position();

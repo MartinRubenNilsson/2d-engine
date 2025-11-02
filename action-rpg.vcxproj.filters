@@ -342,6 +342,9 @@
     <ClCompile Include="editor.cpp">
       <Filter>editor</Filter>
     </ClCompile>
+    <ClCompile Include="window_cursor.cpp">
+      <Filter>engine\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />
@@ -727,6 +730,9 @@
     </ClInclude>
     <ClInclude Include="editor.h">
       <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="window_cursor.h">
+      <Filter>engine\window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
